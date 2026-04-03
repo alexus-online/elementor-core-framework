@@ -14,11 +14,14 @@ jQuery(function($){
     var group = $(this).data('group');
     var index = nextIndex(group);
     var key   = inputKey(group);
-    var isColor = group === 'colors';
-    var templateId = isColor ? '#ecf-row-template-color' : '#ecf-row-template-default';
+    var isColor  = group === 'colors';
+    var isMinMax = $('.ecf-table[data-group="'+group+'"]').data('minmax') === 1;
+    var templateId = isColor ? '#ecf-row-template-color' : (isMinMax ? '#ecf-row-template-minmax' : '#ecf-row-template-default');
     var html = $(templateId).html()
       .replace(/__NAME__/g,  key+'['+index+'][name]')
-      .replace(/__VALUE__/g, key+'['+index+'][value]');
+      .replace(/__VALUE__/g, key+'['+index+'][value]')
+      .replace(/__MIN__/g,   key+'['+index+'][min]')
+      .replace(/__MAX__/g,   key+'['+index+'][max]');
     var $row = $(html);
     $('.ecf-table[data-group="'+group+'"]').append($row);
     if (isColor) initColorPickers($row);
