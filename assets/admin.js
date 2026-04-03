@@ -33,15 +33,32 @@ jQuery(function($){
     $row.remove();
   });
 
-  // ── Tab switching ──────────────────────────────────────────────
-  $(document).on('click', '.ecf-tab', function(){
-    var tab = $(this).data('tab');
-    $('.ecf-tab').removeClass('is-active');
-    $(this).addClass('is-active');
+  // ── Sidebar navigation ─────────────────────────────────────────
+  var $noSavePanel = ['variables', 'sync']; // panels that don't need the save button
+
+  function switchPanel(panel) {
+    $('.ecf-nav-item').removeClass('is-active');
+    $('.ecf-nav-item[data-panel="'+panel+'"]').addClass('is-active');
     $('.ecf-panel').removeClass('is-active');
-    $('.ecf-panel[data-panel="'+tab+'"]').addClass('is-active');
-    if (tab === 'variables') loadVariables();
+    $('.ecf-panel[data-panel="'+panel+'"]').addClass('is-active');
+
+    // show/hide save footer
+    if ($noSavePanel.indexOf(panel) !== -1) {
+      $('#ecf-save-footer').hide();
+    } else {
+      $('#ecf-save-footer').show();
+    }
+
+    if (panel === 'variables') loadVariables();
+  }
+
+  $(document).on('click', '.ecf-nav-item', function(){
+    var panel = $(this).data('panel');
+    switchPanel(panel);
   });
+
+  // Activate first panel on load
+  switchPanel('tokens');
 
   // ── Variables Management ───────────────────────────────────────
   var varsLoaded = false;
