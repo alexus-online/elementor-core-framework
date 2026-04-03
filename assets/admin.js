@@ -60,7 +60,7 @@ jQuery(function($){
       return;
     }
     var html = '<div class="ecf-var-table">';
-    html += '<div class="ecf-var-head"><span></span><span>Name</span><span>Typ</span><span>Wert</span></div>';
+    html += '<div class="ecf-var-head"><span></span><span>'+i18n.col_name+'</span><span>'+i18n.col_type+'</span><span>'+i18n.col_value+'</span></div>';
     $.each(items, function(i, v) {
       var preview = '';
       if (v.type === 'global-color-variable') {
