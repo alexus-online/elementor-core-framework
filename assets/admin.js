@@ -667,6 +667,10 @@ jQuery(function($){
 
   // ── Variables Management ───────────────────────────────────────
   var varsLoaded = false;
+  var varTabs = {
+    ecf: 'all',
+    foreign: 'all'
+  };
 
   function typeLabel(type) {
     if (type === 'global-color-variable')  return i18n.type_color;
@@ -675,13 +679,22 @@ jQuery(function($){
     return type;
   }
 
-  function renderVarList(group, items) {
-    var $list = $('#ecf-varlist-' + group);
-    $('#ecf-badge-' + group).text(items.length);
-    if (!items.length) {
-      $list.html('<p style="color:#9ca3af;font-size:13px;">'+i18n.none+'</p>');
-      return;
-    }
+  function typeTabKey(type) {
+    if (type === 'global-color-variable') return 'color';
+    if (type === 'global-size-variable') return 'size';
+    if (type === 'global-string-variable') return 'string';
+    return 'other';
+  }
+
+  function typeTabLabel(tabKey) {
+    if (tabKey === 'color') return i18n.type_color;
+    if (tabKey === 'size') return i18n.type_size;
+    if (tabKey === 'string') return i18n.type_string;
+    if (tabKey === 'other') return i18n.type_other || 'Sonstige';
+    return i18n.type_all || 'Alle';
+  }
+
+  function buildVarTable(group, items) {
     var html = '<div class="ecf-var-table">';
     html += '<div class="ecf-var-head"><span></span><span>'+i18n.col_name+'</span><span>'+i18n.col_type+'</span><span>'+i18n.col_value+'</span></div>';
     $.each(items, function(i, v) {
@@ -697,7 +710,43 @@ jQuery(function($){
         + '</div>';
     });
     html += '</div>';
-    $list.html(html);
+    return html;
+  }
+
+  function renderVarList(group, items) {
+    var $list = $('#ecf-varlist-' + group);
+    $('#ecf-badge-' + group).text(items.length);
+    if (!items.length) {
+      $list.html('<p style="color:#9ca3af;font-size:13px;">'+i18n.none+'</p>');
+      return;
+    }
+
+    var buckets = {
+      all: items.slice()
+    };
+
+    $.each(items, function(_, item) {
+      var key = typeTabKey(item.type);
+      if (!buckets[key]) buckets[key] = [];
+      buckets[key].push(item);
+    });
+
+    var order = ['all', 'color', 'size', 'string', 'other'];
+    if (!varTabs[group] || !buckets[varTabs[group]] || !buckets[varTabs[group]].length) {
+      varTabs[group] = 'all';
+    }
+
+    var tabs = '<div class="ecf-var-tabs" data-group="' + group + '">';
+    $.each(order, function(_, key) {
+      if (!buckets[key] || !buckets[key].length) return;
+      tabs += '<button type="button" class="ecf-var-tab' + (key === varTabs[group] ? ' is-active' : '') + '" data-group="' + group + '" data-var-tab="' + key + '">'
+        + typeTabLabel(key)
+        + '<span class="ecf-var-tab__count">' + buckets[key].length + '</span>'
+        + '</button>';
+    });
+    tabs += '</div>';
+
+    $list.html(tabs + buildVarTable(group, buckets[varTabs[group]] || items));
   }
 
   function loadVariables() {
@@ -752,6 +801,13 @@ jQuery(function($){
   $(document).on('click', '.ecf-var-row', function(e){
     if ($(e.target).is('input')) return;
     $(this).find('.ecf-var-check').trigger('click');
+  });
+
+  $(document).on('click', '.ecf-var-tab', function(){
+    var group = $(this).data('group') || 'foreign';
+    varTabs[group] = $(this).data('var-tab') || 'all';
+    varsLoaded = false;
+    loadVariables();
   });
 
   // ── Spacing Preview ────────────────────────────────────────────

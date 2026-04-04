@@ -416,6 +416,18 @@
   font-size: 12px;
   line-height: 1.5;
 }
+.ecf-sync-status {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(129, 140, 248, .28);
+  border-left: 4px solid var(--ecf-primary);
+  border-radius: 0 12px 12px 0;
+  background: rgba(99, 102, 241, .12);
+  color: #eef2ff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.55;
+}
 
 /* ── Typography live preview ──────────────────────────────────── */
 .ecf-typography-layout {
@@ -1343,6 +1355,47 @@
 }
 .ecf-varlist { min-height: 40px; }
 .ecf-loading { color: var(--ecf-muted); font-size: 13px; }
+.ecf-var-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+.ecf-var-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ecf-border);
+  background: var(--ecf-card-2);
+  color: var(--ecf-muted-2);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.ecf-var-tab:hover {
+  border-color: var(--ecf-border-2);
+  color: var(--ecf-text);
+}
+.ecf-var-tab.is-active {
+  background: rgba(99, 102, 241, .18);
+  border-color: rgba(99, 102, 241, .55);
+  color: #c7d2fe;
+}
+.ecf-var-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  font-size: 11px;
+  color: inherit;
+}
 .ecf-var-table { display: flex; flex-direction: column; gap: 0; }
 .ecf-var-head {
   display: grid;
@@ -1566,6 +1619,28 @@ input[type="file"].ecf-file { color: var(--ecf-muted-2); font-size: 12px; }
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
+}
+.ecf-panel-notice,
+.ecf-panel-notice.notice,
+.ecf-panel-notice.notice-success,
+.ecf-panel-notice.notice-error {
+  background: #1e2235 !important;
+  color: #f8fafc !important;
+  border-color: #3b4260 !important;
+}
+.ecf-panel-notice.notice-success,
+.ecf-panel-notice.ecf-panel-notice--success {
+  border-left-color: #22c55e !important;
+}
+.ecf-panel-notice.notice-error,
+.ecf-panel-notice.ecf-panel-notice--error {
+  border-left-color: #ef4444 !important;
+}
+.ecf-panel-notice p,
+.ecf-panel-notice.notice p,
+.ecf-panel-notice.notice-success p,
+.ecf-panel-notice.notice-error p {
+  color: #f8fafc !important;
 }
 
 /* ── card code inline ──────────────────────────────────────────── */

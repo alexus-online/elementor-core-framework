@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.8 (2026-04-04)
+
+### Changed
+- Improved the Elementor sync and cleanup workflow with clearer notices, automatic cache clearing, and more resilient cleanup handling.
+- Den Elementor-Sync- und Cleanup-Ablauf mit klareren Meldungen, automatischer Cache-Leerung und robusterem Cleanup verbessert.
+- Added type tabs for ECF and foreign Elementor variables to make large variable lists easier to scan.
+- Typ-Tabs fuer ECF- und fremde Elementor-Variablen hinzugefuegt, damit grosse Variablenlisten leichter zu ueberblicken sind.
+
 ## 0.1.7 (2026-04-04)
 
 ### Added
