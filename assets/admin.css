@@ -286,7 +286,7 @@
 .ecf-table { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .ecf-head, .ecf-row {
   display: grid;
-  grid-template-columns: 160px 1fr 36px;
+  grid-template-columns: minmax(80px, 160px) minmax(0, 1fr) 36px;
   gap: 8px;
   align-items: center;
 }
@@ -924,7 +924,7 @@
 .ecf-font-file-head,
 .ecf-font-file-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 2fr) minmax(70px, .7fr) minmax(80px, .8fr) minmax(80px, .8fr) 36px;
+  grid-template-columns: minmax(100px, 1fr) minmax(100px, 1.2fr) minmax(160px, 2fr) minmax(70px, .6fr) minmax(80px, .7fr) minmax(80px, .7fr) 36px;
   gap: 8px;
   align-items: center;
 }
@@ -958,6 +958,20 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
+}
+.ecf-add-local-font {
+  display: inline-flex !important;
+  width: auto !important;
+  border-color: var(--ecf-border-2) !important;
+  color: var(--ecf-muted-2) !important;
+  background: var(--ecf-card-2) !important;
+  border-style: dashed !important;
+  border-radius: 7px !important;
+  box-shadow: none !important;
+}
+.ecf-add-local-font:hover {
+  border-color: var(--ecf-primary) !important;
+  color: var(--ecf-primary-h) !important;
 }
 .ecf-font-file-select.button {
   border-color: var(--ecf-border-2) !important;
