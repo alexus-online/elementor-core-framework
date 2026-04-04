@@ -1638,16 +1638,12 @@
 .ecf-class-limit-card {
   margin-bottom: 16px;
   padding: 14px 16px;
-  border: 1px solid rgba(239, 68, 68, 0.22);
-  border-left: 4px solid #ef4444;
   border-radius: 14px;
-  background: rgba(239, 68, 68, 0.08);
 }
 
 .ecf-class-limit-card strong {
   display: block;
   margin-bottom: 4px;
-  color: #ffd0d0;
   font-size: 13px;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -1655,9 +1651,64 @@
 
 .ecf-class-limit-card p {
   margin: 0;
-  color: #fff2f2;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.ecf-class-limit-card--neutral {
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-left: 4px solid #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.ecf-class-limit-card--neutral strong {
+  color: #c7d2fe;
+}
+
+.ecf-class-limit-card--neutral p {
+  color: #eef2ff;
+}
+
+.ecf-class-limit-card--success {
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-left: 4px solid var(--ecf-success);
+  background: rgba(16, 185, 129, 0.10);
+}
+
+.ecf-class-limit-card--success strong {
+  color: #86efac;
+}
+
+.ecf-class-limit-card--success p {
+  color: #ecfdf5;
+}
+
+.ecf-class-limit-card--warning {
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.10);
+}
+
+.ecf-class-limit-card--warning strong {
+  color: #fcd34d;
+}
+
+.ecf-class-limit-card--warning p {
+  color: #fffbeb;
+}
+
+.ecf-class-limit-card--danger {
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-left: 4px solid var(--ecf-danger);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.ecf-class-limit-card--danger strong {
+  color: #ffd0d0;
+}
+
+.ecf-class-limit-card--danger p {
+  color: #fff2f2;
 }
 
 .ecf-class-limit-card--compact {
