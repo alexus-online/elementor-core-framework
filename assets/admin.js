@@ -406,6 +406,7 @@ jQuery(function($){
 
     return {
       steps: $preview.data('steps') || [],
+      rootBasePx: ($('[name="ecf_framework_v50[root_font_size]"]').val() === '62.5') ? 10 : 16,
       minBase: minBase,
       maxBase: maxBase,
       minRatio: parseFloat($('[name="ecf_framework_v50[typography][scale][min_ratio]"]').val()) || parseFloat($('[name="ecf_framework_v50[typography][scale][ratio]"]').val()) || 1.125,
@@ -421,28 +422,39 @@ jQuery(function($){
     var baseIndex = config.steps.indexOf(config.baseIndex);
     if (baseIndex === -1) baseIndex = 2;
 
+    function pxToRem(px) {
+      return Math.round((px / config.rootBasePx) * 100) / 100;
+    }
+
     return $.map(config.steps, function(step, i) {
       var exp = i - baseIndex;
       var maxSize = Math.round((config.maxBase * Math.pow(config.maxRatio, exp)) * 1000) / 1000;
       var minSize = Math.round((config.minBase * Math.pow(config.minRatio, exp)) * 1000) / 1000;
-      var cssValue = maxSize + 'px';
+      var cssValue = formatPreviewNumber(pxToRem(maxSize)) + 'rem';
 
       if (config.fluid && config.maxVw > config.minVw) {
         var slope = (maxSize - minSize) / (config.maxVw - config.minVw);
-        var intercept = Math.round((minSize - slope * config.minVw) * 10000) / 10000;
-        var slopeVw = Math.round((slope * 100) * 10000) / 10000;
-        cssValue = 'clamp(' + minSize + 'px,' + slopeVw + 'vw' + (intercept >= 0 ? '+' : '') + intercept + 'px,' + maxSize + 'px)';
+        var interceptRem = Math.round((((minSize - slope * config.minVw) / config.rootBasePx) * 100)) / 100;
+        var slopeVw = Math.round((slope * 100) * 100) / 100;
+        cssValue = 'clamp('
+          + formatPreviewNumber(pxToRem(minSize)) + 'rem, calc('
+          + formatPreviewNumber(slopeVw) + 'vw '
+          + (interceptRem >= 0 ? '+ ' : '- ')
+          + formatPreviewNumber(Math.abs(interceptRem)) + 'rem), '
+          + formatPreviewNumber(pxToRem(maxSize)) + 'rem)';
       } else {
         minSize = maxSize;
       }
 
       return {
         step: step,
-        token: '--cf-text-' + step,
-        min: formatPreviewNumber(minSize),
-        max: formatPreviewNumber(maxSize),
+        token: '--ecf-text-' + step,
+        min: formatPreviewNumber(pxToRem(minSize)),
+        max: formatPreviewNumber(pxToRem(maxSize)),
+        minPx: formatPreviewNumber(minSize),
+        maxPx: formatPreviewNumber(maxSize),
         cssValue: cssValue,
-        previewSize: config.fluid ? cssValue : maxSize + 'px'
+        previewSize: config.fluid ? cssValue : formatPreviewNumber(pxToRem(maxSize)) + 'rem'
       };
     });
   }
@@ -477,8 +489,8 @@ jQuery(function($){
     }
 
     function sizeForView(item) {
-      if (viewMode === 'min') return item.min + 'px';
-      if (viewMode === 'max') return item.max + 'px';
+      if (viewMode === 'min') return item.min + 'rem';
+      if (viewMode === 'max') return item.max + 'rem';
       return item.cssValue;
     }
 
@@ -495,16 +507,16 @@ jQuery(function($){
         + '<span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span>'
         + '</div>'
         + '<div class="ecf-type-row__meta">'
-        + '<div><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.min + 'px</strong></div>'
-        + '<div><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.max + 'px</strong></div>'
+        + '<div><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.minPx + 'px</strong></div>'
+        + '<div><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.maxPx + 'px</strong></div>'
         + '</div>'
         + '<div class="ecf-type-row__sample">'
         + '<div class="ecf-type-row__sample-line">'
-        + '<strong style="font-size:' + item.min + 'px;">' + labelMin + '</strong>'
+        + '<strong style="font-size:' + item.minPx + 'px;">' + labelMin + '</strong>'
         + '<span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span>'
         + '</div>'
         + '<div class="ecf-type-row__sample-line ecf-type-row__sample-line--max">'
-        + '<strong style="font-size:' + item.max + 'px;">' + labelMax + '</strong>'
+        + '<strong style="font-size:' + item.maxPx + 'px;">' + labelMax + '</strong>'
         + '<span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span>'
         + '</div>'
         + '</div>'
@@ -521,10 +533,10 @@ jQuery(function($){
     $preview.find('[data-ecf-focus-token]').text(activeItem ? activeItem.token : '');
     $preview.find('[data-ecf-focus-helper]').text(helperText);
     $preview.find('[data-ecf-focus-word]').text(previewWord).css('font-size', activeItem ? sizeForView(activeItem) : '');
-    $preview.find('[data-ecf-focus-min]').text(activeItem ? activeItem.min + 'px' : '');
-    $preview.find('[data-ecf-focus-max]').text(activeItem ? activeItem.max + 'px' : '');
-    $preview.find('[data-ecf-focus-min-line]').css('font-size', activeItem ? activeItem.min + 'px' : '').text(labelMin);
-    $preview.find('[data-ecf-focus-max-line]').css('font-size', activeItem ? activeItem.max + 'px' : '').text(labelMax);
+    $preview.find('[data-ecf-focus-min]').text(activeItem ? activeItem.minPx + 'px' : '');
+    $preview.find('[data-ecf-focus-max]').text(activeItem ? activeItem.maxPx + 'px' : '');
+    $preview.find('[data-ecf-focus-min-line]').css('font-size', activeItem ? activeItem.minPx + 'px' : '').text(labelMin);
+    $preview.find('[data-ecf-focus-max-line]').css('font-size', activeItem ? activeItem.maxPx + 'px' : '').text(labelMax);
     $preview.find('[data-ecf-preview-view]').removeClass('is-active');
     $preview.find('[data-ecf-preview-view="' + viewMode + '"]').addClass('is-active');
   }
@@ -541,7 +553,7 @@ jQuery(function($){
       return {
         name: name,
         slug: slug,
-        token: 'cf-shadow-' + slug,
+      token: 'ecf-shadow-' + slug,
         value: value
       };
     }).get();
@@ -646,7 +658,7 @@ jQuery(function($){
   renderTypePreview();
   renderShadowPreview();
 
-  $(document).on('input change', '[name^="ecf_framework_v50[typography][scale]"], [name^="ecf_framework_v50[typography][fonts]"]', function(){
+  $(document).on('input change', '[name="ecf_framework_v50[root_font_size]"], [name^="ecf_framework_v50[typography][scale]"], [name^="ecf_framework_v50[typography][fonts]"]', function(){
     renderTypePreview();
   });
 
@@ -822,6 +834,7 @@ jQuery(function($){
 
   function getSpacingConfig() {
     return {
+      rootBasePx: ($('[name="ecf_framework_v50[root_font_size]"]').val() === '62.5') ? 10 : 16,
       minBase:   parseFloat($('[name="ecf_framework_v50[spacing][min_base]"]').val()) || 14,
       maxBase:   parseFloat($('[name="ecf_framework_v50[spacing][max_base]"]').val()) || 16,
       minRatio:  parseFloat($('[name="ecf_framework_v50[spacing][min_ratio]"]').val()) || 1.2,
@@ -849,6 +862,11 @@ jQuery(function($){
   function buildSpacingItems(steps, cfg) {
     var baseIdx = steps.indexOf(cfg.baseIndex);
     if (baseIdx === -1) baseIdx = Math.floor(steps.length / 2);
+
+    function pxToRem(px) {
+      return Math.round((px / cfg.rootBasePx) * 100) / 100;
+    }
+
     return $.map(steps, function(step, i) {
       var exp = i - baseIdx;
       var maxSize, minSize;
@@ -860,14 +878,19 @@ jQuery(function($){
       var cssValue;
       if (cfg.fluid && cfg.maxVw > cfg.minVw) {
         var slope = (maxSize - minSize) / (cfg.maxVw - cfg.minVw);
-        var intercept = Math.round((minSize - slope * cfg.minVw) * 10000) / 10000;
-        var slopeVw = Math.round(slope * 100 * 10000) / 10000;
-        cssValue = 'clamp(' + minSize + 'px,' + slopeVw + 'vw' + (intercept >= 0 ? '+' : '') + intercept + 'px,' + maxSize + 'px)';
+        var interceptRem = Math.round((((minSize - slope * cfg.minVw) / cfg.rootBasePx) * 100)) / 100;
+        var slopeVw = Math.round((slope * 100) * 100) / 100;
+        cssValue = 'clamp('
+          + formatPreviewNumber(pxToRem(minSize)) + 'rem, calc('
+          + formatPreviewNumber(slopeVw) + 'vw '
+          + (interceptRem >= 0 ? '+ ' : '- ')
+          + formatPreviewNumber(Math.abs(interceptRem)) + 'rem), '
+          + formatPreviewNumber(pxToRem(maxSize)) + 'rem)';
       } else {
-        cssValue = maxSize + 'px';
+        cssValue = formatPreviewNumber(pxToRem(maxSize)) + 'rem';
         minSize = maxSize;
       }
-      return { step: step, token: '--cf-' + cfg.prefix + '-' + step, min: formatPreviewNumber(minSize), max: formatPreviewNumber(maxSize), cssValue: cssValue, isBase: (i === baseIdx) };
+      return { step: step, token: '--ecf-' + cfg.prefix + '-' + step, min: formatPreviewNumber(pxToRem(minSize)), max: formatPreviewNumber(pxToRem(maxSize)), minPx: formatPreviewNumber(minSize), maxPx: formatPreviewNumber(maxSize), cssValue: cssValue, isBase: (i === baseIdx) };
     });
   }
 
@@ -883,8 +906,8 @@ jQuery(function($){
     $.each(items, function(_, it) { if (parseFloat(it.max) > maxVal) maxVal = parseFloat(it.max); });
     var html = '';
     $.each(items, function(_, item) {
-      var minValue = parseFloat(item.min);
-      var maxValue = parseFloat(item.max);
+      var minValue = parseFloat(item.minPx);
+      var maxValue = parseFloat(item.maxPx);
       var minBarPct = maxVal > 0 ? Math.round((minValue / maxVal) * 100 * 10) / 10 : 0;
       var maxBarPct = maxVal > 0 ? Math.round((maxValue / maxVal) * 100 * 10) / 10 : 0;
       var minBarH = Math.min(40, Math.max(4, Math.round(minValue)));
@@ -894,11 +917,11 @@ jQuery(function($){
         + '<span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div>'
         + '<div class="ecf-space-row__meta">'
         + '<div class="ecf-space-row__metric">'
-        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.min + 'px</strong></div>'
+        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.minPx + 'px</strong></div>'
         + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + minBarPct + '%;height:' + minBarH + 'px;"></div></div>'
         + '</div>'
         + '<div class="ecf-space-row__metric">'
-        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.max + 'px</strong></div>'
+        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.maxPx + 'px</strong></div>'
         + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + maxBarPct + '%;height:' + maxBarH + 'px;"></div></div>'
         + '</div>'
         + '</div>'
@@ -907,7 +930,7 @@ jQuery(function($){
     $preview.find('[data-ecf-spacing-preview-list]').html(html);
   }
 
-  $(document).on('input change', '[name^="ecf_framework_v50[spacing]"]', function(){
+  $(document).on('input change', '[name="ecf_framework_v50[root_font_size]"], [name^="ecf_framework_v50[spacing]"]', function(){
     renderSpacingPreview();
   });
 
