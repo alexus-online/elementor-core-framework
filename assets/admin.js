@@ -185,7 +185,9 @@ jQuery(function($){
     $.each(items, function(_, item) {
       var selectedClass = item.step === activeStep ? ' is-active' : '';
       html += '<button type="button" class="ecf-type-row' + selectedClass + '" data-ecf-step="' + item.step + '" style="--ecf-preview-size:' + sizeForView(item) + ';">'
-        + '<div class="ecf-type-row__token">' + item.token + '</div>'
+        + '<div class="ecf-type-row__token">' + item.token
+        + '<span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span>'
+        + '</div>'
         + '<div class="ecf-type-row__meta">'
         + '<div><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.min + 'px</strong></div>'
         + '<div><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.max + 'px</strong></div>'
@@ -446,5 +448,65 @@ jQuery(function($){
   $(document).on('click', '.ecf-var-row', function(e){
     if ($(e.target).is('input')) return;
     $(this).find('.ecf-var-check').trigger('click');
+  });
+
+  // ── Type Scale step management ─────────────────────────────────
+  var ALL_STEPS = ['6xs','5xs','4xs','3xs','2xs','xs','s','m','l','xl','2xl','3xl','4xl','5xl','6xl','7xl','8xl','9xl'];
+
+  function getScaleSteps() {
+    var $preview = $('[data-ecf-type-scale-preview]');
+    return ($preview.data('steps') || ['xs','s','m','l','xl','2xl','3xl','4xl']).slice();
+  }
+
+  function applySteps(steps) {
+    var $preview = $('[data-ecf-type-scale-preview]');
+    $preview.data('steps', steps);
+    // Rebuild hidden inputs
+    var $container = $('#ecf-scale-steps-container');
+    $container.empty();
+    $.each(steps, function(_, step) {
+      $container.append('<input type="hidden" class="ecf-scale-step-input" name="ecf_framework_v50[typography][scale][steps][]" value="' + step + '">');
+    });
+    renderTypePreview();
+  }
+
+  $(document).on('click', '[data-ecf-add-step="smaller"]', function(e) {
+    e.preventDefault();
+    var steps = getScaleSteps();
+    var idx = ALL_STEPS.indexOf(steps[0]);
+    if (idx > 0) applySteps([ALL_STEPS[idx - 1]].concat(steps));
+  });
+
+  $(document).on('click', '[data-ecf-remove-step="smaller"]', function(e) {
+    e.preventDefault();
+    var steps = getScaleSteps();
+    if (steps.length > 2) applySteps(steps.slice(1));
+  });
+
+  $(document).on('click', '[data-ecf-add-step="larger"]', function(e) {
+    e.preventDefault();
+    var steps = getScaleSteps();
+    var idx = ALL_STEPS.indexOf(steps[steps.length - 1]);
+    if (idx < ALL_STEPS.length - 1) applySteps(steps.concat([ALL_STEPS[idx + 1]]));
+  });
+
+  $(document).on('click', '[data-ecf-remove-step="larger"]', function(e) {
+    e.preventDefault();
+    var steps = getScaleSteps();
+    if (steps.length > 2) applySteps(steps.slice(0, -1));
+  });
+
+  // ── Copy token to clipboard ────────────────────────────────────
+  $(document).on('click', '.ecf-copy-pill', function(e) {
+    e.stopPropagation();
+    var $pill = $(this);
+    var text = $pill.data('copy');
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(function() {
+      $pill.text(i18n.copied).addClass('is-copied');
+      setTimeout(function() {
+        $pill.text(i18n.copy).removeClass('is-copied');
+      }, 1500);
+    });
   });
 });
