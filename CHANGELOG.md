@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.12 (2026-04-04)
+
+### Changed
+- Prepared the next GitHub version to continue testing plugin update detection in the WordPress plugin overview.
+- Die nächste GitHub-Version vorbereitet, um die Plugin-Update-Erkennung in der WordPress-Pluginübersicht weiter zu testen.
+
 ## 0.1.11 (2026-04-04)
 
 ### Changed
