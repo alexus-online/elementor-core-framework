@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.11 (2026-04-04)
+
+### Changed
+- Moved the root font size control out of the typography panel into a more general settings area because it affects typography, spacing, and radius together.
+- Die Einstellung fuer die Root Font Size aus der Typografie in einen allgemeineren Einstellungsbereich verschoben, weil sie Typografie, Abstaende und Radius gemeinsam beeinflusst.
+
 ## 0.1.10 (2026-04-04)
 
 ### Changed
