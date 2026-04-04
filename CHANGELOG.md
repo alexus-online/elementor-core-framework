@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.9 (2026-04-04)
+
+### Changed
+- Updated the typography preview so the right side shows the real minimum and maximum font sizes instead of the raw clamp value.
+- Die Typografie-Vorschau so angepasst, dass rechts die echten minimalen und maximalen Schriftgroessen statt des rohen Clamp-Werts angezeigt werden.
+
 ## 0.1.8 (2026-04-04)
 
 ### Changed
