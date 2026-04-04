@@ -442,6 +442,13 @@
   flex-direction: column;
   gap: 12px;
 }
+.ecf-panel[data-panel="typography"] .ecf-head,
+.ecf-panel[data-panel="typography"] .ecf-row {
+  grid-template-columns: minmax(110px, 150px) minmax(160px, 1fr) 36px;
+}
+.ecf-panel[data-panel="typography"] .ecf-row input[type="text"] {
+  min-width: 0;
+}
 .ecf-check--inline {
   min-height: 42px;
   margin: 0;
