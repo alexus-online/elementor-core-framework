@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.14 (2026-04-05)
+
+### Changed
+- Added dedicated Elementor class overviews in the variables area for ECF and foreign classes, including live counters for variables and classes.
+- Eigene Elementor-Klassenansichten im Variablen-Bereich fuer ECF- und fremde Klassen hinzugefuegt, inklusive Live-Zaehlern fuer Variablen und Klassen.
+- Renamed the utilities navigation label to classes and removed the generated example class block from that view.
+- Den Navigationspunkt Hilfsklassen in Klassen umbenannt und den generierten Beispielblock aus dieser Ansicht entfernt.
+
 ## 0.1.13 (2026-04-04)
 
 ### Fixed
