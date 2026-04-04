@@ -1,47 +1,5 @@
 # Changelog
 
-## 0.1.16 (2026-04-04)
-
-### Changed
-- Raised the plugin version again and removed the duplicate custom update row so only the native WordPress update notice remains.
-- Plugin-Version erneut erhöht und die doppelte eigene Update-Zeile entfernt, sodass nur noch der native WordPress-Update-Hinweis bleibt.
-
-## 0.1.15 (2026-04-04)
-
-### Changed
-- Raised the GitHub plugin version again to test update detection while keeping the live website on 0.1.14.
-- GitHub-Plugin-Version erneut erhöht, um die Update-Erkennung zu testen, während die Live-Website auf 0.1.14 bleibt.
-
-## 0.1.14 (2026-04-04)
-
-### Changed
-- Raised the GitHub plugin version again to test update detection against the live site version 0.1.13.
-- GitHub-Plugin-Version erneut erhöht, um die Update-Erkennung gegen die Live-Version 0.1.13 zu testen.
-
-## 0.1.13 (2026-04-04)
-
-### Changed
-- Raised the GitHub plugin version again to continue testing update detection from the WordPress plugin overview.
-- GitHub-Plugin-Version erneut erhöht, um die Update-Erkennung in der WordPress-Pluginübersicht weiter zu testen.
-
-## 0.1.12 (2026-04-04)
-
-### Changed
-- Prepared the next GitHub version to continue testing plugin update detection in the WordPress plugin overview.
-- Die nächste GitHub-Version vorbereitet, um die Plugin-Update-Erkennung in der WordPress-Pluginübersicht weiter zu testen.
-
-## 0.1.11 (2026-04-04)
-
-### Changed
-- Added a plugin-row update notice to mirror the standard WordPress update message under the plugin entry.
-- Eine Update-Hinweiszeile direkt unter dem Plugin-Eintrag hinzugefügt, um die Standard-WordPress-Update-Meldung nachzubilden.
-
-## 0.1.10 (2026-04-04)
-
-### Changed
-- Prepared a minimal release to test GitHub-based plugin update detection in the WordPress plugin overview.
-- Minimalen Release vorbereitet, um die GitHub-basierte Plugin-Update-Erkennung in der WordPress-Pluginübersicht zu testen.
-
 ## 0.1.7 (2026-04-04)
 
 ### Added
