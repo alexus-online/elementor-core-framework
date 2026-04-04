@@ -1,6 +1,24 @@
 # Changelog
 
-## 2026-04-03
+## 0.1.7 (2026-04-04)
+
+### Added
+- Added selectable color value formats for HEX, HEXA, RGB, RGBA, HSL, and HSLA in the color token table.
+- Wählbare Farbwert-Formate für HEX, HEXA, RGB, RGBA, HSL und HSLA in der Farbtoken-Tabelle hinzugefügt.
+- Added automatic GitHub-based plugin update checks with native WordPress update support.
+- Automatische GitHub-basierte Plugin-Update-Prüfung mit nativer WordPress-Update-Unterstützung hinzugefügt.
+
+### Changed
+- Updated the color value field so editing the displayed color format updates the actual color live.
+- Das Farbwert-Feld so erweitert, dass Eingaben im gewählten Farbformat die echte Farbe live aktualisieren.
+- Replaced question-mark helper badges with direct hover tooltips on labels and table headers across colors, typography, spacing, and related token tables.
+- Fragezeichen-Hinweise durch direkte Hover-Tooltips auf Labels und Tabellenköpfen in Farben, Typografie, Abständen und verwandten Token-Tabellen ersetzt.
+- Improved the admin layout alignment so the plugin header sits cleaner and the unwanted white strip on the left is removed.
+- Das Admin-Layout so angepasst, dass der Plugin-Kopf sauberer sitzt und die unerwünschte weiße Leiste links verschwindet.
+- Expanded the version changelog view so entries are shown as versioned history with version number and date.
+- Die Versions-Changelog-Ansicht erweitert, sodass Einträge als Versionshistorie mit Versionsnummer und Datum erscheinen.
+
+## 0.1.6 (2026-04-03)
 
 ### Added
 - Added REST endpoints for live ECF settings access and Elementor sync.
