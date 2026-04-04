@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.11 (2026-04-04)
+
+### Changed
+- Added a plugin-row update notice to mirror the standard WordPress update message under the plugin entry.
+- Eine Update-Hinweiszeile direkt unter dem Plugin-Eintrag hinzugefügt, um die Standard-WordPress-Update-Meldung nachzubilden.
+
 ## 0.1.10 (2026-04-04)
 
 ### Changed
