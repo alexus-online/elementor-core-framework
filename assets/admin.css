@@ -1558,6 +1558,112 @@
 .ecf-sidebar::-webkit-scrollbar-track { background: transparent; }
 .ecf-sidebar::-webkit-scrollbar-thumb { background: var(--ecf-border-2); border-radius: 2px; }
 
+.ecf-root-font-impact {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(110, 118, 255, 0.22);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(67, 74, 120, 0.28), rgba(28, 31, 49, 0.72));
+}
+
+.ecf-root-font-impact__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: #dfe6ff;
+}
+
+.ecf-root-font-impact__header strong {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ecf-root-font-impact__header span {
+  color: #9fb0ff;
+  font-weight: 600;
+}
+
+.ecf-root-font-impact__items {
+  display: grid;
+  gap: 10px;
+}
+
+.ecf-root-font-impact__item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(10, 12, 24, 0.38);
+  border: 1px solid rgba(148, 163, 255, 0.12);
+}
+
+.ecf-root-font-impact__item span {
+  color: #9aa4c8;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ecf-root-font-impact__item code {
+  color: #dce4ff;
+  font-size: 14px;
+}
+
+.ecf-root-font-impact__item strong {
+  color: #8ef4ff;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.ecf-root-font-select {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 14px;
+}
+
+.ecf-root-font-select,
+.ecf-root-font-select label,
+.ecf-root-font-select .ecf-tip-hover__label {
+  color: #f5f7ff;
+}
+
+.ecf-root-font-select select {
+  color: #f5f7ff !important;
+}
+
+.ecf-class-limit-card {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-left: 4px solid #ef4444;
+  border-radius: 14px;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.ecf-class-limit-card strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #ffd0d0;
+  font-size: 13px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.ecf-class-limit-card p {
+  margin: 0;
+  color: #fff2f2;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ecf-class-limit-card--compact {
+  margin: 0 0 14px;
+}
+
 /* ── File input ────────────────────────────────────────────────── */
 input[type="file"].ecf-file { color: var(--ecf-muted-2); font-size: 12px; }
 

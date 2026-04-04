@@ -388,6 +388,14 @@ jQuery(function($){
     return String(rounded).replace(/\.0+$|(\.\d*[1-9])0+$/, '$1');
   }
 
+  function syncRootFontSizeControls(value, source) {
+    var normalized = (String(value) === '100') ? '100' : '62.5';
+    $('[data-ecf-root-font-source], [data-ecf-root-font-mirror]').each(function() {
+      if (source && this === source) return;
+      $(this).val(normalized);
+    });
+  }
+
   function escapeHtml(value) {
     return $('<div>').text(value == null ? '' : String(value)).html();
   }
@@ -541,6 +549,72 @@ jQuery(function($){
     $preview.find('[data-ecf-preview-view="' + viewMode + '"]').addClass('is-active');
   }
 
+  function buildRadiusCssValue(minPx, maxPx, rootBasePx) {
+    minPx = parseFloat(minPx) || 0;
+    maxPx = parseFloat(maxPx) || 0;
+
+    if (!minPx && !maxPx) return '';
+    if (!maxPx) maxPx = minPx;
+    if (!minPx) minPx = maxPx;
+
+    if (Math.abs(minPx - maxPx) < 0.001) {
+      return formatPreviewNumber(maxPx / rootBasePx) + 'rem';
+    }
+
+    var minVw = 375;
+    var maxVw = 1280;
+    var slope = (maxPx - minPx) / (maxVw - minVw);
+    var interceptRem = Math.round((((minPx - slope * minVw) / rootBasePx) * 100)) / 100;
+    var slopeVw = Math.round((slope * 100) * 100) / 100;
+
+    return 'clamp('
+      + formatPreviewNumber(minPx / rootBasePx) + 'rem, calc('
+      + formatPreviewNumber(slopeVw) + 'vw '
+      + (interceptRem >= 0 ? '+ ' : '- ')
+      + formatPreviewNumber(Math.abs(interceptRem)) + 'rem), '
+      + formatPreviewNumber(maxPx / rootBasePx) + 'rem)';
+  }
+
+  function renderRootFontImpact() {
+    var $box = $('[data-ecf-root-font-impact]');
+    if (!$box.length) return;
+
+    var rootBasePx = ($('[name="ecf_framework_v50[root_font_size]"]').val() === '62.5') ? 10 : 16;
+    var typeConfig = getTypePreviewConfig($('[data-ecf-type-scale-preview]'));
+    var typeItems = buildTypePreviewItems(typeConfig);
+    var typeStep = $box.attr('data-type-step') || typeConfig.baseIndex || 'm';
+    var spacingConfig = getSpacingConfig();
+    var spacingItems = buildSpacingItems(getSpacingSteps(), spacingConfig);
+    var spacingStep = $box.attr('data-spacing-step') || spacingConfig.baseIndex || 'm';
+    var radiusName = $box.attr('data-radius-name') || 'm';
+    var spacingPrefix = $('[name="ecf_framework_v50[spacing][prefix]"]').val() || 'space';
+    var typeItem = typeItems.find(function(item){ return item.step === typeStep; }) || typeItems[0];
+    var spacingItem = spacingItems.find(function(item){ return item.step === spacingStep; }) || spacingItems[0];
+    var $radiusRow = $('.ecf-table[data-group="radius"] .ecf-row').filter(function() {
+      return $.trim($(this).find('input').eq(0).val()) === radiusName;
+    }).first();
+
+    if (!$radiusRow.length) {
+      $radiusRow = $('.ecf-table[data-group="radius"] .ecf-row').first();
+    }
+
+    var radiusToken = '--ecf-radius-' + (($radiusRow.find('input').eq(0).val() || radiusName).toString().trim() || 'm');
+    var radiusMin = parseFloat($radiusRow.find('input').eq(1).val()) || 0;
+    var radiusMax = parseFloat($radiusRow.find('input').eq(2).val()) || radiusMin;
+
+    $box.find('[data-ecf-root-font-base]').text('1rem = ' + rootBasePx + 'px');
+    if (typeItem) {
+      $box.find('[data-ecf-root-type-token]').text(typeItem.token);
+      $box.find('[data-ecf-root-type-value]').text(typeItem.cssValue);
+    }
+    if (spacingItem) {
+      $box.find('[data-ecf-root-spacing-token]').text('--ecf-' + spacingPrefix + '-' + spacingItem.step);
+      $box.find('[data-ecf-root-spacing-value]').text(spacingItem.cssValue);
+    }
+    $box.find('[data-ecf-root-radius-token]').text(radiusToken);
+    $box.find('[data-ecf-root-radius-value]').text(buildRadiusCssValue(radiusMin, radiusMax, rootBasePx));
+  }
+
   function buildShadowPreviewItems() {
     return $('.ecf-table[data-group="shadows"] .ecf-row').map(function(index) {
       var $row = $(this);
@@ -621,7 +695,10 @@ jQuery(function($){
       $('#ecf-save-footer').show();
     }
 
-    if (panel === 'variables') loadVariables();
+    if (panel === 'variables') {
+      loadVariables();
+      loadClasses();
+    }
   }
 
   $(document).on('click', '.ecf-nav-item', function(){
@@ -660,6 +737,22 @@ jQuery(function($){
 
   $(document).on('input change', '[name="ecf_framework_v50[root_font_size]"], [name^="ecf_framework_v50[typography][scale]"], [name^="ecf_framework_v50[typography][fonts]"]', function(){
     renderTypePreview();
+    renderRootFontImpact();
+  });
+
+  $(document).on('change', '[data-ecf-root-font-source], [data-ecf-root-font-mirror]', function() {
+    var value = $(this).val();
+    syncRootFontSizeControls(value, this);
+
+    var $canonical = $('[data-ecf-root-font-source]').first();
+    if (!$canonical.is(this)) {
+      $canonical.val(value).trigger('change');
+      return;
+    }
+
+    renderTypePreview();
+    renderSpacingPreview();
+    renderRootFontImpact();
   });
 
   $(document).on('input change', '[name^="ecf_framework_v50[shadows]"]', function(){
@@ -686,15 +779,24 @@ jQuery(function($){
 
   // ── Variables Management ───────────────────────────────────────
   var varsLoaded = false;
+  var classesLoaded = false;
   var varTabs = {
     ecf: 'all',
-    foreign: 'all'
+    foreign: 'all',
+    'ecf-classes': 'all',
+    'foreign-classes': 'all'
   };
 
   function typeLabel(type) {
     if (type === 'global-color-variable')  return i18n.type_color;
     if (type === 'global-size-variable')   return i18n.type_size;
     if (type === 'global-string-variable') return i18n.type_string;
+    if (type === 'spacing') return i18n.type_spacing || 'Abstände';
+    if (type === 'typography') return i18n.type_typography || 'Typografie';
+    if (type === 'layout') return i18n.type_layout || 'Layout';
+    if (type === 'radius') return i18n.type_radius || 'Radius';
+    if (type === 'shadow') return i18n.type_shadow || 'Schatten';
+    if (type === 'class') return i18n.type_class || 'Global Class';
     return type;
   }
 
@@ -702,6 +804,12 @@ jQuery(function($){
     if (type === 'global-color-variable') return 'color';
     if (type === 'global-size-variable') return 'size';
     if (type === 'global-string-variable') return 'string';
+    if (type === 'spacing') return 'spacing';
+    if (type === 'typography') return 'typography';
+    if (type === 'layout') return 'layout';
+    if (type === 'radius') return 'radius';
+    if (type === 'shadow') return 'shadow';
+    if (type === 'class') return 'class';
     return 'other';
   }
 
@@ -709,6 +817,12 @@ jQuery(function($){
     if (tabKey === 'color') return i18n.type_color;
     if (tabKey === 'size') return i18n.type_size;
     if (tabKey === 'string') return i18n.type_string;
+    if (tabKey === 'spacing') return i18n.type_spacing || 'Abstände';
+    if (tabKey === 'typography') return i18n.type_typography || 'Typografie';
+    if (tabKey === 'layout') return i18n.type_layout || 'Layout';
+    if (tabKey === 'radius') return i18n.type_radius || 'Radius';
+    if (tabKey === 'shadow') return i18n.type_shadow || 'Schatten';
+    if (tabKey === 'class') return i18n.type_class || 'Global Class';
     if (tabKey === 'other') return i18n.type_other || 'Sonstige';
     return i18n.type_all || 'Alle';
   }
@@ -750,7 +864,7 @@ jQuery(function($){
       buckets[key].push(item);
     });
 
-    var order = ['all', 'color', 'size', 'string', 'other'];
+    var order = ['all', 'color', 'size', 'string', 'spacing', 'typography', 'layout', 'radius', 'shadow', 'class', 'other'];
     if (!varTabs[group] || !buckets[varTabs[group]] || !buckets[varTabs[group]].length) {
       varTabs[group] = 'all';
     }
@@ -768,6 +882,19 @@ jQuery(function($){
     $list.html(tabs + buildVarTable(group, buckets[varTabs[group]] || items));
   }
 
+  function updateVariableSummary(ecfItems, foreignItems) {
+    var ecfCount = (ecfItems || []).length;
+    var foreignCount = (foreignItems || []).length;
+    $('#ecf-total-ecf-variables').text(ecfCount);
+    $('#ecf-total-foreign-variables').text(foreignCount);
+    $('#ecf-total-variables').text(ecfCount + foreignCount);
+  }
+
+  function updateClassSummary(ecfItems, foreignItems) {
+    var total = (ecfItems || []).length + (foreignItems || []).length;
+    $('#ecf-total-global-classes').text(total);
+  }
+
   function loadVariables() {
     if (varsLoaded) return;
     $.post(ecfAdmin.ajaxurl, {
@@ -780,7 +907,25 @@ jQuery(function($){
       }
       renderVarList('ecf',     res.data.ecf);
       renderVarList('foreign', res.data.foreign);
+      updateVariableSummary(res.data.ecf, res.data.foreign);
       varsLoaded = true;
+    });
+  }
+
+  function loadClasses() {
+    if (classesLoaded) return;
+    $.post(ecfAdmin.ajaxurl, {
+      action: 'ecf_get_classes',
+      nonce:  ecfAdmin.nonce
+    }, function(res) {
+      if (!res.success) {
+        $('#ecf-varlist-ecf-classes, #ecf-varlist-foreign-classes').html('<p style="color:#ef4444;">'+res.data+'</p>');
+        return;
+      }
+      renderVarList('ecf-classes', res.data.ecf);
+      renderVarList('foreign-classes', res.data.foreign);
+      updateClassSummary(res.data.ecf, res.data.foreign);
+      classesLoaded = true;
     });
   }
 
@@ -796,6 +941,7 @@ jQuery(function($){
   // Delete selected
   $(document).on('click', '.ecf-delete-selected', function(){
     var group = $(this).data('group');
+    var isClassGroup = String(group).indexOf('classes') !== -1;
     var ids = [];
     $('#ecf-varlist-' + group).find('.ecf-var-check:checked').each(function(){
       ids.push($(this).val());
@@ -805,14 +951,19 @@ jQuery(function($){
 
     var $btn = $(this).prop('disabled', true).text(i18n.deleting);
     $.post(ecfAdmin.ajaxurl, {
-      action: 'ecf_delete_variables',
+      action: isClassGroup ? 'ecf_delete_classes' : 'ecf_delete_variables',
       nonce:  ecfAdmin.nonce,
       ids:    ids
     }, function(res) {
       $btn.prop('disabled', false).text(i18n.delete_sel);
       if (!res.success) { alert(i18n.error + res.data); return; }
-      varsLoaded = false;
-      loadVariables();
+      if (isClassGroup) {
+        classesLoaded = false;
+        loadClasses();
+      } else {
+        varsLoaded = false;
+        loadVariables();
+      }
     });
   });
 
@@ -825,6 +976,11 @@ jQuery(function($){
   $(document).on('click', '.ecf-var-tab', function(){
     var group = $(this).data('group') || 'foreign';
     varTabs[group] = $(this).data('var-tab') || 'all';
+    if (String(group).indexOf('classes') !== -1) {
+      classesLoaded = false;
+      loadClasses();
+      return;
+    }
     varsLoaded = false;
     loadVariables();
   });
@@ -932,9 +1088,16 @@ jQuery(function($){
 
   $(document).on('input change', '[name="ecf_framework_v50[root_font_size]"], [name^="ecf_framework_v50[spacing]"]', function(){
     renderSpacingPreview();
+    renderRootFontImpact();
   });
 
   renderSpacingPreview();
+  renderRootFontImpact();
+  syncRootFontSizeControls($('[data-ecf-root-font-source]').first().val());
+
+  $(document).on('input change', '.ecf-table[data-group="radius"] input, [name="ecf_framework_v50[root_font_size]"]', function(){
+    renderRootFontImpact();
+  });
 
   function applySpacingSteps(steps) {
     if (!Array.isArray(steps) || steps.length < 2) return;
