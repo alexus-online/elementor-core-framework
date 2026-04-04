@@ -4,7 +4,15 @@ jQuery(function($){
   i18n.copied  = i18n.copied  || 'Copied!';
 
   function initColorPickers(scope){
-    scope.find('.ecf-color-field').wpColorPicker();
+    scope.find('.ecf-color-field').wpColorPicker({
+      change: function(event, ui) {
+        var hex = ui.color.toString();
+        $(this).closest('.ecf-row--color').find('.ecf-color-hex-display').val(hex);
+      },
+      clear: function() {
+        $(this).closest('.ecf-row--color').find('.ecf-color-hex-display').val('');
+      }
+    });
   }
   function nextIndex(group){
     return $('.ecf-table[data-group="'+group+'"] .ecf-row').length;

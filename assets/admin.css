@@ -290,6 +290,11 @@
   gap: 8px;
   align-items: center;
 }
+/* Color row: swatch | name | hex value | × */
+.ecf-head--color, .ecf-row--color {
+  grid-template-columns: 44px minmax(80px, 140px) minmax(0, 1fr) 36px;
+}
+.ecf-row--color { padding: 6px 8px; }
 .ecf-head--minmax, .ecf-row--minmax {
   grid-template-columns: 140px 1fr 1fr 36px;
 }
@@ -702,12 +707,8 @@
 .ecf-row-controls {
   display: flex;
   justify-content: space-between;
-  padding: 4px 2px;
+  padding: 6px 2px;
   border-top: 1px solid var(--ecf-border);
-}
-.ecf-row-controls:first-child {
-  border-top: none;
-  border-bottom: 1px solid var(--ecf-border);
 }
 
 /* ── Step +/- controls ─────────────────────────────────────────── */
@@ -1351,7 +1352,33 @@
 .ecf-var-value { font-size: 11px; color: var(--ecf-muted-2); display: flex; align-items: center; gap: 6px; word-break: break-all; }
 .ecf-color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,.1); flex-shrink: 0; }
 
+/* ── Hex value display ─────────────────────────────────────────── */
+.ecf-color-hex-display {
+  background: var(--ecf-surface) !important;
+  border: 1px solid var(--ecf-border-2) !important;
+  border-radius: 6px !important;
+  color: var(--ecf-muted-2) !important;
+  font-size: 12px !important;
+  font-family: monospace !important;
+  padding: 5px 8px !important;
+  width: 100% !important;
+  cursor: default !important;
+}
+
 /* ── WP Color Picker overrides ─────────────────────────────────── */
+.ecf-row--color .wp-picker-container { display: block; }
+.ecf-row--color .wp-color-result.button {
+  width: 44px !important;
+  height: 36px !important;
+  min-height: unset !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--ecf-border-2) !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  display: block !important;
+}
+.ecf-row--color .wp-color-result-text { display: none !important; }
+.ecf-row--color .wp-picker-holder { position: absolute; z-index: 100; }
 .ecf-row .wp-picker-container { display: flex; align-items: center; gap: 6px; }
 .ecf-row .wp-color-result.button {
   width: 22px !important;
