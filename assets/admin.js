@@ -394,6 +394,20 @@ jQuery(function($){
       if (source && this === source) return;
       $(this).val(normalized);
     });
+    updateRootFontSizeLabels(normalized);
+  }
+
+  function updateRootFontSizeLabels(value) {
+    var normalized = (String(value) === '100') ? '100' : '62.5';
+    var rootBasePx = normalized === '62.5' ? 10 : 16;
+    $('[data-ecf-root-font-inline]').text(rootBasePx + 'px = 1rem');
+    $('[data-ecf-root-font-base]').text(rootBasePx + 'px = 1rem');
+  }
+
+  function resetFormatTooltip($picker) {
+    var $current = $picker.find('.ecf-format-picker__option.is-active').first();
+    var tip = $current.data('tip') || '';
+    $picker.find('[data-ecf-format-tooltip]').text(tip);
   }
 
   function escapeHtml(value) {
@@ -515,8 +529,8 @@ jQuery(function($){
         + '<span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span>'
         + '</div>'
         + '<div class="ecf-type-row__meta">'
-        + '<div><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.minPx + 'px</strong></div>'
-        + '<div><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.maxPx + 'px</strong></div>'
+        + '<div><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><div class="ecf-clamp-metric"><strong>' + item.minPx + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div>'
+        + '<div><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><div class="ecf-clamp-metric"><strong>' + item.maxPx + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div>'
         + '</div>'
         + '<div class="ecf-type-row__sample">'
         + '<div class="ecf-type-row__sample-line">'
@@ -543,6 +557,8 @@ jQuery(function($){
     $preview.find('[data-ecf-focus-word]').text(previewWord).css('font-size', activeItem ? sizeForView(activeItem) : '');
     $preview.find('[data-ecf-focus-min]').text(activeItem ? activeItem.minPx + 'px' : '');
     $preview.find('[data-ecf-focus-max]').text(activeItem ? activeItem.maxPx + 'px' : '');
+    $preview.find('[data-ecf-focus-min-copy]').text(activeItem ? activeItem.cssValue : '').attr('data-copy', activeItem ? activeItem.cssValue : '');
+    $preview.find('[data-ecf-focus-max-copy]').text(activeItem ? activeItem.cssValue : '').attr('data-copy', activeItem ? activeItem.cssValue : '');
     $preview.find('[data-ecf-focus-min-line]').css('font-size', activeItem ? activeItem.minPx + 'px' : '').text(labelMin);
     $preview.find('[data-ecf-focus-max-line]').css('font-size', activeItem ? activeItem.maxPx + 'px' : '').text(labelMax);
     $preview.find('[data-ecf-preview-view]').removeClass('is-active');
@@ -601,18 +617,48 @@ jQuery(function($){
     var radiusToken = '--ecf-radius-' + (($radiusRow.find('input').eq(0).val() || radiusName).toString().trim() || 'm');
     var radiusMin = parseFloat($radiusRow.find('input').eq(1).val()) || 0;
     var radiusMax = parseFloat($radiusRow.find('input').eq(2).val()) || radiusMin;
+    var labelMin = $box.attr('data-label-min') || 'Minimum';
+    var labelMax = $box.attr('data-label-max') || 'Maximum';
+    var typePreviewWord = $box.attr('data-preview-type-word') || 'Typography';
+    var spacingMaxValue = spacingItems.reduce(function(max, item) {
+      return Math.max(max, parseFloat(item.maxPx) || 0);
+    }, 0);
 
-    $box.find('[data-ecf-root-font-base]').text('1rem = ' + rootBasePx + 'px');
+    updateRootFontSizeLabels($('[name="ecf_framework_v50[root_font_size]"]').val());
     if (typeItem) {
       $box.find('[data-ecf-root-type-token]').text(typeItem.token);
-      $box.find('[data-ecf-root-type-value]').text(typeItem.cssValue);
+      $box.find('[data-ecf-root-type-copy]').text(typeItem.cssValue).attr('data-copy', typeItem.cssValue);
+      $box.find('[data-ecf-root-type-min-label]').text(labelMin);
+      $box.find('[data-ecf-root-type-max-label]').text(labelMax);
+      $box.find('[data-ecf-root-type-min]').text(typeItem.minPx + 'px');
+      $box.find('[data-ecf-root-type-max]').text(typeItem.maxPx + 'px');
+      $box.find('[data-ecf-root-type-min-preview]').text(typePreviewWord).css('font-size', typeItem.minPx + 'px');
+      $box.find('[data-ecf-root-type-max-preview]').text(typePreviewWord).css('font-size', typeItem.maxPx + 'px');
     }
     if (spacingItem) {
+      var spacingMinValue = parseFloat(spacingItem.minPx) || 0;
+      var spacingMaxPx = parseFloat(spacingItem.maxPx) || spacingMinValue;
+      var minBarWidth = spacingMaxValue > 0 ? Math.max(4, Math.round((spacingMinValue / spacingMaxValue) * 1000) / 10) : 0;
+      var maxBarWidth = spacingMaxValue > 0 ? Math.max(4, Math.round((spacingMaxPx / spacingMaxValue) * 1000) / 10) : 0;
+      var minBarHeight = Math.min(32, Math.max(4, Math.round(spacingMinValue)));
+      var maxBarHeight = Math.min(32, Math.max(4, Math.round(spacingMaxPx)));
       $box.find('[data-ecf-root-spacing-token]').text('--ecf-' + spacingPrefix + '-' + spacingItem.step);
-      $box.find('[data-ecf-root-spacing-value]').text(spacingItem.cssValue);
+      $box.find('[data-ecf-root-spacing-copy]').text(spacingItem.cssValue).attr('data-copy', spacingItem.cssValue);
+      $box.find('[data-ecf-root-spacing-min-label]').text(labelMin);
+      $box.find('[data-ecf-root-spacing-max-label]').text(labelMax);
+      $box.find('[data-ecf-root-spacing-min]').text(spacingItem.minPx + 'px');
+      $box.find('[data-ecf-root-spacing-max]').text(spacingItem.maxPx + 'px');
+      $box.find('[data-ecf-root-spacing-min-bar]').css({ width: minBarWidth + '%', height: minBarHeight + 'px' });
+      $box.find('[data-ecf-root-spacing-max-bar]').css({ width: maxBarWidth + '%', height: maxBarHeight + 'px' });
     }
     $box.find('[data-ecf-root-radius-token]').text(radiusToken);
-    $box.find('[data-ecf-root-radius-value]').text(buildRadiusCssValue(radiusMin, radiusMax, rootBasePx));
+    $box.find('[data-ecf-root-radius-copy]').text(buildRadiusCssValue(radiusMin, radiusMax, rootBasePx)).attr('data-copy', buildRadiusCssValue(radiusMin, radiusMax, rootBasePx));
+    $box.find('[data-ecf-root-radius-min-label]').text(labelMin);
+    $box.find('[data-ecf-root-radius-max-label]').text(labelMax);
+    $box.find('[data-ecf-root-radius-min]').text(formatPreviewNumber(radiusMin) + 'px');
+    $box.find('[data-ecf-root-radius-max]').text(formatPreviewNumber(radiusMax) + 'px');
+    $box.find('[data-ecf-root-radius-min-preview]').css('border-radius', formatPreviewNumber(radiusMin) + 'px');
+    $box.find('[data-ecf-root-radius-max-preview]').css('border-radius', formatPreviewNumber(radiusMax) + 'px');
   }
 
   function buildShadowPreviewItems() {
@@ -732,6 +778,10 @@ jQuery(function($){
 
   // Activate first panel on load
   switchPanel('tokens');
+  updateRootFontSizeLabels($('[data-ecf-root-font-source]').first().val() || $('[data-ecf-root-font-mirror]').first().val());
+  $('[data-ecf-format-picker]').each(function() {
+    resetFormatTooltip($(this));
+  });
   renderTypePreview();
   renderShadowPreview();
 
@@ -753,6 +803,49 @@ jQuery(function($){
     renderTypePreview();
     renderSpacingPreview();
     renderRootFontImpact();
+  });
+
+  $(document).on('click', '[data-ecf-format-trigger]', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $picker = $(this).closest('[data-ecf-format-picker]');
+    var $menu = $picker.find('[data-ecf-format-menu]');
+    var willOpen = $menu.prop('hidden');
+    $('[data-ecf-format-menu]').prop('hidden', true);
+    $('[data-ecf-format-trigger]').attr('aria-expanded', 'false');
+    if (willOpen) {
+      $menu.prop('hidden', false);
+      $(this).attr('aria-expanded', 'true');
+      resetFormatTooltip($picker);
+    }
+  });
+
+  $(document).on('mouseenter focus', '[data-ecf-format-option]', function() {
+    var $option = $(this);
+    $option.closest('[data-ecf-format-picker]').find('[data-ecf-format-tooltip]').text($option.data('tip') || '');
+  });
+
+  $(document).on('mouseleave', '.ecf-format-picker__options', function() {
+    resetFormatTooltip($(this).closest('[data-ecf-format-picker]'));
+  });
+
+  $(document).on('click', '[data-ecf-format-option]', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $option = $(this);
+    var $picker = $option.closest('[data-ecf-format-picker]');
+    $picker.find('[data-ecf-format-option]').removeClass('is-active');
+    $option.addClass('is-active');
+    $picker.find('[data-ecf-format-input]').val($option.data('value'));
+    $picker.find('[data-ecf-format-current]').text($option.data('label'));
+    resetFormatTooltip($picker);
+    $picker.find('[data-ecf-format-menu]').prop('hidden', true);
+    $picker.find('[data-ecf-format-trigger]').attr('aria-expanded', 'false');
+  });
+
+  $(document).on('click', function() {
+    $('[data-ecf-format-menu]').prop('hidden', true);
+    $('[data-ecf-format-trigger]').attr('aria-expanded', 'false');
   });
 
   $(document).on('input change', '[name^="ecf_framework_v50[shadows]"]', function(){
@@ -1073,11 +1166,11 @@ jQuery(function($){
         + '<span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div>'
         + '<div class="ecf-space-row__meta">'
         + '<div class="ecf-space-row__metric">'
-        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><strong>' + item.minPx + 'px</strong></div>'
+        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><div class="ecf-clamp-metric"><strong>' + item.minPx + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div>'
         + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + minBarPct + '%;height:' + minBarH + 'px;"></div></div>'
         + '</div>'
         + '<div class="ecf-space-row__metric">'
-        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><strong>' + item.maxPx + 'px</strong></div>'
+        + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><div class="ecf-clamp-metric"><strong>' + item.maxPx + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div>'
         + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + maxBarPct + '%;height:' + maxBarH + 'px;"></div></div>'
         + '</div>'
         + '</div>'
@@ -1206,5 +1299,57 @@ jQuery(function($){
         $pill.text(i18n.copy).removeClass('is-copied');
       }, 1500);
     });
+  });
+
+  $(document).on('click', '.ecf-clamp-toggle', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $toggle = $(this);
+    var $pop = $toggle.closest('div').siblings('.ecf-clamp-popover').first();
+    $('.ecf-clamp-popover').not($pop).removeClass('is-open');
+    $pop.toggleClass('is-open');
+  });
+
+  $(document).on('click', '.ecf-clamp-popover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $pop = $(this);
+    var text = $pop.attr('data-copy') || $pop.text();
+    if (!text || !navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(function() {
+      var original = $pop.attr('data-copy') || text;
+      $pop.addClass('is-copied').text(i18n.copied);
+      setTimeout(function() {
+        $pop.removeClass('is-copied').text(original);
+      }, 1200);
+    });
+  });
+
+  $(document).on('click', '[data-ecf-root-copy-toggle]', function(e) {
+    e.preventDefault();
+    var $toggle = $(this);
+    var $item = $toggle.closest('.ecf-root-font-impact__item');
+    var $pop = $item.find('.ecf-root-font-impact__copy-pop');
+    $('.ecf-root-font-impact__copy-pop').not($pop).removeClass('is-open');
+    $pop.toggleClass('is-open');
+  });
+
+  $(document).on('click', '.ecf-root-font-impact__copy-pop', function(e) {
+    e.preventDefault();
+    var $pop = $(this);
+    var text = $pop.attr('data-copy') || $pop.text();
+    if (!text || !navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(function() {
+      var original = $pop.text();
+      $pop.addClass('is-copied').text(i18n.copied);
+      setTimeout(function() {
+        $pop.removeClass('is-copied').text(text);
+      }, 1200);
+    });
+  });
+
+  $(document).on('click', function(e) {
+    if ($(e.target).closest('.ecf-root-font-impact__token-row, .ecf-root-font-impact__copy-pop').length) return;
+    $('.ecf-root-font-impact__copy-pop').removeClass('is-open');
   });
 });
