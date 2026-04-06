@@ -735,6 +735,7 @@ jQuery(function($){
   // ── Sidebar navigation ─────────────────────────────────────────
   var $noSavePanel = ['variables', 'sync']; // panels that don't need the save button
   var panelStorageKey = 'ecfActivePanel';
+  var generalTabStorageKey = 'ecfGeneralTab';
 
   function switchPanel(panel) {
     $('.ecf-nav-item').removeClass('is-active');
@@ -761,6 +762,22 @@ jQuery(function($){
   $(document).on('click', '.ecf-nav-item', function(){
     var panel = $(this).data('panel');
     switchPanel(panel);
+  });
+
+  function switchGeneralTab(tab) {
+    var activeTab = tab || 'system';
+    $('[data-ecf-general-tab]').removeClass('is-active')
+      .filter('[data-ecf-general-tab="' + activeTab + '"]').addClass('is-active');
+    $('[data-ecf-general-section]').removeClass('is-active').prop('hidden', true)
+      .filter('[data-ecf-general-section="' + activeTab + '"]').addClass('is-active').prop('hidden', false);
+
+    try {
+      window.sessionStorage.setItem(generalTabStorageKey, activeTab);
+    } catch (err) {}
+  }
+
+  $(document).on('click', '[data-ecf-general-tab]', function() {
+    switchGeneralTab($(this).data('ecf-general-tab'));
   });
 
   function openChangelogModal() {
@@ -797,11 +814,21 @@ jQuery(function($){
     }
   } catch (err) {}
   switchPanel(initialPanel);
+  var initialGeneralTab = 'system';
+  try {
+    var storedGeneralTab = window.sessionStorage.getItem(generalTabStorageKey);
+    if (storedGeneralTab && $('[data-ecf-general-tab="' + storedGeneralTab + '"]').length) {
+      initialGeneralTab = storedGeneralTab;
+    }
+  } catch (err) {}
+  switchGeneralTab(initialGeneralTab);
 
   $(document).on('submit', 'form[action="options.php"]', function() {
     var activePanel = $('.ecf-nav-item.is-active').data('panel') || 'tokens';
     try {
       window.sessionStorage.setItem(panelStorageKey, activePanel);
+      var activeGeneralTab = $('[data-ecf-general-tab].is-active').data('ecf-general-tab') || 'system';
+      window.sessionStorage.setItem(generalTabStorageKey, activeGeneralTab);
     } catch (err) {}
   });
 

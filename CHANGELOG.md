@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.20 (2026-04-06)
+
+### Changed
+- Reorganized General Settings into clearer sub-tabs for System, Layout, and Behavior, and synced the Elementor boxed width as both token and helper class.
+- Allgemeine Einstellungen in klarere Untertabs für System, Layout und Verhalten gegliedert und die Elementor-Boxed-Width als Token und Helferklasse in den Sync aufgenommen.
+
 ## 0.1.19 (2026-04-06)
 
 ### Fixed

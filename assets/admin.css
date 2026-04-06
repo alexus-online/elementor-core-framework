@@ -376,6 +376,18 @@
   margin: 0;
 }
 
+.ecf-general-tabs {
+  margin-bottom: 14px;
+}
+
+.ecf-general-section {
+  display: none;
+}
+
+.ecf-general-section.is-active {
+  display: block;
+}
+
 .ecf-format-picker__trigger {
   width: 100%;
   display: inline-flex;
