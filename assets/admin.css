@@ -2386,7 +2386,7 @@
 .ecf-var-table { display: flex; flex-direction: column; gap: 0; }
 .ecf-var-head {
   display: grid;
-  grid-template-columns: 28px minmax(180px, 1fr) 92px minmax(220px, 1.2fr);
+  grid-template-columns: 28px minmax(180px, 1fr) 92px minmax(300px, 1.5fr);
   gap: 10px;
   padding: 6px 10px;
   font-size: 10px;
@@ -2398,7 +2398,7 @@
 }
 .ecf-var-row {
   display: grid;
-  grid-template-columns: 28px minmax(180px, 1fr) 92px minmax(220px, 1.2fr);
+  grid-template-columns: 28px minmax(180px, 1fr) 92px minmax(300px, 1.5fr);
   gap: 10px;
   padding: 9px 10px;
   align-items: center;
@@ -2475,11 +2475,18 @@
   min-width: 0;
   word-break: normal;
 }
+.ecf-var-value--size {
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  word-break: normal;
+}
 .ecf-var-space-metric {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 52px;
+  flex: 0 0 auto;
 }
 .ecf-var-space-metric small {
   color: var(--ecf-muted);
@@ -2500,6 +2507,7 @@
   width: 100%;
   min-width: 90px;
   max-width: 130px;
+  flex: 1 1 120px;
 }
 .ecf-var-space-bar {
   display: flex;
@@ -2514,6 +2522,32 @@
   min-width: 3px;
   border-radius: inherit;
   background: linear-gradient(90deg, #6366f1, #818cf8);
+}
+.ecf-var-type-visual-row,
+.ecf-var-radius-visual-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ecf-var-type-sample {
+  display: block;
+  line-height: 1;
+  color: var(--ecf-text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ecf-var-type-sample--max {
+  opacity: .88;
+}
+.ecf-var-radius-box {
+  display: block;
+  width: 56px;
+  height: 16px;
+  border: 1px solid rgba(129, 140, 248, 0.35);
+  background: linear-gradient(90deg, rgba(99,102,241,.18), rgba(129,140,248,.26));
+}
+.ecf-var-radius-box--max {
+  width: 84px;
 }
 .ecf-color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,.1); flex-shrink: 0; }
 
@@ -2533,6 +2567,11 @@
     align-items: stretch;
   }
   .ecf-var-value--spacing {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .ecf-var-value--size {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;

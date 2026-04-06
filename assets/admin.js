@@ -1,6 +1,8 @@
 jQuery(function($){
   var i18n = (typeof ecfAdmin !== 'undefined' && ecfAdmin.i18n) ? ecfAdmin.i18n : {};
   var spacingPreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.spacingPreview) ? ecfAdmin.spacingPreview : {};
+  var typePreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.typePreview) ? ecfAdmin.typePreview : {};
+  var radiusPreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.radiusPreview) ? ecfAdmin.radiusPreview : {};
   i18n.copy    = i18n.copy    || 'Copy';
   i18n.copied  = i18n.copied  || 'Copied!';
 
@@ -971,9 +973,51 @@ jQuery(function($){
     var label = String(item.label || '').toLowerCase();
     var tabKey = typeTabKey(item.type);
     if (tabKey === 'spacing') return 'spacing';
+    if (tabKey === 'typography' || label.indexOf('ecf-text-') === 0 || label.indexOf('text-') === 0) return 'typography';
+    if (tabKey === 'radius' || label.indexOf('ecf-radius-') === 0 || label.indexOf('radius') !== -1) return 'radius';
     if (tabKey === 'color') return 'color';
     if (label.indexOf('space') !== -1 || label.indexOf('gap') !== -1 || label.indexOf('padding') !== -1 || label.indexOf('margin') !== -1) return 'spacing';
     return 'value';
+  }
+
+  function getVariableSizePreviewData(value) {
+    var clampData = parseClampSizeValue(value);
+    if (clampData) {
+      return {
+        minPx: clampData.minPx,
+        maxPx: clampData.maxPx,
+        raw: clampData.raw
+      };
+    }
+
+    var token = parseSizeToken(value);
+    if (!token) return null;
+
+    var px = sizeTokenToPx(token, getRootBasePx());
+    if (px == null) return null;
+
+    return {
+      minPx: round(px, 2),
+      maxPx: round(px, 2),
+      raw: String(value || '')
+    };
+  }
+
+  function renderVariableSizeMetrics(minPx, maxPx, visualHtml, modifierClass) {
+    var maxRef = Math.max(minPx, maxPx, 1);
+    var minWidth = clamp((minPx / maxRef) * 100, 10, 100);
+    var maxWidth = clamp((maxPx / maxRef) * 100, 10, 100);
+
+    return '<span class="ecf-var-value ecf-var-value--size ' + (modifierClass || '') + '">'
+      + '<span class="ecf-var-space-metric"><small>Min</small><strong>' + escapeHtml(formatNumber(minPx, 2)) + 'px</strong></span>'
+      + '<span class="ecf-var-space-visual" aria-hidden="true">'
+      + (visualHtml || (
+          '<span class="ecf-var-space-bar"><span class="ecf-var-space-fill" style="width:' + minWidth + '%;height:6px;"></span></span>'
+          + '<span class="ecf-var-space-bar"><span class="ecf-var-space-fill" style="width:' + maxWidth + '%;height:10px;"></span></span>'
+        ))
+      + '</span>'
+      + '<span class="ecf-var-space-metric"><small>Max</small><strong>' + escapeHtml(formatNumber(maxPx, 2)) + 'px</strong></span>'
+      + '</span>';
   }
 
   function renderVariableValue(item) {
@@ -1004,19 +1048,37 @@ jQuery(function($){
       }
 
       if (minPx != null && maxPx != null) {
-        var maxRef = Math.max(minPx, maxPx, 1);
-        var minWidth = clamp((minPx / maxRef) * 100, 10, 100);
-        var maxWidth = clamp((maxPx / maxRef) * 100, 10, 100);
+        return renderVariableSizeMetrics(minPx, maxPx, '', 'ecf-var-value--spacing');
+      }
+    }
 
-        return '<span class="ecf-var-value ecf-var-value--spacing">'
-          + '<span class="ecf-var-space-metric"><small>Min</small><strong>' + escapeHtml(formatNumber(minPx, 2)) + 'px</strong></span>'
-          + '<span class="ecf-var-space-visual" aria-hidden="true">'
-          + '<span class="ecf-var-space-bar"><span class="ecf-var-space-fill" style="width:' + minWidth + '%;height:6px;"></span></span>'
-          + '<span class="ecf-var-space-bar"><span class="ecf-var-space-fill" style="width:' + maxWidth + '%;height:10px;"></span></span>'
-          + '</span>'
-          + '<span class="ecf-var-space-metric"><small>Max</small><strong>' + escapeHtml(formatNumber(maxPx, 2)) + 'px</strong></span>'
-          + '</span>';
-      } 
+    if (kind === 'radius' || kind === 'typography') {
+      var tokenKey = String(item.label || '').toLowerCase();
+      var previewMap = kind === 'radius' ? radiusPreviewMap : typePreviewMap;
+      var mappedData = previewMap[tokenKey] || null;
+      var sizeData = mappedData ? {
+        minPx: parseFloat(mappedData.minPx),
+        maxPx: parseFloat(mappedData.maxPx),
+        raw: String(mappedData.cssValue || value)
+      } : getVariableSizePreviewData(value);
+      if (sizeData) {
+        var visualHtml = '';
+        if (kind === 'radius') {
+          visualHtml =
+            '<span class="ecf-var-radius-visual-row">'
+            + '<span class="ecf-var-radius-box" style="border-radius:' + escapeHtml(formatNumber(sizeData.minPx, 2)) + 'px;"></span>'
+            + '<span class="ecf-var-radius-box ecf-var-radius-box--max" style="border-radius:' + escapeHtml(formatNumber(sizeData.maxPx, 2)) + 'px;"></span>'
+            + '</span>';
+        } else {
+          visualHtml =
+            '<span class="ecf-var-type-visual-row">'
+            + '<span class="ecf-var-type-sample" style="font-size:' + escapeHtml(formatNumber(sizeData.minPx, 2)) + 'px;">Text</span>'
+            + '<span class="ecf-var-type-sample ecf-var-type-sample--max" style="font-size:' + escapeHtml(formatNumber(sizeData.maxPx, 2)) + 'px;">Text</span>'
+            + '</span>';
+        }
+
+        return renderVariableSizeMetrics(sizeData.minPx, sizeData.maxPx, visualHtml, kind === 'radius' ? 'ecf-var-value--radius' : 'ecf-var-value--typography');
+      }
     }
 
     return '<span class="ecf-var-value">' + escapeHtml(value) + '</span>';
@@ -1764,13 +1826,49 @@ jQuery(function($){
     updateClassLibrarySelectAllState();
   });
 
-  $(document).on('submit', 'form[action="options.php"]', function(e) {
-    var submitter = e.originalEvent && e.originalEvent.submitter ? e.originalEvent.submitter : null;
-    if (submitter && $(submitter).is('[data-ecf-class-sync-button]')) {
-      try {
-        window.sessionStorage.setItem(panelStorageKey, 'utilities');
-      } catch (err) {}
+  function submitClassLibrarySync($button) {
+    var $sourceForm = $('form[action="options.php"]').first();
+    if (!$sourceForm.length) return;
+
+    var actionUrl = '';
+    if (typeof window.ajaxurl === 'string' && window.ajaxurl.indexOf('admin-ajax.php') !== -1) {
+      actionUrl = window.ajaxurl.replace('admin-ajax.php', 'admin-post.php');
+    } else {
+      actionUrl = String($button.attr('data-ecf-class-sync-url') || '');
     }
+    if (!actionUrl) return;
+
+    try {
+      window.sessionStorage.setItem(panelStorageKey, 'utilities');
+    } catch (err) {}
+
+    var $tempForm = $('<form>', {
+      method: 'post',
+      action: actionUrl,
+      style: 'display:none'
+    });
+
+    $.each($sourceForm.serializeArray(), function(_, field) {
+      $('<input>', {
+        type: 'hidden',
+        name: field.name,
+        value: field.value
+      }).appendTo($tempForm);
+    });
+
+    $('<input>', {
+      type: 'hidden',
+      name: 'action',
+      value: 'ecf_class_library_sync'
+    }).appendTo($tempForm);
+
+    $('body').append($tempForm);
+    $tempForm.trigger('submit');
+  }
+
+  $(document).on('click', '[data-ecf-class-sync-button]', function(e) {
+    e.preventDefault();
+    submitClassLibrarySync($(this));
   });
 
   $(document).on('click', '[data-ecf-starter-custom-add]', function() {
