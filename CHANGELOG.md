@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-04-06)
+
+### Change
+- Split updater, Elementor status, changelog, and general admin helpers into separate modules.
+- Updater, Elementor-Status, Changelog und allgemeine Admin-Helfer in eigene Module aufgeteilt.
+- Reduced the size of the main plugin file without changing the visible feature set.
+- Hauptdatei des Plugins verkleinert, ohne den sichtbaren Funktionsumfang zu ändern.
+
 ## 0.1.20 (2026-04-06)
 
 ### UX
