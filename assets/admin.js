@@ -733,7 +733,7 @@ jQuery(function($){
   }
 
   // ── Sidebar navigation ─────────────────────────────────────────
-  var $noSavePanel = ['variables', 'sync']; // panels that don't need the save button
+  var $noSavePanel = ['variables', 'sync', 'changelog']; // panels that don't need the save button
   var panelStorageKey = 'ecfActivePanel';
   var generalTabStorageKey = 'ecfGeneralTab';
   var whatsNewStorageKey = 'ecfWhatsNewState';
