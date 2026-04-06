@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.17 (2026-04-06)
+
+### Changed
+- Refined the class library and overall admin UX with cleaner class flows, a guided BEM generator, improved filters, and compact helper states.
+- Die Klassenbibliothek und die gesamte Admin-UX mit klareren Klassen-Flows, geführtem BEM-Generator, verbesserten Filtern und kompakteren Hilfszuständen verfeinert.
+
 ## 0.1.16 (2026-04-05)
 
 ### Fixed
