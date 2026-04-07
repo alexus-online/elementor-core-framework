@@ -736,8 +736,90 @@ jQuery(function($){
   var $noSavePanel = ['variables', 'sync', 'changelog']; // panels that don't need the save button
   var panelStorageKey = 'ecfActivePanel';
   var generalTabStorageKey = 'ecfGeneralTab';
+  var pageScrollStorageKey = 'ecfPageScrollTop';
+  var pageFocusStorageKey = 'ecfPageFocusTarget';
   var whatsNewStorageKey = 'ecfWhatsNewState';
   var whatsNewMaxImpressions = 5;
+
+  function storePageScrollPosition() {
+    try {
+      window.sessionStorage.setItem(pageScrollStorageKey, String(window.scrollY || window.pageYOffset || 0));
+    } catch (err) {}
+  }
+
+  function storePageFocusTarget(targetId) {
+    try {
+      if (targetId) {
+        window.sessionStorage.setItem(pageFocusStorageKey, String(targetId));
+      } else {
+        window.sessionStorage.removeItem(pageFocusStorageKey);
+      }
+    } catch (err) {}
+  }
+
+  function getPersistedFocusTargetId($origin) {
+    if (!$origin || !$origin.length) return '';
+
+    var $focusTarget = $origin.closest('#ecf-elementor-limits');
+    if ($focusTarget.length) return $focusTarget.attr('id') || '';
+
+    $focusTarget = $origin.closest('[data-panel]');
+    if ($focusTarget.length && $focusTarget.attr('data-panel')) {
+      return '';
+    }
+
+    $focusTarget = $origin.closest('[id]');
+    if ($focusTarget.length) return $focusTarget.attr('id') || '';
+
+    return '';
+  }
+
+  function persistAdminPageState($origin) {
+    storePageFocusTarget(getPersistedFocusTargetId($origin));
+    storePageScrollPosition();
+  }
+
+  function restorePageScrollPosition() {
+    var storedTop = null;
+    var storedFocus = null;
+    try {
+      storedTop = window.sessionStorage.getItem(pageScrollStorageKey);
+      storedFocus = window.sessionStorage.getItem(pageFocusStorageKey);
+      window.sessionStorage.removeItem(pageScrollStorageKey);
+      window.sessionStorage.removeItem(pageFocusStorageKey);
+    } catch (err) {
+      storedTop = null;
+      storedFocus = null;
+    }
+
+    var focusSelector = storedFocus ? ('#' + storedFocus.replace(/[^A-Za-z0-9\-_:.]/g, '')) : '';
+    var $focusTarget = focusSelector ? $(focusSelector).first() : $();
+    if ($focusTarget.length) {
+      window.requestAnimationFrame(function() {
+        window.requestAnimationFrame(function() {
+          $focusTarget.get(0).scrollIntoView({ block: 'start', behavior: 'auto' });
+        });
+      });
+      window.setTimeout(function() {
+        $focusTarget.get(0).scrollIntoView({ block: 'start', behavior: 'auto' });
+      }, 160);
+    }
+
+    if (storedTop == null) return;
+
+    var top = parseInt(storedTop, 10);
+    if (isNaN(top) || top < 0) return;
+
+    window.requestAnimationFrame(function() {
+      window.requestAnimationFrame(function() {
+        window.scrollTo(0, top);
+      });
+    });
+
+    window.setTimeout(function() {
+      window.scrollTo(0, top);
+    }, 160);
+  }
 
   function getWhatsNewState() {
     try {
@@ -1116,6 +1198,11 @@ jQuery(function($){
   }
   registerWhatsNewImpressions();
   refreshWhatsNewBadges();
+  restorePageScrollPosition();
+
+  $(document).on('submit', '.ecf-wrap form', function() {
+    persistAdminPageState($(this));
+  });
 
   $(document).on('submit', 'form[action="options.php"]', function() {
     var activePanel = $('.ecf-nav-item.is-active').data('panel') || 'tokens';
@@ -2196,6 +2283,7 @@ jQuery(function($){
     }).appendTo($tempForm);
 
     $('body').append($tempForm);
+    persistAdminPageState($button);
     $tempForm.trigger('submit');
   }
 
@@ -3041,6 +3129,7 @@ jQuery(function($){
 
   $(document).on('click', '[data-ecf-reload-page]', function(e) {
     e.preventDefault();
+    persistAdminPageState($(this));
     window.location.reload();
   });
 

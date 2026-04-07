@@ -672,17 +672,16 @@ trait ECF_Framework_Updater_Trait {
 
     public function handle_check_updates() {
         if (!$this->can_manage_framework()) {
-            wp_die('Unauthorized');
+            $this->deny_admin_request(admin_url('plugins.php'), ['ecf_update_check' => '1']);
         }
         check_admin_referer('ecf_check_updates');
 
         if (!$this->github_update_checks_enabled()) {
-            $message = rawurlencode($this->t(
+            $message = $this->t(
                 'GitHub update checks are disabled in ECF General Settings > System.',
                 'GitHub-Update-Prüfungen sind in den ECF-Allgemeinen Einstellungen > System deaktiviert.'
-            ));
-            wp_safe_redirect(admin_url('plugins.php?ecf_update_check=1&ecf_message=' . $message));
-            exit;
+            );
+            $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
         }
 
         $installed_version = $this->current_plugin_version();
@@ -693,25 +692,25 @@ trait ECF_Framework_Updater_Trait {
         $update = !empty($transient->response[$plugin_file]) ? (object) $transient->response[$plugin_file] : null;
 
         if ($update && !empty($update->new_version)) {
-            $message = rawurlencode(sprintf(
+            $message = sprintf(
                 $this->t(
                     'Update found: installed %1$s, remote %2$s.',
                     'Update gefunden: installiert %1$s, remote %2$s.'
                 ),
                 $installed_version,
                 (string) $update->new_version
-            ));
+            );
         } elseif (!$probe['ok']) {
-            $message = rawurlencode(sprintf(
+            $message = sprintf(
                 $this->t(
                     'Plugin update check failed. Installed: %1$s. GitHub request error: %2$s.',
                     'Plugin-Update-Prüfung fehlgeschlagen. Installiert: %1$s. GitHub-Fehler: %2$s.'
                 ),
                 $installed_version,
                 $probe['error']
-            ));
+            );
         } else {
-            $message = rawurlencode($this->t(
+            $message = $this->t(
                 sprintf(
                     'Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered.',
                     $installed_version,
@@ -722,11 +721,10 @@ trait ECF_Framework_Updater_Trait {
                     $installed_version,
                     $probe['version']
                 )
-            ));
+            );
         }
 
-        wp_safe_redirect(admin_url('plugins.php?ecf_update_check=1&ecf_message=' . $message));
-        exit;
+        $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
     }
 
     public function add_plugin_action_links($actions) {
@@ -771,17 +769,16 @@ trait ECF_Framework_Updater_Trait {
 
     public function handle_toggle_auto_updates() {
         if (!$this->can_manage_framework()) {
-            wp_die('Unauthorized');
+            $this->deny_admin_request(admin_url('plugins.php'), ['ecf_update_check' => '1']);
         }
         check_admin_referer('ecf_toggle_auto_updates');
 
         if (!$this->github_update_checks_enabled()) {
-            $message = rawurlencode($this->t(
+            $message = $this->t(
                 'GitHub update checks are disabled in ECF General Settings > System.',
                 'GitHub-Update-Prüfungen sind in den ECF-Allgemeinen Einstellungen > System deaktiviert.'
-            ));
-            wp_safe_redirect(admin_url('plugins.php?ecf_update_check=1&ecf_message=' . $message));
-            exit;
+            );
+            $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
         }
 
         $plugins = array_values(array_unique((array) get_site_option('auto_update_plugins', [])));
@@ -799,13 +796,12 @@ trait ECF_Framework_Updater_Trait {
 
         update_site_option('auto_update_plugins', $plugins);
 
-        $message = rawurlencode($this->t(
+        $message = $this->t(
             $enabled ? 'Automatic updates disabled for this plugin.' : 'Automatic updates enabled for this plugin.',
             $enabled ? 'Automatische Updates für dieses Plugin deaktiviert.' : 'Automatische Updates für dieses Plugin aktiviert.'
-        ));
+        );
 
-        wp_safe_redirect(admin_url('plugins.php?ecf_update_check=1&ecf_message=' . $message));
-        exit;
+        $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
     }
 
     public function render_plugin_list_notice() {

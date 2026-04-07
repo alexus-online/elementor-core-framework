@@ -1,0 +1,61 @@
+<?php
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+trait ECF_Framework_REST_API_Trait {
+    public function register_rest_routes() {
+        register_rest_route('ecf-framework/v1', '/settings', [
+            [
+                'methods'             => \WP_REST_Server::READABLE,
+                'callback'            => [$this, 'rest_get_settings'],
+                'permission_callback' => [$this, 'rest_manage_options_permission'],
+            ],
+            [
+                'methods'             => \WP_REST_Server::EDITABLE,
+                'callback'            => [$this, 'rest_update_settings'],
+                'permission_callback' => [$this, 'rest_manage_options_permission'],
+            ],
+        ]);
+
+        register_rest_route('ecf-framework/v1', '/sync', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_sync_native'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+    }
+
+    public function rest_manage_options_permission() {
+        return $this->can_manage_framework();
+    }
+
+    public function rest_get_settings(\WP_REST_Request $request) {
+        return rest_ensure_response([
+            'success'  => true,
+            'settings' => $this->get_settings(),
+        ]);
+    }
+
+    public function rest_update_settings(\WP_REST_Request $request) {
+        $data = $request->get_json_params();
+
+        if (!is_array($data)) {
+            return new \WP_Error(
+                'ecf_invalid_payload',
+                'Invalid JSON payload.',
+                ['status' => 400]
+            );
+        }
+
+        $settings = isset($data['settings']) && is_array($data['settings']) ? $data['settings'] : $data;
+        $sanitized = $this->sanitize_settings($settings);
+        update_option($this->option_name, $sanitized);
+
+        return rest_ensure_response([
+            'success'  => true,
+            'message'  => 'Settings updated.',
+            'settings' => $this->get_settings(),
+        ]);
+    }
+}
