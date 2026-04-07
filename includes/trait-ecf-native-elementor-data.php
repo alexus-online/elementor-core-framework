@@ -593,7 +593,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         $variants = $item['variants'] ?? [];
         if (!is_array($variants) || empty($variants)) {
             return isset($this->get_starter_class_category_map()[$label])
-                ? $this->t('Starter class', 'Starter-Klasse')
+                ? __('Starter class', 'ecf-framework')
                 : '—';
         }
 
@@ -601,7 +601,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         $props = $variant['props'] ?? [];
         if (!is_array($props) || empty($props)) {
             return isset($this->get_starter_class_category_map()[$label])
-                ? $this->t('Starter class', 'Starter-Klasse')
+                ? __('Starter class', 'ecf-framework')
                 : '—';
         }
 

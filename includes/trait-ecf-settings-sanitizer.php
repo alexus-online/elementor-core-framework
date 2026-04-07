@@ -10,6 +10,10 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
         $output = $defaults;
         $root_font_size = isset($input['root_font_size']) ? str_replace(',', '.', sanitize_text_field($input['root_font_size'])) : $defaults['root_font_size'];
         $output['root_font_size'] = in_array($root_font_size, ['100', '62.5'], true) ? $root_font_size : $defaults['root_font_size'];
+        $interface_language = sanitize_key($input['interface_language'] ?? $defaults['interface_language']);
+        $output['interface_language'] = in_array($interface_language, ['de', 'en'], true)
+            ? $interface_language
+            : $this->wordpress_default_interface_language();
         $output['github_update_checks_enabled'] = !empty($input['github_update_checks_enabled']) ? '1' : '0';
         $content_width_value  = trim((string) ($input['content_max_width_value'] ?? $input['content_max_width'] ?? ''));
         $content_width_format = sanitize_key($input['content_max_width_format'] ?? '');

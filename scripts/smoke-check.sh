@@ -26,7 +26,21 @@ required_files=(
   "includes/trait-ecf-updater.php"
 )
 
+extra_required_files=(
+  "scripts/generate-pot.php"
+  "scripts/generate-de-language-files.php"
+  "scripts/regression-check.sh"
+  "languages/ecf-framework.pot"
+)
+
 for required_file in "${required_files[@]}"; do
+  if [[ ! -f "$required_file" ]]; then
+    echo "Missing required file: $required_file" >&2
+    exit 1
+  fi
+done
+
+for required_file in "${extra_required_files[@]}"; do
   if [[ ! -f "$required_file" ]]; then
     echo "Missing required file: $required_file" >&2
     exit 1
@@ -78,6 +92,11 @@ node --check assets/admin.js
 node --check assets/editor.js
 
 bash -n deploy.sh
+php -l scripts/generate-pot.php
+php -l scripts/generate-de-language-files.php
+php scripts/generate-pot.php >/dev/null
+php scripts/generate-de-language-files.php >/dev/null
+bash scripts/regression-check.sh
 
 duplicate_methods="$(
   rg -o 'function[[:space:]]+[A-Za-z0-9_]+' elementor-core-framework.php includes/*.php \

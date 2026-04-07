@@ -6,11 +6,14 @@ if (!defined('ABSPATH')) {
 
 trait ECF_Framework_Hook_Registration_Trait {
     private function register_core_hooks() {
+        add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_init', [$this, 'register']);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('wp_head', [$this, 'output_css'], 99);
+        add_action('admin_post_ecf_clear_debug_history', [$this, 'handle_clear_debug_history']);
 
+        add_filter('gettext', [$this, 'filter_runtime_gettext'], 20, 3);
         add_filter('upload_mimes', [$this, 'allow_font_upload_mimes']);
     }
 

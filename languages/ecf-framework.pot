@@ -1,0 +1,2277 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ECF Elementor v4 Core Framework\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-07 08:42+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: ecf-framework\n"
+
+#: includes/trait-ecf-admin-page-sections.php:355
+msgid "% of limit"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:188
+msgid "%1$d ECF classes were removed from Elementor. You can now sync them again as clean empty classes."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:246
+msgid "%1$d created"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:115
+#: includes/trait-ecf-native-elementor-handlers.php:53
+msgid "%1$d new Global Classes were skipped because Elementor can currently not create more than %3$d Global Classes and already uses %2$d."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:108
+msgid "%1$d removed."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:250
+msgid "%1$d updated"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:158
+msgid "%1$d variables and %2$d global classes were removed. The Elementor cache was cleared automatically."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:742
+msgid "%1$s classes / %2$s variables"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:258
+msgid "%1$s: %2$s."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:80
+msgid "%s%% (%spx = 1rem)"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:214
+msgid "%spx = 1rem"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:460
+msgid "Accent variant for highlighted sections or content blocks."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:429
+msgid "Accessibility"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:523
+msgid "Accessibility helper for screen-reader-friendly behavior."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:589
+msgid "Accessibility helpers such as visually hidden content for screen-reader-only text."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:443
+msgid "Action area for buttons or controls."
+msgstr ""
+
+#: elementor-core-framework.php:248
+msgid "Actions"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1521
+#: includes/trait-ecf-admin-page-sections.php:529
+msgid "Active"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:542
+#: includes/trait-ecf-render-helpers.php:70
+msgid "Add"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:476
+msgid "Add as custom classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1181
+#: includes/trait-ecf-admin-page-sections.php:1300
+msgid "Add larger step"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:441
+msgid "Add local font"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:88
+msgid "Add local font file"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1156
+#: includes/trait-ecf-admin-page-sections.php:1278
+msgid "Add smaller step"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:146
+msgid "Additional ECF classes separated by spaces."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:446
+msgid "Additional elements"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:450
+msgid "Additional modifiers"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:56
+msgid "Adjust foreign Elementor variables directly from the search results."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:394
+msgid "Advanced classes"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:465
+msgid "Advanced layout helper for page structure and composition."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:371
+msgid "After sync:"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:502
+msgid "Aligns text content to the left."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:504
+msgid "Aligns text content to the right."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:378
+#: includes/trait-ecf-asset-loading.php:96
+msgid "All"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:539
+#: includes/trait-ecf-framework-config.php:731
+msgid "All classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1411
+msgid "All relevant plugin changes are documented here in the current backend language."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:425
+msgid "All utilities"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:495
+msgid "Applies a compact heading style for subsections."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:494
+msgid "Applies a medium heading style for smaller sections."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:493
+msgid "Applies a strong heading style for section titles."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:496
+msgid "Applies the smallest heading style in the utility set."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:492
+msgid "Applies the strongest heading style for major titles."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:402
+#: includes/trait-ecf-admin-page-sections.php:434
+msgid "Area"
+msgstr ""
+
+#: includes/trait-ecf-updater.php:407
+msgid "Automatic updates delivered from the GitHub repository."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:781
+msgid "Automatic updates disabled for this plugin."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:782
+msgid "Automatic updates enabled for this plugin."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:429
+msgid "BEM class generator"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:505
+msgid "Balances text wrapping for more even headline lines."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:123
+msgid "Base Background Color"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:111
+#: includes/trait-ecf-admin-general.php:426
+msgid "Base Font Family"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1211
+msgid "Base Settings"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1229
+msgid "Base Step"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:117
+msgid "Base Text Color"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:466
+msgid "Base layout class for the overall page structure."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1060
+msgid "Base step"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:381
+msgid "Basic"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:653
+msgid "Behavior"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:397
+msgid "Body Large"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:398
+msgid "Body Medium"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:399
+msgid "Body Small"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:181
+msgid "Box Shadow - Vars"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:446
+msgid "Brand or logo area inside the header."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:294
+msgid "Button"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:476
+msgid "Button component class for interactive call-to-actions."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:457
+msgid "Button variant styled more like a text link."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:737
+msgid "Buttons"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:111
+#: includes/trait-ecf-asset-loading.php:115
+msgid "Cancel"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:400
+msgid "Caption"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:287
+msgid "Card"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:474
+msgid "Card component class for grouped content inside a surface."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:736
+msgid "Cards"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:414
+msgid "Center Inline"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:510
+msgid "Centers inline content inside its available width."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:503
+msgid "Centers text content horizontally."
+msgstr ""
+
+#: elementor-core-framework.php:250
+msgid "Changelog"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:152
+msgid "Changes take effect immediately in Elementor. The cache is cleared automatically; open Elementor tabs should be reloaded once."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:269
+#: includes/trait-ecf-admin-page-sections.php:621
+msgid "Character-based width. Great for readable text columns like 65ch or 72ch."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:726
+msgid "Check for updates"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:722
+msgid "Checks whether Elementor Pro is loaded. Some variables, sync and editor features can depend on it."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:737
+msgid "Checks whether Elementor's Design System Sync module is available. This can affect caches and synchronization behavior."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:733
+msgid "Checks whether Elementor's Global Classes module is available for ECF class sync."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:729
+msgid "Checks whether Elementor's Variables module is available, which is required for ECF variable sync and picker integration."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:715
+msgid "Checks whether the Elementor core plugin is loaded and available to ECF on this website."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:70
+msgid "Choose Color for color values, Size for lengths like px/rem/clamp(...), and Text only for real text strings."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:431
+msgid "Choose a section, add elements or modifiers, and generate clean ECF BEM names for your own classes."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:107
+msgid "Choose font file"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:862
+msgid "Choose the unit for simple values. Use f(x) for complete CSS expressions like min(...), calc(...) or clamp(...)."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:832
+msgid "Choose the unit for simple values. ch is usually best for readable text widths. Use f(x) for full CSS expressions."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:104
+#: includes/trait-ecf-render-helpers.php:23
+#: includes/trait-ecf-render-helpers.php:25
+msgid "Class Name"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:339
+msgid "Class library"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:343
+msgid "Class usage overview"
+msgstr ""
+
+#: elementor-core-framework.php:245
+msgid "Classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:807
+msgid "Classes are reusable styling bundles. In ECF they can be starter classes for semantic naming or compact utility classes for repeated helper patterns."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1361
+msgid "Cleanup ECF Classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1366
+msgid "Cleanup ECF from Elementor"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:753
+msgid "Clear"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1099
+#: includes/trait-ecf-admin-page-sections.php:1116
+msgid "Click a scale step to inspect it in detail."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:190
+#: includes/trait-ecf-admin-page-sections.php:201
+msgid "Click a shadow token to inspect it in detail."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1451
+#: includes/trait-ecf-admin-page-sections.php:58
+msgid "Close"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:415
+msgid "Cluster"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:72
+#: includes/trait-ecf-admin-page-sections.php:79
+#: includes/trait-ecf-asset-loading.php:93
+#: includes/trait-ecf-render-helpers.php:16
+msgid "Color"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:162
+#: includes/trait-ecf-admin-page-sections.php:651
+#: includes/trait-ecf-admin-page-sections.php:919
+msgid "Colors"
+msgstr ""
+
+#: elementor-core-framework.php:238
+msgid "Colors & Radius"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:328
+msgid "Commerce"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:249
+msgid "Consistent, semantic naming instead of improvised labels per page."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1249
+msgid "Container Widths"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:273
+#: includes/trait-ecf-admin-page-sections.php:326
+#: includes/trait-ecf-framework-config.php:739
+msgid "Content"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:99
+#: includes/trait-ecf-admin-page-sections.php:825
+msgid "Content Max Width"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:440
+msgid "Content area inside this component."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:480
+msgid "Content class for inner page content or supportive blocks."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:944
+msgid "Controls helper cards and the optional variable filtering in the Elementor editor."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:819
+msgid "Controls the global rem base for typography, spacing, and radius tokens. Change this only if you want the whole sizing system to shift."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:111
+msgid "Copied!"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1162
+#: includes/trait-ecf-admin-page-sections.php:1288
+#: includes/trait-ecf-admin-page-sections.php:780
+#: includes/trait-ecf-asset-loading.php:110
+msgid "Copy"
+msgstr ""
+
+#: includes/trait-ecf-updater.php:638
+msgid "Could not normalize the GitHub plugin folder after installation."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:602
+msgid "Could not prepare the GitHub update package for installation."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:118
+msgid "Could not save settings automatically."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:253
+msgid "Curated helper styles for headings, text and a few safe layout patterns."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:549
+msgid "Curated utility set"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:958
+msgid "Current rem base"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:117
+msgid "Current root font size: %spx = 1rem."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:680
+msgid "Current status"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1320
+msgid "Currently found in Elementor: %1$d ECF variables and %2$d Global Classes."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:961
+msgid "Currently: %spx = 1rem"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:389
+#: includes/trait-ecf-framework-config.php:555
+#: includes/trait-ecf-framework-config.php:742
+msgid "Custom"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:507
+msgid "Custom classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:315
+msgid "Custom section"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:434
+msgid "Custom stack"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:459
+msgid "Dark variant for sections with a darker surface."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:709
+msgid "Debug"
+msgstr ""
+
+#: includes/trait-ecf-core-admin.php:205
+msgid "Debug history cleared."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:498
+msgid "Default body text style for regular paragraphs."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:113
+msgid "Delete"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:126
+#: includes/trait-ecf-admin-page-sections.php:143
+#: includes/trait-ecf-asset-loading.php:91
+msgid "Delete selected"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:90
+msgid "Deleting…"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:87
+msgid "Deselect all"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:737
+msgid "Design System Sync active"
+msgstr ""
+
+#: elementor-core-framework.php:237
+msgid "Design Tokens"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:704
+msgid "Detected from the installed Elementor version on this website. Use Reload to fetch the current values again."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:741
+msgid "Detected limits"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:124
+msgid "Detected settings groups: %s"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:484
+msgid "Dialog or modal class for overlays and focused interactions."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:741
+msgid "Dialogs"
+msgstr ""
+
+#: includes/trait-ecf-updater.php:750
+msgid "Disable auto-updates"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:142
+#: includes/trait-ecf-admin-general.php:148
+#: includes/trait-ecf-admin-general.php:337
+#: includes/trait-ecf-admin-general.php:386
+#: includes/trait-ecf-admin-general.php:86
+#: includes/trait-ecf-admin-page-sections.php:681
+msgid "Disabled"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:64
+msgid "Display"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:507
+msgid "Displays children inline with flexible spacing."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:128
+msgid "Do you really want to delete \"%s\"?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1358
+msgid "Do you really want to remove %1$d ECF Global Classes from Elementor so they can be synced again as empty classes?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1363
+msgid "Do you really want to remove %1$d ECF variables and %2$d Global Classes from Elementor?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:27
+msgid "ECF"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:143
+msgid "ECF Classes"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:132
+msgid "ECF Framework"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:119
+msgid "ECF Variables"
+msgstr ""
+
+#: includes/trait-ecf-elementor-status.php:10
+#: includes/trait-ecf-elementor-status.php:18
+msgid "ECF fallback"
+msgstr ""
+
+#: includes/trait-ecf-elementor-status.php:27
+#: includes/trait-ecf-elementor-status.php:32
+msgid "ECF filter"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:112
+msgid "Edit"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:55
+msgid "Edit variable"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:653
+msgid "Editor helpers and variable-filter behavior inside Elementor."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:259
+#: includes/trait-ecf-admin-page-sections.php:614
+msgid "Element-based unit. Example: 72 becomes 72em."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:272
+#: includes/trait-ecf-admin-page-sections.php:624
+msgid "Element-based unit. Rarely needed, but possible for content wrappers."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:363
+msgid "Elementor"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:105
+#: includes/trait-ecf-admin-page-sections.php:855
+msgid "Elementor Boxed Width"
+msgstr ""
+
+#: includes/trait-ecf-elementor-status.php:14
+#: includes/trait-ecf-elementor-status.php:22
+msgid "Elementor Core"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:715
+msgid "Elementor Core recognized"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1395
+msgid "Elementor Editor Panel"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1329
+msgid "Elementor Global Classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:722
+msgid "Elementor Pro recognized"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:10
+msgid "Elementor Variables"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:246
+#: includes/trait-ecf-native-elementor-handlers.php:422
+msgid "Elementor global classes repository is not available."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:688
+msgid "Elementor limits"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:206
+#: includes/trait-ecf-native-elementor-handlers.php:304
+#: includes/trait-ecf-native-elementor-handlers.php:348
+msgid "Elementor variable classes are not available."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:457
+msgid "Elements"
+msgstr ""
+
+#: includes/trait-ecf-updater.php:738
+msgid "Enable GitHub update checks in ECF > General Settings > System first."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:750
+msgid "Enable auto-updates"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:142
+#: includes/trait-ecf-admin-general.php:148
+#: includes/trait-ecf-admin-general.php:337
+#: includes/trait-ecf-admin-general.php:386
+#: includes/trait-ecf-admin-general.php:86
+#: includes/trait-ecf-admin-page-sections.php:681
+msgid "Enabled"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:234
+#: includes/trait-ecf-admin-general.php:94
+msgid "English"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:234
+msgid "English (matches current WordPress language)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:859
+msgid "Enter either a plain value like 1140 or, with f(x), a full CSS expression such as clamp(20rem, 80vw, 1140px)."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:829
+msgid "Enter either a simple value like 72 or, with f(x), a full CSS expression such as min(72ch, 100% - 2rem)."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:132
+msgid "Entry deleted."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:92
+msgid "Error:"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1372
+msgid "Export / Import"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1378
+msgid "Export JSON"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1373
+msgid "Export settings as JSON or import from another installation."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:122
+msgid "Exported at: %s"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:121
+msgid "Exported from plugin version: %s"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:385
+msgid "Extras"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:64
+msgid "Family"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:55
+msgid "Favorite"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:648
+msgid "Favorites"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:64
+msgid "File URL"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:482
+msgid "File upload failed."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:120
+msgid "File: %s"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:913
+msgid "Filter for"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:403
+msgid "Filter the starter classes by area."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:147
+msgid "Filter variables by field type"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1097
+#: includes/trait-ecf-admin-page-sections.php:1108
+#: includes/trait-ecf-admin-page-sections.php:1114
+msgid "Fluid"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1238
+msgid "Fluid (clamp)"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:135
+msgid "Focus Color"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1081
+msgid "Font Families"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1188
+msgid "Font Weights"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:308
+#: includes/trait-ecf-framework-config.php:738
+msgid "Footer"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:478
+msgid "Footer class for the bottom area of the website."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:296
+msgid "For CTA buttons with icons, labels and variants."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:83
+msgid "For Size, enter a simple number plus format like 24 + px. If the variable uses clamp(...), edit the Minimum and Maximum px values below instead."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:261
+msgid "For brand, navigation and actions in the top area."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:303
+msgid "For forms, groups, fields and actions."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:289
+msgid "For grouped content surfaces like cards, teasers or tiles."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:282
+msgid "For larger page sections and themed wrappers."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:275
+msgid "For normal content blocks like text, media, lists or side content."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:310
+msgid "For the lower website area with columns, links and meta info."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:268
+msgid "For the main intro section with copy, media and CTAs."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:31
+msgid "Foreign"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:136
+msgid "Foreign Variables"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:301
+msgid "Form"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:482
+msgid "Form class for form layout, groups or actions."
+msgstr ""
+
+#: includes/trait-ecf-render-helpers.php:19
+msgid "Format"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:740
+msgid "Forms"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:262
+#: includes/trait-ecf-admin-page-sections.php:617
+msgid "Full CSS expression. Use values like min(100% - 2rem, 1140px), calc(...) or clamp(...)."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:275
+#: includes/trait-ecf-admin-page-sections.php:627
+msgid "Full CSS expression. Use values like min(72ch, 100% - 2rem), calc(...) or clamp(...)."
+msgstr ""
+
+#: elementor-core-framework.php:246
+#: includes/trait-ecf-admin-page-sections.php:644
+msgid "General Settings"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:815
+msgid "General Settings control global basics like root font size, plugin language, container widths, base colors, body font, and editor helper behavior."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:372
+msgid "Generated ECF variables cannot be edited here."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:231
+#: includes/trait-ecf-admin-general.php:93
+msgid "German"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:231
+msgid "German (matches current WordPress language)"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:456
+msgid "Ghost-style variant with minimal visual weight."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:85
+#: includes/trait-ecf-admin-page-sections.php:665
+msgid "GitHub update checks"
+msgstr ""
+
+#: includes/trait-ecf-updater.php:680
+#: includes/trait-ecf-updater.php:761
+msgid "GitHub update checks are disabled in ECF General Settings > System."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:103
+msgid "Global Class"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1350
+#: includes/trait-ecf-admin-page-sections.php:696
+msgid "Global Classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:733
+msgid "Global Classes active"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:811
+msgid "Global Classes count against Elementor’s class limit. Synced ECF variables count against Elementor’s variable limit. Keep utility classes intentionally compact."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:130
+msgid "Global Classes should be managed in Elementor or through the ECF sync, not directly in the search results."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:651
+msgid "Global base colors for text, background, links and focus states."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:652
+msgid "Global body font family and base typography choices."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:650
+msgid "Global layout widths for readable content and boxed containers."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:511
+msgid "Groups items in a horizontal cluster with wrapping."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:451
+msgid "Groups related fields or controls together."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:259
+msgid "Header"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:392
+msgid "Heading 1"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:393
+msgid "Heading 2"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:394
+msgid "Heading 3"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:395
+msgid "Heading 4"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:396
+msgid "Heading 5"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:266
+#: includes/trait-ecf-framework-config.php:735
+msgid "Hero"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:472
+msgid "Hero section class for the main entry area of a page."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:413
+msgid "Hidden"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:509
+msgid "Hides the element visually."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:452
+msgid "Icon element inside the parent component."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1384
+msgid "Import"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1388
+#: includes/trait-ecf-asset-loading.php:119
+msgid "Import preview"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:763
+msgid "Import/Export"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:513
+msgid "Imported from plugin version %1$s into %2$s. Please review General Settings, Sync, and editor-related options afterwards."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:506
+msgid "Improves text wrapping for more pleasant paragraph breaks."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1396
+msgid "In the Elementor editor, find the <strong>ECF Framework</strong> section under the <strong>Advanced</strong> tab of any element."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:412
+msgid "Inline Block"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:411
+msgid "Inline Flex"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:438
+msgid "Inner wrapper for the parent section or component."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:551
+msgid "Interaction"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:578
+msgid "Interactive classes for buttons, forms, and dialog-based UI elements."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:500
+msgid "Invalid JSON file."
+msgstr ""
+
+#: includes/trait-ecf-rest-api.php:46
+msgid "Invalid JSON payload."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:384
+msgid "Invalid variable value."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:512
+msgid "Keeps content accessible for screen readers while hiding it visually."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:250
+msgid "Keeps naming and Elementor sync manageable while staying below the 100-class limit."
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:64
+msgid "Key"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:497
+msgid "Large body text style for intros or highlighted copy."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:458
+msgid "Larger size variant for stronger emphasis."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:90
+msgid "Largest size of the clamp value, shown here in px for easier editing."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:650
+#: includes/trait-ecf-asset-loading.php:100
+#: includes/trait-ecf-framework-config.php:428
+#: includes/trait-ecf-framework-config.php:732
+msgid "Layout"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:547
+msgid "Layout & content"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:521
+msgid "Layout helper for simple spacing or positioning patterns."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:125
+msgid "Legacy export without metadata. Import is still possible."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1196
+msgid "Letter Spacing"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:909
+msgid "Limit Elementor variables by field type"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1192
+msgid "Line Heights"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:129
+msgid "Link Color"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:449
+msgid "Link element inside navigation or content lists."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:447
+msgid "List container for repeated navigation or content items."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:193
+msgid "Live Box Shadow Preview"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1268
+msgid "Live Spacing Preview"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1103
+msgid "Live Type Preview"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:132
+#: includes/trait-ecf-admin-page-sections.php:149
+#: includes/trait-ecf-asset-loading.php:84
+msgid "Loading…"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1085
+msgid "Local Font Files"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:441
+msgid "Main body area for text and content."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:439
+msgid "Main content area of the page layout."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:508
+msgid "Makes an element behave like an inline block."
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:123
+msgid "Manage starter classes and optional utility classes in the Klassen tab. Add class names here only when you really need them on the current element."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:325
+msgid "Marketing"
+msgstr ""
+
+#: includes/trait-ecf-render-helpers.php:23
+msgid "Max"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1054
+msgid "Max Font Size (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1057
+#: includes/trait-ecf-admin-page-sections.php:1226
+msgid "Max Scale Ratio"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1223
+msgid "Max Size (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1243
+msgid "Max Viewport (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1074
+msgid "Max viewport (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1002
+#: includes/trait-ecf-admin-page-sections.php:1024
+#: includes/trait-ecf-admin-page-sections.php:1095
+#: includes/trait-ecf-admin-page-sections.php:1109
+#: includes/trait-ecf-admin-page-sections.php:1130
+#: includes/trait-ecf-admin-page-sections.php:1144
+#: includes/trait-ecf-admin-page-sections.php:1145
+#: includes/trait-ecf-admin-page-sections.php:1165
+#: includes/trait-ecf-admin-page-sections.php:1173
+#: includes/trait-ecf-admin-page-sections.php:1174
+#: includes/trait-ecf-admin-page-sections.php:1265
+#: includes/trait-ecf-admin-page-sections.php:1291
+#: includes/trait-ecf-admin-page-sections.php:956
+#: includes/trait-ecf-admin-page-sections.php:980
+msgid "Maximum"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:90
+msgid "Maximum (px)"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:444
+msgid "Media slot for image, video or illustration."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:445
+msgid "Meta information such as date, category or label."
+msgstr ""
+
+#: includes/trait-ecf-render-helpers.php:23
+msgid "Min"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1048
+msgid "Min Font Size (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1051
+#: includes/trait-ecf-admin-page-sections.php:1220
+msgid "Min Scale Ratio"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1217
+msgid "Min Size (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1240
+msgid "Min Viewport (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1071
+msgid "Min viewport (px)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1019
+#: includes/trait-ecf-admin-page-sections.php:1094
+#: includes/trait-ecf-admin-page-sections.php:1107
+#: includes/trait-ecf-admin-page-sections.php:1122
+#: includes/trait-ecf-admin-page-sections.php:1140
+#: includes/trait-ecf-admin-page-sections.php:1141
+#: includes/trait-ecf-admin-page-sections.php:1164
+#: includes/trait-ecf-admin-page-sections.php:1169
+#: includes/trait-ecf-admin-page-sections.php:1170
+#: includes/trait-ecf-admin-page-sections.php:1264
+#: includes/trait-ecf-admin-page-sections.php:1290
+#: includes/trait-ecf-admin-page-sections.php:955
+#: includes/trait-ecf-admin-page-sections.php:975
+#: includes/trait-ecf-admin-page-sections.php:997
+msgid "Minimum"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:86
+msgid "Minimum (px)"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:340
+msgid "Missing required fields."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:461
+msgid "Modifiers"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:397
+msgid "Mono"
+msgstr ""
+
+#: includes/trait-ecf-render-helpers.php:17
+msgid "Name"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1214
+msgid "Naming Convention"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1315
+msgid "Native Elementor Sync"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:734
+msgid "Navigation"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:470
+msgid "Navigation-related class for header or menu structure."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:710
+msgid "New: Debug shows Elementor Core and Pro detection, active modules and the detected class and variable limits."
+msgstr ""
+
+#: elementor-core-framework.php:246
+msgid "New: General Settings now include Favorites, a Debug section and clearer Elementor status and limit info."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:648
+msgid "New: Pin important settings here and edit them directly without leaving this tab."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:716
+#: includes/trait-ecf-admin-page-sections.php:723
+#: includes/trait-ecf-admin-page-sections.php:730
+#: includes/trait-ecf-admin-page-sections.php:734
+#: includes/trait-ecf-admin-page-sections.php:738
+msgid "No"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1361
+msgid "No ECF classes found in Elementor."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:181
+msgid "No ECF global classes were found in Elementor."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1366
+msgid "No ECF variables or classes found in Elementor."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:149
+msgid "No ECF variables or global classes were found in Elementor."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:300
+#: includes/trait-ecf-native-elementor-handlers.php:418
+msgid "No IDs were provided."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:211
+#: includes/trait-ecf-native-elementor-handlers.php:309
+#: includes/trait-ecf-native-elementor-handlers.php:353
+msgid "No active Elementor kit found."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:408
+msgid "No changelog available."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1415
+#: includes/trait-ecf-admin-page-sections.php:1455
+msgid "No changelog entries found."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:790
+msgid "No debug history recorded yet. Entries appear here when WP_DEBUG is enabled and ECF logs an internal event."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:85
+msgid "No entries found."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:88
+msgid "No entries selected."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:163
+msgid "No favorites selected yet. Mark important settings with the heart icon."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:472
+msgid "No file uploaded."
+msgstr ""
+
+#: elementor-core-framework.php:268
+msgid "Open Elementor tabs should be reloaded once."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:97
+msgid "Other"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:939
+msgid "Other text values"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:401
+msgid "Overline"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:442
+msgid "Own block name"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:270
+#: includes/trait-ecf-admin-page-sections.php:622
+msgid "Percentage value if the content width should stay fluid."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:257
+#: includes/trait-ecf-admin-page-sections.php:612
+msgid "Percentage value. Example: 90 becomes 90%."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:648
+msgid "Pinned quick settings from Website and Plugin basics."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:487
+msgid "Please upload a valid JSON file."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:157
+#: includes/trait-ecf-admin-page-sections.php:367
+msgid "Plugin"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1410
+msgid "Plugin Changelog"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:226
+#: includes/trait-ecf-admin-general.php:91
+msgid "Plugin Language"
+msgstr ""
+
+#: includes/trait-ecf-updater.php:705
+msgid "Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:699
+msgid "Plugin update check failed. Installed: %1$s. GitHub request error: %2$s."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:199
+#: includes/trait-ecf-admin-page-sections.php:466
+msgid "Preview"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1104
+msgid "Preview for your generated Elementor text variables."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1269
+msgid "Preview of your generated spacing tokens."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:194
+msgid "Preview of your shadow tokens."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:395
+msgid "Primary"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:454
+msgid "Primary variant for the main emphasis action or element."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:797
+msgid "Quick help"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1449
+msgid "Quick view of the latest documented plugin changes."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:166
+#: includes/trait-ecf-admin-page-sections.php:931
+#: includes/trait-ecf-asset-loading.php:101
+msgid "Radius"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1009
+#: includes/trait-ecf-admin-page-sections.php:954
+msgid "Radius token"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:349
+msgid "Readable width for text/content areas."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:749
+msgid "Recent debug history"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:691
+msgid "Reload"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:676
+msgid "Remote service"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:184
+#: includes/trait-ecf-admin-general.php:185
+msgid "Remove from favorites"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1182
+#: includes/trait-ecf-admin-page-sections.php:1301
+msgid "Remove largest step"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:543
+#: includes/trait-ecf-render-helpers.php:71
+msgid "Remove last"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:446
+msgid "Remove selected local font"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1157
+#: includes/trait-ecf-admin-page-sections.php:1279
+msgid "Remove smallest step"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1361
+msgid "Removes %1$d ECF classes from Elementor without touching variables."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1366
+msgid "Removes %1$d variables and %2$d classes from Elementor."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:472
+msgid "Reset"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:525
+msgid "Reusable utility class for common styling helpers."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:206
+#: includes/trait-ecf-admin-general.php:79
+msgid "Root Font Size"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:258
+#: includes/trait-ecf-admin-page-sections.php:613
+msgid "Root-based unit. Example: 72 becomes 72rem."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:271
+#: includes/trait-ecf-admin-page-sections.php:623
+msgid "Root-based unit. Useful if content width should scale with your root font size."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:112
+#: includes/trait-ecf-asset-loading.php:114
+msgid "Save"
+msgstr ""
+
+#: elementor-core-framework.php:329
+msgid "Save framework settings"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:116
+msgid "Saving…"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:123
+msgid "Schema version: %s"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:424
+#: includes/trait-ecf-admin-page-sections.php:575
+msgid "Search classes…"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:45
+msgid "Search variables…"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:396
+msgid "Secondary"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:455
+msgid "Secondary variant for quieter supporting actions or elements."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:280
+msgid "Section"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:468
+msgid "Section wrapper for grouping a complete content block."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:733
+msgid "Sections"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:30
+#: includes/trait-ecf-native-elementor-handlers.php:88
+msgid "Security check failed. Please reload the page and try again."
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:70
+msgid "Select a local upload"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:124
+#: includes/trait-ecf-admin-page-sections.php:141
+#: includes/trait-ecf-admin-page-sections.php:413
+#: includes/trait-ecf-admin-page-sections.php:564
+#: includes/trait-ecf-asset-loading.php:86
+msgid "Select all"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:109
+#: includes/trait-ecf-editor-preview.php:71
+msgid "Select file"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:576
+msgid "Semantic classes for the big page sections such as header, navigation, hero, and footer."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:486
+msgid "Semantic starter class for consistent naming and structure."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:765
+msgid "Settings"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:510
+msgid "Settings imported successfully."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:117
+msgid "Settings saved automatically."
+msgstr ""
+
+#: elementor-core-framework.php:262
+msgid "Settings saved."
+msgstr ""
+
+#: includes/trait-ecf-rest-api.php:57
+msgid "Settings updated."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:189
+#: includes/trait-ecf-asset-loading.php:102
+msgid "Shadow"
+msgstr ""
+
+#: elementor-core-framework.php:241
+#: includes/trait-ecf-admin-page-sections.php:935
+msgid "Shadows"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1125
+#: includes/trait-ecf-admin-page-sections.php:1133
+msgid "Show clamp value"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:905
+msgid "Show status cards in Variables & Sync"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:741
+msgid "Shows the class and variable limits ECF currently assumes from the installed Elementor setup."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:575
+msgid "Shows the complete starter library so you can enable a full naming system at once."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:585
+msgid "Shows the complete utility set with all available text, alignment, layout, and accessibility helpers."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:256
+#: includes/trait-ecf-admin-page-sections.php:611
+msgid "Simple pixel value. Example: 1140 becomes 1140px."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:268
+#: includes/trait-ecf-admin-page-sections.php:620
+msgid "Simple pixel value. Good for strict content widths like 720px."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:448
+msgid "Single item inside a repeated list or navigation."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:73
+#: includes/trait-ecf-asset-loading.php:94
+msgid "Size"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:500
+msgid "Small caption style for image notes or meta text."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:588
+msgid "Small layout helpers for inline, cluster, centering, and visibility behavior."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:551
+msgid "Small optional helpers for text styles, alignment, and a few safe layout utilities. They are intentionally limited so the class system stays manageable."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:501
+msgid "Small uppercase overline style for labels above headings."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:499
+msgid "Smaller body text style for secondary information."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:86
+msgid "Smallest size of the clamp value, shown here in px for easier editing."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:743
+msgid "Source: classes via %1$s, variables via %2$s"
+msgstr ""
+
+#: elementor-core-framework.php:240
+#: includes/trait-ecf-admin-page-sections.php:927
+#: includes/trait-ecf-asset-loading.php:98
+msgid "Spacing"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:953
+#: includes/trait-ecf-admin-page-sections.php:987
+msgid "Spacing token"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:420
+msgid "Start the sync to apply the currently selected classes to Elementor."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-data.php:596
+#: includes/trait-ecf-native-elementor-data.php:604
+msgid "Starter class"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:248
+msgid "Starter classes for common page elements like header, hero, buttons or footer."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:531
+msgid "Starter classes give you a semantic naming system for common page areas and components such as headers, heroes, cards, buttons, and footers."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1096
+#: includes/trait-ecf-admin-page-sections.php:1114
+msgid "Static"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:141
+msgid "Status cards in Variables & Sync"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:95
+msgid "String"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:577
+msgid "Structural and content-oriented classes for layout shells, sections, cards, and general content areas."
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:64
+msgid "Style"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:510
+msgid "Suggestions for quick, clean custom names. Click a chip to insert it into a free row."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:762
+msgid "Sync"
+msgstr ""
+
+#: elementor-core-framework.php:249
+msgid "Sync & Export"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:571
+msgid "Sync only the utility classes that are currently enabled here."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1356
+msgid "Sync to Elementor (Merge)"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:417
+#: includes/trait-ecf-admin-page-sections.php:568
+msgid "Sync with Elementor"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1348
+msgid "Synced:"
+msgstr ""
+
+#: elementor-core-framework.php:243
+#: includes/trait-ecf-admin-page-sections.php:649
+#: includes/trait-ecf-admin-page-sections.php:766
+msgid "System"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:649
+msgid "System-wide base settings like the root rem size."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:74
+#: includes/trait-ecf-framework-config.php:427
+msgid "Text"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:407
+msgid "Text Balance"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:405
+msgid "Text Center"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:404
+msgid "Text Left"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:408
+msgid "Text Pretty"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:406
+msgid "Text Right"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:587
+msgid "Text helpers for alignment and text behavior such as balanced or pretty wrapping."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:519
+msgid "Text utility for alignment or text-flow behavior."
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:492
+msgid "The JSON file is empty or too large."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1078
+msgid "The preview updates live while you edit the scale settings."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:127
+msgid "The selected file is not a valid ECF JSON export."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:893
+msgid "These colors affect the site basis directly and are also exposed as global ECF tokens."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:129
+msgid "This ECF variable is generated from the framework settings. Please change it in the matching ECF section instead."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:126
+msgid "This file was exported from another plugin version. Please review General Settings, Sync, and editor-related options after import."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:442
+msgid "Title element inside this component."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1012
+#: includes/trait-ecf-admin-page-sections.php:968
+#: includes/trait-ecf-admin-page-sections.php:990
+msgid "Toggle clamp output"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:450
+msgid "Toggle control, for example for mobile navigation."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:35
+msgid "Total"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:327
+msgid "Trust"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:652
+#: includes/trait-ecf-admin-page-sections.php:70
+#: includes/trait-ecf-asset-loading.php:105
+msgid "Type"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1045
+msgid "Type Scale"
+msgstr ""
+
+#: elementor-core-framework.php:239
+#: includes/trait-ecf-admin-page-sections.php:1098
+#: includes/trait-ecf-admin-page-sections.php:1119
+#: includes/trait-ecf-admin-page-sections.php:923
+#: includes/trait-ecf-admin-page-sections.php:957
+#: includes/trait-ecf-admin-page-sections.php:977
+#: includes/trait-ecf-admin-page-sections.php:982
+#: includes/trait-ecf-asset-loading.php:99
+#: includes/trait-ecf-framework-config.php:426
+msgid "Typography"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:517
+msgid "Typography helper class for reusable text styles."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:586
+msgid "Typography helpers for heading and body text styles that reuse your ECF text tokens."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:952
+#: includes/trait-ecf-admin-page-sections.php:965
+msgid "Typography token"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:344
+msgid "Unsupported variable type."
+msgstr ""
+
+#: includes/trait-ecf-updater.php:693
+msgid "Update found: installed %1$s, remote %2$s."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:672
+msgid "Updater & privacy"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:764
+msgid "Updates"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1086
+msgid "Upload font files into the WordPress media library and then use their family names in your Primary, Secondary or Mono stacks."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:405
+msgid "Uploaded font"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:884
+msgid "Use Content Max Width for readable text wrappers and Elementor Boxed Width for wider centered layout containers."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:341
+msgid "Use starter classes for semantic naming and utility classes for a compact curated helper set. Both count toward Elementor’s 100-class limit."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:46
+#: includes/trait-ecf-admin-general.php:47
+msgid "Use the heart to pin this setting to Favorites or remove it from Favorites again."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:899
+msgid "Use this as the global body font. Upload local fonts in Typography > Local Fonts and then select them here by name."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:108
+msgid "Use this file"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:317
+msgid "Use your own block name and build a small BEM family around it."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:746
+msgid "Useful for checking whether Elementor and its design-system modules are available before debugging sync or editor issues."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:254
+msgid "Useful when you want a small reusable utility layer without reviving the old full utility flood."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:255
+msgid "Utilities also count toward Elementor’s 100 global classes and should stay intentionally compact."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:592
+msgid "Utility"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:395
+msgid "Utility classes"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:532
+msgid "Utility classes are a small curated helper set for text styles, alignment, and a few safe layout patterns. Use them sparingly because they also count toward Elementor’s class limit."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:83
+#: includes/trait-ecf-asset-loading.php:106
+#: includes/trait-ecf-render-helpers.php:18
+#: includes/trait-ecf-render-helpers.php:25
+msgid "Value"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:182
+msgid "Values in CSS box-shadow syntax, e.g. <code>0 4px 16px rgba(0,0,0,0.1)</code>."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:66
+msgid "Variable name"
+msgstr ""
+
+#: includes/trait-ecf-native-elementor-handlers.php:368
+msgid "Variable not found."
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:131
+msgid "Variable updated."
+msgstr ""
+
+#: elementor-core-framework.php:244
+#: includes/trait-ecf-admin-page-sections.php:1349
+#: includes/trait-ecf-admin-page-sections.php:700
+msgid "Variables"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:803
+msgid "Variables are reusable design tokens such as colors, spacing, radius, shadows, and text sizes. They help you keep Elementor and your CSS values consistent."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:729
+msgid "Variables module active"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:718
+#: includes/trait-ecf-admin-page-sections.php:725
+msgid "Version %s"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1448
+msgid "Version Changelog"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:261
+#: includes/trait-ecf-admin-page-sections.php:616
+msgid "Viewport height unit. Example: 80 becomes 80vh."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:274
+#: includes/trait-ecf-admin-page-sections.php:626
+msgid "Viewport height unit. Usually uncommon here, but available if needed."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:260
+#: includes/trait-ecf-admin-page-sections.php:615
+msgid "Viewport width unit. Example: 90 becomes 90vw."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:273
+#: includes/trait-ecf-admin-page-sections.php:625
+msgid "Viewport width unit. Useful for fluid readable widths."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:960
+msgid "Visible effect of the root font size"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:418
+msgid "Visually Hidden"
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:156
+msgid "Website"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:543
+msgid "Website sections"
+msgstr ""
+
+#: includes/trait-ecf-editor-preview.php:64
+msgid "Weight"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:806
+msgid "What are Classes?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:802
+msgid "What are Variables?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:810
+msgid "What counts against Elementor limits?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:814
+msgid "What do General Settings do?"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:684
+msgid "When enabled, ECF can contact api.github.com and codeload.github.com from your server to check update metadata and download plugin updates. If an ECF_GITHUB_TOKEN is configured, it is sent only to GitHub for authenticated update requests."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:946
+msgid "When enabled, the Elementor editor should later be able to show only matching variables for colors, sizes, and other fitting field types."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:360
+msgid "Width of centered boxed layout containers."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1347
+msgid "Works in <strong>merge mode</strong> — ECF adds to existing Elementor variables and Global Classes without overwriting."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:716
+#: includes/trait-ecf-admin-page-sections.php:723
+#: includes/trait-ecf-admin-page-sections.php:730
+#: includes/trait-ecf-admin-page-sections.php:734
+#: includes/trait-ecf-admin-page-sections.php:738
+msgid "Yes"
+msgstr ""
+
+#: includes/trait-ecf-core-admin.php:210
+#: includes/trait-ecf-native-elementor-handlers.php:202
+#: includes/trait-ecf-native-elementor-handlers.php:242
+#: includes/trait-ecf-native-elementor-handlers.php:295
+#: includes/trait-ecf-native-elementor-handlers.php:331
+#: includes/trait-ecf-native-elementor-handlers.php:413
+msgid "You are not allowed to perform this action."
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:579
+msgid "Your own semantic class names. Use this area for project-specific naming that does not fit the predefined library."
+msgstr ""
+
+#: includes/trait-ecf-admin-general.php:161
+msgid "Your pinned quick settings. Use the star icon on any supported setting to add or remove it here."
+msgstr ""
+
+#: elementor-core-framework.php:254
+msgid "by"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1487
+#: includes/trait-ecf-admin-page-sections.php:1503
+#: includes/trait-ecf-admin-page-sections.php:1512
+#: includes/trait-ecf-render-helpers.php:52
+#: includes/trait-ecf-render-helpers.php:61
+msgid "class name"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:364
+#: includes/trait-ecf-admin-page-sections.php:368
+msgid "classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:351
+msgid "classes used"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:451
+msgid "e.g. dark, compact"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:447
+msgid "e.g. subtitle, badge"
+msgstr ""
+
+#: includes/trait-ecf-asset-loading.php:89
+msgid "entry/entries delete?"
+msgstr ""
+
+#: includes/trait-ecf-render-helpers.php:38
+msgid "name"
+msgstr ""
+
+#: includes/trait-ecf-framework-config.php:254
+msgid "no changes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:348
+msgid "of"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:22
+msgid "of current Elementor limit"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:443
+msgid "optional, e.g. testimonials"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1350
+msgid "selected starter classes and selected utility classes"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:18
+msgid "variables currently found in Elementor"
+msgstr ""

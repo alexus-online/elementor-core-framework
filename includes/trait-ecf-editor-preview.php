@@ -61,14 +61,14 @@ trait ECF_Framework_Editor_Preview_Trait {
 
     private function render_local_font_rows($rows, $input_key) {
         echo '<div class="ecf-font-file-table" data-local-font-table data-input-key="' . esc_attr($input_key) . '">';
-        echo '<div class="ecf-font-file-head"><span>' . esc_html($this->t('Key', 'Key')) . '</span><span>' . esc_html($this->t('Family', 'Familie')) . '</span><span>' . esc_html($this->t('File URL', 'Datei-URL')) . '</span><span>' . esc_html($this->t('Weight', 'Stärke')) . '</span><span>' . esc_html($this->t('Style', 'Stil')) . '</span><span>' . esc_html($this->t('Display', 'Display')) . '</span><span></span></div>';
+        echo '<div class="ecf-font-file-head"><span>' . esc_html__('Key', 'ecf-framework') . '</span><span>' . esc_html__('Family', 'ecf-framework') . '</span><span>' . esc_html__('File URL', 'ecf-framework') . '</span><span>' . esc_html__('Weight', 'ecf-framework') . '</span><span>' . esc_html__('Style', 'ecf-framework') . '</span><span>' . esc_html__('Display', 'ecf-framework') . '</span><span></span></div>';
         foreach ($rows as $i => $row) {
             echo '<div class="ecf-font-file-row">';
             echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][name]') . '" value="' . esc_attr($row['name'] ?? '') . '" placeholder="primary-regular" />';
             echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][family]') . '" value="' . esc_attr($row['family'] ?? '') . '" placeholder="Primary" />';
             echo '<div class="ecf-font-file-picker">';
-            echo '<input type="text" class="ecf-font-file-url" name="' . esc_attr($input_key . '[' . $i . '][src]') . '" value="' . esc_attr($row['src'] ?? '') . '" placeholder="' . esc_attr($this->t('Select a local upload', 'Lokalen Upload wählen')) . '" readonly />';
-            echo '<button type="button" class="button ecf-font-file-select">' . esc_html($this->t('Select file', 'Datei wählen')) . '</button>';
+            echo '<input type="text" class="ecf-font-file-url" name="' . esc_attr($input_key . '[' . $i . '][src]') . '" value="' . esc_attr($row['src'] ?? '') . '" placeholder="' . esc_attr__('Select a local upload', 'ecf-framework') . '" readonly />';
+            echo '<button type="button" class="button ecf-font-file-select">' . esc_html__('Select file', 'ecf-framework') . '</button>';
             echo '</div>';
             echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][weight]') . '" value="' . esc_attr($row['weight'] ?? '400') . '" placeholder="400" />';
             echo '<select name="' . esc_attr($input_key . '[' . $i . '][style]') . '">';
@@ -85,7 +85,7 @@ trait ECF_Framework_Editor_Preview_Trait {
             echo '</div>';
         }
         echo '</div>';
-        echo '<button type="button" class="button button-secondary ecf-add-local-font">' . esc_html($this->t('Add local font file', 'Lokale Schriftdatei hinzufügen')) . '</button>';
+        echo '<button type="button" class="button button-secondary ecf-add-local-font">' . esc_html__('Add local font file', 'ecf-framework') . '</button>';
     }
 
     private function find_preview_item_by_step($items, $step) {
@@ -114,16 +114,13 @@ trait ECF_Framework_Editor_Preview_Trait {
 
     private function root_font_size_hint($root_base_px) {
         return sprintf(
-            $this->t(
-                'Current root font size: %spx = 1rem.',
-                'Aktuelle Root Font Size: %spx = 1rem.'
-            ),
+            __('Current root font size: %spx = 1rem.', 'ecf-framework'),
             $this->format_preview_number($root_base_px)
         );
     }
 
     private function get_editor_palette_html() {
-        return '<div class="ecf-editor-help">' . esc_html($this->t('Manage starter classes and optional utility classes in the Klassen tab. Add class names here only when you really need them on the current element.', 'Verwalte Starter-Klassen und optionale Utility-Klassen im Klassen-Tab. Trage hier nur dann Klassennamen ein, wenn du sie am aktuellen Element wirklich brauchst.')) . '</div>';
+        return '<div class="ecf-editor-help">' . esc_html__('Manage starter classes and optional utility classes in the Klassen tab. Add class names here only when you really need them on the current element.', 'ecf-framework') . '</div>';
     }
 
     public function inject_editor_controls($element, $section_id, $args) {
@@ -146,7 +143,7 @@ trait ECF_Framework_Editor_Preview_Trait {
             'label' => esc_html__('ECF Classes', 'ecf-framework'),
             'type' => \Elementor\Controls_Manager::TEXTAREA,
             'rows' => 4,
-            'description' => esc_html__('Zusätzliche ECF-Klassen, getrennt durch Leerzeichen.', 'ecf-framework'),
+            'description' => esc_html__('Additional ECF classes separated by spaces.', 'ecf-framework'),
         ]);
 
         $element->end_controls_section();

@@ -1,6 +1,20 @@
 <?php
 
 trait ECF_Framework_Native_Elementor_Handlers_Trait {
+    private function export_payload($settings) {
+        return [
+            'meta' => [
+                'plugin' => 'ECF Framework',
+                'plugin_version' => $this->current_plugin_version(),
+                'schema_version' => 1,
+                'exported_at' => gmdate('c'),
+                'site_url' => home_url('/'),
+                'wordpress_locale' => get_locale(),
+            ],
+            'settings' => $settings,
+        ];
+    }
+
     public function handle_native_sync() {
         if (!$this->can_manage_framework()) {
             $this->deny_admin_request(admin_url('admin.php?page=ecf-framework'), ['panel' => 'sync', 'ecf_sync' => 'error']);
@@ -13,7 +27,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $this->redirect_with_message(
                 admin_url('admin.php?page=ecf-framework'),
                 ['panel' => 'sync', 'ecf_sync' => 'error'],
-                $this->t('Security check failed. Please reload the page and try again.', 'Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.')
+                __('Security check failed. Please reload the page and try again.', 'ecf-framework')
             );
         }
 
@@ -36,10 +50,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
 
             if (!empty($class_result['skipped'])) {
                 $message .= ' ' . sprintf(
-                    $this->t(
-                        '%1$d new Global Classes were skipped because Elementor can currently not create more than %3$d Global Classes and already uses %2$d.',
-                        '%1$d neue Global Classes wurden übersprungen, weil Elementor aktuell nicht mehr als %3$d Global Classes anlegen kann und bereits %2$d belegt sind.'
-                    ),
+                    __('%1$d new Global Classes were skipped because Elementor can currently not create more than %3$d Global Classes and already uses %2$d.', 'ecf-framework'),
                     $class_result['skipped'],
                     $class_result['total'],
                     $class_result['limit']
@@ -74,7 +85,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $this->redirect_with_message(
                 admin_url('admin.php?page=ecf-framework'),
                 ['panel' => 'utilities', 'ecf_sync' => 'error'],
-                $this->t('Security check failed. Please reload the page and try again.', 'Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.')
+                __('Security check failed. Please reload the page and try again.', 'ecf-framework')
             );
         }
 
@@ -94,17 +105,14 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             );
             if (!empty($class_result['deleted'])) {
                 $message = rtrim($message, '.') . ', ' . sprintf(
-                    $this->t('%1$d removed.', '%1$d entfernt.'),
+                    __('%1$d removed.', 'ecf-framework'),
                     (int) $class_result['deleted']
                 );
             }
 
             if (!empty($class_result['skipped'])) {
                 $message .= ' ' . sprintf(
-                    $this->t(
-                        '%1$d new Global Classes were skipped because Elementor can currently not create more than %3$d Global Classes and already uses %2$d.',
-                        '%1$d neue globale Klassen wurden übersprungen, weil Elementor aktuell nicht mehr als %3$d globale Klassen anlegen kann und bereits %2$d belegt sind.'
-                    ),
+                    __('%1$d new Global Classes were skipped because Elementor can currently not create more than %3$d Global Classes and already uses %2$d.', 'ecf-framework'),
                     $class_result['skipped'],
                     $class_result['total'],
                     $class_result['limit']
@@ -138,10 +146,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $classes_count = $this->get_native_class_cleanup_count();
 
             if ($vars_count === 0 && $classes_count === 0) {
-                $message = rawurlencode($this->t(
-                    'No ECF variables or global classes were found in Elementor.',
-                    'Es wurden keine ECF-Variablen oder globalen Klassen in Elementor gefunden.'
-                ));
+                $message = rawurlencode(__('No ECF variables or global classes were found in Elementor.', 'ecf-framework'));
                 wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=ok&ecf_message=' . $message));
                 exit;
             }
@@ -150,7 +155,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $classes_deleted = $this->cleanup_native_classes();
             $message = rawurlencode(
                 sprintf(
-                    'Es wurden %1$d Variablen und %2$d globale Klassen entfernt. Der Elementor-Cache wurde automatisch geleert.',
+                    __('%1$d variables and %2$d global classes were removed. The Elementor cache was cleared automatically.', 'ecf-framework'),
                     $vars_deleted,
                     $classes_deleted
                 )
@@ -173,20 +178,14 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $classes_count = $this->get_native_class_cleanup_count();
 
             if ($classes_count === 0) {
-                $message = rawurlencode($this->t(
-                    'No ECF global classes were found in Elementor.',
-                    'Es wurden keine ECF-Klassen in Elementor gefunden.'
-                ));
+                $message = rawurlencode(__('No ECF global classes were found in Elementor.', 'ecf-framework'));
                 wp_safe_redirect(admin_url('admin.php?page=ecf-framework&panel=sync&ecf_sync=ok&ecf_message=' . $message));
                 exit;
             }
 
             $classes_deleted = $this->cleanup_native_classes();
             $message = rawurlencode(sprintf(
-                $this->t(
-                    '%1$d ECF classes were removed from Elementor. You can now sync them again as clean empty classes.',
-                    '%1$d ECF-Klassen wurden aus Elementor entfernt. Du kannst sie jetzt wieder als saubere leere Klassen synchronisieren.'
-                ),
+                __('%1$d ECF classes were removed from Elementor. You can now sync them again as clean empty classes.', 'ecf-framework'),
                 $classes_deleted
             ));
             wp_safe_redirect(admin_url('admin.php?page=ecf-framework&panel=sync&ecf_sync=ok&ecf_message=' . $message));
@@ -200,16 +199,16 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
     public function ajax_get_variables() {
         check_ajax_referer('ecf_variables', 'nonce');
         if (!$this->can_manage_framework()) {
-            wp_send_json_error('Unauthorized');
+            $this->ajax_error(__('You are not allowed to perform this action.', 'ecf-framework'), 403);
         }
 
         if (!class_exists('\Elementor\Plugin') || !class_exists('\Elementor\Modules\Variables\Storage\Variables_Repository')) {
-            wp_send_json_error('Elementor variable classes not available.');
+            $this->ajax_error(__('Elementor variable classes are not available.', 'ecf-framework'), 500);
         }
 
         $kit = \Elementor\Plugin::$instance->kits_manager->get_active_kit();
         if (!$kit) {
-            wp_send_json_error('No active kit.');
+            $this->ajax_error(__('No active Elementor kit found.', 'ecf-framework'), 500);
         }
 
         $repo = new \Elementor\Modules\Variables\Storage\Variables_Repository($kit);
@@ -240,11 +239,11 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
     public function ajax_get_classes() {
         check_ajax_referer('ecf_variables', 'nonce');
         if (!$this->can_manage_framework()) {
-            wp_send_json_error('Unauthorized');
+            $this->ajax_error(__('You are not allowed to perform this action.', 'ecf-framework'), 403);
         }
 
         if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
-            wp_send_json_error('Elementor global classes repository not available.');
+            $this->ajax_error(__('Elementor global classes repository is not available.', 'ecf-framework'), 500);
         }
 
         $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
@@ -293,21 +292,21 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
     public function ajax_delete_variables() {
         check_ajax_referer('ecf_variables', 'nonce');
         if (!$this->can_manage_framework()) {
-            wp_send_json_error('Unauthorized');
+            $this->ajax_error(__('You are not allowed to perform this action.', 'ecf-framework'), 403);
         }
 
         $ids = isset($_POST['ids']) ? (array) $_POST['ids'] : [];
         if (empty($ids)) {
-            wp_send_json_error('No IDs provided.');
+            $this->ajax_error(__('No IDs were provided.', 'ecf-framework'));
         }
 
         if (!class_exists('\Elementor\Plugin') || !class_exists('\Elementor\Modules\Variables\Storage\Variables_Repository')) {
-            wp_send_json_error('Elementor variable classes not available.');
+            $this->ajax_error(__('Elementor variable classes are not available.', 'ecf-framework'), 500);
         }
 
         $kit = \Elementor\Plugin::$instance->kits_manager->get_active_kit();
         if (!$kit) {
-            wp_send_json_error('No active kit.');
+            $this->ajax_error(__('No active Elementor kit found.', 'ecf-framework'), 500);
         }
 
         $repo = new \Elementor\Modules\Variables\Storage\Variables_Repository($kit);
@@ -329,7 +328,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
     public function ajax_update_variable() {
         check_ajax_referer('ecf_variables', 'nonce');
         if (!$this->can_manage_framework()) {
-            wp_send_json_error('Unauthorized');
+            $this->ajax_error(__('You are not allowed to perform this action.', 'ecf-framework'), 403);
         }
 
         $id = sanitize_text_field(wp_unslash($_POST['id'] ?? ''));
@@ -338,20 +337,20 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         $value = wp_unslash($_POST['value'] ?? '');
 
         if ($id === '' || $label === '' || $type === '') {
-            wp_send_json_error('Missing required fields.');
+            $this->ajax_error(__('Missing required fields.', 'ecf-framework'));
         }
 
         if (!in_array($type, ['global-color-variable', 'global-size-variable', 'global-string-variable'], true)) {
-            wp_send_json_error('Unsupported variable type.');
+            $this->ajax_error(__('Unsupported variable type.', 'ecf-framework'));
         }
 
         if (!class_exists('\Elementor\Plugin') || !class_exists('\Elementor\Modules\Variables\Storage\Variables_Repository')) {
-            wp_send_json_error('Elementor variable classes not available.');
+            $this->ajax_error(__('Elementor variable classes are not available.', 'ecf-framework'), 500);
         }
 
         $kit = \Elementor\Plugin::$instance->kits_manager->get_active_kit();
         if (!$kit) {
-            wp_send_json_error('No active kit.');
+            $this->ajax_error(__('No active Elementor kit found.', 'ecf-framework'), 500);
         }
 
         $repo = new \Elementor\Modules\Variables\Storage\Variables_Repository($kit);
@@ -366,11 +365,11 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         }
 
         if (!$target) {
-            wp_send_json_error('Variable not found.');
+            $this->ajax_error(__('Variable not found.', 'ecf-framework'), 404);
         }
 
         if ($this->is_ecf_native_variable($target)) {
-            wp_send_json_error('Generated ECF variables cannot be edited here.');
+            $this->ajax_error(__('Generated ECF variables cannot be edited here.', 'ecf-framework'), 400);
         }
 
         if ($type === 'global-color-variable') {
@@ -382,7 +381,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         }
 
         if ($sanitized_value === '') {
-            wp_send_json_error('Invalid variable value.');
+            $this->ajax_error(__('Invalid variable value.', 'ecf-framework'));
         }
 
         $target->apply_changes([
@@ -411,16 +410,16 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
     public function ajax_delete_classes() {
         check_ajax_referer('ecf_variables', 'nonce');
         if (!$this->can_manage_framework()) {
-            wp_send_json_error('Unauthorized');
+            $this->ajax_error(__('You are not allowed to perform this action.', 'ecf-framework'), 403);
         }
 
         $ids = isset($_POST['ids']) ? (array) $_POST['ids'] : [];
         if (empty($ids)) {
-            wp_send_json_error('No IDs provided.');
+            $this->ajax_error(__('No IDs were provided.', 'ecf-framework'));
         }
 
         if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
-            wp_send_json_error('Elementor global classes repository not available.');
+            $this->ajax_error(__('Elementor global classes repository is not available.', 'ecf-framework'), 500);
         }
 
         $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
@@ -454,11 +453,12 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         check_admin_referer('ecf_export');
 
         $settings = $this->get_settings();
-        $filename = 'ecf-framework-' . date('Y-m-d') . '.json';
+        $payload = $this->export_payload($settings);
+        $filename = 'ecf-framework-' . $this->current_plugin_version() . '-' . date('Y-m-d') . '.json';
         header('Content-Type: application/json; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: no-cache');
-        echo wp_json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        echo wp_json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -469,7 +469,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         check_admin_referer('ecf_import');
 
         if (empty($_FILES['ecf_import_file']['tmp_name'])) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode('Keine Datei hochgeladen.')));
+            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('No file uploaded.', 'ecf-framework'))));
             exit;
         }
 
@@ -479,17 +479,17 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         $max_size = 1024 * 1024 * 2;
 
         if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode('Datei-Upload fehlgeschlagen.')));
+            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('File upload failed.', 'ecf-framework'))));
             exit;
         }
 
         if ($filename === '' || strtolower(pathinfo($filename, PATHINFO_EXTENSION)) !== 'json') {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode('Bitte eine gültige JSON-Datei hochladen.')));
+            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('Please upload a valid JSON file.', 'ecf-framework'))));
             exit;
         }
 
         if ($filesize <= 0 || $filesize > $max_size) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode('Die JSON-Datei ist leer oder zu groß.')));
+            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('The JSON file is empty or too large.', 'ecf-framework'))));
             exit;
         }
 
@@ -497,14 +497,26 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         $data = json_decode($content, true);
 
         if (!is_array($data)) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode('Ungültige JSON-Datei.')));
+            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('Invalid JSON file.', 'ecf-framework'))));
             exit;
         }
 
-        $sanitized = $this->sanitize_settings($data);
+        $import_settings = isset($data['settings']) && is_array($data['settings']) ? $data['settings'] : $data;
+        $meta = isset($data['meta']) && is_array($data['meta']) ? $data['meta'] : [];
+
+        $sanitized = $this->sanitize_settings($import_settings);
         update_option($this->option_name, $sanitized);
 
-        wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=ok&ecf_message=' . rawurlencode('Einstellungen erfolgreich importiert.')));
+        $message = __('Settings imported successfully.', 'ecf-framework');
+        if (!empty($meta['plugin_version']) && version_compare((string) $meta['plugin_version'], (string) $this->current_plugin_version(), '!=')) {
+            $message .= ' ' . sprintf(
+                __('Imported from plugin version %1$s into %2$s. Please review General Settings, Sync, and editor-related options afterwards.', 'ecf-framework'),
+                (string) $meta['plugin_version'],
+                (string) $this->current_plugin_version()
+            );
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=ok&ecf_message=' . rawurlencode($message)));
         exit;
     }
 

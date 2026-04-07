@@ -41,10 +41,10 @@ trait ECF_Framework_REST_API_Trait {
         $data = $request->get_json_params();
 
         if (!is_array($data)) {
-            return new \WP_Error(
+            return $this->rest_error(
                 'ecf_invalid_payload',
-                'Invalid JSON payload.',
-                ['status' => 400]
+                __('Invalid JSON payload.', 'ecf-framework'),
+                400
             );
         }
 
@@ -54,7 +54,7 @@ trait ECF_Framework_REST_API_Trait {
 
         return rest_ensure_response([
             'success'  => true,
-            'message'  => 'Settings updated.',
+            'message'  => __('Settings updated.', 'ecf-framework'),
             'settings' => $this->get_settings(),
         ]);
     }

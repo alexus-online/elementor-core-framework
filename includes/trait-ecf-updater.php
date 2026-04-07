@@ -677,10 +677,7 @@ trait ECF_Framework_Updater_Trait {
         check_admin_referer('ecf_check_updates');
 
         if (!$this->github_update_checks_enabled()) {
-            $message = $this->t(
-                'GitHub update checks are disabled in ECF General Settings > System.',
-                'GitHub-Update-Prüfungen sind in den ECF-Allgemeinen Einstellungen > System deaktiviert.'
-            );
+            $message = __('GitHub update checks are disabled in ECF General Settings > System.', 'ecf-framework');
             $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
         }
 
@@ -693,34 +690,21 @@ trait ECF_Framework_Updater_Trait {
 
         if ($update && !empty($update->new_version)) {
             $message = sprintf(
-                $this->t(
-                    'Update found: installed %1$s, remote %2$s.',
-                    'Update gefunden: installiert %1$s, remote %2$s.'
-                ),
+                __('Update found: installed %1$s, remote %2$s.', 'ecf-framework'),
                 $installed_version,
                 (string) $update->new_version
             );
         } elseif (!$probe['ok']) {
             $message = sprintf(
-                $this->t(
-                    'Plugin update check failed. Installed: %1$s. GitHub request error: %2$s.',
-                    'Plugin-Update-Prüfung fehlgeschlagen. Installiert: %1$s. GitHub-Fehler: %2$s.'
-                ),
+                __('Plugin update check failed. Installed: %1$s. GitHub request error: %2$s.', 'ecf-framework'),
                 $installed_version,
                 $probe['error']
             );
         } else {
-            $message = $this->t(
-                sprintf(
-                    'Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered.',
-                    $installed_version,
-                    $probe['version']
-                ),
-                sprintf(
-                    'Plugin-Update-Prüfung abgeschlossen. Installiert: %1$s. GitHub remote: %2$s. Es wurde keine neuere Version registriert.',
-                    $installed_version,
-                    $probe['version']
-                )
+            $message = sprintf(
+                __('Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered.', 'ecf-framework'),
+                $installed_version,
+                $probe['version']
             );
         }
 
@@ -739,7 +723,7 @@ trait ECF_Framework_Updater_Trait {
         $actions['ecf_check_updates'] = sprintf(
             '<a href="%s">%s</a>',
             esc_url($check_url),
-            esc_html($this->t('Check for updates', 'Auf Updates prüfen'))
+            esc_html__('Check for updates', 'ecf-framework')
         );
 
         return $actions;
@@ -751,7 +735,7 @@ trait ECF_Framework_Updater_Trait {
         }
 
         if (!$this->github_update_checks_enabled()) {
-            return '<span class="description">' . esc_html($this->t('Enable GitHub update checks in ECF > General Settings > System first.', 'Aktiviere zuerst die GitHub-Update-Prüfungen unter ECF > Allgemeine Einstellungen > System.')) . '</span>';
+            return '<span class="description">' . esc_html__('Enable GitHub update checks in ECF > General Settings > System first.', 'ecf-framework') . '</span>';
         }
 
         $auto_updates_enabled = $this->auto_updates_enabled();
@@ -763,7 +747,7 @@ trait ECF_Framework_Updater_Trait {
         return sprintf(
             '<a href="%s">%s</a>',
             esc_url($toggle_url),
-            esc_html($auto_updates_enabled ? $this->t('Disable auto-updates', 'Automatische Aktualisierungen deaktivieren') : $this->t('Enable auto-updates', 'Automatische Aktualisierungen aktivieren'))
+            esc_html($auto_updates_enabled ? __('Disable auto-updates', 'ecf-framework') : __('Enable auto-updates', 'ecf-framework'))
         );
     }
 
@@ -774,10 +758,7 @@ trait ECF_Framework_Updater_Trait {
         check_admin_referer('ecf_toggle_auto_updates');
 
         if (!$this->github_update_checks_enabled()) {
-            $message = $this->t(
-                'GitHub update checks are disabled in ECF General Settings > System.',
-                'GitHub-Update-Prüfungen sind in den ECF-Allgemeinen Einstellungen > System deaktiviert.'
-            );
+            $message = __('GitHub update checks are disabled in ECF General Settings > System.', 'ecf-framework');
             $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
         }
 
@@ -796,10 +777,9 @@ trait ECF_Framework_Updater_Trait {
 
         update_site_option('auto_update_plugins', $plugins);
 
-        $message = $this->t(
-            $enabled ? 'Automatic updates disabled for this plugin.' : 'Automatic updates enabled for this plugin.',
-            $enabled ? 'Automatische Updates für dieses Plugin deaktiviert.' : 'Automatische Updates für dieses Plugin aktiviert.'
-        );
+        $message = $enabled
+            ? __('Automatic updates disabled for this plugin.', 'ecf-framework')
+            : __('Automatic updates enabled for this plugin.', 'ecf-framework');
 
         $this->redirect_with_message(admin_url('plugins.php'), ['ecf_update_check' => '1'], $message);
     }

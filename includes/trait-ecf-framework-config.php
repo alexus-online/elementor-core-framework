@@ -4,6 +4,7 @@ trait ECF_Framework_Config_Trait {
     private function defaults() {
         return [
             'root_font_size' => '62.5',
+            'interface_language' => $this->wordpress_default_interface_language(),
             'github_update_checks_enabled' => '1',
             'elementor_boxed_width' => '1140px',
             'content_max_width' => '72ch',
@@ -242,20 +243,20 @@ trait ECF_Framework_Config_Trait {
         $parts = [];
 
         if ((int) $created > 0) {
-            $parts[] = sprintf($this->t('%1$d created', '%1$d erstellt'), (int) $created);
+            $parts[] = sprintf(__('%1$d created', 'ecf-framework'), (int) $created);
         }
 
         if ((int) $updated > 0) {
-            $parts[] = sprintf($this->t('%1$d updated', '%1$d aktualisiert'), (int) $updated);
+            $parts[] = sprintf(__('%1$d updated', 'ecf-framework'), (int) $updated);
         }
 
         if (empty($parts)) {
-            $parts[] = $this->t('no changes', 'keine Änderungen');
+            $parts[] = __('no changes', 'ecf-framework');
         }
 
         return sprintf(
-            $this->t('%1$s: %2$s.', '%1$s: %2$s.'),
-            $this->t($label_en, $label_de),
+            __('%1$s: %2$s.', 'ecf-framework'),
+            __($label_en, 'ecf-framework'),
             implode(', ', $parts)
         );
     }
@@ -267,6 +268,9 @@ trait ECF_Framework_Config_Trait {
         }
 
         $settings = wp_parse_args($saved, $this->defaults());
+        $settings['interface_language'] = in_array(($settings['interface_language'] ?? ''), ['de', 'en'], true)
+            ? $settings['interface_language']
+            : $this->wordpress_default_interface_language();
         if (empty($settings['starter_classes']) || !is_array($settings['starter_classes'])) {
             $settings['starter_classes'] = $this->defaults()['starter_classes'];
         }
@@ -385,44 +389,44 @@ trait ECF_Framework_Config_Trait {
     private function utility_class_library() {
         return [
             'typography' => [
-                ['name' => 'ecf-heading-1', 'label' => $this->t('Heading 1', 'Heading 1')],
-                ['name' => 'ecf-heading-2', 'label' => $this->t('Heading 2', 'Heading 2')],
-                ['name' => 'ecf-heading-3', 'label' => $this->t('Heading 3', 'Heading 3')],
-                ['name' => 'ecf-heading-4', 'label' => $this->t('Heading 4', 'Heading 4')],
-                ['name' => 'ecf-heading-5', 'label' => $this->t('Heading 5', 'Heading 5')],
-                ['name' => 'ecf-body-l', 'label' => $this->t('Body Large', 'Body Large')],
-                ['name' => 'ecf-body-m', 'label' => $this->t('Body Medium', 'Body Medium')],
-                ['name' => 'ecf-body-s', 'label' => $this->t('Body Small', 'Body Small')],
-                ['name' => 'ecf-caption', 'label' => $this->t('Caption', 'Caption')],
-                ['name' => 'ecf-overline', 'label' => $this->t('Overline', 'Overline')],
+                ['name' => 'ecf-heading-1', 'label' => __('Heading 1', 'ecf-framework')],
+                ['name' => 'ecf-heading-2', 'label' => __('Heading 2', 'ecf-framework')],
+                ['name' => 'ecf-heading-3', 'label' => __('Heading 3', 'ecf-framework')],
+                ['name' => 'ecf-heading-4', 'label' => __('Heading 4', 'ecf-framework')],
+                ['name' => 'ecf-heading-5', 'label' => __('Heading 5', 'ecf-framework')],
+                ['name' => 'ecf-body-l', 'label' => __('Body Large', 'ecf-framework')],
+                ['name' => 'ecf-body-m', 'label' => __('Body Medium', 'ecf-framework')],
+                ['name' => 'ecf-body-s', 'label' => __('Body Small', 'ecf-framework')],
+                ['name' => 'ecf-caption', 'label' => __('Caption', 'ecf-framework')],
+                ['name' => 'ecf-overline', 'label' => __('Overline', 'ecf-framework')],
             ],
             'text' => [
-                ['name' => 'ecf-text-left', 'label' => $this->t('Text Left', 'Text Left')],
-                ['name' => 'ecf-text-center', 'label' => $this->t('Text Center', 'Text Center')],
-                ['name' => 'ecf-text-right', 'label' => $this->t('Text Right', 'Text Right')],
-                ['name' => 'ecf-text-balance', 'label' => $this->t('Text Balance', 'Text Balance')],
-                ['name' => 'ecf-text-pretty', 'label' => $this->t('Text Pretty', 'Text Pretty')],
+                ['name' => 'ecf-text-left', 'label' => __('Text Left', 'ecf-framework')],
+                ['name' => 'ecf-text-center', 'label' => __('Text Center', 'ecf-framework')],
+                ['name' => 'ecf-text-right', 'label' => __('Text Right', 'ecf-framework')],
+                ['name' => 'ecf-text-balance', 'label' => __('Text Balance', 'ecf-framework')],
+                ['name' => 'ecf-text-pretty', 'label' => __('Text Pretty', 'ecf-framework')],
             ],
             'layout' => [
-                ['name' => 'ecf-inline', 'label' => $this->t('Inline Flex', 'Inline Flex')],
-                ['name' => 'ecf-inline-block', 'label' => $this->t('Inline Block', 'Inline Block')],
-                ['name' => 'ecf-hidden', 'label' => $this->t('Hidden', 'Hidden')],
-                ['name' => 'ecf-center-inline', 'label' => $this->t('Center Inline', 'Center Inline')],
-                ['name' => 'ecf-cluster', 'label' => $this->t('Cluster', 'Cluster')],
+                ['name' => 'ecf-inline', 'label' => __('Inline Flex', 'ecf-framework')],
+                ['name' => 'ecf-inline-block', 'label' => __('Inline Block', 'ecf-framework')],
+                ['name' => 'ecf-hidden', 'label' => __('Hidden', 'ecf-framework')],
+                ['name' => 'ecf-center-inline', 'label' => __('Center Inline', 'ecf-framework')],
+                ['name' => 'ecf-cluster', 'label' => __('Cluster', 'ecf-framework')],
             ],
             'accessibility' => [
-                ['name' => 'ecf-visually-hidden', 'label' => $this->t('Visually Hidden', 'Visually Hidden')],
+                ['name' => 'ecf-visually-hidden', 'label' => __('Visually Hidden', 'ecf-framework')],
             ],
         ];
     }
 
     private function utility_class_category_labels() {
         return [
-            'all' => $this->t('All utilities', 'Alle Utilities'),
-            'typography' => $this->t('Typography', 'Typografie'),
-            'text' => $this->t('Text', 'Text'),
-            'layout' => $this->t('Layout', 'Layout'),
-            'accessibility' => $this->t('Accessibility', 'Barrierefreiheit'),
+            'all' => __('All utilities', 'ecf-framework'),
+            'typography' => __('Typography', 'ecf-framework'),
+            'text' => __('Text', 'ecf-framework'),
+            'layout' => __('Layout', 'ecf-framework'),
+            'accessibility' => __('Accessibility', 'ecf-framework'),
         ];
     }
 
@@ -431,130 +435,124 @@ trait ECF_Framework_Config_Trait {
         $category = (string) $category;
         $tier = (string) $tier;
 
-        if (str_contains($name, '__inner')) return $this->t('Inner wrapper for the parent section or component.', 'Innerer Wrapper für den übergeordneten Bereich oder die Komponente.');
-        if (str_contains($name, '__main')) return $this->t('Main content area of the page layout.', 'Hauptbereich des Seitenlayouts.');
-        if (str_contains($name, '__content')) return $this->t('Content area inside this component.', 'Inhaltsbereich innerhalb dieser Komponente.');
-        if (str_contains($name, '__body')) return $this->t('Main body area for text and content.', 'Hauptbereich für Text und Inhalte.');
-        if (str_contains($name, '__title')) return $this->t('Title element inside this component.', 'Titel-Element innerhalb dieser Komponente.');
-        if (str_contains($name, '__actions')) return $this->t('Action area for buttons or controls.', 'Aktionsbereich für Buttons oder Steuerelemente.');
-        if (str_contains($name, '__media')) return $this->t('Media slot for image, video or illustration.', 'Media-Bereich für Bild, Video oder Illustration.');
-        if (str_contains($name, '__meta')) return $this->t('Meta information such as date, category or label.', 'Meta-Informationen wie Datum, Kategorie oder Label.');
-        if (str_contains($name, '__brand')) return $this->t('Brand or logo area inside the header.', 'Brand- oder Logo-Bereich im Header.');
-        if (str_contains($name, '__list')) return $this->t('List container for repeated navigation or content items.', 'Listen-Container für wiederholte Navigations- oder Inhaltselemente.');
-        if (str_contains($name, '__item')) return $this->t('Single item inside a repeated list or navigation.', 'Ein einzelnes Element innerhalb einer Liste oder Navigation.');
-        if (str_contains($name, '__link')) return $this->t('Link element inside navigation or content lists.', 'Link-Element innerhalb einer Navigation oder Inhaltsliste.');
-        if (str_contains($name, '__toggle')) return $this->t('Toggle control, for example for mobile navigation.', 'Toggle-Steuerung, zum Beispiel für eine mobile Navigation.');
-        if (str_contains($name, '__group')) return $this->t('Groups related fields or controls together.', 'Gruppiert zusammengehörige Felder oder Steuerelemente.');
-        if (str_contains($name, '__icon')) return $this->t('Icon element inside the parent component.', 'Icon-Element innerhalb der übergeordneten Komponente.');
+        if (str_contains($name, '__inner')) return __('Inner wrapper for the parent section or component.', 'ecf-framework');
+        if (str_contains($name, '__main')) return __('Main content area of the page layout.', 'ecf-framework');
+        if (str_contains($name, '__content')) return __('Content area inside this component.', 'ecf-framework');
+        if (str_contains($name, '__body')) return __('Main body area for text and content.', 'ecf-framework');
+        if (str_contains($name, '__title')) return __('Title element inside this component.', 'ecf-framework');
+        if (str_contains($name, '__actions')) return __('Action area for buttons or controls.', 'ecf-framework');
+        if (str_contains($name, '__media')) return __('Media slot for image, video or illustration.', 'ecf-framework');
+        if (str_contains($name, '__meta')) return __('Meta information such as date, category or label.', 'ecf-framework');
+        if (str_contains($name, '__brand')) return __('Brand or logo area inside the header.', 'ecf-framework');
+        if (str_contains($name, '__list')) return __('List container for repeated navigation or content items.', 'ecf-framework');
+        if (str_contains($name, '__item')) return __('Single item inside a repeated list or navigation.', 'ecf-framework');
+        if (str_contains($name, '__link')) return __('Link element inside navigation or content lists.', 'ecf-framework');
+        if (str_contains($name, '__toggle')) return __('Toggle control, for example for mobile navigation.', 'ecf-framework');
+        if (str_contains($name, '__group')) return __('Groups related fields or controls together.', 'ecf-framework');
+        if (str_contains($name, '__icon')) return __('Icon element inside the parent component.', 'ecf-framework');
 
-        if (str_contains($name, '--primary')) return $this->t('Primary variant for the main emphasis action or element.', 'Primäre Variante für die wichtigste Aktion oder den wichtigsten Akzent.');
-        if (str_contains($name, '--secondary')) return $this->t('Secondary variant for quieter supporting actions or elements.', 'Sekundäre Variante für ruhigere unterstützende Aktionen oder Elemente.');
-        if (str_contains($name, '--ghost')) return $this->t('Ghost-style variant with minimal visual weight.', 'Ghost-Variante mit geringem visuellem Gewicht.');
-        if (str_contains($name, '--link')) return $this->t('Button variant styled more like a text link.', 'Button-Variante, die eher wie ein Textlink wirkt.');
-        if (str_contains($name, '--large')) return $this->t('Larger size variant for stronger emphasis.', 'Größere Variante für mehr visuelle Betonung.');
-        if (str_contains($name, '--dark')) return $this->t('Dark variant for sections with a darker surface.', 'Dunkle Variante für Bereiche mit dunkler Oberfläche.');
-        if (str_contains($name, '--accent')) return $this->t('Accent variant for highlighted sections or content blocks.', 'Akzent-Variante für hervorgehobene Bereiche oder Content-Blöcke.');
+        if (str_contains($name, '--primary')) return __('Primary variant for the main emphasis action or element.', 'ecf-framework');
+        if (str_contains($name, '--secondary')) return __('Secondary variant for quieter supporting actions or elements.', 'ecf-framework');
+        if (str_contains($name, '--ghost')) return __('Ghost-style variant with minimal visual weight.', 'ecf-framework');
+        if (str_contains($name, '--link')) return __('Button variant styled more like a text link.', 'ecf-framework');
+        if (str_contains($name, '--large')) return __('Larger size variant for stronger emphasis.', 'ecf-framework');
+        if (str_contains($name, '--dark')) return __('Dark variant for sections with a darker surface.', 'ecf-framework');
+        if (str_contains($name, '--accent')) return __('Accent variant for highlighted sections or content blocks.', 'ecf-framework');
 
         switch ($category) {
             case 'layout':
                 return $tier === 'advanced'
-                    ? $this->t('Advanced layout helper for page structure and composition.', 'Erweiterte Layout-Klasse für Seitenstruktur und Aufbau.')
-                    : $this->t('Base layout class for the overall page structure.', 'Basis-Layout-Klasse für den generellen Seitenaufbau.');
+                    ? __('Advanced layout helper for page structure and composition.', 'ecf-framework')
+                    : __('Base layout class for the overall page structure.', 'ecf-framework');
             case 'sections':
-                return $this->t('Section wrapper for grouping a complete content block.', 'Section-Wrapper zum Gruppieren eines vollständigen Inhaltsbereichs.');
+                return __('Section wrapper for grouping a complete content block.', 'ecf-framework');
             case 'navigation':
-                return $this->t('Navigation-related class for header or menu structure.', 'Navigationsbezogene Klasse für Header- oder Menüstruktur.');
+                return __('Navigation-related class for header or menu structure.', 'ecf-framework');
             case 'hero':
-                return $this->t('Hero section class for the main entry area of a page.', 'Hero-Klasse für den zentralen Einstiegsbereich einer Seite.');
+                return __('Hero section class for the main entry area of a page.', 'ecf-framework');
             case 'cards':
-                return $this->t('Card component class for grouped content inside a surface.', 'Card-Komponentenklasse für gruppierte Inhalte auf einer Fläche.');
+                return __('Card component class for grouped content inside a surface.', 'ecf-framework');
             case 'buttons':
-                return $this->t('Button component class for interactive call-to-actions.', 'Button-Komponentenklasse für interaktive Call-to-Actions.');
+                return __('Button component class for interactive call-to-actions.', 'ecf-framework');
             case 'footer':
-                return $this->t('Footer class for the bottom area of the website.', 'Footer-Klasse für den unteren Bereich der Website.');
+                return __('Footer class for the bottom area of the website.', 'ecf-framework');
             case 'content':
-                return $this->t('Content class for inner page content or supportive blocks.', 'Content-Klasse für Seiteninhalte oder unterstützende Blöcke.');
+                return __('Content class for inner page content or supportive blocks.', 'ecf-framework');
             case 'forms':
-                return $this->t('Form class for form layout, groups or actions.', 'Form-Klasse für Formularlayout, Gruppen oder Aktionen.');
+                return __('Form class for form layout, groups or actions.', 'ecf-framework');
             case 'dialogs':
-                return $this->t('Dialog or modal class for overlays and focused interactions.', 'Dialog- oder Modal-Klasse für Overlays und fokussierte Interaktionen.');
+                return __('Dialog or modal class for overlays and focused interactions.', 'ecf-framework');
             default:
-                return $this->t('Semantic starter class for consistent naming and structure.', 'Semantische Starter-Klasse für konsistente Benennung und Struktur.');
+                return __('Semantic starter class for consistent naming and structure.', 'ecf-framework');
         }
     }
 
     private function utility_class_tooltip($class_name, $category) {
         switch ((string) $class_name) {
-            case 'ecf-heading-1': return $this->t('Applies the strongest heading style for major titles.', 'Wendet den stärksten Heading-Stil für große Haupttitel an.');
-            case 'ecf-heading-2': return $this->t('Applies a strong heading style for section titles.', 'Wendet einen starken Heading-Stil für Abschnittsüberschriften an.');
-            case 'ecf-heading-3': return $this->t('Applies a medium heading style for smaller sections.', 'Wendet einen mittleren Heading-Stil für kleinere Abschnitte an.');
-            case 'ecf-heading-4': return $this->t('Applies a compact heading style for subsections.', 'Wendet einen kompakten Heading-Stil für Unterabschnitte an.');
-            case 'ecf-heading-5': return $this->t('Applies the smallest heading style in the utility set.', 'Wendet den kleinsten Heading-Stil im Utility-Set an.');
-            case 'ecf-body-l': return $this->t('Large body text style for intros or highlighted copy.', 'Großer Fließtext-Stil für Einleitungen oder hervorgehobene Texte.');
-            case 'ecf-body-m': return $this->t('Default body text style for regular paragraphs.', 'Standard-Fließtext-Stil für normale Absätze.');
-            case 'ecf-body-s': return $this->t('Smaller body text style for secondary information.', 'Kleinerer Fließtext-Stil für sekundäre Informationen.');
-            case 'ecf-caption': return $this->t('Small caption style for image notes or meta text.', 'Kleiner Caption-Stil für Bildhinweise oder Meta-Text.');
-            case 'ecf-overline': return $this->t('Small uppercase overline style for labels above headings.', 'Kleiner Overline-Stil für Labels über Überschriften.');
-            case 'ecf-text-left': return $this->t('Aligns text content to the left.', 'Richtet Text links aus.');
-            case 'ecf-text-center': return $this->t('Centers text content horizontally.', 'Zentriert Text horizontal.');
-            case 'ecf-text-right': return $this->t('Aligns text content to the right.', 'Richtet Text rechts aus.');
-            case 'ecf-text-balance': return $this->t('Balances text wrapping for more even headline lines.', 'Balanciert den Zeilenumbruch für gleichmäßigere Überschriften.');
-            case 'ecf-text-pretty': return $this->t('Improves text wrapping for more pleasant paragraph breaks.', 'Verbessert den Zeilenumbruch für angenehmere Absatzumbrüche.');
-            case 'ecf-inline': return $this->t('Displays children inline with flexible spacing.', 'Zeigt Inhalte inline mit flexiblem Abstand an.');
-            case 'ecf-inline-block': return $this->t('Makes an element behave like an inline block.', 'Lässt ein Element wie ein Inline-Block verhalten.');
-            case 'ecf-hidden': return $this->t('Hides the element visually.', 'Blendet das Element visuell aus.');
-            case 'ecf-center-inline': return $this->t('Centers inline content inside its available width.', 'Zentriert Inline-Inhalte innerhalb der verfügbaren Breite.');
-            case 'ecf-cluster': return $this->t('Groups items in a horizontal cluster with wrapping.', 'Gruppiert Elemente als horizontale, umbrechende Cluster-Reihe.');
-            case 'ecf-visually-hidden': return $this->t('Keeps content accessible for screen readers while hiding it visually.', 'Lässt Inhalte für Screenreader zugänglich, blendet sie aber visuell aus.');
+            case 'ecf-heading-1': return __('Applies the strongest heading style for major titles.', 'ecf-framework');
+            case 'ecf-heading-2': return __('Applies a strong heading style for section titles.', 'ecf-framework');
+            case 'ecf-heading-3': return __('Applies a medium heading style for smaller sections.', 'ecf-framework');
+            case 'ecf-heading-4': return __('Applies a compact heading style for subsections.', 'ecf-framework');
+            case 'ecf-heading-5': return __('Applies the smallest heading style in the utility set.', 'ecf-framework');
+            case 'ecf-body-l': return __('Large body text style for intros or highlighted copy.', 'ecf-framework');
+            case 'ecf-body-m': return __('Default body text style for regular paragraphs.', 'ecf-framework');
+            case 'ecf-body-s': return __('Smaller body text style for secondary information.', 'ecf-framework');
+            case 'ecf-caption': return __('Small caption style for image notes or meta text.', 'ecf-framework');
+            case 'ecf-overline': return __('Small uppercase overline style for labels above headings.', 'ecf-framework');
+            case 'ecf-text-left': return __('Aligns text content to the left.', 'ecf-framework');
+            case 'ecf-text-center': return __('Centers text content horizontally.', 'ecf-framework');
+            case 'ecf-text-right': return __('Aligns text content to the right.', 'ecf-framework');
+            case 'ecf-text-balance': return __('Balances text wrapping for more even headline lines.', 'ecf-framework');
+            case 'ecf-text-pretty': return __('Improves text wrapping for more pleasant paragraph breaks.', 'ecf-framework');
+            case 'ecf-inline': return __('Displays children inline with flexible spacing.', 'ecf-framework');
+            case 'ecf-inline-block': return __('Makes an element behave like an inline block.', 'ecf-framework');
+            case 'ecf-hidden': return __('Hides the element visually.', 'ecf-framework');
+            case 'ecf-center-inline': return __('Centers inline content inside its available width.', 'ecf-framework');
+            case 'ecf-cluster': return __('Groups items in a horizontal cluster with wrapping.', 'ecf-framework');
+            case 'ecf-visually-hidden': return __('Keeps content accessible for screen readers while hiding it visually.', 'ecf-framework');
         }
 
         switch ((string) $category) {
             case 'typography':
-                return $this->t('Typography helper class for reusable text styles.', 'Typografie-Helferklasse für wiederverwendbare Textstile.');
+                return __('Typography helper class for reusable text styles.', 'ecf-framework');
             case 'text':
-                return $this->t('Text utility for alignment or text-flow behavior.', 'Text-Utility für Ausrichtung oder Textfluss-Verhalten.');
+                return __('Text utility for alignment or text-flow behavior.', 'ecf-framework');
             case 'layout':
-                return $this->t('Layout helper for simple spacing or positioning patterns.', 'Layout-Helfer für einfache Abstands- oder Positionierungs-Muster.');
+                return __('Layout helper for simple spacing or positioning patterns.', 'ecf-framework');
             case 'accessibility':
-                return $this->t('Accessibility helper for screen-reader-friendly behavior.', 'Barrierefreiheits-Helfer für screenreaderfreundliches Verhalten.');
+                return __('Accessibility helper for screen-reader-friendly behavior.', 'ecf-framework');
             default:
-                return $this->t('Reusable utility class for common styling helpers.', 'Wiederverwendbare Utility-Klasse für häufige Styling-Helfer.');
+                return __('Reusable utility class for common styling helpers.', 'ecf-framework');
         }
     }
 
     private function class_library_tab_help_texts() {
         return [
-            'starter' => $this->t(
-                'Starter classes give you a semantic naming system for common page areas and components such as headers, heroes, cards, buttons, and footers.',
-                'Starter-Klassen geben dir ein semantisches Benennungssystem für typische Seitenbereiche und Komponenten wie Header, Hero, Cards, Buttons und Footer.'
-            ),
-            'utility' => $this->t(
-                'Utility classes are a small curated helper set for text styles, alignment, and a few safe layout patterns. Use them sparingly because they also count toward Elementor’s class limit.',
-                'Utility-Klassen sind ein kleines kuratiertes Helfer-Set für Textstile, Ausrichtung und einige sichere Layout-Muster. Nutze sie sparsam, weil sie ebenfalls in Elementors Klassenlimit zählen.'
-            ),
+            'starter' => __('Starter classes give you a semantic naming system for common page areas and components such as headers, heroes, cards, buttons, and footers.', 'ecf-framework'),
+            'utility' => __('Utility classes are a small curated helper set for text styles, alignment, and a few safe layout patterns. Use them sparingly because they also count toward Elementor’s class limit.', 'ecf-framework'),
         ];
     }
 
     private function starter_class_tab_groups() {
         return [
             'all' => [
-                'label' => $this->t('All classes', 'Alle Klassen'),
+                'label' => __('All classes', 'ecf-framework'),
                 'categories' => ['layout', 'sections', 'navigation', 'hero', 'cards', 'buttons', 'footer', 'content', 'forms', 'dialogs', 'custom'],
             ],
             'website_sections' => [
-                'label' => $this->t('Website sections', 'Website-Abschnitte'),
+                'label' => __('Website sections', 'ecf-framework'),
                 'categories' => ['navigation', 'hero', 'footer'],
             ],
             'layout_content' => [
-                'label' => $this->t('Layout & content', 'Layout & Inhalt'),
+                'label' => __('Layout & content', 'ecf-framework'),
                 'categories' => ['layout', 'sections', 'content', 'cards'],
             ],
             'interaction' => [
-                'label' => $this->t('Interaction', 'Interaktion'),
+                'label' => __('Interaction', 'ecf-framework'),
                 'categories' => ['buttons', 'forms', 'dialogs'],
             ],
             'custom' => [
-                'label' => $this->t('Custom', 'Custom'),
+                'label' => __('Custom', 'ecf-framework'),
                 'categories' => ['custom'],
             ],
         ];
@@ -574,51 +572,21 @@ trait ECF_Framework_Config_Trait {
 
     private function starter_class_tab_help_texts() {
         return [
-            'all' => $this->t(
-                'Shows the complete starter library so you can enable a full naming system at once.',
-                'Zeigt die komplette Starter-Bibliothek, damit du ein vollständiges Benennungssystem auf einmal aktivieren kannst.'
-            ),
-            'website_sections' => $this->t(
-                'Semantic classes for the big page sections such as header, navigation, hero, and footer.',
-                'Semantische Klassen für die großen Seitenabschnitte wie Header, Navigation, Hero und Footer.'
-            ),
-            'layout_content' => $this->t(
-                'Structural and content-oriented classes for layout shells, sections, cards, and general content areas.',
-                'Struktur- und Inhaltsklassen für Layout-Hüllen, Sektionen, Cards und allgemeine Inhaltsbereiche.'
-            ),
-            'interaction' => $this->t(
-                'Interactive classes for buttons, forms, and dialog-based UI elements.',
-                'Interaktive Klassen für Buttons, Formulare und dialogbasierte UI-Elemente.'
-            ),
-            'custom' => $this->t(
-                'Your own semantic class names. Use this area for project-specific naming that does not fit the predefined library.',
-                'Deine eigenen semantischen Klassennamen. Nutze diesen Bereich für projektspezifische Namen, die nicht in die vordefinierte Bibliothek passen.'
-            ),
+            'all' => __('Shows the complete starter library so you can enable a full naming system at once.', 'ecf-framework'),
+            'website_sections' => __('Semantic classes for the big page sections such as header, navigation, hero, and footer.', 'ecf-framework'),
+            'layout_content' => __('Structural and content-oriented classes for layout shells, sections, cards, and general content areas.', 'ecf-framework'),
+            'interaction' => __('Interactive classes for buttons, forms, and dialog-based UI elements.', 'ecf-framework'),
+            'custom' => __('Your own semantic class names. Use this area for project-specific naming that does not fit the predefined library.', 'ecf-framework'),
         ];
     }
 
     private function utility_class_category_help_texts() {
         return [
-            'all' => $this->t(
-                'Shows the complete utility set with all available text, alignment, layout, and accessibility helpers.',
-                'Zeigt das komplette Utility-Set mit allen verfügbaren Text-, Ausrichtungs-, Layout- und Accessibility-Helfern.'
-            ),
-            'typography' => $this->t(
-                'Typography helpers for heading and body text styles that reuse your ECF text tokens.',
-                'Typografie-Helfer für Heading- und Body-Textstile, die deine ECF-Text-Tokens wiederverwenden.'
-            ),
-            'text' => $this->t(
-                'Text helpers for alignment and text behavior such as balanced or pretty wrapping.',
-                'Text-Helfer für Ausrichtung und Textverhalten wie ausgeglichenes oder schönes Umbruchverhalten.'
-            ),
-            'layout' => $this->t(
-                'Small layout helpers for inline, cluster, centering, and visibility behavior.',
-                'Kleine Layout-Helfer für Inline-, Cluster-, Zentrierungs- und Sichtbarkeits-Verhalten.'
-            ),
-            'accessibility' => $this->t(
-                'Accessibility helpers such as visually hidden content for screen-reader-only text.',
-                'Accessibility-Helfer wie visuell versteckte Inhalte für reinen Screenreader-Text.'
-            ),
+            'all' => __('Shows the complete utility set with all available text, alignment, layout, and accessibility helpers.', 'ecf-framework'),
+            'typography' => __('Typography helpers for heading and body text styles that reuse your ECF text tokens.', 'ecf-framework'),
+            'text' => __('Text helpers for alignment and text behavior such as balanced or pretty wrapping.', 'ecf-framework'),
+            'layout' => __('Small layout helpers for inline, cluster, centering, and visibility behavior.', 'ecf-framework'),
+            'accessibility' => __('Accessibility helpers such as visually hidden content for screen-reader-only text.', 'ecf-framework'),
         ];
     }
 
@@ -760,18 +728,18 @@ trait ECF_Framework_Config_Trait {
 
     private function starter_class_category_labels() {
         return [
-            'all' => $this->t('All classes', 'Alle Klassen'),
-            'layout' => $this->t('Layout', 'Layout'),
-            'sections' => $this->t('Sections', 'Sektionen'),
-            'navigation' => $this->t('Navigation', 'Navigation'),
-            'hero' => $this->t('Hero', 'Hero'),
-            'cards' => $this->t('Cards', 'Cards'),
-            'buttons' => $this->t('Buttons', 'Buttons'),
-            'footer' => $this->t('Footer', 'Footer'),
-            'content' => $this->t('Content', 'Content'),
-            'forms' => $this->t('Forms', 'Formulare'),
-            'dialogs' => $this->t('Dialogs', 'Dialoge'),
-            'custom' => $this->t('Custom', 'Custom'),
+            'all' => __('All classes', 'ecf-framework'),
+            'layout' => __('Layout', 'ecf-framework'),
+            'sections' => __('Sections', 'ecf-framework'),
+            'navigation' => __('Navigation', 'ecf-framework'),
+            'hero' => __('Hero', 'ecf-framework'),
+            'cards' => __('Cards', 'ecf-framework'),
+            'buttons' => __('Buttons', 'ecf-framework'),
+            'footer' => __('Footer', 'ecf-framework'),
+            'content' => __('Content', 'ecf-framework'),
+            'forms' => __('Forms', 'ecf-framework'),
+            'dialogs' => __('Dialogs', 'ecf-framework'),
+            'custom' => __('Custom', 'ecf-framework'),
         ];
     }
 

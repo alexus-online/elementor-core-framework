@@ -13,16 +13,16 @@ trait ECF_Framework_Render_Helpers_Trait {
 
         if ($is_color) {
             echo '<div class="ecf-head ecf-head--color">';
-            echo '<span>' . $this->tip_hover_label($this->t('Color', 'Farbe'), 'Color preview', 'Farbvorschau') . '</span>';
-            echo '<span>' . $this->tip_hover_label($this->t('Name', 'Name'), 'Color name / CSS variable', 'Farbname / CSS-Variable') . '</span>';
-            echo '<span>' . $this->tip_hover_label($this->t('Value', 'Wert'), 'Color value', 'Farbwert') . '</span>';
-            echo '<span>' . $this->tip_hover_label($this->t('Format', 'Format'), 'Color format', 'Farbformat') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Color', 'ecf-framework'), 'Color preview', 'Farbvorschau') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Name', 'ecf-framework'), 'Color name / CSS variable', 'Farbname / CSS-Variable') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Color value', 'Farbwert') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Format', 'ecf-framework'), 'Color format', 'Farbformat') . '</span>';
             echo '<span></span>';
             echo '</div>';
         } elseif ($is_minmax) {
-            echo '<div class="ecf-head ecf-head--minmax"><span>' . $this->tip_hover_label($this->t('Class Name', 'Klassenname'), 'Token name / CSS class name', 'Tokenname / CSS-Klassenname') . '</span><span>' . $this->tip_hover_label('Min', 'Minimum value', 'Minimalwert') . '</span><span>' . $this->tip_hover_label('Max', 'Maximum value', 'Maximalwert') . '</span><span></span></div>';
+            echo '<div class="ecf-head ecf-head--minmax"><span>' . $this->tip_hover_label(__('Class Name', 'ecf-framework'), 'Token name / CSS class name', 'Tokenname / CSS-Klassenname') . '</span><span>' . $this->tip_hover_label(__('Min', 'ecf-framework'), 'Minimum value', 'Minimalwert') . '</span><span>' . $this->tip_hover_label(__('Max', 'ecf-framework'), 'Maximum value', 'Maximalwert') . '</span><span></span></div>';
         } else {
-            echo '<div class="ecf-head"><span>' . $this->tip_hover_label($this->t('Class Name', 'Klassenname'), 'Token name / CSS class name', 'Tokenname / CSS-Klassenname') . '</span><span>' . $this->tip_hover_label($this->t('Value', 'Wert'), 'Token value / CSS value', 'Tokenwert / CSS-Wert') . '</span><span></span></div>';
+            echo '<div class="ecf-head"><span>' . $this->tip_hover_label(__('Class Name', 'ecf-framework'), 'Token name / CSS class name', 'Tokenname / CSS-Klassenname') . '</span><span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Token value / CSS value', 'Tokenwert / CSS-Wert') . '</span><span></span></div>';
         }
 
         foreach ($rows as $i => $row) {
@@ -35,7 +35,7 @@ trait ECF_Framework_Render_Helpers_Trait {
                 $picker_hex = $this->format_css_color($this->parse_css_color($row['value']), 'hex');
                 echo '<input type="text" class="ecf-color-field" value="' . esc_attr($picker_hex) . '" placeholder="#000000" />';
                 echo '<input type="hidden" class="ecf-color-value-input" name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" />';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr($this->t('name', 'Name')) . '" />';
+                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('name', 'ecf-framework') . '" />';
                 echo '<input type="text" class="ecf-color-value-display" value="' . esc_attr($row['value']) . '" spellcheck="false" autocomplete="off" />';
                 echo '<select class="ecf-color-format-select" name="' . $input_key . '[' . $i . '][format]">';
                 echo '<option value="hex"' . selected($format, 'hex', false) . '>HEX</option>';
@@ -49,7 +49,7 @@ trait ECF_Framework_Render_Helpers_Trait {
                 echo '</div>';
             } elseif ($is_minmax) {
                 echo '<div class="ecf-row ecf-row--minmax">';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr($this->t('class name', 'Klassenname')) . '" />';
+                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
                 $min_val = esc_attr($row['min'] ?? $row['value'] ?? '');
                 $max_val = esc_attr($row['max'] ?? $row['value'] ?? '');
                 echo '<input type="text" name="' . $input_key . '[' . $i . '][min]" value="' . $min_val . '" placeholder="min" />';
@@ -58,7 +58,7 @@ trait ECF_Framework_Render_Helpers_Trait {
                 echo '</div>';
             } else {
                 echo '<div class="ecf-row">';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr($this->t('class name', 'Klassenname')) . '" />';
+                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
                 echo '<input type="text" name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" placeholder="value" />';
                 echo '<button type="button" class="ecf-remove-row" title="×">×</button>';
                 echo '</div>';
@@ -67,8 +67,8 @@ trait ECF_Framework_Render_Helpers_Trait {
         echo '</div>';
 
         echo '<div class="ecf-row-controls ecf-row-controls--bottom">';
-        echo '<button type="button" class="ecf-step-btn ecf-add-row" data-group="' . esc_attr($group) . '" title="' . esc_attr($this->t('Add', 'Hinzufügen')) . '">+</button>';
-        echo '<button type="button" class="ecf-step-btn ecf-step-btn--remove ecf-remove-last-row" data-group="' . esc_attr($group) . '" title="' . esc_attr($this->t('Remove last', 'Letzten entfernen')) . '">−</button>';
+        echo '<button type="button" class="ecf-step-btn ecf-add-row" data-group="' . esc_attr($group) . '" title="' . esc_attr__('Add', 'ecf-framework') . '">+</button>';
+        echo '<button type="button" class="ecf-step-btn ecf-step-btn--remove ecf-remove-last-row" data-group="' . esc_attr($group) . '" title="' . esc_attr__('Remove last', 'ecf-framework') . '">−</button>';
         echo '</div>';
     }
 

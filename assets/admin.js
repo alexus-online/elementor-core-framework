@@ -3,6 +3,8 @@ jQuery(function($){
   var spacingPreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.spacingPreview) ? ecfAdmin.spacingPreview : {};
   var typePreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.typePreview) ? ecfAdmin.typePreview : {};
   var radiusPreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.radiusPreview) ? ecfAdmin.radiusPreview : {};
+  var restUrl = (typeof ecfAdmin !== 'undefined' && ecfAdmin.restUrl) ? ecfAdmin.restUrl : '';
+  var restNonce = (typeof ecfAdmin !== 'undefined' && ecfAdmin.restNonce) ? ecfAdmin.restNonce : '';
   i18n.copy    = i18n.copy    || 'Copy';
   i18n.copied  = i18n.copied  || 'Copied!';
 
@@ -740,6 +742,294 @@ jQuery(function($){
   var pageFocusStorageKey = 'ecfPageFocusTarget';
   var whatsNewStorageKey = 'ecfWhatsNewState';
   var whatsNewMaxImpressions = 5;
+  var $settingsForm = $('form[action="options.php"]').first();
+  var $autosaveNotice = $();
+  var autosaveTimer = null;
+  var autosaveInFlight = false;
+  var autosaveQueued = false;
+  var autosaveReloadRequested = false;
+  var autosaveReady = false;
+
+  function parseFormFieldPath(name) {
+    return String(name || '')
+      .replace(/\]/g, '')
+      .split('[');
+  }
+
+  function shouldUseArrayContainer(nextKey) {
+    return nextKey === '' || /^\d+$/.test(nextKey);
+  }
+
+  function assignFormValue(target, path, value) {
+    var current = target;
+
+    for (var i = 0; i < path.length; i += 1) {
+      var key = path[i];
+      var isLast = i === path.length - 1;
+      var nextKey = path[i + 1];
+
+      if (isLast) {
+        if (Array.isArray(current)) {
+          if (key === '' || /^\d+$/.test(key)) {
+            current[key === '' ? current.length : parseInt(key, 10)] = value;
+          } else {
+            current[key] = value;
+          }
+        } else if (key === '') {
+          if (!Array.isArray(current)) {
+            current = [];
+          }
+          current.push(value);
+        } else {
+          current[key] = value;
+        }
+        return;
+      }
+
+      var container;
+      if (Array.isArray(current)) {
+        if (key === '' || /^\d+$/.test(key)) {
+          var arrayIndex = key === '' ? current.length : parseInt(key, 10);
+          if (current[arrayIndex] == null || typeof current[arrayIndex] !== 'object') {
+            current[arrayIndex] = shouldUseArrayContainer(nextKey) ? [] : {};
+          }
+          container = current[arrayIndex];
+        } else {
+          if (current[key] == null || typeof current[key] !== 'object') {
+            current[key] = shouldUseArrayContainer(nextKey) ? [] : {};
+          }
+          container = current[key];
+        }
+      } else {
+        if (current[key] == null || typeof current[key] !== 'object') {
+          current[key] = shouldUseArrayContainer(nextKey) ? [] : {};
+        }
+        container = current[key];
+      }
+
+      current = container;
+    }
+  }
+
+  function buildSettingsPayloadFromForm() {
+    var payload = {};
+    if (!$settingsForm.length) return payload;
+
+    $.each($settingsForm.serializeArray(), function(_, field) {
+      var path = parseFormFieldPath(field.name);
+      if (!path.length || path[0] !== 'ecf_framework_v50') {
+        return;
+      }
+      assignFormValue(payload, path.slice(1), field.value);
+    });
+
+    return payload;
+  }
+
+  function submitSettingsAutosave() {
+    if (!$settingsForm.length || !restUrl || !restNonce) return;
+
+    if (autosaveInFlight) {
+      autosaveQueued = true;
+      return;
+    }
+
+    autosaveInFlight = true;
+    autosaveQueued = false;
+    persistAdminPageState($settingsForm);
+    showAutosaveNotice(i18n.autosave_saving || 'Saving…', 'saving');
+    var payload = buildSettingsPayloadFromForm();
+
+    window.fetch(restUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-WP-Nonce': restNonce
+      },
+      body: JSON.stringify({ settings: payload })
+    }).then(function(response) {
+      if (!response.ok) {
+        throw new Error('rest_save_failed');
+      }
+      return response.json();
+    }).then(function() {
+      autosaveInFlight = false;
+
+      if (autosaveQueued) {
+        autosaveQueued = false;
+        submitSettingsAutosave();
+        return;
+      }
+
+      if (autosaveReloadRequested) {
+        autosaveReloadRequested = false;
+        window.location.reload();
+        return;
+      }
+
+      showAutosaveNotice(i18n.autosave_saved || 'Settings saved automatically.', 'success');
+    }).catch(function() {
+      autosaveInFlight = false;
+
+      if (autosaveQueued) {
+        autosaveQueued = false;
+      }
+
+      showAutosaveNotice(i18n.autosave_failed || 'Could not save settings automatically.', 'error');
+    });
+  }
+
+  function scheduleSettingsAutosave(options) {
+    if (!$settingsForm.length || !autosaveReady) return;
+
+    var opts = options || {};
+    var delay = typeof opts.delay === 'number' ? opts.delay : 700;
+    if (opts.reloadAfterSave) {
+      autosaveReloadRequested = true;
+    }
+
+    window.clearTimeout(autosaveTimer);
+    autosaveTimer = window.setTimeout(function() {
+      submitSettingsAutosave();
+    }, delay);
+  }
+
+  function ensureAutosaveNotice() {
+    if ($autosaveNotice.length) {
+      return $autosaveNotice;
+    }
+
+    $autosaveNotice = $('<div class="notice ecf-panel-notice ecf-autosave-notice" aria-live="polite" hidden><p></p></div>');
+    $('.ecf-main').prepend($autosaveNotice);
+    return $autosaveNotice;
+  }
+
+  function showAutosaveNotice(message, state) {
+    var $notice = ensureAutosaveNotice();
+    var hideTimer = $notice.data('hideTimer');
+    if (hideTimer) {
+      window.clearTimeout(hideTimer);
+    }
+
+    $notice.removeClass('ecf-panel-notice--success ecf-panel-notice--error ecf-panel-notice--saving');
+    $notice.find('p').text(message);
+    if (state === 'error') {
+      $notice.addClass('ecf-panel-notice--error');
+    } else if (state === 'saving') {
+      $notice.addClass('ecf-panel-notice--saving');
+    } else {
+      $notice.addClass('ecf-panel-notice--success');
+    }
+    $notice.prop('hidden', false).addClass('is-visible');
+
+    if (state === 'saving') {
+      return;
+    }
+
+    hideTimer = window.setTimeout(function() {
+      $notice.removeClass('is-visible');
+      window.setTimeout(function() {
+        $notice.prop('hidden', true);
+      }, 180);
+    }, 1800);
+
+    $notice.data('hideTimer', hideTimer);
+  }
+
+  function formatTemplate(template, value) {
+    return String(template || '').replace('%s', value == null ? '' : String(value));
+  }
+
+  function formatFileSize(bytes) {
+    var size = Number(bytes || 0);
+    if (!size) return '0 B';
+    if (size < 1024) return size + ' B';
+    if (size < 1024 * 1024) return formatNumber(size / 1024, 1) + ' KB';
+    return formatNumber(size / (1024 * 1024), 1) + ' MB';
+  }
+
+  function updateImportPreview(data) {
+    var $preview = $('[data-ecf-import-preview]');
+    if (!$preview.length) return;
+
+    var $meta = $preview.find('[data-ecf-import-preview-meta]');
+    var $warning = $preview.find('[data-ecf-import-preview-warning]');
+    var lines = [];
+
+    if (!data) {
+      $preview.prop('hidden', true);
+      $meta.empty();
+      $warning.prop('hidden', true).text('');
+      return;
+    }
+
+    lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_file || 'File: %s', data.name + ' (' + formatFileSize(data.size) + ')')) + '</div>');
+    if (data.meta && data.meta.plugin_version) {
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_version || 'Exported from plugin version: %s', data.meta.plugin_version)) + '</div>');
+    }
+    if (data.meta && data.meta.exported_at) {
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_date || 'Exported at: %s', data.meta.exported_at)) + '</div>');
+    }
+    if (data.meta && data.meta.schema_version) {
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_schema || 'Schema version: %s', data.meta.schema_version)) + '</div>');
+    }
+    if (data.settingsCount) {
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_sections || 'Detected settings groups: %s', data.settingsCount)) + '</div>');
+    }
+    if (!data.meta) {
+      lines.push('<div>' + escapeHtml(i18n.import_preview_legacy || 'Legacy export without metadata. Import is still possible.') + '</div>');
+    }
+
+    $meta.html(lines.join(''));
+
+    if (data.warning) {
+      $warning.prop('hidden', false).text(data.warning);
+    } else {
+      $warning.prop('hidden', true).text('');
+    }
+
+    $preview.prop('hidden', false);
+  }
+
+  $(document).on('change', '[data-ecf-import-file]', function() {
+    var file = this.files && this.files[0] ? this.files[0] : null;
+    if (!file) {
+      updateImportPreview(null);
+      return;
+    }
+
+    var reader = new window.FileReader();
+    reader.onload = function(event) {
+      try {
+        var parsed = JSON.parse(String(event.target.result || ''));
+        var meta = parsed && typeof parsed === 'object' && parsed.meta && typeof parsed.meta === 'object' ? parsed.meta : null;
+        var warning = '';
+        if (!meta && !(parsed && typeof parsed === 'object')) {
+          throw new Error('invalid');
+        }
+        if (meta && meta.plugin_version && ecfAdmin.pluginVersion && String(meta.plugin_version) !== String(ecfAdmin.pluginVersion)) {
+          warning = i18n.import_preview_incompatible || 'This file was exported from another plugin version. Please review General Settings, Sync, and editor-related options after import.';
+        }
+
+        updateImportPreview({
+          name: file.name,
+          size: file.size,
+          meta: meta,
+          settingsCount: parsed && parsed.settings && typeof parsed.settings === 'object' ? Object.keys(parsed.settings).length : 0,
+          warning: warning
+        });
+      } catch (err) {
+        updateImportPreview({
+          name: file.name,
+          size: file.size,
+          meta: null,
+          warning: i18n.import_preview_invalid || 'The selected file is not a valid ECF JSON export.'
+        });
+      }
+    };
+    reader.readAsText(file);
+  });
 
   function storePageScrollPosition() {
     try {
@@ -1087,6 +1377,17 @@ jQuery(function($){
     syncNamedField($(this));
   });
 
+  $(document).on('input', 'form[action="options.php"] :input[name]:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"])', function() {
+    scheduleSettingsAutosave({ delay: 900 });
+  });
+
+  $(document).on('change', 'form[action="options.php"] select[name], form[action="options.php"] textarea[name], form[action="options.php"] input[type="checkbox"][name], form[action="options.php"] input[type="radio"][name], form[action="options.php"] input[type="hidden"][name]', function() {
+    scheduleSettingsAutosave({
+      delay: 250,
+      reloadAfterSave: $(this).attr('name') === 'ecf_framework_v50[interface_language]'
+    });
+  });
+
   $(document).on('change', '[data-ecf-base-font-preset]', function() {
     var $custom = $('[data-ecf-base-font-custom]');
     var showCustom = $(this).val() === '__custom__';
@@ -1199,8 +1500,10 @@ jQuery(function($){
   registerWhatsNewImpressions();
   refreshWhatsNewBadges();
   restorePageScrollPosition();
+  autosaveReady = true;
 
   $(document).on('submit', '.ecf-wrap form', function() {
+    window.clearTimeout(autosaveTimer);
     persistAdminPageState($(this));
   });
 
@@ -3077,6 +3380,20 @@ jQuery(function($){
       setTimeout(function() {
         $pill.text(i18n.copy).removeClass('is-copied');
       }, 1500);
+    });
+  });
+
+  $(document).on('click', '.ecf-debug-copy', function(e) {
+    e.preventDefault();
+    var $button = $(this);
+    var text = $button.attr('data-ecf-copy-text') || '';
+    if (!text || !navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(function() {
+      var original = $button.text();
+      $button.text(i18n.copied).addClass('is-copied');
+      setTimeout(function() {
+        $button.text(original).removeClass('is-copied');
+      }, 1200);
     });
   });
 

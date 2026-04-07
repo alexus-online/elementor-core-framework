@@ -7,29 +7,29 @@ if (!defined('ABSPATH')) {
 trait ECF_Framework_Elementor_Status_Trait {
     private function get_detected_elementor_limits() {
         $class_limit = 100;
-        $class_source = $this->t('ECF fallback', 'ECF-Fallback');
+        $class_source = __('ECF fallback', 'ecf-framework');
 
         if (class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_REST_API')) {
             $class_limit = (int) \Elementor\Modules\GlobalClasses\Global_Classes_REST_API::MAX_ITEMS;
-            $class_source = $this->t('Elementor Core', 'Elementor Core');
+            $class_source = __('Elementor Core', 'ecf-framework');
         }
 
         $variable_limit = 100;
-        $variable_source = $this->t('ECF fallback', 'ECF-Fallback');
+        $variable_source = __('ECF fallback', 'ecf-framework');
 
         if (class_exists('\Elementor\Modules\Variables\Storage\Constants')) {
             $variable_limit = (int) \Elementor\Modules\Variables\Storage\Constants::TOTAL_VARIABLES_COUNT;
-            $variable_source = $this->t('Elementor Core', 'Elementor Core');
+            $variable_source = __('Elementor Core', 'ecf-framework');
         }
 
         $filtered_class_limit = (int) apply_filters('ecf/elementor_global_class_limit', $class_limit);
         if ($filtered_class_limit !== $class_limit) {
-            $class_source = $this->t('ECF filter', 'ECF-Filter');
+            $class_source = __('ECF filter', 'ecf-framework');
         }
 
         $filtered_variable_limit = (int) apply_filters('ecf/elementor_global_variable_limit', $variable_limit);
         if ($filtered_variable_limit !== $variable_limit) {
-            $variable_source = $this->t('ECF filter', 'ECF-Filter');
+            $variable_source = __('ECF filter', 'ecf-framework');
         }
 
         return [
