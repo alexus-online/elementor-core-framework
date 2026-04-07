@@ -1375,16 +1375,16 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                 <div class="ecf-card" data-ecf-layout-item="sync-import-export">
                     <h2><?php echo esc_html__('Export / Import', 'ecf-framework'); ?></h2>
                     <p style="color:#9ca3af;font-size:13px;margin:0 0 16px;"><?php echo esc_html__('Export settings as JSON or import from another installation.', 'ecf-framework'); ?></p>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                    <div class="ecf-import-actions">
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                             <?php wp_nonce_field('ecf_export'); ?>
                             <input type="hidden" name="action" value="ecf_export">
                             <button type="submit" class="ecf-btn ecf-btn--ghost"><span class="dashicons dashicons-download" aria-hidden="true"></span><span><?php echo esc_html__('Export JSON', 'ecf-framework'); ?></span></button>
                         </form>
-                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" style="display:flex;align-items:center;gap:8px;">
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" class="ecf-import-form">
                             <?php wp_nonce_field('ecf_import'); ?>
                             <input type="hidden" name="action" value="ecf_import">
-                            <input type="file" name="ecf_import_file" accept=".json" required style="color:#9ca3af;font-size:13px;" data-ecf-import-file>
+                            <input type="file" name="ecf_import_file" accept=".json" required class="ecf-file ecf-import-form__file" data-ecf-import-file>
                             <button type="submit" class="ecf-btn ecf-btn--ghost"><span class="dashicons dashicons-upload" aria-hidden="true"></span><span><?php echo esc_html__('Import', 'ecf-framework'); ?></span></button>
                         </form>
                     </div>

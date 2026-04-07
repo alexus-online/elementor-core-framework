@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2 (2026-04-07)
+
+### Fix
+- Fixed the local font add flow so it opens and edits the correct Typography font section.
+- Flow für lokale Schriften korrigiert, sodass der richtige Typography-Bereich geöffnet und bearbeitet wird.
+- Fixed narrow layout issues in the local font file UI and the Export / Import card.
+- Schmale Layout-Probleme in der UI für lokale Schriftdateien und in der Export-/Import-Karte behoben.
+
 ## 0.2.1 (2026-04-07)
 
 ### UX

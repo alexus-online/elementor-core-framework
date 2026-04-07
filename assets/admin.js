@@ -293,8 +293,8 @@ jQuery(function($){
   function inputKey(group){
     return $('.ecf-table[data-group="'+group+'"]').data('input-key') || ('ecf_framework_v50['+group+']');
   }
-  function nextLocalFontIndex() {
-    return $('[data-local-font-table] .ecf-font-file-row').length;
+  function nextLocalFontIndex($table) {
+    return ($table && $table.length ? $table : $('[data-local-font-table]').first()).find('.ecf-font-file-row').length;
   }
   initColorPickers($(document));
 
@@ -355,9 +355,13 @@ jQuery(function($){
   });
 
   $(document).on('click', '.ecf-add-local-font', function(){
-    var $table = $('[data-local-font-table]');
+    var $table = $(this).siblings('[data-local-font-table]').first();
+    if (!$table.length) {
+      $table = $(this).closest('[data-ecf-local-fonts-section], .ecf-card').find('[data-local-font-table]').first();
+    }
+    if (!$table.length) return;
     var key = $table.data('input-key');
-    var index = nextLocalFontIndex();
+    var index = nextLocalFontIndex($table);
     var html = '<div class="ecf-font-file-row">'
       + '<input type="text" name="' + key + '[' + index + '][name]" value="" placeholder="primary-regular" />'
       + '<input type="text" name="' + key + '[' + index + '][family]" value="" placeholder="Primary" />'

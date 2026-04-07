@@ -2223,6 +2223,12 @@
   gap: 8px;
   align-items: center;
 }
+.ecf-panel[data-panel="typography"] [data-ecf-local-fonts-section] .ecf-font-file-head {
+  display: none;
+}
+.ecf-panel[data-panel="typography"] [data-ecf-local-fonts-section] .ecf-font-file-row {
+  grid-template-columns: 1fr;
+}
 .ecf-font-file-head {
   font-size: 10px;
   font-weight: 600;
@@ -2247,12 +2253,37 @@
   padding: 5px 8px;
   width: 100%;
   box-shadow: none;
+  min-width: 0;
 }
 .ecf-font-file-picker {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
+}
+.ecf-panel[data-panel="typography"] [data-ecf-local-fonts-section] .ecf-font-file-picker {
+  grid-template-columns: 1fr;
+}
+.ecf-panel[data-panel="typography"] [data-ecf-local-fonts-section] .ecf-font-file-select.button {
+  width: 100%;
+  justify-content: center;
+}
+.ecf-import-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.ecf-import-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ecf-import-form__file {
+  min-width: 0;
+  max-width: 100%;
 }
 .ecf-add-local-font {
   display: inline-flex !important;
@@ -4696,6 +4727,12 @@ body.ecf-modal-open {
   }
   .ecf-font-file-row {
     grid-template-columns: 1fr;
+  }
+  .ecf-import-form {
+    width: 100%;
+  }
+  .ecf-import-form__file {
+    width: 100%;
   }
   .ecf-shadow-layout {
     grid-template-columns: 1fr;
