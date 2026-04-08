@@ -154,6 +154,9 @@ msgstr "Basis-Stufe"
 msgid "Base Text Color"
 msgstr "Basis-Textfarbe"
 
+msgid "Base font stack for the whole site body and normal flowing text. Headings can keep using your separate Primary typography font."
+msgstr "Basis-Schriftfamilie für den gesamten Body und normalen Fließtext der Website. Überschriften können weiterhin deine separate Primärschrift aus der Typografie verwenden."
+
 msgid "Base layout class for the overall page structure."
 msgstr "Basis-Layout-Klasse für den generellen Seitenaufbau."
 
@@ -259,6 +262,9 @@ msgstr "Container-Breiten"
 msgid "Content"
 msgstr "Inhalt"
 
+msgid "Content Max Width"
+msgstr "Maximale Inhaltsbreite"
+
 msgid "Content area inside this component."
 msgstr "Inhaltsbereich innerhalb dieser Komponente."
 
@@ -305,7 +311,7 @@ msgid "Custom stack"
 msgstr "Eigener Stack"
 
 msgid "Dark mode"
-msgstr "Dark Mode"
+msgstr "Dunkelmodus"
 
 msgid "Dark variant for sections with a darker surface."
 msgstr "Dunkle Variante für Bereiche mit dunkler Oberfläche."
@@ -315,6 +321,9 @@ msgstr "Standard-Schriftgröße für normale Absätze und Fließtext."
 
 msgid "Default body text style for regular paragraphs."
 msgstr "Standard-Fließtext-Stil für normale Absätze."
+
+msgid "Default font size for normal paragraph text across the site. By default this follows the current max value of your active body token and can be overridden here if needed."
+msgstr "Standard-Schriftgröße für normalen Fließtext auf der ganzen Website. Standardmäßig folgt sie dem aktuellen Maximalwert deines aktiven Body-Tokens und kann hier bei Bedarf überschrieben werden."
 
 msgid "Delete"
 msgstr "Löschen"
@@ -405,6 +414,9 @@ msgstr "Element-basierte Einheit. Selten nötig, aber für Content-Wrapper mögl
 
 msgid "Elementor"
 msgstr "Elementor"
+
+msgid "Elementor Boxed Width"
+msgstr "Elementor Boxed-Breite"
 
 msgid "Elementor Core recognized"
 msgstr "Elementor Core erkannt"
@@ -634,6 +646,9 @@ msgstr "Ungültige JSON-Nutzlast."
 msgid "Invalid variable value."
 msgstr "Ungültiger Variablenwert."
 
+msgid "Keep readable content widths and wider layout containers together in one place."
+msgstr "Bündele hier lesbare Inhaltsbreiten und breitere Layout-Container an einem Ort."
+
 msgid "Keeps content accessible for screen readers while hiding it visually."
 msgstr "Lässt Inhalte für Screenreader zugänglich, blendet sie aber visuell aus."
 
@@ -739,6 +754,9 @@ msgstr "Modus"
 msgid "Modifiers"
 msgstr "Modifier"
 
+msgid "Mono"
+msgstr "Mono"
+
 msgid "Naming Convention"
 msgstr "Bezeichnung"
 
@@ -835,6 +853,9 @@ msgstr "Vorschau deiner generierten Abstands-Tokens."
 msgid "Preview of your shadow tokens."
 msgstr "Vorschau deiner Schatten-Tokens."
 
+msgid "Primary"
+msgstr "Primär"
+
 msgid "Primary variant for the main emphasis action or element."
 msgstr "Primäre Variante für die wichtigste Aktion oder den wichtigsten Akzent."
 
@@ -907,6 +928,9 @@ msgstr "Klassen durchsuchen…"
 msgid "Search variables…"
 msgstr "Variablen durchsuchen…"
 
+msgid "Secondary"
+msgstr "Sekundär"
+
 msgid "Secondary variant for quieter supporting actions or elements."
 msgstr "Sekundäre Variante für ruhigere unterstützende Aktionen oder Elemente."
 
@@ -930,6 +954,12 @@ msgstr "Datei wählen"
 
 msgid "Semantic starter class for consistent naming and structure."
 msgstr "Semantische Starter-Klasse für konsistente Benennung und Struktur."
+
+msgid "Set the root rem size plus the default body type choices for your site."
+msgstr "Lege hier die Root-rem-Größe und die Standard-Typografie für den Fließtext deiner Website fest."
+
+msgid "Sets the token <code>%1$s</code>. Default source: max value from <code>%2$s</code> (%3$s %4$s)."
+msgstr "Setzt das Token <code>%1$s</code>. Standardquelle: Maximalwert von <code>%2$s</code> (%3$s %4$s)."
 
 msgid "Settings"
 msgstr "Einstellungen"
@@ -1069,6 +1099,9 @@ msgstr "Vertrauen"
 msgid "Type"
 msgstr "Typo"
 
+msgid "Type & Size"
+msgstr "Typ & Größe"
+
 msgid "Type Scale"
 msgstr "Schriftskala"
 
@@ -1175,7 +1208,7 @@ msgid "Visible effect of the root font size"
 msgstr "Sichtbare Auswirkung der Root Font Size"
 
 msgid "Website"
-msgstr "Website"
+msgstr "Webseite"
 
 msgid "Website basics live here: root size, readable widths, body font and the default base colors for your site."
 msgstr "Hier liegen die Website-Grundlagen: Root-Größe, lesbare Breiten, Fließtext-Schrift und die Standard-Basisfarben deiner Website."
@@ -1196,10 +1229,13 @@ msgid "When enabled, the Elementor editor should later be able to show only matc
 msgstr "Wenn aktiv, soll der Elementor-Editor später nur passende Variablen für Farben, Größen und andere geeignete Feldtypen anzeigen können."
 
 msgid "White mode"
-msgstr "White Mode"
+msgstr "Hellmodus"
 
 msgid "Width of centered boxed layout containers."
 msgstr "Breite zentrierter Boxed-Layout-Container."
+
+msgid "Widths"
+msgstr "Breiten"
 
 msgid "Works in <strong>merge mode</strong> — ECF adds to existing Elementor variables and Global Classes without overwriting."
 msgstr "Arbeitet im <strong>Merge-Modus</strong> — ECF ergänzt bestehende Elementor-Variablen und globale Klassen ohne Überschreiben."

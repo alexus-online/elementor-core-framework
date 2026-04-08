@@ -267,7 +267,9 @@ trait ECF_Framework_Config_Trait {
     public function get_settings() {
         $saved = get_option($this->option_name);
         if (!$saved || !is_array($saved)) {
-            return $this->defaults();
+            $defaults = $this->defaults();
+            $defaults['base_body_text_size'] = $this->derived_base_body_text_size($defaults);
+            return $defaults;
         }
 
         $settings = wp_parse_args($saved, $this->defaults());
@@ -275,14 +277,16 @@ trait ECF_Framework_Config_Trait {
             ? $settings['interface_language']
             : $this->wordpress_default_interface_language();
         $default_general_favorites = $this->default_general_setting_favorites();
-        $saved_general_favorites = is_array($settings['general_setting_favorites'] ?? null)
-            ? $settings['general_setting_favorites']
+        $has_saved_general_favorites = array_key_exists('general_setting_favorites', $saved);
+        $saved_general_favorites = is_array($saved['general_setting_favorites'] ?? null)
+            ? $saved['general_setting_favorites']
             : [];
-        $merged_general_favorites = array_merge($default_general_favorites, $saved_general_favorites);
-        if (($settings['general_setting_favorites'] ?? []) !== $merged_general_favorites) {
-            $settings['general_setting_favorites'] = $merged_general_favorites;
-            $saved['general_setting_favorites'] = $merged_general_favorites;
+        if (!$has_saved_general_favorites) {
+            $settings['general_setting_favorites'] = $default_general_favorites;
+            $saved['general_setting_favorites'] = $default_general_favorites;
             update_option($this->option_name, $saved);
+        } else {
+            $settings['general_setting_favorites'] = $saved_general_favorites;
         }
         if (empty($settings['starter_classes']) || !is_array($settings['starter_classes'])) {
             $settings['starter_classes'] = $this->defaults()['starter_classes'];
@@ -325,6 +329,13 @@ trait ECF_Framework_Config_Trait {
         if ($needs_spacing_upgrade) {
             $settings['spacing'] = $this->default_spacing_settings();
             $saved['spacing'] = $settings['spacing'];
+            update_option($this->option_name, $saved);
+        }
+
+        $derived_base_body_text_size = $this->derived_base_body_text_size($settings);
+        if ($this->should_upgrade_base_body_text_size($settings['base_body_text_size'] ?? '', $settings)) {
+            $settings['base_body_text_size'] = $derived_base_body_text_size;
+            $saved['base_body_text_size'] = $derived_base_body_text_size;
             update_option($this->option_name, $saved);
         }
 

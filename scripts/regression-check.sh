@@ -19,6 +19,12 @@ rg -Fq "data-ecf-refresh-system-info" includes/trait-ecf-admin-page-sections.php
 rg -Fq "updateSystemInfoCards" assets/admin.js
 rg -Fq "ecf-framework-de_DE.po" scripts/generate-de-language-files.php || true
 test -x scripts/e2e-rest-check.sh
+test -x scripts/e2e-ui-check.sh
+test -x scripts/remote-cleanup.sh
+test -f playwright.config.js
+test -f tests/ui/admin-ui.spec.js
+test -f tests/ui/admin-ui-extended.spec.js
+test -f tests/ui/helpers/ecf-admin.js
 
 test -s languages/ecf-framework.pot
 test -s languages/ecf-framework-de_DE.po

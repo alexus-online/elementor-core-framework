@@ -64,21 +64,33 @@ trait ECF_Framework_Editor_Preview_Trait {
         echo '<div class="ecf-font-file-head"><span>' . esc_html__('Key', 'ecf-framework') . '</span><span>' . esc_html__('Family', 'ecf-framework') . '</span><span>' . esc_html__('File URL', 'ecf-framework') . '</span><span>' . esc_html__('Weight', 'ecf-framework') . '</span><span>' . esc_html__('Style', 'ecf-framework') . '</span><span>' . esc_html__('Display', 'ecf-framework') . '</span><span></span></div>';
         foreach ($rows as $i => $row) {
             echo '<div class="ecf-font-file-row">';
-            echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][name]') . '" value="' . esc_attr($row['name'] ?? '') . '" placeholder="primary-regular" />';
-            echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][family]') . '" value="' . esc_attr($row['family'] ?? '') . '" placeholder="Primary" />';
+            echo '<input type="text" data-ecf-slug-field="token" name="' . esc_attr($input_key . '[' . $i . '][name]') . '" value="' . esc_attr($row['name'] ?? '') . '" placeholder="' . esc_attr__('primary-regular', 'ecf-framework') . '" />';
+            echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][family]') . '" value="' . esc_attr($row['family'] ?? '') . '" placeholder="' . esc_attr__('Primary', 'ecf-framework') . '" />';
             echo '<div class="ecf-font-file-picker">';
             echo '<input type="text" class="ecf-font-file-url" name="' . esc_attr($input_key . '[' . $i . '][src]') . '" value="' . esc_attr($row['src'] ?? '') . '" placeholder="' . esc_attr__('Select a local upload', 'ecf-framework') . '" readonly />';
             echo '<button type="button" class="button ecf-font-file-select">' . esc_html__('Select file', 'ecf-framework') . '</button>';
             echo '</div>';
             echo '<input type="text" name="' . esc_attr($input_key . '[' . $i . '][weight]') . '" value="' . esc_attr($row['weight'] ?? '400') . '" placeholder="400" />';
             echo '<select name="' . esc_attr($input_key . '[' . $i . '][style]') . '">';
-            foreach (['normal', 'italic', 'oblique'] as $style) {
-                echo '<option value="' . esc_attr($style) . '" ' . selected($row['style'] ?? 'normal', $style, false) . '>' . esc_html($style) . '</option>';
+            $style_labels = [
+                'normal' => __('normal', 'ecf-framework'),
+                'italic' => __('italic', 'ecf-framework'),
+                'oblique' => __('oblique', 'ecf-framework'),
+            ];
+            foreach ($style_labels as $style => $style_label) {
+                echo '<option value="' . esc_attr($style) . '" ' . selected($row['style'] ?? 'normal', $style, false) . '>' . esc_html($style_label) . '</option>';
             }
             echo '</select>';
             echo '<select name="' . esc_attr($input_key . '[' . $i . '][display]') . '">';
-            foreach (['swap', 'fallback', 'optional', 'block', 'auto'] as $display) {
-                echo '<option value="' . esc_attr($display) . '" ' . selected($row['display'] ?? 'swap', $display, false) . '>' . esc_html($display) . '</option>';
+            $display_labels = [
+                'swap' => __('swap', 'ecf-framework'),
+                'fallback' => __('fallback', 'ecf-framework'),
+                'optional' => __('optional', 'ecf-framework'),
+                'block' => __('block', 'ecf-framework'),
+                'auto' => __('auto', 'ecf-framework'),
+            ];
+            foreach ($display_labels as $display => $display_label) {
+                echo '<option value="' . esc_attr($display) . '" ' . selected($row['display'] ?? 'swap', $display, false) . '>' . esc_html($display_label) . '</option>';
             }
             echo '</select>';
             echo '<button type="button" class="button ecf-remove-row">×</button>';

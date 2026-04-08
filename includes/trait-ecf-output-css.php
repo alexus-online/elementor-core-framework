@@ -1,12 +1,39 @@
 <?php
 
 trait ECF_Framework_Output_CSS_Trait {
+    private function resolved_base_font_family_css_value($settings) {
+        $selected = trim((string) ($settings['base_font_family'] ?? ''));
+        if ($selected === '') {
+            $selected = 'var(--ecf-font-primary)';
+        }
+
+        if (preg_match('/^var\(--ecf-font-([a-z0-9_-]+)\)$/i', $selected, $matches)) {
+            $token_name = sanitize_key($matches[1]);
+            foreach ((array) ($settings['typography']['fonts'] ?? []) as $row) {
+                if (sanitize_key($row['name'] ?? '') !== $token_name) {
+                    continue;
+                }
+
+                $value = trim((string) ($row['value'] ?? ''));
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+        }
+
+        return $selected;
+    }
+
     public function output_css() {
         $settings = $this->get_settings();
         $root_base_px = $this->get_root_font_base_px($settings);
         $root_font_css = $this->get_root_font_css_value($settings);
         $spacing_scale = $this->build_spacing_scale($settings['spacing'], $root_base_px);
         $type_scale = $this->build_type_scale($settings['typography']['scale'], $root_base_px);
+        $base_body_text_size = trim((string) ($settings['base_body_text_size'] ?? ''));
+        if ($this->should_upgrade_base_body_text_size($base_body_text_size, $settings)) {
+            $base_body_text_size = $this->derived_base_body_text_size($settings);
+        }
         echo "<style id='ecf-framework-v010'>";
         echo ":root{font-size:" . esc_attr($root_font_css) . ";";
         foreach ($settings['colors'] as $row) {
@@ -38,8 +65,8 @@ trait ECF_Framework_Output_CSS_Trait {
         echo "--ecf-base-background-color:" . esc_attr($this->sanitize_css_color_value($settings['base_background_color'] ?? '#ffffff')) . ";";
         echo "--ecf-link-color:" . esc_attr($this->sanitize_css_color_value($settings['link_color'] ?? '#3b82f6')) . ";";
         echo "--ecf-focus-color:" . esc_attr($this->sanitize_css_color_value($settings['focus_color'] ?? '#6366f1')) . ";";
-        echo "--ecf-base-font-family:" . esc_attr($settings['base_font_family'] ?? 'var(--ecf-font-primary)') . ";";
-        echo "--ecf-base-body-text-size:" . esc_attr($settings['base_body_text_size'] ?? '16px') . ";";
+        echo "--ecf-base-font-family:" . esc_attr($this->resolved_base_font_family_css_value($settings)) . ";";
+        echo "--ecf-base-body-text-size:" . esc_attr($base_body_text_size) . ";";
         foreach ($settings['typography']['fonts'] as $row) {
             $name = sanitize_key($row['name']);
             $value = esc_attr($row['value']);
@@ -74,6 +101,7 @@ trait ECF_Framework_Output_CSS_Trait {
             echo ".ecf-container-boxed,.cf-container-boxed{width:min(100% - 2rem, var(--ecf-container-boxed));margin-inline:auto;}";
         }
         echo "body{font-family:var(--ecf-base-font-family);font-size:var(--ecf-base-body-text-size);color:var(--ecf-base-text-color);background-color:var(--ecf-base-background-color);}";
+        echo "h1,h2,h3,h4,h5,h6{font-family:var(--ecf-font-primary);}";
         echo "a{color:var(--ecf-link-color);}";
         echo ":focus-visible{outline:2px solid var(--ecf-focus-color);outline-offset:2px;}";
         echo ".ecf-content-width,.cf-content-width{width:min(100%,var(--ecf-content-max-width));margin-inline:auto;}";

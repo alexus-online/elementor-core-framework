@@ -530,7 +530,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                         <input type="checkbox" name="<?php echo esc_attr($this->option_name); ?>[starter_classes][custom][<?php echo esc_attr((string) $index); ?>][enabled]" value="1" class="ecf-custom-starter-enabled" <?php checked(!empty($row['enabled'])); ?>>
                                         <span><?php echo esc_html__('Active', 'ecf-framework'); ?></span>
                                     </label>
-                                    <input type="text" name="<?php echo esc_attr($this->option_name); ?>[starter_classes][custom][<?php echo esc_attr((string) $index); ?>][name]" value="<?php echo esc_attr($row['name'] ?? ''); ?>" placeholder="ecf-banner" class="ecf-custom-starter-name">
+                                    <input type="text" data-ecf-slug-field="token" name="<?php echo esc_attr($this->option_name); ?>[starter_classes][custom][<?php echo esc_attr((string) $index); ?>][name]" value="<?php echo esc_attr($row['name'] ?? ''); ?>" placeholder="ecf-banner" class="ecf-custom-starter-name">
                                     <select name="<?php echo esc_attr($this->option_name); ?>[starter_classes][custom][<?php echo esc_attr((string) $index); ?>][category]" class="ecf-custom-starter-category">
                                         <?php foreach ($starter_class_categories as $category_key => $category_label): ?>
                                             <?php if ($category_key === 'all') continue; ?>
@@ -1544,7 +1544,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
             <div class="ecf-row ecf-row--color">
                 <input type="text" class="ecf-color-field" value="#000000" placeholder="#000000" />
                 <input type="hidden" class="ecf-color-value-input" name="__VALUE__" value="#000000" />
-                <input type="text" name="__NAME__" value="" placeholder="<?php echo esc_attr__('class name', 'ecf-framework'); ?>" />
+                <input type="text" data-ecf-slug-field="token" name="__NAME__" value="" placeholder="<?php echo esc_attr__('class name', 'ecf-framework'); ?>" />
                 <input type="text" class="ecf-color-value-display" value="#000000" spellcheck="false" autocomplete="off" />
                 <select class="ecf-color-format-select" name="__FORMAT__">
                     <option value="hex">HEX</option>
@@ -1560,7 +1560,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
 
         <script type="text/template" id="ecf-row-template-minmax">
             <div class="ecf-row ecf-row--minmax">
-                <input type="text" name="__NAME__" value="" placeholder="<?php echo esc_attr__('class name', 'ecf-framework'); ?>" />
+                <input type="text" data-ecf-slug-field="token" name="__NAME__" value="" placeholder="<?php echo esc_attr__('class name', 'ecf-framework'); ?>" />
                 <input type="text" name="__MIN__" value="" placeholder="min" />
                 <input type="text" name="__MAX__" value="" placeholder="max" />
                 <button type="button" class="button ecf-remove-row">×</button>
@@ -1569,7 +1569,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
 
         <script type="text/template" id="ecf-row-template-default">
             <div class="ecf-row">
-                <input type="text" name="__NAME__" value="" placeholder="<?php echo esc_attr__('class name', 'ecf-framework'); ?>" />
+                <input type="text" data-ecf-slug-field="token" name="__NAME__" value="" placeholder="<?php echo esc_attr__('class name', 'ecf-framework'); ?>" />
                 <input type="text" name="__VALUE__" value="" placeholder="value" />
                 <button type="button" class="button ecf-remove-row">×</button>
             </div>
@@ -1580,7 +1580,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     <input type="checkbox" name="__ENABLED__" value="1" class="ecf-custom-starter-enabled" checked>
                     <span><?php echo esc_html__('Active', 'ecf-framework'); ?></span>
                 </label>
-                <input type="text" name="__NAME__" value="" placeholder="ecf-banner" class="ecf-custom-starter-name">
+                <input type="text" data-ecf-slug-field="token" name="__NAME__" value="" placeholder="ecf-banner" class="ecf-custom-starter-name">
                 <select name="__CATEGORY__" class="ecf-custom-starter-category">
                     <?php foreach ($starter_class_categories as $category_key => $category_label): ?>
                         <?php if ($category_key === 'all') continue; ?>

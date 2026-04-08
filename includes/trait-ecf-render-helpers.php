@@ -35,7 +35,7 @@ trait ECF_Framework_Render_Helpers_Trait {
                 $picker_hex = $this->format_css_color($this->parse_css_color($row['value']), 'hex');
                 echo '<input type="text" class="ecf-color-field" value="' . esc_attr($picker_hex) . '" placeholder="#000000" />';
                 echo '<input type="hidden" class="ecf-color-value-input" name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" />';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('name', 'ecf-framework') . '" />';
+                echo '<input type="text" data-ecf-slug-field="token" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('name', 'ecf-framework') . '" />';
                 echo '<input type="text" class="ecf-color-value-display" value="' . esc_attr($row['value']) . '" spellcheck="false" autocomplete="off" />';
                 echo '<select class="ecf-color-format-select" name="' . $input_key . '[' . $i . '][format]">';
                 echo '<option value="hex"' . selected($format, 'hex', false) . '>HEX</option>';
@@ -49,7 +49,7 @@ trait ECF_Framework_Render_Helpers_Trait {
                 echo '</div>';
             } elseif ($is_minmax) {
                 echo '<div class="ecf-row ecf-row--minmax">';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
+                echo '<input type="text" data-ecf-slug-field="token" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
                 $min_val = esc_attr($row['min'] ?? $row['value'] ?? '');
                 $max_val = esc_attr($row['max'] ?? $row['value'] ?? '');
                 echo '<input type="text" name="' . $input_key . '[' . $i . '][min]" value="' . $min_val . '" placeholder="min" />';
@@ -58,7 +58,7 @@ trait ECF_Framework_Render_Helpers_Trait {
                 echo '</div>';
             } else {
                 echo '<div class="ecf-row">';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
+                echo '<input type="text" data-ecf-slug-field="token" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
                 echo '<input type="text" name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" placeholder="value" />';
                 echo '<button type="button" class="ecf-remove-row" title="×">×</button>';
                 echo '</div>';

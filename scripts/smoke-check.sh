@@ -29,8 +29,15 @@ required_files=(
 extra_required_files=(
   "scripts/generate-pot.php"
   "scripts/generate-de-language-files.php"
+  "scripts/remote-cleanup.sh"
   "scripts/e2e-rest-check.sh"
+  "scripts/e2e-ui-check.sh"
   "scripts/regression-check.sh"
+  "playwright.config.js"
+  "package.json"
+  "tests/ui/admin-ui.spec.js"
+  "tests/ui/admin-ui-extended.spec.js"
+  "tests/ui/helpers/ecf-admin.js"
   "languages/ecf-framework.pot"
 )
 
@@ -93,15 +100,21 @@ node --check assets/admin.js
 node --check assets/editor.js
 
 bash -n deploy.sh
+bash -n scripts/remote-cleanup.sh
 php -l scripts/generate-pot.php
 php -l scripts/generate-de-language-files.php
 bash -n scripts/e2e-rest-check.sh
+bash -n scripts/e2e-ui-check.sh
 php scripts/generate-pot.php >/dev/null
 php scripts/generate-de-language-files.php >/dev/null
 bash scripts/regression-check.sh
 
 if [[ -n "${ECF_WP_URL:-}" && -n "${ECF_WP_USER:-}" && -n "${ECF_WP_APP_PASSWORD:-}" ]]; then
   bash scripts/e2e-rest-check.sh
+fi
+
+if [[ -n "${ECF_WP_URL:-}" && ( -n "${ECF_WP_ADMIN_USER:-}" || -n "${ECF_WP_USER:-}" ) && -n "${ECF_WP_ADMIN_PASSWORD:-}" ]]; then
+  bash scripts/e2e-ui-check.sh
 fi
 
 duplicate_methods="$(

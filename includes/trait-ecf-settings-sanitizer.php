@@ -5,9 +5,41 @@ if (!defined('ABSPATH')) {
 }
 
 trait ECF_Framework_Settings_Sanitizer_Trait {
+    private function fallback_positive_css_size($candidate, $saved_value, $default_value, $settings_for_default = null) {
+        $candidate = trim((string) $candidate);
+        $saved_value = trim((string) $saved_value);
+        $default_value = trim((string) $default_value);
+
+        $is_positive = function($value) {
+            $parts = $this->parse_css_size_parts($value);
+            if (($parts['format'] ?? '') === 'custom') {
+                $normalized = strtolower(trim((string) $value));
+                if ($normalized === '' || preg_match('/^(?:0|0px|0rem|0em|0ch|0%|0vw|0vh)$/', $normalized)) {
+                    return false;
+                }
+                return $this->sanitize_css_size_value($value) !== '';
+            }
+            $numeric = (float) str_replace(',', '.', (string) ($parts['value'] ?? '0'));
+            return $value !== '' && $numeric > 0;
+        };
+
+        if ($is_positive($candidate)) {
+            return $candidate;
+        }
+        if ($is_positive($saved_value)) {
+            return $saved_value;
+        }
+        if ($default_value === '16px' && $settings_for_default !== null) {
+            return $this->derived_base_body_text_size($settings_for_default);
+        }
+        return $default_value;
+    }
+
     public function sanitize_settings($input) {
         $defaults = $this->defaults();
         $output = $defaults;
+        $saved_settings = get_option($this->option_name);
+        $saved_settings = is_array($saved_settings) ? $saved_settings : [];
         $root_font_size = isset($input['root_font_size']) ? str_replace(',', '.', sanitize_text_field($input['root_font_size'])) : $defaults['root_font_size'];
         $output['root_font_size'] = in_array($root_font_size, ['100', '62.5'], true) ? $root_font_size : $defaults['root_font_size'];
         $interface_language = sanitize_key($input['interface_language'] ?? $defaults['interface_language']);
@@ -28,7 +60,11 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
         } else {
             $content_width = $this->sanitize_css_size_value($content_width_value);
         }
-        $output['content_max_width'] = $content_width !== '' ? $content_width : $defaults['content_max_width'];
+        $output['content_max_width'] = $this->fallback_positive_css_size(
+            $content_width,
+            $saved_settings['content_max_width'] ?? '',
+            $defaults['content_max_width']
+        );
         $boxed_width_value  = trim((string) ($input['elementor_boxed_width_value'] ?? $input['elementor_boxed_width'] ?? ''));
         $boxed_width_format = sanitize_key($input['elementor_boxed_width_format'] ?? '');
         if (in_array($boxed_width_format, ['px', 'rem', 'em', '%', 'vw', 'vh'], true)) {
@@ -36,7 +72,11 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
         } else {
             $boxed_width = $this->sanitize_css_size_value($boxed_width_value);
         }
-        $output['elementor_boxed_width'] = $boxed_width !== '' ? $boxed_width : $defaults['elementor_boxed_width'];
+        $output['elementor_boxed_width'] = $this->fallback_positive_css_size(
+            $boxed_width,
+            $saved_settings['elementor_boxed_width'] ?? '',
+            $defaults['elementor_boxed_width']
+        );
         $base_font_family_preset = sanitize_text_field($input['base_font_family_preset'] ?? '');
         $base_font_family_custom = sanitize_text_field($input['base_font_family_custom'] ?? '');
         if ($base_font_family_preset === '__custom__') {
@@ -54,7 +94,12 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
         } else {
             $base_body_text_size = $this->sanitize_css_size_value($base_body_text_size_value);
         }
-        $output['base_body_text_size'] = $base_body_text_size !== '' ? $base_body_text_size : $defaults['base_body_text_size'];
+        $output['base_body_text_size'] = $this->fallback_positive_css_size(
+            $base_body_text_size,
+            $saved_settings['base_body_text_size'] ?? '',
+            $defaults['base_body_text_size'],
+            $output
+        );
         $base_text_color = $this->sanitize_css_color_value($input['base_text_color'] ?? $defaults['base_text_color']);
         $base_background_color = $this->sanitize_css_color_value($input['base_background_color'] ?? $defaults['base_background_color']);
         $link_color = $this->sanitize_css_color_value($input['link_color'] ?? $defaults['link_color']);
@@ -305,6 +350,10 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
                 }
             }
             if (empty($output['typography'][$group])) $output['typography'][$group] = $typo_defaults[$group];
+        }
+
+        if ($base_body_text_size === '' || $this->should_upgrade_base_body_text_size($output['base_body_text_size'] ?? '', $output)) {
+            $output['base_body_text_size'] = $this->derived_base_body_text_size($output);
         }
 
         if (empty($output['github_update_checks_enabled'])) {

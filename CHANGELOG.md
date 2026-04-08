@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.5 (2026-04-08)
+
+### Fix
+- Resolved `--ecf-base-font-family` to a real body font stack and aligned the body font handling with the selected base font family.
+- `--ecf-base-font-family` auf einen echten Body-Font-Stack aufgelöst und die Body-Schrift sauber an die ausgewählte Basis-Schriftfamilie gekoppelt.
+- Normalized token-style names in the UI so new token keys, local font keys, and custom starter names no longer keep spaces.
+- Token-artige Namen im UI normalisiert, sodass neue Token-Keys, Local-Font-Keys und Custom-Starter-Namen keine Leerzeichen mehr behalten.
+- Hardened foreign-variable editing with label normalization, visible error feedback, and better exception handling.
+- Bearbeitung fremder Variablen mit Label-Normalisierung, sichtbaren Fehlermeldungen und robusterem Exception-Handling gehärtet.
+
+### Test
+- Added live UI flows for base font family resolution and token-name normalization and verified them against the production site.
+- Live-UI-Flows für die Auflösung der Basis-Schriftfamilie und die Normalisierung von Token-Namen ergänzt und gegen die Produktivseite verifiziert.
+
+## 0.2.4 (2026-04-07)
+
+### Fix
+- Removed remaining user-facing hardcoded messages from the admin JS flow.
+- Verbleibende sichtbare Hardcode-Meldungen aus dem Admin-JS-Flow entfernt.
+- Moved local-font placeholders, search-edit helper text, and preview labels fully into the translation pipeline.
+- Platzhalter für lokale Schriften, Search-Edit-Hilfetexte und Preview-Labels vollständig in die Übersetzungspipeline verschoben.
+
 ## 0.2.3 (2026-04-07)
 
 ### Fix

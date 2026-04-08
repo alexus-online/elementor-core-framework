@@ -476,11 +476,11 @@ trait ECF_Framework_Admin_General_Trait {
 
     private function body_text_size_format_options() {
         return [
-            'rem'    => ['label' => 'rem', 'tip' => __('Root-based unit. Best default for body text like 1rem or 1.125rem.', 'ecf-framework')],
-            'px'     => ['label' => 'px',  'tip' => __('Fixed pixel value. Useful if you need a strict size like 16px or 18px.', 'ecf-framework')],
+            'px'     => ['label' => 'px',  'tip' => __('Fixed pixel value. Best default here, because the field inherits the max px value from your active body token such as --ecf-text-m.', 'ecf-framework')],
+            'rem'    => ['label' => 'rem', 'tip' => __('Root-based unit. Use this only if you want to override the body size intentionally in rem.', 'ecf-framework')],
             'em'     => ['label' => 'em',  'tip' => __('Element-based unit. Rarely needed for body text, but available if you want it.', 'ecf-framework')],
             '%'      => ['label' => '%',   'tip' => __('Percentage value relative to the inherited font size.', 'ecf-framework')],
-            'custom' => ['label' => 'f(x)', 'tip' => __('Full CSS expression. Use values like clamp(1rem, 0.95rem + 0.2vw, 1.125rem).', 'ecf-framework')],
+            'custom' => ['label' => 'f(x)', 'tip' => __('Full CSS expression. Use values like clamp(16px, 1rem + 0.2vw, 18px).', 'ecf-framework')],
         ];
     }
 
@@ -488,16 +488,18 @@ trait ECF_Framework_Admin_General_Trait {
         $parts = $this->parse_css_size_parts($stored_value);
         $selected_format = isset($options[$parts['format']]) ? $parts['format'] : $default_format;
         ?>
-        <div class="ecf-inline-size-input ecf-inline-size-input--favorite">
+        <div class="ecf-inline-size-input ecf-inline-size-input--favorite" data-ecf-inline-size-field data-field-key="<?php echo esc_attr($field_key); ?>">
             <input type="text"
                    name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($field_key); ?>_value]"
                    value="<?php echo esc_attr($parts['value']); ?>"
                    placeholder="<?php echo esc_attr($placeholder); ?>"
+                   data-ecf-size-value-input
                    title="<?php echo esc_attr($title); ?>">
             <div class="ecf-format-picker" data-ecf-format-picker>
                 <input type="hidden"
                        name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($field_key); ?>_format]"
                        value="<?php echo esc_attr($selected_format); ?>"
+                       data-ecf-size-format-input
                        data-ecf-format-input>
                 <button type="button" class="ecf-format-picker__trigger" data-ecf-format-trigger aria-expanded="false">
                     <span data-ecf-format-current><?php echo esc_html($options[$selected_format]['label']); ?></span>
@@ -519,6 +521,7 @@ trait ECF_Framework_Admin_General_Trait {
                 </div>
             </div>
         </div>
+        <p class="ecf-inline-warning" hidden data-ecf-inline-size-warning></p>
         <?php
     }
 
@@ -637,7 +640,7 @@ trait ECF_Framework_Admin_General_Trait {
         ?>
         <label data-ecf-general-field="base_font_family">
             <span class="ecf-general-label-with-favorite">
-                <?php echo $this->general_setting_label(__('Base Font Family', 'ecf-framework'), 'Base font stack applied to the whole site body. Choose one of your saved stacks or a locally uploaded font. Use Custom only for a special free text stack.', 'editor-textcolor'); ?>
+                <?php echo $this->general_setting_label(__('Base Font Family', 'ecf-framework'), 'Base font stack for the whole site body and normal flowing text. Headings can keep using your separate Primary typography font.', 'editor-textcolor'); ?>
                 <?php $this->render_general_setting_favorite_toggle($settings, 'base_font_family'); ?>
             </span>
             <div class="ecf-form-grid ecf-form-grid--single">
@@ -666,11 +669,20 @@ trait ECF_Framework_Admin_General_Trait {
     }
 
     private function render_base_body_text_size_field($settings) {
-        $stored_value = (string) ($settings['base_body_text_size'] ?? '16px');
+        $stored_value = (string) ($settings['base_body_text_size'] ?? '');
+        if ($this->should_upgrade_base_body_text_size($stored_value, $settings)) {
+            $stored_value = $this->derived_base_body_text_size($settings);
+        }
+        $parts = $this->parse_css_size_parts($stored_value);
+        $base_step = sanitize_key($settings['typography']['scale']['base_index'] ?? 'm');
+        $warning_message = $this->base_body_text_size_warning_message($stored_value, $settings);
+        if ($base_step === '') {
+            $base_step = 'm';
+        }
         ?>
-        <label data-ecf-general-field="base_body_text_size" class="ecf-general-field ecf-general-field--body-size">
+        <label data-ecf-general-field="base_body_text_size" class="ecf-general-field ecf-general-field--body-size<?php echo $warning_message !== '' ? ' is-warning' : ''; ?>" data-ecf-body-size-field>
             <span class="ecf-general-label-with-favorite">
-                <?php echo $this->general_setting_label(__('Base Body Text Size', 'ecf-framework'), 'Default font size for normal paragraph text across the site. This sets the body text baseline independently from your token scale.', 'editor-paragraph'); ?>
+                <?php echo $this->general_setting_label(__('Base Body Text Size', 'ecf-framework'), 'Default font size for normal paragraph text across the site. By default this follows the current max value of your active body token and can be overridden here if needed.', 'editor-paragraph'); ?>
                 <?php $this->render_general_setting_favorite_toggle($settings, 'base_body_text_size'); ?>
             </span>
             <?php
@@ -680,11 +692,27 @@ trait ECF_Framework_Admin_General_Trait {
                 $stored_value,
                 $this->body_text_size_format_options(),
                 'px',
-                '16 oder clamp(16px, 15px + 0.2vw, 18px)',
+                '18 oder clamp(16px, 1rem + 0.2vw, 18px)',
                 __('Default body text size for regular paragraphs and flowing content.', 'ecf-framework')
             );
             ?>
-            <p class="ecf-muted-copy"><?php echo wp_kses(sprintf(__('Sets the token <code>%s</code> for regular body text.', 'ecf-framework'), '--ecf-base-body-text-size'), ['code' => []]); ?></p>
+            <p class="ecf-muted-copy">
+                <?php
+                echo wp_kses(
+                    sprintf(
+                        __('Sets the token <code>%1$s</code>. Default source: max value from <code>%2$s</code> (%3$s %4$s).', 'ecf-framework'),
+                        '--ecf-base-body-text-size',
+                        '--ecf-text-' . $base_step,
+                        $parts['value'],
+                        $parts['format']
+                    ),
+                    ['code' => []]
+                );
+                ?>
+            </p>
+            <p class="ecf-inline-warning"<?php echo $warning_message === '' ? ' hidden' : ''; ?> data-ecf-body-size-warning>
+                <?php echo esc_html($warning_message); ?>
+            </p>
         </label>
         <?php
     }

@@ -1,6 +1,10 @@
 <?php
 
 trait ECF_Framework_Native_Elementor_Handlers_Trait {
+    private function normalize_elementor_variable_label($label) {
+        return trim((string) sanitize_title(wp_unslash((string) $label)));
+    }
+
     private function export_payload($settings) {
         return [
             'meta' => [
@@ -332,7 +336,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         }
 
         $id = sanitize_text_field(wp_unslash($_POST['id'] ?? ''));
-        $label = sanitize_text_field(wp_unslash($_POST['label'] ?? ''));
+        $label = $this->normalize_elementor_variable_label($_POST['label'] ?? '');
         $type = sanitize_key($_POST['type'] ?? '');
         $value = wp_unslash($_POST['value'] ?? '');
 
@@ -353,58 +357,96 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $this->ajax_error(__('No active Elementor kit found.', 'ecf-framework'), 500);
         }
 
-        $repo = new \Elementor\Modules\Variables\Storage\Variables_Repository($kit);
-        $collection = $repo->load();
-        $target = null;
+        try {
+            $repo = new \Elementor\Modules\Variables\Storage\Variables_Repository($kit);
+            $collection = $repo->load();
+            $target = null;
 
-        foreach ($collection->all() as $variable_id => $variable) {
-            if ((string) $variable_id === $id) {
-                $target = $variable;
-                break;
+            foreach ($collection->all() as $variable_id => $variable) {
+                if ((string) $variable_id === $id) {
+                    $target = $variable;
+                    break;
+                }
             }
-        }
 
-        if (!$target) {
-            $this->ajax_error(__('Variable not found.', 'ecf-framework'), 404);
-        }
+            if (!$target) {
+                $this->ajax_error(__('Variable not found.', 'ecf-framework'), 404);
+            }
 
-        if ($this->is_ecf_native_variable($target)) {
-            $this->ajax_error(__('Generated ECF variables cannot be edited here.', 'ecf-framework'), 400);
-        }
+            if ($this->is_ecf_native_variable($target)) {
+                $this->ajax_error(__('Generated ECF variables cannot be edited here.', 'ecf-framework'), 400);
+            }
 
-        if ($type === 'global-color-variable') {
-            $sanitized_value = $this->sanitize_css_color_value($value);
-        } elseif ($type === 'global-size-variable') {
-            $sanitized_value = $this->sanitize_css_size_value($value);
-        } else {
-            $sanitized_value = sanitize_text_field($value);
-        }
+            if ($type === 'global-color-variable') {
+                $sanitized_value = $this->sanitize_css_color_value($value);
+            } elseif ($type === 'global-size-variable') {
+                $sanitized_value = $this->sanitize_css_size_value($value);
+            } else {
+                $sanitized_value = sanitize_text_field($value);
+            }
 
-        if ($sanitized_value === '') {
-            $this->ajax_error(__('Invalid variable value.', 'ecf-framework'));
-        }
+            if ($sanitized_value === '') {
+                $this->ajax_error(__('Invalid variable value.', 'ecf-framework'));
+            }
 
-        $target->apply_changes([
-            'label' => $label,
-            'type' => $type,
-            'value' => $sanitized_value,
-        ]);
-
-        if (method_exists($target, 'is_deleted') && $target->is_deleted() && method_exists($target, 'restore')) {
-            $target->restore();
-        }
-
-        $repo->save($collection);
-        $this->clear_elementor_sync_caches();
-
-        wp_send_json_success([
-            'item' => [
-                'id' => $id,
+            $target->apply_changes([
                 'label' => $label,
                 'type' => $type,
                 'value' => $sanitized_value,
-            ],
-        ]);
+            ]);
+
+            if (method_exists($target, 'is_deleted') && $target->is_deleted() && method_exists($target, 'restore')) {
+                $target->restore();
+            }
+
+            $repo->save($collection);
+
+            try {
+                $this->clear_elementor_sync_caches();
+            } catch (\Throwable $cache_exception) {
+                if (method_exists($this, 'debug_log')) {
+                    $this->debug_log(
+                        'foreign_variable_update_cache_clear_failed',
+                        [
+                            'id' => $id,
+                            'label' => $label,
+                            'type' => $type,
+                            'message' => $cache_exception->getMessage(),
+                        ]
+                    );
+                }
+            }
+
+            wp_send_json_success([
+                'item' => [
+                    'id' => $id,
+                    'label' => $label,
+                    'type' => $type,
+                    'value' => $sanitized_value,
+                ],
+            ]);
+        } catch (\Throwable $exception) {
+            if (method_exists($this, 'debug_log')) {
+                $this->debug_log(
+                    'foreign_variable_update_exception',
+                    [
+                        'id' => $id,
+                        'label' => $label,
+                        'type' => $type,
+                        'message' => $exception->getMessage(),
+                    ]
+                );
+            }
+
+            $this->ajax_error(
+                sprintf(
+                    /* translators: %s: underlying exception message */
+                    __('Variable could not be updated: %s', 'ecf-framework'),
+                    $exception->getMessage()
+                ),
+                500
+            );
+        }
     }
 
     public function ajax_delete_classes() {

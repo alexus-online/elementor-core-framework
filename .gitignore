@@ -4,3 +4,6 @@ deploy.sh
 .vscode
 .claude
 tmp/
+node_modules/
+playwright-report/
+test-results/

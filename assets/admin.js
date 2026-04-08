@@ -8,8 +8,8 @@ jQuery(function($){
   var restNonce = (typeof ecfAdmin !== 'undefined' && ecfAdmin.restNonce) ? ecfAdmin.restNonce : '';
   var adminDesign = (typeof ecfAdmin !== 'undefined' && ecfAdmin.adminDesign) ? ecfAdmin.adminDesign : {};
   var layoutOrders = (typeof ecfAdmin !== 'undefined' && ecfAdmin.layoutOrders) ? ecfAdmin.layoutOrders : {};
-  i18n.copy    = i18n.copy    || 'Copy';
-  i18n.copied  = i18n.copied  || 'Copied!';
+  i18n.copy    = String(i18n.copy || '');
+  i18n.copied  = String(i18n.copied || '');
 
   function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -367,16 +367,32 @@ jQuery(function($){
     if (!$table.length) return;
     var key = $table.data('input-key');
     var index = nextLocalFontIndex($table);
+    var styleOptions = [
+      { value: 'normal', label: i18n.font_style_normal || '' },
+      { value: 'italic', label: i18n.font_style_italic || '' },
+      { value: 'oblique', label: i18n.font_style_oblique || '' }
+    ].map(function(item) {
+      return '<option value="' + escapeHtml(item.value) + '">' + escapeHtml(item.label) + '</option>';
+    }).join('');
+    var displayOptions = [
+      { value: 'swap', label: i18n.font_display_swap || '' },
+      { value: 'fallback', label: i18n.font_display_fallback || '' },
+      { value: 'optional', label: i18n.font_display_optional || '' },
+      { value: 'block', label: i18n.font_display_block || '' },
+      { value: 'auto', label: i18n.font_display_auto || '' }
+    ].map(function(item) {
+      return '<option value="' + escapeHtml(item.value) + '">' + escapeHtml(item.label) + '</option>';
+    }).join('');
     var html = '<div class="ecf-font-file-row">'
-      + '<input type="text" name="' + key + '[' + index + '][name]" value="" placeholder="primary-regular" />'
-      + '<input type="text" name="' + key + '[' + index + '][family]" value="" placeholder="Primary" />'
+      + '<input type="text" data-ecf-slug-field="token" name="' + key + '[' + index + '][name]" value="" placeholder="' + escapeHtml(i18n.local_font_name_placeholder || '') + '" />'
+      + '<input type="text" name="' + key + '[' + index + '][family]" value="" placeholder="' + escapeHtml(i18n.local_font_family_placeholder || '') + '" />'
       + '<div class="ecf-font-file-picker">'
-      + '<input type="text" class="ecf-font-file-url" name="' + key + '[' + index + '][src]" value="" placeholder="Local upload" readonly />'
+      + '<input type="text" class="ecf-font-file-url" name="' + key + '[' + index + '][src]" value="" placeholder="' + escapeHtml(i18n.local_font_upload_placeholder || '') + '" readonly />'
       + '<button type="button" class="button ecf-font-file-select">' + ecfAdmin.i18n.select_file + '</button>'
       + '</div>'
       + '<input type="text" name="' + key + '[' + index + '][weight]" value="400" placeholder="400" />'
-      + '<select name="' + key + '[' + index + '][style]"><option value="normal">normal</option><option value="italic">italic</option><option value="oblique">oblique</option></select>'
-      + '<select name="' + key + '[' + index + '][display]"><option value="swap">swap</option><option value="fallback">fallback</option><option value="optional">optional</option><option value="block">block</option><option value="auto">auto</option></select>'
+      + '<select name="' + key + '[' + index + '][style]">' + styleOptions + '</select>'
+      + '<select name="' + key + '[' + index + '][display]">' + displayOptions + '</select>'
       + '<button type="button" class="button ecf-remove-row">×</button>'
       + '</div>';
     $table.append($(html));
@@ -516,11 +532,11 @@ jQuery(function($){
     var config = getTypePreviewConfig($preview);
     var items = buildTypePreviewItems(config);
     var html = '';
-    var labelMin = $preview.data('preview-label-min') || 'Minimum';
-    var labelMax = $preview.data('preview-label-max') || 'Maximum';
-    var labelFixed = $preview.data('preview-label-fixed') || 'Static';
-    var labelFluid = $preview.data('preview-label-fluid') || 'Fluid';
-    var previewWord = $preview.data('preview-word') || 'Typography';
+    var labelMin = $preview.data('preview-label-min') || '';
+    var labelMax = $preview.data('preview-label-max') || '';
+    var labelFixed = $preview.data('preview-label-fixed') || '';
+    var labelFluid = $preview.data('preview-label-fluid') || '';
+    var previewWord = $preview.data('preview-word') || '';
     var helperText = $preview.data('preview-helper') || '';
     var activeStep = $preview.attr('data-active-step') || config.baseIndex;
     var viewMode = $preview.attr('data-preview-view') || 'fluid';
@@ -640,9 +656,9 @@ jQuery(function($){
     var radiusToken = '--ecf-radius-' + (($radiusRow.find('input').eq(0).val() || radiusName).toString().trim() || 'm');
     var radiusMin = parseFloat($radiusRow.find('input').eq(1).val()) || 0;
     var radiusMax = parseFloat($radiusRow.find('input').eq(2).val()) || radiusMin;
-    var labelMin = $box.attr('data-label-min') || 'Minimum';
-    var labelMax = $box.attr('data-label-max') || 'Maximum';
-    var typePreviewWord = $box.attr('data-preview-type-word') || 'Typography';
+    var labelMin = $box.attr('data-label-min') || '';
+    var labelMax = $box.attr('data-label-max') || '';
+    var typePreviewWord = $box.attr('data-preview-type-word') || '';
     var spacingMaxValue = spacingItems.reduce(function(max, item) {
       return Math.max(max, parseFloat(item.maxPx) || 0);
     }, 0);
@@ -708,7 +724,7 @@ jQuery(function($){
 
     var items = buildShadowPreviewItems();
     var helperText = $preview.data('preview-helper') || '';
-    var previewWord = $preview.data('preview-word') || 'Shadow';
+    var previewWord = $preview.data('preview-word') || '';
     var activeShadow = $preview.attr('data-active-shadow') || (items[0] ? items[0].slug : '');
     var html = '';
 
@@ -837,7 +853,81 @@ jQuery(function($){
       assignFormValue(payload, path.slice(1), field.value);
     });
 
+    var favoritePayload = {};
+    $('[data-ecf-general-favorite-toggle]').each(function() {
+      var key = $(this).data('ecf-favorite-key');
+      if (!key || favoritePayload[key]) {
+        return;
+      }
+      if ($(this).is(':checked')) {
+        favoritePayload[key] = '1';
+      }
+    });
+    payload.general_setting_favorites = favoritePayload;
+
     return payload;
+  }
+
+  function validateRequiredPositiveSizeField($field) {
+    var $input = $field.find('[data-ecf-size-value-input]').first();
+    var $format = $field.find('[data-ecf-size-format-input]').first();
+    var $warning = $field.siblings('[data-ecf-inline-size-warning]').first();
+    var rawValue = $.trim($input.val() || '');
+    var format = $.trim($format.val() || '').toLowerCase();
+    var numeric = parseFloat(String(rawValue).replace(',', '.'));
+    var message = '';
+
+    if (!rawValue) {
+      message = i18n.size_value_required || '';
+    } else if (format === 'custom') {
+      var normalized = rawValue.toLowerCase();
+      if (/^(?:0|0px|0rem|0em|0ch|0%|0vw|0vh)$/.test(normalized)) {
+        message = i18n.size_value_positive || '';
+      }
+    } else if (isNaN(numeric) || numeric <= 0) {
+      message = i18n.size_value_positive || '';
+    }
+
+    if (message) {
+      $field.addClass('is-invalid');
+      $warning.prop('hidden', false).text(message);
+      return false;
+    }
+
+    $field.removeClass('is-invalid');
+    $warning.prop('hidden', true).text('');
+    return true;
+  }
+
+  function shakeField($field) {
+    $field.removeClass('ecf-field-shake');
+    if ($field.length && $field[0]) {
+      void $field[0].offsetWidth;
+    }
+    $field.addClass('ecf-field-shake');
+  }
+
+  function validateSettingsForSave() {
+    var invalid = [];
+    $('[data-ecf-inline-size-field]').each(function() {
+      var $field = $(this);
+      if (!validateRequiredPositiveSizeField($field)) {
+        invalid.push($field);
+      }
+    });
+
+    if (invalid.length) {
+      invalid.forEach(function($field) {
+        shakeField($field);
+      });
+      if (invalid[0] && invalid[0].length) {
+        invalid[0].find('[data-ecf-size-value-input]').trigger('focus');
+      }
+      showAutosaveNotice(i18n.autosave_invalid || '', 'error');
+      return false;
+    }
+
+    return true;
   }
 
   function updateSystemInfoCards(meta, settings) {
@@ -853,31 +943,31 @@ jQuery(function($){
     }
 
     if (typeof currentSettings.github_update_checks_enabled !== 'undefined') {
-      $('[data-ecf-github-status]').text(currentSettings.github_update_checks_enabled ? (i18n.enabled || 'Enabled') : (i18n.disabled || 'Disabled'));
+      $('[data-ecf-github-status]').text(currentSettings.github_update_checks_enabled ? (i18n.enabled || '') : (i18n.disabled || ''));
     }
 
     if (debug) {
-      $('[data-ecf-debug-core-state]').text(debug.core_recognized ? (i18n.yes || 'Yes') : (i18n.no || 'No'));
-      $('[data-ecf-debug-pro-state]').text(debug.pro_recognized ? (i18n.yes || 'Yes') : (i18n.no || 'No'));
-      $('[data-ecf-debug-variables-state]').text(debug.variables_active ? (i18n.yes || 'Yes') : (i18n.no || 'No'));
-      $('[data-ecf-debug-classes-state]').text(debug.global_classes_active ? (i18n.yes || 'Yes') : (i18n.no || 'No'));
-      $('[data-ecf-debug-sync-state]').text(debug.design_system_sync_active ? (i18n.yes || 'Yes') : (i18n.no || 'No'));
+      $('[data-ecf-debug-core-state]').text(debug.core_recognized ? (i18n.yes || '') : (i18n.no || ''));
+      $('[data-ecf-debug-pro-state]').text(debug.pro_recognized ? (i18n.yes || '') : (i18n.no || ''));
+      $('[data-ecf-debug-variables-state]').text(debug.variables_active ? (i18n.yes || '') : (i18n.no || ''));
+      $('[data-ecf-debug-classes-state]').text(debug.global_classes_active ? (i18n.yes || '') : (i18n.no || ''));
+      $('[data-ecf-debug-sync-state]').text(debug.design_system_sync_active ? (i18n.yes || '') : (i18n.no || ''));
       $('[data-ecf-debug-limits]').text(
-        String(i18n.limit_summary || '%1$s classes / %2$s variables')
+        String(i18n.limit_summary || '')
           .replace('%1$s', String(debug.classes_limit))
           .replace('%2$s', String(debug.variables_limit))
       );
       $('[data-ecf-debug-limit-sources]').text(
-        String(i18n.source_limits || 'Source: classes via %1$s, variables via %2$s')
+        String(i18n.source_limits || '')
           .replace('%1$s', debug.classes_limit_source || '')
           .replace('%2$s', debug.variables_limit_source || '')
       );
 
       if ($('[data-ecf-debug-core-version]').length) {
-        $('[data-ecf-debug-core-version]').text(debug.core_version ? formatTemplate(i18n.version || 'Version %s', debug.core_version) : '');
+        $('[data-ecf-debug-core-version]').text(debug.core_version ? formatTemplate(i18n.version || '', debug.core_version) : '');
       }
       if ($('[data-ecf-debug-pro-version]').length) {
-        $('[data-ecf-debug-pro-version]').text(debug.pro_version ? formatTemplate(i18n.version || 'Version %s', debug.pro_version) : '');
+        $('[data-ecf-debug-pro-version]').text(debug.pro_version ? formatTemplate(i18n.version || '', debug.pro_version) : '');
       }
     }
   }
@@ -1021,9 +1111,9 @@ jQuery(function($){
       if (responseData && responseData.orders) {
         layoutOrders = normalizeLayoutOrders(responseData.orders);
       }
-      showAutosaveNotice(i18n.layout_saved || 'Card layout saved.', 'success');
+      showAutosaveNotice(i18n.layout_saved || '', 'success');
     }).catch(function() {
-      showAutosaveNotice(i18n.layout_failed || 'Could not save card layout.', 'error');
+      showAutosaveNotice(i18n.layout_failed || '', 'error');
     });
   }
 
@@ -1120,6 +1210,7 @@ jQuery(function($){
 
   function submitSettingsAutosave() {
     if (!$settingsForm.length || !restUrl || !restNonce) return;
+    if (!validateSettingsForSave()) return;
 
     if (autosaveInFlight) {
       autosaveQueued = true;
@@ -1129,7 +1220,7 @@ jQuery(function($){
     autosaveInFlight = true;
     autosaveQueued = false;
     persistAdminPageState($settingsForm);
-    showAutosaveNotice(i18n.autosave_saving || 'Saving…', 'saving');
+    showAutosaveNotice(i18n.autosave_saving || '', 'saving');
     var payload = buildSettingsPayloadFromForm();
 
     window.fetch(restUrl, {
@@ -1171,7 +1262,7 @@ jQuery(function($){
         return;
       }
 
-      showAutosaveNotice(i18n.autosave_saved || 'Settings saved automatically.', 'success');
+      showAutosaveNotice(i18n.autosave_saved || '', 'success');
     }).catch(function() {
       autosaveInFlight = false;
 
@@ -1179,7 +1270,7 @@ jQuery(function($){
         autosaveQueued = false;
       }
 
-      showAutosaveNotice(i18n.autosave_failed || 'Could not save settings automatically.', 'error');
+      showAutosaveNotice(i18n.autosave_failed || '', 'error');
     });
   }
 
@@ -1267,21 +1358,21 @@ jQuery(function($){
       return;
     }
 
-    lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_file || 'File: %s', data.name + ' (' + formatFileSize(data.size) + ')')) + '</div>');
+    lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_file || '', data.name + ' (' + formatFileSize(data.size) + ')')) + '</div>');
     if (data.meta && data.meta.plugin_version) {
-      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_version || 'Exported from plugin version: %s', data.meta.plugin_version)) + '</div>');
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_version || '', data.meta.plugin_version)) + '</div>');
     }
     if (data.meta && data.meta.exported_at) {
-      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_date || 'Exported at: %s', data.meta.exported_at)) + '</div>');
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_date || '', data.meta.exported_at)) + '</div>');
     }
     if (data.meta && data.meta.schema_version) {
-      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_schema || 'Schema version: %s', data.meta.schema_version)) + '</div>');
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_schema || '', data.meta.schema_version)) + '</div>');
     }
     if (data.settingsCount) {
-      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_sections || 'Detected settings groups: %s', data.settingsCount)) + '</div>');
+      lines.push('<div>' + escapeHtml(formatTemplate(i18n.import_preview_sections || '', data.settingsCount)) + '</div>');
     }
     if (!data.meta) {
-      lines.push('<div>' + escapeHtml(i18n.import_preview_legacy || 'Legacy export without metadata. Import is still possible.') + '</div>');
+      lines.push('<div>' + escapeHtml(i18n.import_preview_legacy || '') + '</div>');
     }
 
     $meta.html(lines.join(''));
@@ -1312,7 +1403,7 @@ jQuery(function($){
           throw new Error('invalid');
         }
         if (meta && meta.plugin_version && ecfAdmin.pluginVersion && String(meta.plugin_version) !== String(ecfAdmin.pluginVersion)) {
-          warning = i18n.import_preview_incompatible || 'This file was exported from another plugin version. Please review General Settings, Sync, and editor-related options after import.';
+          warning = i18n.import_preview_incompatible || '';
         }
 
         updateImportPreview({
@@ -1327,7 +1418,7 @@ jQuery(function($){
           name: file.name,
           size: file.size,
           meta: null,
-          warning: i18n.import_preview_invalid || 'The selected file is not a valid ECF JSON export.'
+          warning: i18n.import_preview_invalid || ''
         });
       }
     };
@@ -1591,7 +1682,19 @@ jQuery(function($){
     });
   }
 
+  function syncFavoriteToggleGroup($source) {
+    if (!$source || !$source.length) return;
+    var key = $source.data('ecf-favorite-key');
+    if (!key) return;
+    var checked = $source.is(':checked');
+    $('[data-ecf-general-favorite-toggle][data-ecf-favorite-key="' + key + '"]').not($source).each(function() {
+      $(this).prop('checked', checked);
+      syncFavoriteToggleState($(this).closest('.ecf-favorite-toggle'));
+    });
+  }
+
   $(document).on('change', '[data-ecf-general-favorite-toggle]', function() {
+    syncFavoriteToggleGroup($(this));
     syncFavoriteToggleState($(this).closest('.ecf-favorite-toggle'));
     refreshGeneralFavoritesState();
   });
@@ -1717,6 +1820,13 @@ jQuery(function($){
 
   $(document).on('input change', '.ecf-general-favorite-card [name], [data-ecf-general-section] [name]', function() {
     syncNamedField($(this));
+  });
+
+  $(document).on('blur change', '[data-ecf-slug-field="token"]', function() {
+    var normalized = normalizeTokenName($(this).val());
+    if ($(this).val() !== normalized) {
+      $(this).val(normalized).trigger('input');
+    }
   });
 
   $(document).on('input', 'form[action="options.php"] :input[name]:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"])', function() {
@@ -1853,6 +1963,9 @@ jQuery(function($){
   });
 
   $(document).on('submit', 'form[action="options.php"]', function() {
+    if (!validateSettingsForSave()) {
+      return false;
+    }
     var activePanel = $('.ecf-nav-item.is-active').data('panel') || 'tokens';
     try {
       window.sessionStorage.setItem(panelStorageKey, activePanel);
@@ -1867,10 +1980,12 @@ jQuery(function($){
   });
   renderTypePreview();
   renderShadowPreview();
+  updateBaseBodyTextSizeWarning();
 
   $(document).on('input change', '[name="ecf_framework_v50[root_font_size]"], [name^="ecf_framework_v50[typography][scale]"], [name^="ecf_framework_v50[typography][fonts]"]', function(){
     renderTypePreview();
     renderRootFontImpact();
+    updateBaseBodyTextSizeWarning();
   });
 
   var isSyncingRootFontControls = false;
@@ -1937,6 +2052,15 @@ jQuery(function($){
     $picker.find('[data-ecf-format-menu]').prop('hidden', true);
     $picker.find('[data-ecf-format-trigger]').attr('aria-expanded', 'false');
     setFormatTooltipVisibility($picker, false);
+    updateBaseBodyTextSizeWarning();
+  });
+
+  $(document).on('input change', '[name="ecf_framework_v50[base_body_text_size_value]"], [name="ecf_framework_v50[base_body_text_size_format]"]', function() {
+    updateBaseBodyTextSizeWarning();
+  });
+
+  $(document).on('input change', '[data-ecf-size-value-input], [data-ecf-size-format-input]', function() {
+    validateRequiredPositiveSizeField($(this).closest('[data-ecf-inline-size-field]'));
   });
 
   $(document).on('click', function() {
@@ -1999,12 +2123,12 @@ jQuery(function($){
     if (type === 'global-color-variable')  return i18n.type_color;
     if (type === 'global-size-variable')   return i18n.type_size;
     if (type === 'global-string-variable') return i18n.type_string;
-    if (type === 'spacing') return i18n.type_spacing || 'Abstände';
-    if (type === 'typography') return i18n.type_typography || 'Typografie';
-    if (type === 'layout') return i18n.type_layout || 'Layout';
-    if (type === 'radius') return i18n.type_radius || 'Radius';
-    if (type === 'shadow') return i18n.type_shadow || 'Schatten';
-    if (type === 'class') return i18n.type_class || 'Globale Klasse';
+    if (type === 'spacing') return i18n.type_spacing || '';
+    if (type === 'typography') return i18n.type_typography || '';
+    if (type === 'layout') return i18n.type_layout || '';
+    if (type === 'radius') return i18n.type_radius || '';
+    if (type === 'shadow') return i18n.type_shadow || '';
+    if (type === 'class') return i18n.type_class || '';
     return type;
   }
 
@@ -2025,14 +2149,14 @@ jQuery(function($){
     if (tabKey === 'color') return i18n.type_color;
     if (tabKey === 'size') return i18n.type_size;
     if (tabKey === 'string') return i18n.type_string;
-    if (tabKey === 'spacing') return i18n.type_spacing || 'Abstände';
-    if (tabKey === 'typography') return i18n.type_typography || 'Typografie';
-    if (tabKey === 'layout') return i18n.type_layout || 'Layout';
-    if (tabKey === 'radius') return i18n.type_radius || 'Radius';
-    if (tabKey === 'shadow') return i18n.type_shadow || 'Schatten';
-    if (tabKey === 'class') return i18n.type_class || 'Globale Klasse';
-    if (tabKey === 'other') return i18n.type_other || 'Sonstige';
-    return i18n.type_all || 'Alle';
+    if (tabKey === 'spacing') return i18n.type_spacing || '';
+    if (tabKey === 'typography') return i18n.type_typography || '';
+    if (tabKey === 'layout') return i18n.type_layout || '';
+    if (tabKey === 'radius') return i18n.type_radius || '';
+    if (tabKey === 'shadow') return i18n.type_shadow || '';
+    if (tabKey === 'class') return i18n.type_class || '';
+    if (tabKey === 'other') return i18n.type_other || '';
+    return i18n.type_all || '';
   }
 
   function getVariablePreviewKind(item) {
@@ -2075,14 +2199,14 @@ jQuery(function($){
     var maxWidth = clamp((maxPx / maxRef) * 100, 10, 100);
 
     return '<span class="ecf-var-value ecf-var-value--size ' + (modifierClass || '') + '">'
-      + '<span class="ecf-var-space-metric"><small>Min</small><strong>' + escapeHtml(formatNumber(minPx, 2)) + 'px</strong></span>'
+      + '<span class="ecf-var-space-metric"><small>' + escapeHtml(i18n.preview_min || '') + '</small><strong>' + escapeHtml(formatNumber(minPx, 2)) + 'px</strong></span>'
       + '<span class="ecf-var-space-visual" aria-hidden="true">'
       + (visualHtml || (
           '<span class="ecf-var-space-bar"><span class="ecf-var-space-fill" style="width:' + minWidth + '%;height:6px;"></span></span>'
           + '<span class="ecf-var-space-bar"><span class="ecf-var-space-fill" style="width:' + maxWidth + '%;height:10px;"></span></span>'
         ))
       + '</span>'
-      + '<span class="ecf-var-space-metric"><small>Max</small><strong>' + escapeHtml(formatNumber(maxPx, 2)) + 'px</strong></span>'
+      + '<span class="ecf-var-space-metric"><small>' + escapeHtml(i18n.preview_max || '') + '</small><strong>' + escapeHtml(formatNumber(maxPx, 2)) + 'px</strong></span>'
       + '</span>';
   }
 
@@ -2138,8 +2262,8 @@ jQuery(function($){
         } else {
           visualHtml =
             '<span class="ecf-var-type-visual-row">'
-            + '<span class="ecf-var-type-sample" style="font-size:' + escapeHtml(formatNumber(sizeData.minPx, 2)) + 'px;">Text</span>'
-            + '<span class="ecf-var-type-sample ecf-var-type-sample--max" style="font-size:' + escapeHtml(formatNumber(sizeData.maxPx, 2)) + 'px;">Text</span>'
+            + '<span class="ecf-var-type-sample" style="font-size:' + escapeHtml(formatNumber(sizeData.minPx, 2)) + 'px;">' + escapeHtml(i18n.search_preview_text_sample || '') + '</span>'
+            + '<span class="ecf-var-type-sample ecf-var-type-sample--max" style="font-size:' + escapeHtml(formatNumber(sizeData.maxPx, 2)) + 'px;">' + escapeHtml(i18n.search_preview_text_sample || '') + '</span>'
             + '</span>';
         }
 
@@ -2166,10 +2290,10 @@ jQuery(function($){
   }
 
   function groupLabel(group) {
-    if (group === 'ecf') return 'ECF Variablen';
-    if (group === 'foreign') return 'Fremde Variablen';
-    if (group === 'ecf-classes') return 'ECF Klassen';
-    if (group === 'foreign-classes') return 'Fremde Klassen';
+    if (group === 'ecf') return i18n.group_ecf_variables || '';
+    if (group === 'foreign') return i18n.group_foreign_variables || '';
+    if (group === 'ecf-classes') return i18n.group_ecf_classes || '';
+    if (group === 'foreign-classes') return i18n.group_foreign_classes || '';
     return group;
   }
 
@@ -2205,7 +2329,7 @@ jQuery(function($){
       return '<span class="ecf-global-search__preview ecf-global-search__preview--color"><span class="ecf-color-dot" style="background:' + escapeHtml(item.value) + '"></span><span>' + escapeHtml(String(item.value || '')) + '</span></span>';
     }
     if (kind === 'typography') {
-      return '<span class="ecf-global-search__preview ecf-global-search__preview--type">Text</span>';
+      return '<span class="ecf-global-search__preview ecf-global-search__preview--type">' + escapeHtml(i18n.search_preview_text || '') + '</span>';
     }
     if (kind === 'spacing') {
       return '<span class="ecf-global-search__preview ecf-global-search__preview--spacing"><span></span></span>';
@@ -2217,7 +2341,7 @@ jQuery(function($){
       return '<span class="ecf-global-search__preview ecf-global-search__preview--shadow"></span>';
     }
     if (kind === 'class') {
-      return '<span class="ecf-global-search__preview ecf-global-search__preview--class">Klasse</span>';
+      return '<span class="ecf-global-search__preview ecf-global-search__preview--class">' + escapeHtml(i18n.search_preview_class || '') + '</span>';
     }
     return '<span class="ecf-global-search__preview ecf-global-search__preview--value">' + escapeHtml(String(item.value || '')) + '</span>';
   }
@@ -2286,7 +2410,7 @@ jQuery(function($){
 
     $list.find('.ecf-var-empty-search').remove();
     if (!visibleCount) {
-      $list.append('<p class="ecf-var-empty-search">'+(i18n.none || 'Keine Einträge gefunden.')+'</p>');
+      $list.append('<p class="ecf-var-empty-search">'+(i18n.none || '')+'</p>');
     }
 
     updateSelectAllState(group);
@@ -2496,7 +2620,7 @@ jQuery(function($){
       .prop('disabled', !$checks.length)
       .toggleClass('is-active', allChecked)
       .find('[data-ecf-class-select-all-label]')
-      .text(allChecked ? (i18n.deselect_all || 'Auswahl aufheben') : (i18n.select_all || 'Alle wählen'));
+      .text(allChecked ? (i18n.deselect_all || '') : (i18n.select_all || ''));
 
     $('[data-ecf-class-select-all-icon]').toggleClass('is-active', allChecked || hasSelection);
   }
@@ -2619,8 +2743,8 @@ jQuery(function($){
     if (!$root.length) return;
     var classes = getBemGeneratedClasses();
     var emptyText = isBemCustomPreset()
-      ? 'Eigenen Blocknamen eingeben, dann entsteht hier die Vorschau.'
-      : 'Bereich wählen, dann entsteht hier die Vorschau.';
+      ? (i18n.bem_preview_empty_custom || '')
+      : (i18n.bem_preview_empty_preset || '');
     var html = classes.length
       ? classes.map(function(className) { return '<code>' + escapeHtml(className) + '</code>'; }).join('')
       : '<span class="ecf-muted-copy">' + escapeHtml(emptyText) + '</span>';
@@ -2688,8 +2812,8 @@ jQuery(function($){
 
     $root.find('[data-ecf-bem-feedback]').text(
       added
-        ? added + ' ' + (added === 1 ? 'Klasse hinzugefügt.' : 'Klassen hinzugefügt.')
-        : 'Alle erzeugten Klassen existieren bereits.'
+        ? formatTemplate(added === 1 ? (i18n.bem_feedback_added_one || '') : (i18n.bem_feedback_added_many || ''), added)
+        : (i18n.bem_feedback_exists || '')
     );
 
     updateStarterClassesState();
@@ -2698,6 +2822,8 @@ jQuery(function($){
       refreshStarterClassVisibility();
       return;
     }
+
+    scheduleSettingsAutosave({ delay: 250 });
 
     $('[data-ecf-library-section="starter"] [data-ecf-class-search]').val('');
     applyClassTierFilter('custom');
@@ -3069,12 +3195,18 @@ jQuery(function($){
 
     var matches = buildGlobalSearchMatches(normalized);
     if (!matches.length) {
-      $results.html('<div class="ecf-global-search__empty">'+(i18n.none || 'Keine Einträge gefunden.')+'</div>').prop('hidden', false);
+      $results.html('<div class="ecf-global-search__empty">'+(i18n.none || '')+'</div>').prop('hidden', false);
       return;
     }
 
     var html = '<div class="ecf-global-search__list">';
     $.each(matches.slice(0, 24), function(_, item) {
+      var actionsHtml = '';
+      if (canEditSearchItem(item)) {
+        actionsHtml += '<button type="button" class="ecf-icon-btn ecf-icon-btn--secondary ecf-search-edit" data-ecf-search-edit data-group="' + item.group + '" data-id="' + item.id + '" title="' + escapeHtml(i18n.edit || '') + '"><span class="dashicons dashicons-edit"></span></button>';
+      }
+      actionsHtml += '<button type="button" class="ecf-icon-btn ecf-icon-btn--danger ecf-search-delete" data-ecf-search-delete data-group="' + item.group + '" data-id="' + item.id + '" data-label="' + escapeHtml(item.label) + '" title="' + escapeHtml(i18n.delete) + '"><span class="dashicons dashicons-trash"></span></button>';
+
       html += '<div class="ecf-global-search__item">'
         + '<button type="button" class="ecf-global-search__main" data-ecf-search-result data-group="' + item.group + '" data-id="' + item.id + '" data-tab-key="' + item.tabKey + '">'
         + '<div class="ecf-global-search__identity">'
@@ -3085,7 +3217,7 @@ jQuery(function($){
         + renderSearchPreview(item)
         + '</button>'
         + '<div class="ecf-global-search__actions">'
-        + '<button type="button" class="ecf-icon-btn ecf-icon-btn--danger ecf-search-delete" data-ecf-search-delete data-group="' + item.group + '" data-id="' + item.id + '" data-label="' + escapeHtml(item.label) + '" title="' + escapeHtml(i18n.delete) + '"><span class="dashicons dashicons-trash"></span></button>'
+        + actionsHtml
         + '</div>'
         + '</div>';
     });
@@ -3134,6 +3266,26 @@ jQuery(function($){
       value: value,
       format: 'fx'
     };
+  }
+
+  function normalizeSearchEditLabel(rawValue) {
+    return String(rawValue || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\-_ ]+/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function normalizeTokenName(rawValue) {
+    return String(rawValue || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\-_ ]+/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   function getRootBasePx() {
@@ -3220,7 +3372,7 @@ jQuery(function($){
 
     if (type === 'global-size-variable' && clampData) {
       $tech
-        .html('<strong>Clamp</strong><br><code>' + escapeHtml(clampData.raw) + '</code>')
+        .html('<strong>' + escapeHtml(i18n.clamp_label || '') + '</strong><br><code>' + escapeHtml(clampData.raw) + '</code>')
         .prop('hidden', false);
       $('[data-ecf-search-edit-clamp-min]').val(formatNumber(clampData.minPx, 2));
       $('[data-ecf-search-edit-clamp-max]').val(formatNumber(clampData.maxPx, 2));
@@ -3272,11 +3424,11 @@ jQuery(function($){
     var type = $('[data-ecf-search-edit-type]').val();
     var text = '';
     if (type === 'global-color-variable') {
-      text = 'Farbe ist für Werte wie #3b82f6, rgb(...) oder hsl(...).';
+      text = i18n.search_type_help_color || '';
     } else if (type === 'global-size-variable') {
-      text = 'Größe ist für Werte wie 24px, 1.5rem oder clamp(...). Auch text-2xl gehört hierhin.';
+      text = i18n.search_type_help_size || '';
     } else {
-      text = 'Text ist nur für echte Strings gedacht, nicht für Textgrößen wie text-2xl.';
+      text = i18n.search_type_help_string || '';
     }
     $('[data-ecf-search-edit-type-help]').text(text);
   }
@@ -3312,7 +3464,7 @@ jQuery(function($){
 
   function deleteSearchItem(group, id, label) {
     var isClass = isClassGroup(group);
-    if (!confirm((i18n.search_delete_confirm || 'Löschen?').replace('%s', label))) return;
+    if (!confirm((i18n.search_delete_confirm || '').replace('%s', label))) return;
 
     $.post(ecfAdmin.ajaxurl, {
       action: isClass ? 'ecf_delete_classes' : 'ecf_delete_variables',
@@ -3320,7 +3472,7 @@ jQuery(function($){
       ids: [id]
     }, function(res) {
       if (!res.success) {
-        alert((i18n.error || 'Fehler: ') + res.data);
+        alert((i18n.error || '') + res.data);
         return;
       }
 
@@ -3458,11 +3610,18 @@ jQuery(function($){
 
   $(document).on('click', '[data-ecf-search-edit-save]', function(){
     var id = $('[data-ecf-search-edit-id]').val();
-    var label = $('[data-ecf-search-edit-label]').val();
+    var label = normalizeSearchEditLabel($('[data-ecf-search-edit-label]').val());
     var type = $('[data-ecf-search-edit-type]').val();
     var value = $('[data-ecf-search-edit-value]').val();
     var format = $('[data-ecf-search-edit-format]').val();
     var clampData = $('[data-ecf-search-edit-modal]').data('ecfClampData');
+
+    $('[data-ecf-search-edit-label]').val(label);
+
+    if (!label) {
+      $('[data-ecf-search-edit-note]').prop('hidden', false).text((i18n.error || '') + (i18n.search_label_invalid || ''));
+      return;
+    }
 
     if (type === 'global-color-variable' && $('[data-ecf-search-edit-color]').val()) {
       value = $('[data-ecf-search-edit-color]').val();
@@ -3472,7 +3631,7 @@ jQuery(function($){
         var maxPx = parseFloat($('[data-ecf-search-edit-clamp-max]').val());
         var rootBasePx = getRootBasePx();
         if (!isFinite(minPx) || !isFinite(maxPx)) {
-          $('[data-ecf-search-edit-note]').prop('hidden', false).text(i18n.error + 'Bitte Minimum und Maximum als Zahlen eingeben.');
+          $('[data-ecf-search-edit-note]').prop('hidden', false).text((i18n.error || '') + (i18n.search_clamp_number_error || ''));
           return;
         }
         value = 'clamp('
@@ -3490,22 +3649,37 @@ jQuery(function($){
       }
     }
 
-    $.post(ecfAdmin.ajaxurl, {
+    $.ajax({
+      url: ecfAdmin.ajaxurl,
+      method: 'POST',
+      dataType: 'json',
+      data: {
       action: 'ecf_update_variable',
       nonce: ecfAdmin.nonce,
       id: id,
       label: label,
       type: type,
       value: value
-    }, function(res) {
+      }
+    }).done(function(res) {
       if (!res.success) {
-        $('[data-ecf-search-edit-note]').prop('hidden', false).text((i18n.error || 'Fehler: ') + res.data);
+        var message = res && res.data && res.data.message ? res.data.message : res.data;
+        $('[data-ecf-search-edit-note]').prop('hidden', false).text((i18n.error || '') + message);
         return;
       }
 
       closeSearchEditModal();
       varsLoaded = false;
       loadVariables();
+    }).fail(function(xhr) {
+      var message = '';
+      if (xhr && xhr.responseJSON && xhr.responseJSON.data) {
+        message = xhr.responseJSON.data.message || xhr.responseJSON.data;
+      }
+      if (!message && xhr && xhr.responseText) {
+        message = xhr.responseText;
+      }
+      $('[data-ecf-search-edit-note]').prop('hidden', false).text((i18n.error || '') + (message || (i18n.autosave_failed || '')));
     });
   });
 
@@ -3580,8 +3754,8 @@ jQuery(function($){
     var steps = getSpacingSteps();
     var cfg = getSpacingConfig();
     var items = buildSpacingItems(steps, cfg);
-    var labelMin = $preview.data('preview-label-min') || 'Minimum';
-    var labelMax = $preview.data('preview-label-max') || 'Maximum';
+    var labelMin = $preview.data('preview-label-min') || '';
+    var labelMax = $preview.data('preview-label-max') || '';
     var maxVal = 0;
     $.each(items, function(_, it) { if (parseFloat(it.max) > maxVal) maxVal = parseFloat(it.max); });
     var html = '';
@@ -3822,9 +3996,9 @@ jQuery(function($){
       return response.json();
     }).then(function(responseData) {
       updateSystemInfoCards(responseData && responseData.meta ? responseData.meta : null, responseData && responseData.settings ? responseData.settings : null);
-      showAutosaveNotice(i18n.system_refreshed || 'Elementor status refreshed.', 'success');
+      showAutosaveNotice(i18n.system_refreshed || '', 'success');
     }).catch(function() {
-      showAutosaveNotice(i18n.autosave_failed || 'Could not save settings automatically.', 'error');
+      showAutosaveNotice(i18n.autosave_failed || '', 'error');
     }).finally(function() {
       $button.prop('disabled', false).removeClass('is-loading');
     });
@@ -3855,6 +4029,45 @@ jQuery(function($){
     $('.ecf-root-font-impact__copy-pop').removeClass('is-open');
   });
 
+  function updateBaseBodyTextSizeWarning() {
+    var $field = $('[data-ecf-body-size-field]');
+    if (!$field.length) return;
+
+    var value = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || '');
+    var format = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || '').toLowerCase();
+    var $warning = $field.find('[data-ecf-body-size-warning]');
+    var numeric = parseFloat(String(value).replace(',', '.'));
+    var rootBasePx = ($('[name="ecf_framework_v50[root_font_size]"]').val() === '62.5') ? 10 : 16;
+    var message = '';
+    var pxEquivalent = null;
+
+    if (!value || isNaN(numeric) || numeric <= 0 || format === 'custom') {
+      $field.removeClass('is-warning');
+      $warning.prop('hidden', true).text('');
+      return;
+    }
+
+    if (format === 'px') {
+      pxEquivalent = numeric;
+    } else if (format === 'rem' || format === 'em') {
+      pxEquivalent = numeric * rootBasePx;
+    }
+
+    if ((format === 'rem' || format === 'em') && numeric >= 8) {
+      message = i18n.body_size_warn_large_unit || '';
+    } else if (pxEquivalent !== null && (pxEquivalent < 10 || pxEquivalent > 32)) {
+      message = i18n.body_size_warn_unusual || '';
+    }
+
+    if (message) {
+      $field.addClass('is-warning');
+      $warning.prop('hidden', false).text(message);
+    } else {
+      $field.removeClass('is-warning');
+      $warning.prop('hidden', true).text('');
+    }
+  }
+
   applyStarterClassFilter('all');
   applyUtilityClassFilter('all');
   switchClassLibrary('starter');
@@ -3863,4 +4076,5 @@ jQuery(function($){
   renderBemGeneratorPreview();
   updateClassLibraryContext();
   updateStarterClassesState();
+  updateBaseBodyTextSizeWarning();
 });

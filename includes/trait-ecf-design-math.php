@@ -5,6 +5,89 @@ if (!defined('ABSPATH')) {
 }
 
 trait ECF_Framework_Design_Math_Trait {
+    private function derived_base_body_text_size($settings = null) {
+        if (!is_array($settings)) {
+            $settings = $this->get_settings();
+        }
+
+        $scale = is_array($settings['typography']['scale'] ?? null)
+            ? $settings['typography']['scale']
+            : [];
+        $steps = is_array($scale['steps'] ?? null) ? $scale['steps'] : ['xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl'];
+        $base_index = sanitize_key($scale['base_index'] ?? 'm');
+        if ($base_index === '' || !in_array($base_index, $steps, true)) {
+            $base_index = in_array('m', $steps, true) ? 'm' : (string) reset($steps);
+        }
+
+        $root_base_px = $this->get_root_font_base_px($settings);
+        foreach ($this->build_type_scale_preview($scale + ['steps' => $steps, 'base_index' => $base_index], $root_base_px) as $item) {
+            if (($item['step'] ?? '') === $base_index && ($item['max_px'] ?? '') !== '') {
+                return trim((string) $item['max_px']) . 'px';
+            }
+        }
+
+        $max_base = (float) ($scale['max_base'] ?? $scale['base'] ?? 16);
+        return $this->format_preview_number($max_base, 3) . 'px';
+    }
+
+    private function should_upgrade_base_body_text_size($value, $settings = null) {
+        $normalized = strtolower(trim((string) $value));
+        if (in_array($normalized, ['', '1rem', '16px', '16rem'], true)) {
+            return true;
+        }
+
+        if (!is_array($settings)) {
+            return false;
+        }
+
+        $parts = $this->parse_css_size_parts($normalized);
+        $format = strtolower((string) ($parts['format'] ?? ''));
+        $numeric = (float) str_replace(',', '.', (string) ($parts['value'] ?? '0'));
+        $scale = is_array($settings['typography']['scale'] ?? null) ? $settings['typography']['scale'] : [];
+        $max_base = (float) ($scale['max_base'] ?? $scale['base'] ?? 16);
+        $root_base_px = $this->get_root_font_base_px($settings);
+        $legacy_rem = (float) $this->format_preview_number($this->format_rem_value($max_base, 2, $root_base_px));
+
+        if ($format === 'rem' && abs($numeric - $max_base) < 0.0001) {
+            return true;
+        }
+
+        if ($format === 'rem' && abs($numeric - $legacy_rem) < 0.0001) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function base_body_text_size_warning_message($value, $settings = null) {
+        $parts = $this->parse_css_size_parts($value);
+        $format = strtolower((string) ($parts['format'] ?? ''));
+        $numeric = (float) str_replace(',', '.', (string) ($parts['value'] ?? '0'));
+
+        if ($numeric <= 0 || $format === 'custom') {
+            return '';
+        }
+
+        $root_base_px = $this->get_root_font_base_px($settings);
+        $px_equivalent = null;
+
+        if ($format === 'px') {
+            $px_equivalent = $numeric;
+        } elseif (in_array($format, ['rem', 'em'], true)) {
+            $px_equivalent = $numeric * $root_base_px;
+        }
+
+        if (in_array($format, ['rem', 'em'], true) && $numeric >= 8) {
+            return __('This value looks unusually large for rem/em body text. Did you mean px or the value from your active type scale token?', 'ecf-framework');
+        }
+
+        if ($px_equivalent !== null && ($px_equivalent < 10 || $px_equivalent > 32)) {
+            return __('This body text size looks unusual for normal reading text. Please double-check the unit and value.', 'ecf-framework');
+        }
+
+        return '';
+    }
+
     private function get_root_font_base_px($settings = null) {
         if (is_array($settings)) {
             $value = str_replace(',', '.', (string) ($settings['root_font_size'] ?? ''));
