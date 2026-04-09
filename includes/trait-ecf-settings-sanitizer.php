@@ -87,6 +87,16 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
             $base_font_family = sanitize_text_field($input['base_font_family'] ?? $defaults['base_font_family']);
         }
         $output['base_font_family'] = $base_font_family !== '' ? $base_font_family : $defaults['base_font_family'];
+        $heading_font_family_preset = sanitize_text_field($input['heading_font_family_preset'] ?? '');
+        $heading_font_family_custom = sanitize_text_field($input['heading_font_family_custom'] ?? '');
+        if ($heading_font_family_preset === '__custom__') {
+            $heading_font_family = $heading_font_family_custom;
+        } elseif ($heading_font_family_preset !== '') {
+            $heading_font_family = $heading_font_family_preset;
+        } else {
+            $heading_font_family = sanitize_text_field($input['heading_font_family'] ?? $defaults['heading_font_family']);
+        }
+        $output['heading_font_family'] = $heading_font_family !== '' ? $heading_font_family : $defaults['heading_font_family'];
         $base_body_text_size_value = trim((string) ($input['base_body_text_size_value'] ?? $input['base_body_text_size'] ?? ''));
         $base_body_text_size_format = sanitize_key($input['base_body_text_size_format'] ?? '');
         if (in_array($base_body_text_size_format, ['px', 'rem', 'em', 'ch', '%', 'vw', 'vh'], true)) {
@@ -356,10 +366,63 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
             $output['base_body_text_size'] = $this->derived_base_body_text_size($output);
         }
 
+        $output['base_font_family'] = $this->normalize_saved_font_family_value(
+            $output['base_font_family'] ?? $defaults['base_font_family'],
+            $output['typography']['local_fonts'] ?? [],
+            $defaults['base_font_family']
+        );
+        $output['heading_font_family'] = $this->normalize_saved_font_family_value(
+            $output['heading_font_family'] ?? $defaults['heading_font_family'],
+            $output['typography']['local_fonts'] ?? [],
+            $defaults['heading_font_family']
+        );
+
         if (empty($output['github_update_checks_enabled'])) {
             $this->clear_registered_plugin_update_state();
         }
 
         return $output;
+    }
+
+    private function normalize_saved_font_family_value($value, $local_fonts, $default) {
+        $value = trim((string) $value);
+        $default = trim((string) $default);
+
+        if ($value === '') {
+            return $default;
+        }
+
+        $family_from_library_pointer = '';
+        if (strpos($value, '__library__|') === 0) {
+            $family_from_library_pointer = trim(substr($value, strlen('__library__|')));
+        }
+
+        foreach ((array) $local_fonts as $row) {
+            $family = trim((string) ($row['family'] ?? ''));
+            if ($family === '') {
+                continue;
+            }
+
+            if ($value === $family || $value === "'" . $family . "'" || $family_from_library_pointer === $family) {
+                return "'" . $family . "'";
+            }
+        }
+
+        if ($family_from_library_pointer !== '') {
+            return $default;
+        }
+
+        if (preg_match("/^'([^']+)'$/", $value, $matches)) {
+            $single_family = trim((string) ($matches[1] ?? ''));
+            if ($single_family !== '' && strpos($single_family, ',') === false) {
+                return $default;
+            }
+        }
+
+        if ($value !== '' && strpos($value, ',') === false && preg_match('/^[A-Za-z0-9 _-]+$/', $value)) {
+            return $default;
+        }
+
+        return $value;
     }
 }

@@ -1,10 +1,30 @@
 <?php
 
 trait ECF_Framework_Output_CSS_Trait {
-    private function resolved_base_font_family_css_value($settings) {
-        $selected = trim((string) ($settings['base_font_family'] ?? ''));
+    private function css_font_value_for_output($value) {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^var\(--ecf-font-[a-z0-9_-]+\)$/i', $value)) {
+            return $value;
+        }
+
+        return $this->sanitize_css_font_stack($value);
+    }
+
+    private function css_string_literal($value) {
+        $value = trim((string) $value);
+        $value = str_replace(['\\', "'"], ['\\\\', "\\'"], $value);
+
+        return "'" . $value . "'";
+    }
+
+    private function resolved_font_family_css_value($settings, $setting_key, $default_value) {
+        $selected = trim((string) ($settings[$setting_key] ?? ''));
         if ($selected === '') {
-            $selected = 'var(--ecf-font-primary)';
+            $selected = $default_value;
         }
 
         if (preg_match('/^var\(--ecf-font-([a-z0-9_-]+)\)$/i', $selected, $matches)) {
@@ -22,6 +42,14 @@ trait ECF_Framework_Output_CSS_Trait {
         }
 
         return $selected;
+    }
+
+    private function resolved_base_font_family_css_value($settings) {
+        return $this->resolved_font_family_css_value($settings, 'base_font_family', 'var(--ecf-font-primary)');
+    }
+
+    private function resolved_heading_font_family_css_value($settings) {
+        return $this->resolved_font_family_css_value($settings, 'heading_font_family', 'var(--ecf-font-primary)');
     }
 
     public function output_css() {
@@ -65,11 +93,18 @@ trait ECF_Framework_Output_CSS_Trait {
         echo "--ecf-base-background-color:" . esc_attr($this->sanitize_css_color_value($settings['base_background_color'] ?? '#ffffff')) . ";";
         echo "--ecf-link-color:" . esc_attr($this->sanitize_css_color_value($settings['link_color'] ?? '#3b82f6')) . ";";
         echo "--ecf-focus-color:" . esc_attr($this->sanitize_css_color_value($settings['focus_color'] ?? '#6366f1')) . ";";
-        echo "--ecf-base-font-family:" . esc_attr($this->resolved_base_font_family_css_value($settings)) . ";";
+        $resolved_base_font_family = $this->resolved_base_font_family_css_value($settings);
+        $resolved_heading_font_family = $this->resolved_heading_font_family_css_value($settings);
+        echo "--ecf-base-font-family:" . $this->css_font_value_for_output($resolved_base_font_family) . ";";
+        echo "--ecf-base-body-font-family:" . $this->css_font_value_for_output($resolved_base_font_family) . ";";
+        echo "--ecf-heading-font-family:" . $this->css_font_value_for_output($resolved_heading_font_family) . ";";
         echo "--ecf-base-body-text-size:" . esc_attr($base_body_text_size) . ";";
         foreach ($settings['typography']['fonts'] as $row) {
             $name = sanitize_key($row['name']);
-            $value = esc_attr($row['value']);
+            $value = $this->css_font_value_for_output($row['value'] ?? '');
+            if ($value === '') {
+                continue;
+            }
             echo "--ecf-font-$name:$value;";
         }
         foreach ($type_scale as $name => $value) {
@@ -100,8 +135,8 @@ trait ECF_Framework_Output_CSS_Trait {
         if ($settings['enabled_components']['layout'] === '1') {
             echo ".ecf-container-boxed,.cf-container-boxed{width:min(100% - 2rem, var(--ecf-container-boxed));margin-inline:auto;}";
         }
-        echo "body{font-family:var(--ecf-base-font-family);font-size:var(--ecf-base-body-text-size);color:var(--ecf-base-text-color);background-color:var(--ecf-base-background-color);}";
-        echo "h1,h2,h3,h4,h5,h6{font-family:var(--ecf-font-primary);}";
+        echo "body{font-family:var(--ecf-base-body-font-family,var(--ecf-base-font-family));font-size:var(--ecf-base-body-text-size);color:var(--ecf-base-text-color);background-color:var(--ecf-base-background-color);}";
+        echo "h1,h2,h3,h4,h5,h6{font-family:var(--ecf-heading-font-family,var(--ecf-font-primary));}";
         echo "a{color:var(--ecf-link-color);}";
         echo ":focus-visible{outline:2px solid var(--ecf-focus-color);outline-offset:2px;}";
         echo ".ecf-content-width,.cf-content-width{width:min(100%,var(--ecf-content-max-width));margin-inline:auto;}";
@@ -115,7 +150,7 @@ trait ECF_Framework_Output_CSS_Trait {
                 continue;
             }
             $format = $this->font_format_from_url($src);
-            echo "@font-face{font-family:'" . esc_attr($family) . "';src:url('" . esc_url($src) . "')";
+            echo "@font-face{font-family:" . $this->css_string_literal($family) . ";src:url('" . esc_url($src) . "')";
             if ($format !== '') {
                 echo " format('" . esc_attr($format) . "')";
             }

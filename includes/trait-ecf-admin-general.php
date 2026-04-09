@@ -14,6 +14,7 @@ trait ECF_Framework_Admin_General_Trait {
             'content_max_width',
             'elementor_boxed_width',
             'base_font_family',
+            'heading_font_family',
             'base_body_text_size',
             'base_text_color',
             'base_background_color',
@@ -32,6 +33,7 @@ trait ECF_Framework_Admin_General_Trait {
             'content_max_width' => '1',
             'elementor_boxed_width' => '1',
             'base_font_family' => '1',
+            'heading_font_family' => '1',
             'base_body_text_size' => '1',
             'base_text_color' => '1',
             'github_update_checks_enabled' => '1',
@@ -77,9 +79,11 @@ trait ECF_Framework_Admin_General_Trait {
 
     private function general_setting_favorite_definitions($settings) {
         $root_base_px = $this->get_root_font_base_px($settings);
-        $base_font_options = $this->base_font_family_options($settings);
+        $base_font_options = $this->font_family_field_options($settings);
         $base_font_value = (string) ($settings['base_font_family'] ?? 'var(--ecf-font-primary)');
         $base_font_label = $base_font_options[$base_font_value] ?? $base_font_value;
+        $heading_font_value = (string) ($settings['heading_font_family'] ?? 'var(--ecf-font-primary)');
+        $heading_font_label = $base_font_options[$heading_font_value] ?? $heading_font_value;
 
         return [
             'root_font_size' => [
@@ -131,6 +135,12 @@ trait ECF_Framework_Admin_General_Trait {
                 'tab' => 'typography',
                 'title' => __('Base Font Family', 'ecf-framework'),
                 'value' => $base_font_label,
+            ],
+            'heading_font_family' => [
+                'group' => 'website',
+                'tab' => 'typography',
+                'title' => __('Heading Font Family', 'ecf-framework'),
+                'value' => $heading_font_label,
             ],
             'base_body_text_size' => [
                 'group' => 'website',
@@ -444,7 +454,11 @@ trait ECF_Framework_Admin_General_Trait {
                 <?php echo $this->general_setting_label(__($label_en, 'ecf-framework'), $tip_en, $icon); ?>
                 <?php $this->render_general_setting_favorite_toggle($settings, $key); ?>
             </span>
-            <input type="text" class="ecf-color-input" name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($value); ?>" data-default-color="<?php echo esc_attr($value); ?>">
+            <div class="ecf-color-field-wrap">
+                <button type="button" class="ecf-color-swatch ecf-color-swatch--interactive" data-ecf-color-swatch style="background:<?php echo esc_attr($value); ?>;" aria-label="<?php echo esc_attr__('Choose color', 'ecf-framework'); ?>"></button>
+                <input type="color" class="ecf-color-native" data-ecf-color-native value="<?php echo esc_attr($value); ?>">
+                <input type="text" class="ecf-color-input ecf-color-text" name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($value); ?>" data-default-color="<?php echo esc_attr($value); ?>">
+            </div>
         </label>
         <?php
     }
@@ -577,6 +591,9 @@ trait ECF_Framework_Admin_General_Trait {
             case 'base_font_family':
                 $this->render_base_font_family_field($settings);
                 break;
+            case 'heading_font_family':
+                $this->render_heading_font_family_field($settings);
+                break;
             case 'base_body_text_size':
                 $this->render_base_body_text_size_field($settings);
                 break;
@@ -607,7 +624,7 @@ trait ECF_Framework_Admin_General_Trait {
         }
     }
 
-    private function base_font_family_options($settings) {
+    private function font_family_field_options($settings) {
         $options = [
             'var(--ecf-font-primary)' => __('Primary', 'ecf-framework') . ': ' . ($settings['typography']['fonts'][0]['value'] ?? 'Inter, sans-serif'),
             'var(--ecf-font-secondary)' => __('Secondary', 'ecf-framework') . ': ' . ($settings['typography']['fonts'][1]['value'] ?? 'Georgia, serif'),
@@ -625,55 +642,281 @@ trait ECF_Framework_Admin_General_Trait {
         return $options;
     }
 
-    private function render_base_font_family_field($settings) {
-        $current = (string) ($settings['base_font_family'] ?? 'var(--ecf-font-primary)');
-        $options = $this->base_font_family_options($settings);
-        $is_custom = !isset($options[$current]);
-        $current_local_family = '';
+    private function grouped_font_family_field_options($settings) {
+        $groups = [];
+
+        $local_options = [];
+        foreach ((array) ($settings['typography']['local_fonts'] ?? []) as $row) {
+            $family = trim((string) ($row['family'] ?? ''));
+            if ($family === '') {
+                continue;
+            }
+            $local_options[] = [
+                'value' => "'" . $family . "'",
+                'label' => $family,
+                'source' => 'local',
+            ];
+        }
+        if (!empty($local_options)) {
+            $groups[] = [
+                'label' => __('Local fonts', 'ecf-framework'),
+                'options' => $local_options,
+            ];
+        }
+
+        $groups[] = [
+            'label' => __('Core font tokens', 'ecf-framework'),
+            'options' => [
+                [
+                    'value' => 'var(--ecf-font-primary)',
+                    'label' => __('Primary', 'ecf-framework') . ': ' . ($settings['typography']['fonts'][0]['value'] ?? 'Inter, sans-serif'),
+                    'source' => 'core',
+                ],
+                [
+                    'value' => 'var(--ecf-font-secondary)',
+                    'label' => __('Secondary', 'ecf-framework') . ': ' . ($settings['typography']['fonts'][1]['value'] ?? 'Georgia, serif'),
+                    'source' => 'core',
+                ],
+                [
+                    'value' => 'var(--ecf-font-mono)',
+                    'label' => __('Mono', 'ecf-framework') . ': ' . ($settings['typography']['fonts'][2]['value'] ?? 'JetBrains Mono, monospace'),
+                    'source' => 'core',
+                ],
+            ],
+        ];
+
+        $library_options = [];
+        foreach ($this->font_library_catalog() as $entry) {
+            $family = trim((string) ($entry['family'] ?? ''));
+            if ($family === '') {
+                continue;
+            }
+            $library_options[] = [
+                'value' => '__library__|' . $family,
+                'label' => $family,
+                'source' => 'library',
+            ];
+        }
+        if (!empty($library_options)) {
+            $groups[] = [
+                'label' => __('Google Fonts library', 'ecf-framework'),
+                'options' => $library_options,
+            ];
+        }
+
+        return $groups;
+    }
+
+    private function base_font_family_options($settings) {
+        return $this->font_family_field_options($settings);
+    }
+
+    private function font_library_catalog() {
+        static $catalog = null;
+
+        if (is_array($catalog)) {
+            return $catalog;
+        }
+
+        $catalog = [];
+        $bundled_path = plugin_dir_path(ECF_FRAMEWORK_FILE) . 'assets/data/google-fonts.json';
+
+        if (file_exists($bundled_path)) {
+            $bundled = json_decode((string) file_get_contents($bundled_path), true);
+            if (is_array($bundled) && !empty($bundled)) {
+                foreach ($bundled as $family) {
+                    if (!is_string($family)) {
+                        continue;
+                    }
+                    $family = trim($family);
+                    if ($family === '') {
+                        continue;
+                    }
+                    $catalog[] = ['family' => $family];
+                }
+            }
+        }
+
+        if (!empty($catalog)) {
+            return $catalog;
+        }
+
+        return [
+            ['family' => 'Inter'],
+            ['family' => 'Roboto'],
+            ['family' => 'Open Sans'],
+            ['family' => 'Lato'],
+            ['family' => 'Montserrat'],
+            ['family' => 'Poppins'],
+            ['family' => 'Manrope'],
+            ['family' => 'Source Sans 3'],
+            ['family' => 'Merriweather'],
+            ['family' => 'Playfair Display'],
+        ];
+    }
+
+    private function font_library_lookup($family) {
+        $family = trim((string) $family);
+        if ($family === '') {
+            return null;
+        }
+
+        foreach ($this->font_library_catalog() as $entry) {
+            if (strcasecmp((string) ($entry['family'] ?? ''), $family) === 0) {
+                return $entry;
+            }
+        }
+
+        return null;
+    }
+
+    private function selected_local_font_family($settings, $current) {
         foreach ((array) ($settings['typography']['local_fonts'] ?? []) as $row) {
             $family = trim((string) ($row['family'] ?? ''));
             if ($family !== '' && ("'" . $family . "'") === $current) {
-                $current_local_family = $family;
-                break;
+                return $family;
             }
         }
+
+        return '';
+    }
+
+    private function normalize_font_family_field_current_value($settings, $current) {
+        $current = trim((string) $current);
+        if ($current === '') {
+            return $current;
+        }
+
+        foreach ((array) ($settings['typography']['local_fonts'] ?? []) as $row) {
+            $family = trim((string) ($row['family'] ?? ''));
+            if ($family === '') {
+                continue;
+            }
+            if ($current === $family || $current === "'" . $family . "'") {
+                return "'" . $family . "'";
+            }
+        }
+
+        return $current;
+    }
+
+    private function font_family_field_current_label($settings, $current, $fallback = '') {
+        $current = $this->normalize_font_family_field_current_value($settings, $current);
+        $options = $this->font_family_field_options($settings);
+
+        if (isset($options[$current])) {
+            return (string) $options[$current];
+        }
+
+        $local_family = $this->selected_local_font_family($settings, $current);
+        if ($local_family !== '') {
+            return $local_family;
+        }
+
+        return trim((string) $current) !== '' ? (string) $current : (string) $fallback;
+    }
+
+    private function render_font_family_field($settings, $field_key, $label, $tip, $icon, $target, $default_value, $default_custom_placeholder = 'Inter, sans-serif', $show_note = true) {
+        $current = $this->normalize_font_family_field_current_value($settings, (string) ($settings[$field_key] ?? $default_value));
+        $options = $this->font_family_field_options($settings);
+        $grouped_options = $this->grouped_font_family_field_options($settings);
+        $is_custom = !isset($options[$current]);
+        $current_local_family = $this->selected_local_font_family($settings, $current);
+        $current_label = $this->font_family_field_current_label($settings, $current, $default_value);
         ?>
-        <label data-ecf-general-field="base_font_family">
+        <div data-ecf-general-field="<?php echo esc_attr($field_key); ?>" class="ecf-font-family-field">
             <span class="ecf-general-label-with-favorite">
-                <?php echo $this->general_setting_label(__('Base Font Family', 'ecf-framework'), 'Base font stack for the whole site body and normal flowing text. Headings can keep using your separate Primary typography font.', 'editor-textcolor'); ?>
-                <?php $this->render_general_setting_favorite_toggle($settings, 'base_font_family'); ?>
+                <?php echo $this->general_setting_label($label, $tip, $icon); ?>
+                <?php $this->render_general_setting_favorite_toggle($settings, $field_key); ?>
             </span>
-            <div class="ecf-form-grid ecf-form-grid--single">
-                <select name="<?php echo esc_attr($this->option_name); ?>[base_font_family_preset]" data-ecf-base-font-preset>
-                    <?php foreach ($options as $value => $label): ?>
-                        <option value="<?php echo esc_attr($value); ?>" <?php selected(!$is_custom && $current === $value); ?>><?php echo esc_html($label); ?></option>
-                    <?php endforeach; ?>
-                    <option value="__custom__" <?php selected($is_custom); ?>><?php echo esc_html__('Custom stack', 'ecf-framework'); ?></option>
-                </select>
-                <input type="text" name="<?php echo esc_attr($this->option_name); ?>[base_font_family_custom]" value="<?php echo esc_attr($is_custom ? $current : ''); ?>" placeholder="Inter, sans-serif" data-ecf-base-font-custom <?php echo $is_custom ? '' : 'hidden'; ?>>
+            <div class="ecf-font-current" data-ecf-font-current>
+                <?php echo esc_html__('Current:', 'ecf-framework'); ?>
+                <strong data-ecf-font-current-value><?php echo esc_html($current_label); ?></strong>
             </div>
-            <div class="ecf-inline-actions ecf-inline-actions--fonts">
-                <button type="button" class="ecf-btn ecf-btn--secondary ecf-btn--tiny" data-ecf-local-font-add>
-                    <span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
-                    <span><?php echo esc_html__('Add local font', 'ecf-framework'); ?></span>
-                </button>
+            <div class="ecf-form-grid ecf-form-grid--single ecf-font-picker" data-ecf-font-picker>
+                <input type="search"
+                       class="ecf-font-family-search"
+                       data-ecf-font-family-search
+                       data-ecf-font-family-field="<?php echo esc_attr($field_key); ?>"
+                       placeholder="<?php echo esc_attr__('Search local and Google fonts', 'ecf-framework'); ?>">
+                <input type="hidden"
+                       name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($field_key); ?>_preset]"
+                       value="<?php echo esc_attr($is_custom ? '__custom__' : $current); ?>"
+                       data-ecf-font-family-preset-input
+                       data-ecf-font-family-field="<?php echo esc_attr($field_key); ?>">
+                <div class="ecf-font-picker__panel" data-ecf-font-picker-panel hidden>
+                    <select size="8" class="ecf-font-family-list" data-ecf-font-family-preset data-ecf-font-family-field="<?php echo esc_attr($field_key); ?>"<?php echo $field_key === 'base_font_family' ? ' data-ecf-base-font-preset' : ''; ?> data-ecf-font-library-target="<?php echo esc_attr($target); ?>">
+                        <?php foreach ($grouped_options as $group): ?>
+                            <optgroup label="<?php echo esc_attr($group['label']); ?>">
+                                <?php foreach ($group['options'] as $option): ?>
+                                    <option value="<?php echo esc_attr($option['value']); ?>"
+                                            data-ecf-font-source="<?php echo esc_attr($option['source']); ?>"
+                                            <?php selected(!$is_custom && $current === $option['value']); ?>>
+                                        <?php echo esc_html($option['label']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endforeach; ?>
+                        <option value="__custom__" <?php selected($is_custom); ?>><?php echo esc_html__('Custom stack', 'ecf-framework'); ?></option>
+                    </select>
+                </div>
+                <input type="text" name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($field_key); ?>_custom]" value="<?php echo esc_attr($is_custom ? $current : ''); ?>" placeholder="<?php echo esc_attr($default_custom_placeholder); ?>" data-ecf-font-family-custom data-ecf-font-family-field="<?php echo esc_attr($field_key); ?>"<?php echo $field_key === 'base_font_family' ? ' data-ecf-base-font-custom' : ''; ?> <?php echo $is_custom ? '' : 'hidden'; ?>>
+            </div>
+            <div class="ecf-inline-actions ecf-inline-actions--fonts ecf-inline-actions--font-family-status">
                 <?php if ($current_local_family !== ''): ?>
-                    <button type="button" class="ecf-btn ecf-btn--danger ecf-btn--tiny" data-ecf-local-font-remove="<?php echo esc_attr($current_local_family); ?>">
+                    <button type="button" class="ecf-btn ecf-btn--ghost ecf-btn--tiny ecf-font-family-remove" data-ecf-local-font-remove="<?php echo esc_attr($current_local_family); ?>" data-ecf-font-family-field="<?php echo esc_attr($field_key); ?>">
                         <span class="dashicons dashicons-no-alt" aria-hidden="true"></span>
                         <span><?php echo esc_html__('Remove selected local font', 'ecf-framework'); ?></span>
                     </button>
                 <?php endif; ?>
             </div>
-        </label>
+            <?php if ($show_note): ?>
+                <p class="ecf-muted-copy ecf-font-family-note">
+                    <?php echo esc_html__('Library fonts are downloaded into your own media library on the server and then served locally, so the frontend does not need live requests to external font providers.', 'ecf-framework'); ?>
+                </p>
+            <?php endif; ?>
+        </div>
         <?php
     }
 
+    private function render_base_font_family_field($settings, $show_note = true) {
+        $this->render_font_family_field(
+            $settings,
+            'base_font_family',
+            __('Base Font Family', 'ecf-framework'),
+            'Base font stack for the whole site body and normal flowing text. This should drive the body font family for normal reading text across the site.',
+            'editor-textcolor',
+            'body',
+            'var(--ecf-font-primary)',
+            'Inter, sans-serif',
+            $show_note
+        );
+    }
+
+    private function render_heading_font_family_field($settings, $show_note = true) {
+        $this->render_font_family_field(
+            $settings,
+            'heading_font_family',
+            __('Heading Font Family', 'ecf-framework'),
+            'Separate heading font stack for h1 to h6. This lets you keep one font for the body text and another one for headings.',
+            'heading',
+            'heading',
+            'var(--ecf-font-primary)',
+            'Inter, sans-serif',
+            $show_note
+        );
+    }
+
     private function render_base_body_text_size_field($settings) {
-        $stored_value = (string) ($settings['base_body_text_size'] ?? '');
-        if ($this->should_upgrade_base_body_text_size($stored_value, $settings)) {
+        $raw_stored_value = (string) ($settings['base_body_text_size'] ?? '');
+        $uses_default_source = $this->should_upgrade_base_body_text_size($raw_stored_value, $settings);
+        $stored_value = $raw_stored_value;
+        if ($uses_default_source) {
             $stored_value = $this->derived_base_body_text_size($settings);
         }
-        $parts = $this->parse_css_size_parts($stored_value);
+        $derived_source_value = $this->derived_base_body_text_size($settings);
+        $derived_parts = $this->parse_css_size_parts($derived_source_value);
+        $stored_parts = $this->parse_css_size_parts($stored_value);
         $base_step = sanitize_key($settings['typography']['scale']['base_index'] ?? 'm');
         $warning_message = $this->base_body_text_size_warning_message($stored_value, $settings);
         if ($base_step === '') {
@@ -698,16 +941,24 @@ trait ECF_Framework_Admin_General_Trait {
             ?>
             <p class="ecf-muted-copy">
                 <?php
-                echo wp_kses(
-                    sprintf(
-                        __('Sets the token <code>%1$s</code>. Default source: max value from <code>%2$s</code> (%3$s %4$s).', 'ecf-framework'),
+                $body_size_message = $uses_default_source
+                    ? sprintf(
+                        __('Sets the token <code>%1$s</code>. By default it follows the max value from <code>%2$s</code> (%3$s %4$s).', 'ecf-framework'),
                         '--ecf-base-body-text-size',
                         '--ecf-text-' . $base_step,
-                        $parts['value'],
-                        $parts['format']
-                    ),
-                    ['code' => []]
-                );
+                        $derived_parts['value'],
+                        $derived_parts['format']
+                    )
+                    : sprintf(
+                        __('Sets the token <code>%1$s</code>. This value is currently set manually to %2$s %3$s and no longer follows <code>%4$s</code> automatically (%5$s %6$s).', 'ecf-framework'),
+                        '--ecf-base-body-text-size',
+                        $stored_parts['value'],
+                        $stored_parts['format'],
+                        '--ecf-text-' . $base_step,
+                        $derived_parts['value'],
+                        $derived_parts['format']
+                    );
+                echo wp_kses($body_size_message, ['code' => []]);
                 ?>
             </p>
             <p class="ecf-inline-warning"<?php echo $warning_message === '' ? ' hidden' : ''; ?> data-ecf-body-size-warning>

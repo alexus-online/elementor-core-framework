@@ -76,14 +76,21 @@ async function openPluginPage(page) {
 }
 
 async function openPanel(page, panel) {
-  await page.locator(`.ecf-nav-item[data-panel="${panel}"]`).click();
+  const trigger = page.locator(`.ecf-nav-item[data-panel="${panel}"], .ecf-sidebar-link[data-panel="${panel}"]`).first();
+  await expect(trigger).toBeVisible();
+  await trigger.click();
   await expect(page.locator(`.ecf-panel[data-panel="${panel}"]`)).toBeVisible();
 }
 
 async function openGeneralTab(page, tab) {
+  const normalizedTab = (tab === 'editor' || tab === 'ui' || tab === 'behavior') ? 'interface' : tab;
   await openPanel(page, 'components');
-  await page.locator(`[data-ecf-general-tab="${tab}"]`).click();
-  await expect(page.locator(`[data-ecf-general-section="${tab}"]`)).toBeVisible();
+  const panel = page.locator('.ecf-panel[data-panel="components"]').first();
+  const tabButton = panel.locator(`[data-ecf-general-tab="${normalizedTab}"]`).first();
+  await expect(tabButton).toBeVisible();
+  await tabButton.evaluate((element) => element.click());
+  await expect(tabButton).toHaveClass(/is-active/);
+  await expect(panel.locator(`[data-ecf-general-section="${normalizedTab}"]`).first()).toBeVisible();
 }
 
 async function chooseFormat(field, value) {
@@ -128,6 +135,52 @@ async function selectBaseFontFamilyPreset(page, presetValue) {
   return field;
 }
 
+async function selectHeadingFontFamilyPreset(page, presetValue) {
+  const field = getGeneralField(page, 'heading_font_family');
+  const select = field.locator('[data-ecf-font-family-preset]').first();
+  await expect(select).toBeVisible();
+  await select.selectOption(presetValue);
+  return field;
+}
+
+async function getBaseFontFamilyState(page) {
+  const field = getGeneralField(page, 'base_font_family');
+  return {
+    field,
+    preset: await field.locator('[data-ecf-base-font-preset]').first().inputValue(),
+    custom: await field.locator('[data-ecf-base-font-custom]').first().inputValue().catch(() => ''),
+  };
+}
+
+async function clickRemoveSelectedLocalFont(page) {
+  const field = getGeneralField(page, 'base_font_family');
+  const button = field.locator('[data-ecf-local-font-remove]').first();
+  await expect(button).toBeVisible();
+  await button.click();
+}
+
+async function clickRemoveSelectedHeadingLocalFont(page) {
+  const field = getGeneralField(page, 'heading_font_family');
+  const button = field.locator('[data-ecf-local-font-remove]').first();
+  await expect(button).toBeVisible();
+  await button.click();
+}
+
+async function importLibraryFontForField(page, fieldName, family) {
+  const field = getGeneralField(page, fieldName);
+  await expect(field).toBeVisible();
+  const search = field.locator('[data-ecf-font-family-search]').first();
+  const select = field.locator('[data-ecf-font-family-preset]').first();
+  await search.fill(family);
+  await expect
+    .poll(async () => {
+      return await select.locator(`option[value="__library__|${family}"]`).count();
+    })
+    .toBeGreaterThan(0);
+  await select.selectOption(`__library__|${family}`);
+  return field;
+}
+
 async function getRootCssVariable(page, variableName) {
   return page.evaluate((name) => {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -142,8 +195,40 @@ async function getFrontendStyles(page) {
   await page.goto(`${wpUrl}/`, { waitUntil: 'domcontentloaded' });
   return page.evaluate(() => ({
     rootFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-base-font-family').trim(),
+    rootBodyFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-base-body-font-family').trim(),
     bodyFontFamily: getComputedStyle(document.body).fontFamily,
   }));
+}
+
+async function getFrontendTypographySnapshot(page) {
+  await page.goto(`${wpUrl}/`, { waitUntil: 'domcontentloaded' });
+  return page.evaluate(() => {
+    const heading = document.querySelector('h1, h2, h3, h4, h5, h6');
+    return {
+      rootFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-base-font-family').trim(),
+      rootBodyFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-base-body-font-family').trim(),
+      rootPrimaryFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-font-primary').trim(),
+      rootHeadingFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-heading-font-family').trim(),
+      rootBodyTextSize: getComputedStyle(document.documentElement).getPropertyValue('--ecf-base-body-text-size').trim(),
+      bodyFontFamily: getComputedStyle(document.body).fontFamily,
+      bodyFontSize: getComputedStyle(document.body).fontSize,
+      headingExists: Boolean(heading),
+      headingFontFamily: heading ? getComputedStyle(heading).fontFamily : '',
+    };
+  });
+}
+
+async function getFrontendColorSnapshot(page) {
+  await page.goto(`${wpUrl}/`, { waitUntil: 'domcontentloaded' });
+  return page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    return {
+      baseText: root.getPropertyValue('--ecf-base-text-color').trim(),
+      baseBackground: root.getPropertyValue('--ecf-base-background-color').trim(),
+      link: root.getPropertyValue('--ecf-link-color').trim(),
+      focus: root.getPropertyValue('--ecf-focus-color').trim(),
+    };
+  });
 }
 
 async function toggleGeneralFavorite(page, fieldName) {
@@ -160,12 +245,74 @@ async function toggleGeneralFavorite(page, fieldName) {
   return { field, toggle, originalChecked };
 }
 
+function getFavoriteCard(page, key) {
+  return page.locator(`[data-ecf-favorite-card="${key}"]`).first();
+}
+
+async function getFieldTooltipText(page, fieldName) {
+  const field = getGeneralField(page, fieldName);
+  return (await field.locator('.ecf-tip-hover').first().getAttribute('data-tip')) || '';
+}
+
+async function getFavoriteToggleTip(page, fieldName) {
+  const field = getGeneralField(page, fieldName);
+  return (await field.locator('.ecf-favorite-toggle').first().getAttribute('data-tip')) || '';
+}
+
+async function setGeneralCheckbox(page, fieldName, checked) {
+  const field = getGeneralField(page, fieldName);
+  const checkbox = field.locator('input[type="checkbox"]').first();
+  await expect(checkbox).toBeVisible();
+  if ((await checkbox.isChecked()) !== checked) {
+    await checkbox.setChecked(checked);
+  }
+  return field;
+}
+
+async function setGeneralColorValue(page, fieldName, value) {
+  const field = getGeneralField(page, fieldName);
+  const input = field.locator('input.ecf-color-input').first();
+  await expect(input).toBeVisible();
+  await input.fill(value);
+  await input.blur();
+  return field;
+}
+
+async function getRootFontImpactSnapshot(page) {
+  const box = page.locator('[data-ecf-root-font-impact]').first();
+  await expect(box).toBeVisible();
+  return {
+    currentBase: (await box.locator('[data-ecf-root-font-base]').first().textContent() || '').trim(),
+    typeMin: (await box.locator('[data-ecf-root-type-min]').first().textContent() || '').trim(),
+    typeMax: (await box.locator('[data-ecf-root-type-max]').first().textContent() || '').trim(),
+    typeCopy: (await box.locator('[data-ecf-root-type-copy]').first().getAttribute('data-copy') || '').trim(),
+    spacingMin: (await box.locator('[data-ecf-root-spacing-min]').first().textContent() || '').trim(),
+    spacingMax: (await box.locator('[data-ecf-root-spacing-max]').first().textContent() || '').trim(),
+    spacingCopy: (await box.locator('[data-ecf-root-spacing-copy]').first().getAttribute('data-copy') || '').trim(),
+    radiusMin: (await box.locator('[data-ecf-root-radius-min]').first().textContent() || '').trim(),
+    radiusMax: (await box.locator('[data-ecf-root-radius-max]').first().textContent() || '').trim(),
+    radiusCopy: (await box.locator('[data-ecf-root-radius-copy]').first().getAttribute('data-copy') || '').trim(),
+  };
+}
+
+function getVariablesStatusCard(page) {
+  return page.locator('.ecf-panel[data-panel="variables"] .ecf-class-limit-card').first();
+}
+
+function getSyncStatusCard(page) {
+  return page.locator('.ecf-panel[data-panel="sync"] [data-ecf-class-usage-card="compact"]').first();
+}
+
+function getGithubStatus(page) {
+  return page.locator('[data-ecf-github-status]').first();
+}
+
 async function selectDesignPreset(page, preset) {
-  await page.locator('[data-ecf-general-section="ui"]:visible').locator(`[data-ecf-admin-design-option][data-value="${preset}"]`).first().click();
+  await page.locator('[data-ecf-general-section="interface"]:visible').locator(`[data-ecf-admin-design-option][data-value="${preset}"]`).first().click();
 }
 
 async function selectDesignMode(page, mode) {
-  await page.locator('[data-ecf-general-section="ui"]:visible').locator(`[data-ecf-admin-design-mode-option][data-value="${mode}"]`).first().click();
+  await page.locator('[data-ecf-general-section="interface"]:visible').locator(`[data-ecf-admin-design-mode-option][data-value="${mode}"]`).first().click();
 }
 
 async function refreshSystemInfo(page) {
@@ -238,12 +385,47 @@ async function switchInterfaceLanguage(page, language) {
   await expect(getGeneralField(page, 'interface_language').locator('select').first()).toHaveValue(language, { timeout: 15000 });
 }
 
+async function setTypographyScaleMaxBase(page, value) {
+  const input = page.locator('[name="ecf_framework_v50[typography][scale][max_base]"]').first();
+  await expect(input).toBeVisible();
+  await input.fill(value);
+  await input.blur();
+}
+
+async function setTypographyScaleMinBase(page, value) {
+  const input = page.locator('[name="ecf_framework_v50[typography][scale][min_base]"]').first();
+  await expect(input).toBeVisible();
+  await input.fill(value);
+  await input.blur();
+}
+
+async function getTypographyPreviewRow(page, step = 'm') {
+  return page.locator(`.ecf-panel[data-panel="typography"] .ecf-type-row[data-ecf-step="${step}"]`).first();
+}
+
+async function setSpacingMaxBase(page, value) {
+  const input = page.locator('[name="ecf_framework_v50[spacing][max_base]"]').first();
+  await expect(input).toBeVisible();
+  await input.fill(value);
+  await input.blur();
+}
+
+async function getSpacingPreviewRow(page, step = 'm') {
+  return page.locator(`.ecf-panel[data-panel="spacing"] .ecf-space-row[data-ecf-space-step="${step}"]`).first();
+}
+
 async function addLocalFontRow(page) {
   await page.locator('.ecf-panel[data-panel="typography"] .ecf-add-local-font:visible').first().click();
 }
 
 async function getLocalFontRows(page) {
   return page.locator('[data-local-font-table] .ecf-font-file-row');
+}
+
+async function getLocalFontFamilies(page) {
+  return page.locator('[data-local-font-table] .ecf-font-file-row input[name$="[family]"]').evaluateAll((nodes) =>
+    nodes.map((node) => node.value)
+  );
 }
 
 async function fillLocalFontRow(row, values) {
@@ -506,10 +688,37 @@ async function clearDebugHistory(page) {
   const clearButton = debugCard.getByRole('button', { name: /Clear|Leeren/i }).first();
   await expect(clearButton).toBeVisible();
   await Promise.all([
-    page.waitForURL(/page=ecf-framework.*ecf_sync=ok.*ecf_message=/i),
+    page.waitForURL(/page=ecf-framework.*ecf_sync=ok/i),
     clearButton.click(),
   ]);
+  await expect(page).not.toHaveURL(/ecf_message=/i);
   await expect(page.locator('.notice-success, .updated, .notice').filter({ hasText: /Debug history cleared/i }).first()).toBeVisible();
+}
+
+async function openChangelogModal(page) {
+  await page.locator('[data-ecf-open-changelog-modal]').first().click();
+  await expect(page.locator('[data-ecf-changelog-modal]')).toBeVisible();
+}
+
+async function closeChangelogModal(page) {
+  await page.locator('[data-ecf-changelog-modal] .ecf-modal__close[data-ecf-close-changelog-modal]').first().click();
+  await expect(page.locator('[data-ecf-changelog-modal]')).toBeHidden();
+}
+
+async function mockClipboard(page) {
+  await page.evaluate(() => {
+    window.__ecfCopiedTexts = [];
+    const clipboard = navigator.clipboard || {};
+    clipboard.writeText = (text) => {
+      window.__ecfCopiedTexts.push(String(text));
+      return Promise.resolve();
+    };
+    navigator.clipboard = clipboard;
+  });
+}
+
+async function getCopiedTexts(page) {
+  return page.evaluate(() => window.__ecfCopiedTexts || []);
 }
 
 async function triggerClassSync(page) {
@@ -538,6 +747,17 @@ async function waitForErrorNotice(page) {
   await expect(notice).toHaveClass(/ecf-panel-notice--error/);
 }
 
+async function waitForAutosaveIdle(page) {
+  const notice = page.locator('.ecf-autosave-notice');
+  await expect.poll(async () => {
+    if (!(await notice.count())) {
+      return 'missing';
+    }
+    const className = await notice.first().getAttribute('class');
+    return String(className || '');
+  }).not.toContain('ecf-panel-notice--saving');
+}
+
 async function fetchRestSettings(page) {
   return page.evaluate(async () => {
     const response = await fetch(window.ecfAdmin.restUrl, {
@@ -555,6 +775,13 @@ async function fetchRestSettings(page) {
     const payload = await response.json();
     return payload.settings || {};
   });
+}
+
+async function waitForRestSetting(page, key, expectedValue) {
+  await expect.poll(async () => {
+    const settings = await fetchRestSettings(page);
+    return settings[key];
+  }).toBe(expectedValue);
 }
 
 async function updateRestSettings(page, settings) {
@@ -578,15 +805,38 @@ async function updateRestSettings(page, settings) {
 }
 
 async function reorderLayoutGroup(page, groupName, sourceItemId, targetItemId) {
-  const sourceHandle = page.locator(`[data-ecf-layout-group="${groupName}"] [data-ecf-layout-item="${sourceItemId}"] [data-ecf-layout-handle]`).first();
-  const targetHandle = page.locator(`[data-ecf-layout-group="${groupName}"] [data-ecf-layout-item="${targetItemId}"] [data-ecf-layout-handle]`).first();
-  await sourceHandle.dragTo(targetHandle);
+  const sourceHandle = page.locator(
+    `[data-ecf-layout-group="${groupName}"] [data-ecf-layout-item="${sourceItemId}"][data-ecf-layout-handle], ` +
+    `[data-ecf-layout-group="${groupName}"] [data-ecf-layout-item="${sourceItemId}"] [data-ecf-layout-handle]`
+  ).first();
+  const targetItem = page.locator(
+    `[data-ecf-layout-group="${groupName}"] [data-ecf-layout-item="${targetItemId}"]`
+  ).first();
+  await sourceHandle.dragTo(targetItem, {
+    targetPosition: { x: 24, y: 24 },
+  });
 }
 
 async function getLayoutOrder(page, groupName) {
   return page.locator(`[data-ecf-layout-group="${groupName}"] > [data-ecf-layout-item]`).evaluateAll((nodes) =>
     nodes.map((node) => node.getAttribute('data-ecf-layout-item'))
   );
+}
+
+async function setLayoutColumns(page, groupName, count) {
+  const current = await getLayoutColumns(page, groupName);
+  if (current === Number(count)) {
+    return false;
+  }
+  const button = page.locator(`[data-ecf-layout-columns-btn][data-group="${groupName}"][data-ecf-layout-columns="${count}"]`).first();
+  await expect(button).toBeVisible();
+  await button.click();
+  return true;
+}
+
+async function getLayoutColumns(page, groupName) {
+  const value = await page.locator(`[data-ecf-layout-columns-group="${groupName}"]`).first().getAttribute('data-ecf-layout-columns');
+  return Number(value || 1);
 }
 
 module.exports = {
@@ -602,10 +852,26 @@ module.exports = {
   setBodyTextSize,
   getBodyTextSizeState,
   selectBaseFontFamilyPreset,
+  selectHeadingFontFamilyPreset,
+  getBaseFontFamilyState,
+  clickRemoveSelectedLocalFont,
+  clickRemoveSelectedHeadingLocalFont,
+  importLibraryFontForField,
   getRootCssVariable,
   getBodyComputedFontFamily,
   getFrontendStyles,
+  getFrontendTypographySnapshot,
+  getFrontendColorSnapshot,
   toggleGeneralFavorite,
+  getFavoriteCard,
+  getFieldTooltipText,
+  getFavoriteToggleTip,
+  setGeneralCheckbox,
+  setGeneralColorValue,
+  getRootFontImpactSnapshot,
+  getVariablesStatusCard,
+  getSyncStatusCard,
+  getGithubStatus,
   selectDesignPreset,
   selectDesignMode,
   refreshSystemInfo,
@@ -616,12 +882,18 @@ module.exports = {
   addTypographyStep,
   removeTypographyStep,
   getTypographyStepCount,
+  setTypographyScaleMaxBase,
+  setTypographyScaleMinBase,
+  getTypographyPreviewRow,
   addSpacingStep,
   removeSpacingStep,
   getSpacingStepCount,
+  setSpacingMaxBase,
+  getSpacingPreviewRow,
   switchInterfaceLanguage,
   addLocalFontRow,
   getLocalFontRows,
+  getLocalFontFamilies,
   fillLocalFontRow,
   removeLocalFontRow,
   setImportFile,
@@ -653,14 +925,22 @@ module.exports = {
   saveSearchEditModal,
   openSystemDebugCard,
   clearDebugHistory,
+  openChangelogModal,
+  closeChangelogModal,
+  mockClipboard,
+  getCopiedTexts,
   triggerClassSync,
   triggerNativeSync,
   triggerClassCleanup,
   triggerNativeCleanup,
   waitForSuccessNotice,
   waitForErrorNotice,
+  waitForAutosaveIdle,
   fetchRestSettings,
+  waitForRestSetting,
   updateRestSettings,
   reorderLayoutGroup,
   getLayoutOrder,
+  setLayoutColumns,
+  getLayoutColumns,
 };

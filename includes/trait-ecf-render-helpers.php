@@ -7,22 +7,30 @@ trait ECF_Framework_Render_Helpers_Trait {
         }
         $is_minmax = ($group === 'radius');
         $is_color = ($group === 'colors');
+        $is_shadow = ($group === 'shadows');
         $col_class = $is_minmax ? 'ecf-table--minmax' : ($is_color ? 'ecf-table--color' : '');
 
         echo '<div class="ecf-table ' . esc_attr($col_class) . '" data-group="' . esc_attr($group) . '" data-input-key="' . esc_attr($input_key) . '" data-minmax="' . ($is_minmax ? '1' : '0') . '">';
 
         if ($is_color) {
             echo '<div class="ecf-head ecf-head--color">';
-            echo '<span>' . $this->tip_hover_label(__('Color', 'ecf-framework'), 'Color preview', 'Farbvorschau') . '</span>';
+            echo '<span aria-hidden="true"></span>';
             echo '<span>' . $this->tip_hover_label(__('Name', 'ecf-framework'), 'Color name / CSS variable', 'Farbname / CSS-Variable') . '</span>';
-            echo '<span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Color value', 'Farbwert') . '</span>';
-            echo '<span>' . $this->tip_hover_label(__('Format', 'ecf-framework'), 'Color format', 'Farbformat') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Color value', 'Wert') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Format', 'ecf-framework'), 'Color format', 'Format') . '</span>';
             echo '<span></span>';
             echo '</div>';
         } elseif ($is_minmax) {
-            echo '<div class="ecf-head ecf-head--minmax"><span>' . $this->tip_hover_label(__('Class Name', 'ecf-framework'), 'Token name / CSS class name', 'Tokenname / CSS-Klassenname') . '</span><span>' . $this->tip_hover_label(__('Min', 'ecf-framework'), 'Minimum value', 'Minimalwert') . '</span><span>' . $this->tip_hover_label(__('Max', 'ecf-framework'), 'Maximum value', 'Maximalwert') . '</span><span></span></div>';
+            echo '<div class="ecf-head ecf-head--minmax"><span>' . $this->tip_hover_label(__('Class', 'ecf-framework'), 'Token name / CSS class name', 'Klasse') . '</span><span>' . $this->tip_hover_label(__('Min', 'ecf-framework'), 'Minimum value', 'Min') . '</span><span>' . $this->tip_hover_label(__('Max', 'ecf-framework'), 'Maximum value', 'Max') . '</span><span></span></div>';
+        } elseif ($is_shadow) {
+            echo '<div class="ecf-head">';
+            echo '<span aria-hidden="true"></span>';
+            echo '<span>' . $this->tip_hover_label(__('Class Name', 'ecf-framework'), 'Token name / CSS class name', 'Klassenname') . '</span>';
+            echo '<span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Token value / CSS value', 'Wert') . '</span>';
+            echo '<span></span>';
+            echo '</div>';
         } else {
-            echo '<div class="ecf-head"><span>' . $this->tip_hover_label(__('Class Name', 'ecf-framework'), 'Token name / CSS class name', 'Tokenname / CSS-Klassenname') . '</span><span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Token value / CSS value', 'Tokenwert / CSS-Wert') . '</span><span></span></div>';
+            echo '<div class="ecf-head"><span>' . $this->tip_hover_label(__('Class Name', 'ecf-framework'), 'Token name / CSS class name', 'Klassenname') . '</span><span>' . $this->tip_hover_label(__('Value', 'ecf-framework'), 'Token value / CSS value', 'Wert') . '</span><span></span></div>';
         }
 
         foreach ($rows as $i => $row) {
@@ -58,6 +66,9 @@ trait ECF_Framework_Render_Helpers_Trait {
                 echo '</div>';
             } else {
                 echo '<div class="ecf-row">';
+                if ($is_shadow) {
+                    echo '<div class="ecf-shadow-preview" style="box-shadow:' . esc_attr($row['value']) . ';"></div>';
+                }
                 echo '<input type="text" data-ecf-slug-field="token" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
                 echo '<input type="text" name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" placeholder="value" />';
                 echo '<button type="button" class="ecf-remove-row" title="×">×</button>';

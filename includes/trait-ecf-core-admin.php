@@ -79,6 +79,10 @@ trait ECF_Framework_Core_Admin_Trait {
         return $this->option_name . '_layout_order';
     }
 
+    private function layout_columns_meta_key() {
+        return $this->option_name . '_layout_columns';
+    }
+
     private function wordpress_default_interface_language() {
         $locale = function_exists('determine_locale') ? determine_locale() : get_locale();
         $locale = strtolower((string) $locale);
@@ -253,6 +257,24 @@ trait ECF_Framework_Core_Admin_Trait {
         return $sanitized;
     }
 
+    private function sanitize_layout_columns($columns) {
+        if (!is_array($columns)) {
+            return [];
+        }
+
+        $sanitized = [];
+        foreach ($columns as $group => $count) {
+            $group_key = sanitize_key($group);
+            $count_int = (int) $count;
+            if ($group_key === '' || $count_int < 1 || $count_int > 3) {
+                continue;
+            }
+            $sanitized[$group_key] = $count_int;
+        }
+
+        return $sanitized;
+    }
+
     private function get_user_layout_orders($user_id = 0) {
         $user_id = $user_id ? (int) $user_id : (int) get_current_user_id();
         if ($user_id <= 0) {
@@ -262,6 +284,20 @@ trait ECF_Framework_Core_Admin_Trait {
         $saved = get_user_meta($user_id, $this->layout_order_meta_key(), true);
 
         return $this->sanitize_layout_orders(is_array($saved) ? $saved : []);
+    }
+
+    private function get_user_layout_columns($user_id = 0) {
+        $user_id = $user_id ? (int) $user_id : (int) get_current_user_id();
+        if ($user_id <= 0) {
+            return $this->default_layout_columns();
+        }
+
+        $saved = get_user_meta($user_id, $this->layout_columns_meta_key(), true);
+
+        return array_merge(
+            $this->default_layout_columns(),
+            $this->sanitize_layout_columns(is_array($saved) ? $saved : [])
+        );
     }
 
     private function save_user_layout_orders($orders, $user_id = 0) {
@@ -274,6 +310,24 @@ trait ECF_Framework_Core_Admin_Trait {
         update_user_meta($user_id, $this->layout_order_meta_key(), $sanitized);
 
         return $sanitized;
+    }
+
+    private function save_user_layout_columns($columns, $user_id = 0) {
+        $user_id = $user_id ? (int) $user_id : (int) get_current_user_id();
+        if ($user_id <= 0) {
+            return $this->default_layout_columns();
+        }
+
+        $sanitized = $this->sanitize_layout_columns($columns);
+        update_user_meta($user_id, $this->layout_columns_meta_key(), $sanitized);
+
+        return array_merge($this->default_layout_columns(), $sanitized);
+    }
+
+    private function default_layout_columns() {
+        return [
+            'components-website-type-size' => 2,
+        ];
     }
 
     public function handle_clear_debug_history() {
@@ -294,9 +348,65 @@ trait ECF_Framework_Core_Admin_Trait {
         return __('You are not allowed to perform this action.', 'ecf-framework');
     }
 
+    private function admin_notice_scope_from_url($base_url) {
+        return strpos((string) $base_url, 'plugins.php') !== false ? 'plugins' : 'ecf_group';
+    }
+
+    private function admin_notice_transient_key($scope = 'ecf_group') {
+        return $this->option_name . '_notice_' . sanitize_key((string) $scope) . '_' . get_current_user_id();
+    }
+
+    private function queue_admin_notice($message, $type = 'success', $scope = 'ecf_group') {
+        $message = trim((string) $message);
+        if ($message === '') {
+            return;
+        }
+
+        $type = in_array($type, ['success', 'error', 'warning', 'info'], true) ? $type : 'success';
+        $scope = sanitize_key((string) $scope) ?: 'ecf_group';
+        $key = $this->admin_notice_transient_key($scope);
+        $queue = get_transient($key);
+        if (!is_array($queue)) {
+            $queue = [];
+        }
+
+        $queue[] = [
+            'message' => $message,
+            'type' => $type,
+        ];
+
+        set_transient($key, $queue, MINUTE_IN_SECONDS * 10);
+    }
+
+    private function consume_admin_notices($scope = 'ecf_group') {
+        $key = $this->admin_notice_transient_key($scope);
+        $queue = get_transient($key);
+        delete_transient($key);
+
+        return is_array($queue) ? $queue : [];
+    }
+
+    private function render_consumed_admin_notices($scope = 'ecf_group', $panel_class = 'ecf-panel-notice') {
+        foreach ($this->consume_admin_notices($scope) as $notice) {
+            $type = sanitize_key((string) ($notice['type'] ?? 'success'));
+            $message = (string) ($notice['message'] ?? '');
+            if ($message === '') {
+                continue;
+            }
+
+            $notice_class = 'notice notice-' . $type;
+            if ($panel_class !== '') {
+                $notice_class .= ' ' . $panel_class . ' ' . $panel_class . '--' . $type;
+            }
+
+            echo '<div class="' . esc_attr($notice_class) . '"><p>' . esc_html($message) . '</p></div>';
+        }
+    }
+
     private function redirect_with_message($base_url, array $query = [], $message = '', $message_key = 'ecf_message') {
         if ($message !== '') {
-            $query[$message_key] = $message;
+            $type = (!empty($query['ecf_sync']) && $query['ecf_sync'] === 'error') ? 'error' : 'success';
+            $this->queue_admin_notice($message, $type, $this->admin_notice_scope_from_url($base_url));
         }
 
         wp_safe_redirect(add_query_arg($query, $base_url));

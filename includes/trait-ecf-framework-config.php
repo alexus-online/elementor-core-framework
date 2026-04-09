@@ -11,6 +11,7 @@ trait ECF_Framework_Config_Trait {
             'elementor_boxed_width' => '1140px',
             'content_max_width' => '72ch',
             'base_font_family' => 'var(--ecf-font-primary)',
+            'heading_font_family' => 'var(--ecf-font-primary)',
             'base_body_text_size' => '16px',
             'base_text_color' => '#111827',
             'base_background_color' => '#ffffff',
@@ -341,6 +342,28 @@ trait ECF_Framework_Config_Trait {
         if ($this->should_upgrade_base_body_text_size($settings['base_body_text_size'] ?? '', $settings)) {
             $settings['base_body_text_size'] = $derived_base_body_text_size;
             $saved['base_body_text_size'] = $derived_base_body_text_size;
+            update_option($this->option_name, $saved);
+        }
+
+        $normalized_base_font_family = $this->normalize_saved_font_family_value(
+            $settings['base_font_family'] ?? $this->defaults()['base_font_family'],
+            $settings['typography']['local_fonts'] ?? [],
+            $this->defaults()['base_font_family']
+        );
+        if ($normalized_base_font_family !== ($settings['base_font_family'] ?? '')) {
+            $settings['base_font_family'] = $normalized_base_font_family;
+            $saved['base_font_family'] = $normalized_base_font_family;
+            update_option($this->option_name, $saved);
+        }
+
+        $normalized_heading_font_family = $this->normalize_saved_font_family_value(
+            $settings['heading_font_family'] ?? $this->defaults()['heading_font_family'],
+            $settings['typography']['local_fonts'] ?? [],
+            $this->defaults()['heading_font_family']
+        );
+        if ($normalized_heading_font_family !== ($settings['heading_font_family'] ?? '')) {
+            $settings['heading_font_family'] = $normalized_heading_font_family;
+            $saved['heading_font_family'] = $normalized_heading_font_family;
             update_option($this->option_name, $saved);
         }
 

@@ -136,6 +136,11 @@ trait ECF_Framework_Design_Math_Trait {
             }
             $max_size = round($max_size, 3);
             $min_size = round($min_size, 3);
+            if ($min_size > $max_size) {
+                $swap = $min_size;
+                $min_size = $max_size;
+                $max_size = $swap;
+            }
             if ($fluid && $max_vw > $min_vw) {
                 $scale[$step] = $this->build_fluid_rem_clamp($min_size, $max_size, $min_vw, $max_vw, $root_base_px);
             } else {
@@ -172,6 +177,11 @@ trait ECF_Framework_Design_Math_Trait {
             }
             $max_size = round($max_size, 3);
             $min_size = round($min_size, 3);
+            if ($min_size > $max_size) {
+                $swap = $min_size;
+                $min_size = $max_size;
+                $max_size = $swap;
+            }
             if ($fluid && $max_vw > $min_vw) {
                 $css_value = $this->build_fluid_rem_clamp($min_size, $max_size, $min_vw, $max_vw, $root_base_px);
             } else {

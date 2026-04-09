@@ -150,25 +150,31 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $classes_count = $this->get_native_class_cleanup_count();
 
             if ($vars_count === 0 && $classes_count === 0) {
-                $message = rawurlencode(__('No ECF variables or global classes were found in Elementor.', 'ecf-framework'));
-                wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=ok&ecf_message=' . $message));
-                exit;
+                $this->redirect_with_message(
+                    admin_url('admin.php?page=ecf-framework'),
+                    ['ecf_sync' => 'ok'],
+                    __('No ECF variables or global classes were found in Elementor.', 'ecf-framework')
+                );
             }
 
             $vars_deleted = $this->cleanup_native_variables();
             $classes_deleted = $this->cleanup_native_classes();
-            $message = rawurlencode(
-                sprintf(
-                    __('%1$d variables and %2$d global classes were removed. The Elementor cache was cleared automatically.', 'ecf-framework'),
-                    $vars_deleted,
-                    $classes_deleted
-                )
+            $message = sprintf(
+                __('%1$d variables and %2$d global classes were removed. The Elementor cache was cleared automatically.', 'ecf-framework'),
+                $vars_deleted,
+                $classes_deleted
             );
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=ok&ecf_message=' . $message));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'ok'],
+                $message
+            );
         } catch (\Throwable $e) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode($e->getMessage())));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'error'],
+                $e->getMessage()
+            );
         }
     }
 
@@ -182,21 +188,29 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $classes_count = $this->get_native_class_cleanup_count();
 
             if ($classes_count === 0) {
-                $message = rawurlencode(__('No ECF global classes were found in Elementor.', 'ecf-framework'));
-                wp_safe_redirect(admin_url('admin.php?page=ecf-framework&panel=sync&ecf_sync=ok&ecf_message=' . $message));
-                exit;
+                $this->redirect_with_message(
+                    admin_url('admin.php?page=ecf-framework'),
+                    ['panel' => 'sync', 'ecf_sync' => 'ok'],
+                    __('No ECF global classes were found in Elementor.', 'ecf-framework')
+                );
             }
 
             $classes_deleted = $this->cleanup_native_classes();
-            $message = rawurlencode(sprintf(
+            $message = sprintf(
                 __('%1$d ECF classes were removed from Elementor. You can now sync them again as clean empty classes.', 'ecf-framework'),
                 $classes_deleted
-            ));
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&panel=sync&ecf_sync=ok&ecf_message=' . $message));
-            exit;
+            );
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['panel' => 'sync', 'ecf_sync' => 'ok'],
+                $message
+            );
         } catch (\Throwable $e) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&panel=sync&ecf_sync=error&ecf_message=' . rawurlencode($e->getMessage())));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['panel' => 'sync', 'ecf_sync' => 'error'],
+                $e->getMessage()
+            );
         }
     }
 
@@ -299,7 +313,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $this->ajax_error(__('You are not allowed to perform this action.', 'ecf-framework'), 403);
         }
 
-        $ids = isset($_POST['ids']) ? (array) $_POST['ids'] : [];
+        $ids = isset($_POST['ids']) ? array_map('strval', (array) $_POST['ids']) : [];
         if (empty($ids)) {
             $this->ajax_error(__('No IDs were provided.', 'ecf-framework'));
         }
@@ -318,7 +332,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         $deleted = 0;
 
         foreach ($collection->all() as $id => $variable) {
-            if (in_array($id, $ids, true) && $this->is_ecf_native_variable($variable) && $this->delete_native_variable_entity($collection, $id, $variable)) {
+            if (in_array((string) $id, $ids, true) && $this->delete_native_variable_entity($collection, $id, $variable)) {
                 $deleted++;
             }
         }
@@ -511,8 +525,11 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         check_admin_referer('ecf_import');
 
         if (empty($_FILES['ecf_import_file']['tmp_name'])) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('No file uploaded.', 'ecf-framework'))));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'error'],
+                __('No file uploaded.', 'ecf-framework')
+            );
         }
 
         $file = $_FILES['ecf_import_file'];
@@ -521,26 +538,38 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
         $max_size = 1024 * 1024 * 2;
 
         if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('File upload failed.', 'ecf-framework'))));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'error'],
+                __('File upload failed.', 'ecf-framework')
+            );
         }
 
         if ($filename === '' || strtolower(pathinfo($filename, PATHINFO_EXTENSION)) !== 'json') {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('Please upload a valid JSON file.', 'ecf-framework'))));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'error'],
+                __('Please upload a valid JSON file.', 'ecf-framework')
+            );
         }
 
         if ($filesize <= 0 || $filesize > $max_size) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('The JSON file is empty or too large.', 'ecf-framework'))));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'error'],
+                __('The JSON file is empty or too large.', 'ecf-framework')
+            );
         }
 
         $content = file_get_contents($_FILES['ecf_import_file']['tmp_name']);
         $data = json_decode($content, true);
 
         if (!is_array($data)) {
-            wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=error&ecf_message=' . rawurlencode(__('Invalid JSON file.', 'ecf-framework'))));
-            exit;
+            $this->redirect_with_message(
+                admin_url('admin.php?page=ecf-framework'),
+                ['ecf_sync' => 'error'],
+                __('Invalid JSON file.', 'ecf-framework')
+            );
         }
 
         $import_settings = isset($data['settings']) && is_array($data['settings']) ? $data['settings'] : $data;
@@ -558,8 +587,11 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             );
         }
 
-        wp_safe_redirect(admin_url('admin.php?page=ecf-framework&ecf_sync=ok&ecf_message=' . rawurlencode($message)));
-        exit;
+        $this->redirect_with_message(
+            admin_url('admin.php?page=ecf-framework'),
+            ['ecf_sync' => 'ok'],
+            $message
+        );
     }
 
     public function rest_sync_native(\WP_REST_Request $request) {

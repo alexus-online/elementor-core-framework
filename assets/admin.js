@@ -4,10 +4,16 @@ jQuery(function($){
   var typePreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.typePreview) ? ecfAdmin.typePreview : {};
   var radiusPreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.radiusPreview) ? ecfAdmin.radiusPreview : {};
   var restUrl = (typeof ecfAdmin !== 'undefined' && ecfAdmin.restUrl) ? ecfAdmin.restUrl : '';
+  var fontImportRestUrl = (typeof ecfAdmin !== 'undefined' && ecfAdmin.fontImportRestUrl) ? ecfAdmin.fontImportRestUrl : '';
+  var fontSearchRestUrl = (typeof ecfAdmin !== 'undefined' && ecfAdmin.fontSearchRestUrl) ? ecfAdmin.fontSearchRestUrl : '';
   var layoutRestUrl = (typeof ecfAdmin !== 'undefined' && ecfAdmin.layoutRestUrl) ? ecfAdmin.layoutRestUrl : '';
   var restNonce = (typeof ecfAdmin !== 'undefined' && ecfAdmin.restNonce) ? ecfAdmin.restNonce : '';
   var adminDesign = (typeof ecfAdmin !== 'undefined' && ecfAdmin.adminDesign) ? ecfAdmin.adminDesign : {};
   var layoutOrders = (typeof ecfAdmin !== 'undefined' && ecfAdmin.layoutOrders) ? ecfAdmin.layoutOrders : {};
+  var layoutColumns = (typeof ecfAdmin !== 'undefined' && ecfAdmin.layoutColumns) ? ecfAdmin.layoutColumns : {};
+  var fontLibrary = (typeof ecfAdmin !== 'undefined' && Array.isArray(ecfAdmin.fontLibrary)) ? ecfAdmin.fontLibrary : [];
+  var fontSearchTimers = {};
+  var fontSearchRequests = {};
   i18n.copy    = String(i18n.copy || '');
   i18n.copied  = String(i18n.copied || '');
 
@@ -236,6 +242,25 @@ jQuery(function($){
     $row.find('.ecf-color-value-display').val(formatColorValue(hex, format));
   }
 
+  function normalizeDisplayColorValue(value) {
+    var normalized = $.trim(String(value || ''));
+    return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(normalized) ? normalized : '';
+  }
+
+  function syncGeneralColorField($field, nextValue, options) {
+    if (!$field || !$field.length) return;
+    var settings = options || {};
+    var fallback = normalizeDisplayColorValue($field.find('.ecf-color-text').attr('data-default-color')) || '#000000';
+    var value = normalizeDisplayColorValue(nextValue != null ? nextValue : $field.find('.ecf-color-text').val());
+
+    if (settings.writeText && value) {
+      $field.find('.ecf-color-text').val(value);
+    }
+
+    $field.find('[data-ecf-color-native]').val(value || fallback);
+    $field.find('[data-ecf-color-swatch]').css('background', value || fallback);
+  }
+
   function applyDisplayValueToRow($row) {
     var $display = $row.find('.ecf-color-value-display');
     var format = $row.find('.ecf-color-format-select').val() || 'hex';
@@ -359,6 +384,22 @@ jQuery(function($){
     }
   });
 
+  $(document).on('click', '[data-ecf-color-swatch]', function() {
+    var $field = $(this).closest('[data-ecf-general-field]');
+    syncGeneralColorField($field);
+    $field.find('[data-ecf-color-native]').trigger('click');
+  });
+
+  $(document).on('input change', '[data-ecf-color-native]', function() {
+    var $field = $(this).closest('[data-ecf-general-field]');
+    syncGeneralColorField($field, $(this).val(), { writeText: true });
+    $field.find('.ecf-color-text').trigger('input').trigger('change');
+  });
+
+  $(document).on('input change', '.ecf-color-text', function() {
+    syncGeneralColorField($(this).closest('[data-ecf-general-field]'), $(this).val());
+  });
+
   $(document).on('click', '.ecf-add-local-font', function(){
     var $table = $(this).siblings('[data-local-font-table]').first();
     if (!$table.length) {
@@ -451,6 +492,598 @@ jQuery(function($){
 
   function escapeHtml(value) {
     return $('<div>').text(value == null ? '' : String(value)).html();
+  }
+
+  function getFontFamilyOptionsFromSettings(settings) {
+    var fontRows = (((settings || {}).typography || {}).fonts) || [];
+    var options = [
+      {
+        value: 'var(--ecf-font-primary)',
+        label: (i18n.font_option_primary || '') + ': ' + (((fontRows[0] || {}).value) || 'Inter, sans-serif')
+      },
+      {
+        value: 'var(--ecf-font-secondary)',
+        label: (i18n.font_option_secondary || '') + ': ' + (((fontRows[1] || {}).value) || 'Georgia, serif')
+      },
+      {
+        value: 'var(--ecf-font-mono)',
+        label: (i18n.font_option_mono || '') + ': ' + (((fontRows[2] || {}).value) || 'JetBrains Mono, monospace')
+      }
+    ];
+
+    ((((settings || {}).typography || {}).local_fonts) || []).forEach(function(row) {
+      var family = $.trim((row && row.family) || '');
+      if (!family) {
+        return;
+      }
+      options.push({
+        value: "'" + family + "'",
+        label: (i18n.font_option_uploaded || '') + ': ' + family
+      });
+    });
+
+    return options;
+  }
+
+  function getGroupedFontFamilyOptionsFromSettings(settings) {
+    var groups = [];
+    var localOptions = [];
+
+    ((((settings || {}).typography || {}).local_fonts) || []).forEach(function(row) {
+      var family = $.trim((row && row.family) || '');
+      if (!family) {
+        return;
+      }
+      localOptions.push({
+        value: "'" + family + "'",
+        label: family,
+        source: 'local'
+      });
+    });
+
+    if (localOptions.length) {
+      groups.push({
+        label: i18n.font_group_local || '',
+        options: localOptions
+      });
+    }
+
+    groups.push({
+      label: i18n.font_group_core || '',
+      options: getFontFamilyOptionsFromSettings(settings).slice(0, 3).map(function(option) {
+        return $.extend({}, option, { source: 'core' });
+      })
+    });
+
+    var libraryOptions = (((window.ecfAdmin || {}).fontLibrary) || []).map(function(entry) {
+      var family = $.trim((entry && entry.family) || '');
+      if (!family) {
+        return null;
+      }
+      return {
+        value: '__library__|' + family,
+        label: family,
+        source: 'library'
+      };
+    }).filter(Boolean);
+
+    if (libraryOptions.length) {
+      groups.push({
+        label: i18n.font_group_library || '',
+        options: libraryOptions
+      });
+    }
+
+    return groups;
+  }
+
+  function renderFontFamilyGroupsIntoSelect($select, groups, current) {
+    var options = [];
+    $select.empty();
+
+    groups.forEach(function(group) {
+      var groupOptions = Array.isArray(group.options) ? group.options : [];
+      if (!groupOptions.length) {
+        return;
+      }
+      var $group = $('<optgroup>').attr('label', group.label);
+      groupOptions.forEach(function(option) {
+        options.push(option);
+        $('<option>')
+          .attr('value', option.value)
+          .attr('data-ecf-font-source', option.source || '')
+          .text(option.label)
+          .appendTo($group);
+      });
+      $group.appendTo($select);
+    });
+
+    $('<option value="__custom__">').text(i18n.font_option_custom_stack || '').appendTo($select);
+
+    var hasPreset = options.some(function(option) {
+      return option.value === current;
+    });
+
+    if (hasPreset) {
+      $select.val(current);
+    } else if ($select.find('option[value="__custom__"]').length) {
+      $select.val('__custom__');
+    }
+
+    return hasPreset;
+  }
+
+  function currentFontFamilyLabel($field) {
+    var $select = $field.find('[data-ecf-font-family-preset]').first();
+    var $selected = $select.find('option:selected');
+    var $custom = $field.find('[data-ecf-font-family-custom]').first();
+
+    if ($selected.length && $selected.val() !== '__custom__') {
+      return $.trim($selected.text() || '');
+    }
+
+    return $.trim($custom.val() || '') || $.trim($selected.text() || '');
+  }
+
+  function syncFontFamilyCurrentLabel($field) {
+    if (!$field || !$field.length) return;
+    $field.find('[data-ecf-font-current-value]').text(currentFontFamilyLabel($field));
+  }
+
+  function parseCssSizeParts(value) {
+    var normalized = $.trim(String(value || ''));
+    var match = normalized.match(/^(-?\d+(?:[.,]\d+)?)(px|rem|em|ch|%|vw|vh)$/i);
+
+    if (match) {
+      return {
+        value: String(match[1]).replace(',', '.'),
+        format: String(match[2]).toLowerCase(),
+      };
+    }
+
+    return {
+      value: normalized,
+      format: 'custom',
+    };
+  }
+
+  var lastDerivedBodySize = null;
+
+  function closeFontPicker($field) {
+    if (!$field || !$field.length) return;
+    $field.removeClass('is-open');
+    $field.find('[data-ecf-font-picker-panel]').prop('hidden', true);
+  }
+
+  function openFontPicker($field) {
+    if (!$field || !$field.length) return;
+    $field.addClass('is-open');
+    $field.find('[data-ecf-font-picker-panel]').prop('hidden', false);
+  }
+
+  function extractFontFamilyGroupsFromSelect($select) {
+    var groups = [];
+    $select.find('optgroup').each(function() {
+      var $group = $(this);
+      var options = [];
+      $group.find('option').each(function() {
+        options.push({
+          value: String($(this).attr('value') || ''),
+          label: String($(this).text() || ''),
+          source: String($(this).data('ecf-font-source') || ''),
+        });
+      });
+      if (options.length) {
+        groups.push({
+          label: String($group.attr('label') || ''),
+          options: options,
+        });
+      }
+    });
+    return groups;
+  }
+
+  function normalizeFontFamilyCurrentValue(settings, current) {
+    var normalized = String(current || '').trim();
+    var localRows = ((((settings || {}).typography || {}).local_fonts) || []);
+
+    localRows.forEach(function(row) {
+      var family = $.trim((row && row.family) || '');
+      if (!family) {
+        return;
+      }
+      if (normalized === family || normalized === "'" + family + "'") {
+        normalized = "'" + family + "'";
+      }
+    });
+
+    return normalized;
+  }
+
+  function buildLocalFontRowHtml(inputKey, index, row) {
+    var styleValue = (row && row.style) || 'normal';
+    var displayValue = (row && row.display) || 'swap';
+    var styleOptions = [
+      { value: 'normal', label: i18n.font_style_normal || '' },
+      { value: 'italic', label: i18n.font_style_italic || '' },
+      { value: 'oblique', label: i18n.font_style_oblique || '' }
+    ].map(function(item) {
+      return '<option value="' + escapeHtml(item.value) + '"' + (item.value === styleValue ? ' selected' : '') + '>' + escapeHtml(item.label) + '</option>';
+    }).join('');
+    var displayOptions = [
+      { value: 'swap', label: i18n.font_display_swap || '' },
+      { value: 'fallback', label: i18n.font_display_fallback || '' },
+      { value: 'optional', label: i18n.font_display_optional || '' },
+      { value: 'block', label: i18n.font_display_block || '' },
+      { value: 'auto', label: i18n.font_display_auto || '' }
+    ].map(function(item) {
+      return '<option value="' + escapeHtml(item.value) + '"' + (item.value === displayValue ? ' selected' : '') + '>' + escapeHtml(item.label) + '</option>';
+    }).join('');
+
+    return '<div class="ecf-font-file-row">'
+      + '<input type="text" data-ecf-slug-field="token" name="' + inputKey + '[' + index + '][name]" value="' + escapeHtml((row && row.name) || '') + '" placeholder="' + escapeHtml(i18n.local_font_name_placeholder || '') + '" />'
+      + '<input type="text" name="' + inputKey + '[' + index + '][family]" value="' + escapeHtml((row && row.family) || '') + '" placeholder="' + escapeHtml(i18n.local_font_family_placeholder || '') + '" />'
+      + '<div class="ecf-font-file-picker">'
+      + '<input type="text" class="ecf-font-file-url" name="' + inputKey + '[' + index + '][src]" value="' + escapeHtml((row && row.src) || '') + '" placeholder="' + escapeHtml(i18n.local_font_upload_placeholder || '') + '" readonly />'
+      + '<button type="button" class="button ecf-font-file-select">' + escapeHtml(i18n.select_file || '') + '</button>'
+      + '</div>'
+      + '<input type="text" name="' + inputKey + '[' + index + '][weight]" value="' + escapeHtml((row && row.weight) || '400') + '" placeholder="400" />'
+      + '<select name="' + inputKey + '[' + index + '][style]">' + styleOptions + '</select>'
+      + '<select name="' + inputKey + '[' + index + '][display]">' + displayOptions + '</select>'
+      + '<button type="button" class="button ecf-remove-row">×</button>'
+      + '</div>';
+  }
+
+  function syncLocalFontRowsFromSettings(settings) {
+    var rows = ((((settings || {}).typography) || {}).local_fonts) || [];
+    $('[data-local-font-table]').each(function() {
+      var $table = $(this);
+      var inputKey = String($table.data('input-key') || '');
+      $table.find('.ecf-font-file-row').remove();
+      rows.forEach(function(row, index) {
+        $table.append($(buildLocalFontRowHtml(inputKey, index, row)));
+      });
+    });
+  }
+
+  function getFontFamilyFields(fieldName) {
+    return $('[data-ecf-general-field="' + fieldName + '"]');
+  }
+
+  function getPrimaryFontFamilyField(fieldName) {
+    var $fields = getFontFamilyFields(fieldName);
+    var $visible = $fields.filter(':visible').first();
+    return $visible.length ? $visible : $fields.first();
+  }
+
+  function syncFontFamilyFieldFromSettings(fieldName, settings) {
+    var $fields = getFontFamilyFields(fieldName);
+    if (!$fields.length) {
+      return;
+    }
+    var current = normalizeFontFamilyCurrentValue(settings || {}, settings && settings[fieldName] ? String(settings[fieldName]) : 'var(--ecf-font-primary)');
+    var groups = getGroupedFontFamilyOptionsFromSettings(settings || {});
+    $fields.each(function() {
+      var $field = $(this);
+      var $select = $field.find('[data-ecf-font-family-preset]').first();
+      var $presetInput = $field.find('[data-ecf-font-family-preset-input]').first();
+      var $custom = $field.find('[data-ecf-font-family-custom]').first();
+      var hasPreset = renderFontFamilyGroupsIntoSelect($select, groups, current);
+      $field.data('ecfFontBaseGroups', groups);
+
+      if (hasPreset) {
+        $select.val(current);
+        $presetInput.val(current);
+        $custom.val('').prop('hidden', true);
+      } else {
+        $select.val('__custom__');
+        $presetInput.val('__custom__');
+        $custom.val(current).prop('hidden', false);
+      }
+      syncFontFamilyCurrentLabel($field);
+    });
+  }
+
+  function syncInterfaceLanguageFieldFromSettings(settings) {
+    if (!settings || typeof settings.interface_language === 'undefined') {
+      return;
+    }
+
+    getGeneralField('interface_language').find('select').val(String(settings.interface_language));
+  }
+
+  function getDerivedBodySizeFromTypeScale() {
+    var $preview = $('[data-ecf-type-scale-preview]').first();
+    if (!$preview.length) {
+      return null;
+    }
+
+    var config = getTypePreviewConfig($preview);
+    var items = buildTypePreviewItems(config);
+    var match = null;
+
+    $.each(items, function(_, item) {
+      if (item.step === config.baseIndex) {
+        match = item;
+        return false;
+      }
+    });
+
+    if (!match && items.length) {
+      match = items[0];
+    }
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      value: String(match.maxPx),
+      format: 'px',
+    };
+  }
+
+  function refreshBodySizeLinkedState() {
+    var derived = getDerivedBodySizeFromTypeScale();
+    if (!derived) {
+      return;
+    }
+    lastDerivedBodySize = {
+      value: String(derived.value),
+      format: String(derived.format),
+    };
+
+    $('[data-ecf-body-size-field]').each(function() {
+      var $field = $(this);
+      var currentValue = $.trim(String($field.find('[data-ecf-size-value-input]').val() || ''));
+      var currentFormat = $.trim(String($field.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || '')).toLowerCase();
+      var isLinked = currentFormat === derived.format && currentValue === derived.value;
+      $field.attr('data-ecf-body-size-linked', isLinked ? '1' : '0');
+    });
+  }
+
+  function syncBodySizeWithTypeScale(force) {
+    var derived = getDerivedBodySizeFromTypeScale();
+    if (!derived) {
+      return;
+    }
+    var previousDerived = lastDerivedBodySize;
+
+    $('[data-ecf-body-size-field]').each(function() {
+      var $field = $(this);
+      var currentValue = $.trim(String($field.find('[data-ecf-size-value-input]').val() || ''));
+      var currentFormat = $.trim(String($field.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || '')).toLowerCase();
+      var matchesPreviousDerived = previousDerived
+        && currentFormat === previousDerived.format
+        && currentValue === previousDerived.value;
+      var isLinked = force || $field.attr('data-ecf-body-size-linked') === '1' || matchesPreviousDerived;
+      if (!isLinked) {
+        return;
+      }
+      $field.find('[data-ecf-size-value-input]').val(derived.value);
+      $field.find('[data-ecf-size-format-input], [data-ecf-format-input]').val(derived.format);
+      $field.find('[data-ecf-format-current]').text(derived.format);
+      $field.find('[data-ecf-format-option]').removeClass('is-active');
+      $field.find('[data-ecf-format-option][data-value="' + derived.format + '"]').addClass('is-active');
+    });
+
+    refreshBodySizeLinkedState();
+    updateBaseBodyTextSizeWarning();
+  }
+
+  function syncBodyTextSizeFieldFromSettings(settings) {
+    if (!settings || typeof settings.base_body_text_size === 'undefined') {
+      return;
+    }
+
+    var parts = parseCssSizeParts(settings.base_body_text_size);
+    var format = parts.format === 'custom' ? 'px' : parts.format;
+
+    $('[data-ecf-body-size-field]').each(function() {
+      var $field = $(this);
+      $field.find('[data-ecf-size-value-input]').val(parts.value);
+      $field.find('[data-ecf-size-format-input], [data-ecf-format-input]').val(format);
+      $field.find('[data-ecf-format-current]').text(format);
+      $field.find('[data-ecf-format-option]').removeClass('is-active');
+      $field.find('[data-ecf-format-option][data-value="' + format + '"]').addClass('is-active');
+    });
+
+    refreshBodySizeLinkedState();
+    updateBaseBodyTextSizeWarning();
+  }
+
+  function syncGeneralFavoriteTogglesFromSettings(settings) {
+    var favorites = settings && settings.general_setting_favorites && typeof settings.general_setting_favorites === 'object'
+      ? settings.general_setting_favorites
+      : {};
+
+    $('[data-ecf-general-favorite-toggle]').each(function() {
+      var $toggle = $(this);
+      var key = String($toggle.data('ecf-favorite-key') || '');
+      if (!key) {
+        return;
+      }
+      $toggle.prop('checked', favorites[key] === '1');
+      syncFavoriteToggleState($toggle.closest('.ecf-favorite-toggle'));
+    });
+
+    refreshGeneralFavoritesState();
+  }
+
+  function buildFilteredLocalFontGroups(groups, query) {
+    var normalized = $.trim(String(query || '')).toLowerCase();
+    if (!normalized) {
+      return Array.isArray(groups) ? groups : [];
+    }
+
+    return (Array.isArray(groups) ? groups : []).map(function(group) {
+      var groupOptions = Array.isArray(group.options) ? group.options : [];
+      return {
+        label: group.label,
+        options: groupOptions.filter(function(option) {
+          return String(option.label || '').toLowerCase().indexOf(normalized) !== -1;
+        })
+      };
+    }).filter(function(group) {
+      return group.options.length > 0;
+    });
+  }
+
+  function fetchRemoteFontSearchGroups(query) {
+    if (!fontSearchRestUrl || !restNonce) {
+      return Promise.resolve([]);
+    }
+
+    var params = new URLSearchParams();
+    params.set('q', String(query || ''));
+    params.set('limit', '50');
+
+    return window.fetch(fontSearchRestUrl + '?' + params.toString(), {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'X-WP-Nonce': restNonce
+      }
+    }).then(function(response) {
+      return response.json().then(function(data) {
+        if (!response.ok || !data || data.success === false) {
+          throw new Error((data && data.message) || 'font_search_failed');
+        }
+        return Array.isArray(data.groups) ? data.groups : [];
+      });
+    });
+  }
+
+  function refreshFontFamilyList($field, query) {
+    var fieldName = String($field.data('ecf-general-field') || '');
+    if (!fieldName) return;
+
+    var current = String($field.find('[data-ecf-font-family-preset-input]').first().val() || $field.find('[data-ecf-font-family-preset]').first().val() || 'var(--ecf-font-primary)');
+    var $select = $field.find('[data-ecf-font-family-preset]').first();
+    var baseGroups = $field.data('ecfFontBaseGroups') || [];
+    var localGroups = buildFilteredLocalFontGroups(baseGroups, query);
+    openFontPicker($field);
+
+    if (!query) {
+      renderFontFamilyGroupsIntoSelect($select, localGroups, current);
+      syncFontFamilyCurrentLabel($field);
+      return;
+    }
+
+    if (fontSearchTimers[fieldName]) {
+      window.clearTimeout(fontSearchTimers[fieldName]);
+    }
+
+    fontSearchTimers[fieldName] = window.setTimeout(function() {
+      if (fontSearchRequests[fieldName] && typeof fontSearchRequests[fieldName].abort === 'function') {
+        fontSearchRequests[fieldName].abort();
+      }
+
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      fontSearchRequests[fieldName] = controller;
+
+      var params = new URLSearchParams();
+      params.set('q', String(query || ''));
+      params.set('limit', '50');
+
+      window.fetch(fontSearchRestUrl + '?' + params.toString(), {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'X-WP-Nonce': restNonce
+        },
+        signal: controller ? controller.signal : undefined
+      }).then(function(response) {
+        return response.json().then(function(data) {
+          if (!response.ok || !data || data.success === false) {
+            throw new Error((data && data.message) || 'font_search_failed');
+          }
+          return Array.isArray(data.groups) ? data.groups : [];
+        });
+      }).then(function(groups) {
+        renderFontFamilyGroupsIntoSelect($select, groups, current);
+        syncFontFamilyCurrentLabel($field);
+      }).catch(function(error) {
+        if (error && error.name === 'AbortError') {
+          return;
+        }
+        renderFontFamilyGroupsIntoSelect($select, localGroups, current);
+        syncFontFamilyCurrentLabel($field);
+      });
+    }, 180);
+  }
+
+  function importLibraryFontIntoField(fieldName, target, family, $trigger) {
+    if (!fontImportRestUrl || !restNonce) return $.Deferred().reject(new Error('font_import_disabled')).promise();
+
+    var $field = getPrimaryFontFamilyField(fieldName);
+    if (!$field.length) return $.Deferred().reject(new Error('font_import_field_missing')).promise();
+
+    if (!family) {
+      showAutosaveNotice(i18n.font_import_missing || '', 'error');
+      return $.Deferred().reject(new Error('font_import_missing_family')).promise();
+    }
+
+    showAutosaveNotice(i18n.font_import_running || '', 'saving');
+    if ($trigger && $trigger.length) {
+      $trigger.prop('disabled', true);
+    }
+
+    return window.fetch(fontImportRestUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-WP-Nonce': restNonce
+      },
+      body: JSON.stringify({
+        family: family,
+        target: target
+      })
+    }).then(function(response) {
+      return response.json().then(function(data) {
+        if (!response.ok || !data || data.success === false) {
+          throw new Error((data && data.message) || 'font_import_failed');
+        }
+        return data;
+      });
+    }).then(function(responseData) {
+      var settings = responseData && responseData.settings ? responseData.settings : null;
+      if (settings) {
+        syncLocalFontRowsFromSettings(settings);
+        syncFontFamilyFieldFromSettings('base_font_family', settings);
+        syncFontFamilyFieldFromSettings('heading_font_family', settings);
+      }
+      if (settings && settings[fieldName]) {
+        var $select = $field.find('[data-ecf-font-family-preset]').first();
+        var normalizedValue = normalizeFontFamilyCurrentValue(settings, settings[fieldName]);
+        var hasOption = false;
+
+        $select.find('option').each(function() {
+          if (String($(this).attr('value') || '') === normalizedValue) {
+            hasOption = true;
+            return false;
+          }
+        });
+
+        if (hasOption) {
+          $select.val(normalizedValue).trigger('change');
+        } else {
+          $select.val('__custom__').trigger('change');
+          $field.find('[data-ecf-font-family-custom]').first().val(normalizedValue);
+        }
+      }
+      updateSystemInfoCards(responseData && responseData.meta ? responseData.meta : null, settings);
+      showAutosaveNotice(i18n.font_import_success || '', 'success');
+      return responseData;
+    }).catch(function(error) {
+      showAutosaveNotice(error && error.message ? error.message : (i18n.font_import_failed || ''), 'error');
+      throw error;
+    }).finally(function() {
+      if ($trigger && $trigger.length) {
+        $trigger.prop('disabled', false);
+      }
+    });
   }
 
   function getTypePreviewConfig($preview) {
@@ -573,11 +1206,11 @@ jQuery(function($){
         + '</div>'
         + '<div class="ecf-type-row__sample">'
         + '<div class="ecf-type-row__sample-line">'
-        + '<strong style="font-size:' + item.minPx + 'px;">' + labelMin + '</strong>'
+        + '<strong style="font-size:' + item.minPx + 'px;">' + previewWord + '</strong>'
         + '<span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span>'
         + '</div>'
         + '<div class="ecf-type-row__sample-line ecf-type-row__sample-line--max">'
-        + '<strong style="font-size:' + item.maxPx + 'px;">' + labelMax + '</strong>'
+        + '<strong style="font-size:' + item.maxPx + 'px;">' + previewWord + '</strong>'
         + '<span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span>'
         + '</div>'
         + '</div>'
@@ -598,8 +1231,8 @@ jQuery(function($){
     $preview.find('[data-ecf-focus-max]').text(activeItem ? activeItem.maxPx + 'px' : '');
     $preview.find('[data-ecf-focus-min-copy]').text(activeItem ? activeItem.cssValue : '').attr('data-copy', activeItem ? activeItem.cssValue : '');
     $preview.find('[data-ecf-focus-max-copy]').text(activeItem ? activeItem.cssValue : '').attr('data-copy', activeItem ? activeItem.cssValue : '');
-    $preview.find('[data-ecf-focus-min-line]').css('font-size', activeItem ? activeItem.minPx + 'px' : '').text(labelMin);
-    $preview.find('[data-ecf-focus-max-line]').css('font-size', activeItem ? activeItem.maxPx + 'px' : '').text(labelMax);
+    $preview.find('[data-ecf-focus-min-line]').css('font-size', activeItem ? activeItem.minPx + 'px' : '').text(previewWord);
+    $preview.find('[data-ecf-focus-max-line]').css('font-size', activeItem ? activeItem.maxPx + 'px' : '').text(previewWord);
     $preview.find('[data-ecf-preview-view]').removeClass('is-active');
     $preview.find('[data-ecf-preview-view="' + viewMode + '"]').addClass('is-active');
   }
@@ -780,6 +1413,10 @@ jQuery(function($){
   var autosaveReloadRequested = false;
   var autosaveSkipValidation = false;
   var autosaveReady = false;
+  var pendingFontAutolinkField = '';
+  var lastSavedSettingsPayload = '';
+  var inFlightSettingsPayload = '';
+  var queuedSettingsPayload = '';
 
   function parseFormFieldPath(name) {
     return String(name || '')
@@ -846,7 +1483,48 @@ jQuery(function($){
     var payload = {};
     if (!$settingsForm.length) return payload;
 
-    $.each($settingsForm.serializeArray(), function(_, field) {
+    var fieldMap = {};
+    $settingsForm.find(':input[name]').each(function() {
+      var $input = $(this);
+      var type = String($input.attr('type') || '').toLowerCase();
+      var $favoriteCard = $input.closest('[data-ecf-favorite-card]');
+      var name = String($input.attr('name') || '');
+      var score = 0;
+
+      if (!name || $input.is(':disabled')) {
+        return;
+      }
+
+      if ((type === 'checkbox' || type === 'radio') && !$input.is(':checked')) {
+        return;
+      }
+
+      if (type !== 'hidden' && $input.prop('hidden')) {
+        return;
+      }
+
+      if ($input.is(':visible')) {
+        score += 100;
+      }
+
+      if (!$favoriteCard.length) {
+        score += 10;
+      }
+
+      if (type === 'hidden') {
+        score -= 5;
+      }
+
+      if (!fieldMap[name] || score >= fieldMap[name].score) {
+        fieldMap[name] = {
+          score: score,
+          name: name,
+          value: $input.val(),
+        };
+      }
+    });
+
+    $.each(fieldMap, function(_, field) {
       var path = parseFormFieldPath(field.name);
       if (!path.length || path[0] !== 'ecf_framework_v50') {
         return;
@@ -869,10 +1547,91 @@ jQuery(function($){
     return payload;
   }
 
+  function stableStringify(value) {
+    if (Array.isArray(value)) {
+      return '[' + value.map(stableStringify).join(',') + ']';
+    }
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map(function(key) {
+        return JSON.stringify(key) + ':' + stableStringify(value[key]);
+      }).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  }
+
+  function updateUnsavedBadge() {
+    var currentPayload = stableStringify(buildSettingsPayloadFromForm());
+    var hasChanges = !!lastSavedSettingsPayload && currentPayload !== lastSavedSettingsPayload;
+    $('[data-ecf-unsaved-badge]').prop('hidden', !hasChanges);
+  }
+
+  function markCurrentStateAsSaved() {
+    lastSavedSettingsPayload = stableStringify(buildSettingsPayloadFromForm());
+    updateUnsavedBadge();
+  }
+
+  function getPanelButtonLabel(panel) {
+    var $source = $('[data-panel="' + panel + '"]').filter('.ecf-nav-item, .ecf-sidebar-link').first();
+    if (!$source.length) {
+      return '';
+    }
+    var $clone = $source.clone();
+    $clone.find('.dashicons, .ecf-new-dot, .ecf-unsaved-badge').remove();
+    return $.trim($clone.text());
+  }
+
+  function getStickyTopbarTitle(panel) {
+    var titleMap = {
+      tokens: i18n.topbar_colors_radius || '',
+      typography: i18n.topbar_typography || '',
+      spacing: i18n.topbar_spacing || '',
+      shadows: i18n.topbar_shadows || '',
+      variables: i18n.topbar_elementor_variables || '',
+      utilities: i18n.topbar_elementor_classes || '',
+      sync: i18n.topbar_sync_export || '',
+      components: i18n.topbar_general_settings || '',
+      help: i18n.topbar_help_support || '',
+      changelog: i18n.topbar_help_support || ''
+    };
+    return titleMap[panel] || '';
+  }
+
+  function scrollActivePanelToTop(panel) {
+    var $panel = $('.ecf-panel[data-panel="' + panel + '"]').first();
+    var $main = $('.ecf-main').first();
+
+    if ($panel.length && $panel[0] && typeof $panel[0].scrollTo === 'function') {
+      $panel[0].scrollTo(0, 0);
+    } else if ($panel.length) {
+      $panel.scrollTop(0);
+    }
+
+    if ($main.length && $main[0] && typeof $main[0].scrollTo === 'function') {
+      $main[0].scrollTo(0, 0);
+    } else if ($main.length) {
+      $main.scrollTop(0);
+    }
+  }
+
+  function updateStickyTopbar(panel) {
+    var panelTitle = getStickyTopbarTitle(panel);
+    var $panel = $('.ecf-panel[data-panel="' + panel + '"]').first();
+    if (!panelTitle && $panel.length) {
+      panelTitle = $.trim($panel.find('h2').first().text());
+    }
+    if (!panelTitle) {
+      panelTitle = getPanelButtonLabel(panel);
+    }
+    $('[data-ecf-active-panel-title]').text(panelTitle);
+    $('.ecf-sticky-topbar__save').prop('hidden', $noSavePanel.indexOf(panel) !== -1);
+  }
+
   function validateRequiredPositiveSizeField($field) {
     var $input = $field.find('[data-ecf-size-value-input]').first();
     var $format = $field.find('[data-ecf-size-format-input]').first();
     var $warning = $field.siblings('[data-ecf-inline-size-warning]').first();
+    var $bodyField = $field.closest('[data-ecf-body-size-field]');
+    var $bodyWarning = $bodyField.find('[data-ecf-body-size-warning]').first();
     var rawValue = $.trim($input.val() || '');
     var format = $.trim($format.val() || '').toLowerCase();
     var numeric = parseFloat(String(rawValue).replace(',', '.'));
@@ -892,11 +1651,19 @@ jQuery(function($){
     if (message) {
       $field.addClass('is-invalid');
       $warning.prop('hidden', false).text(message);
+      if ($bodyField.length && $bodyWarning.length) {
+        $bodyField.addClass('is-warning');
+        $bodyWarning.prop('hidden', false).text(message);
+      }
       return false;
     }
 
     $field.removeClass('is-invalid');
     $warning.prop('hidden', true).text('');
+    if ($bodyField.length && $bodyWarning.length) {
+      $bodyField.removeClass('is-warning');
+      $bodyWarning.prop('hidden', true).text('');
+    }
     return true;
   }
 
@@ -909,6 +1676,7 @@ jQuery(function($){
   }
 
   function validateSettingsForSave() {
+    updateBaseBodyTextSizeWarning();
     var invalid = [];
     $('[data-ecf-inline-size-field]').each(function() {
       var $field = $(this);
@@ -1026,6 +1794,21 @@ jQuery(function($){
     return normalized;
   }
 
+  function normalizeLayoutColumns(columns) {
+    var normalized = {};
+
+    $.each(columns || {}, function(group, count) {
+      var groupKey = String(group || '').trim();
+      var countInt = parseInt(count, 10);
+      if (!groupKey || !countInt || countInt < 1 || countInt > 3) {
+        return;
+      }
+      normalized[groupKey] = countInt;
+    });
+
+    return normalized;
+  }
+
   function getLayoutItemIds($group) {
     return $group.children('[data-ecf-layout-item]').map(function() {
       return $(this).data('ecf-layout-item');
@@ -1074,6 +1857,190 @@ jQuery(function($){
     }
   }
 
+  function applySavedLayoutColumns() {
+    $('[data-ecf-layout-columns-group]').each(function() {
+      var $group = $(this);
+      var groupKey = String($group.data('ecf-layout-columns-group') || '');
+      var fallbackCount = parseInt($group.attr('data-ecf-layout-columns') || 2, 10);
+      var count = parseInt(layoutColumns[groupKey] || fallbackCount, 10);
+      if (!count || count < 1 || count > 3) {
+        count = fallbackCount && fallbackCount >= 1 && fallbackCount <= 3 ? fallbackCount : 2;
+      }
+
+      $group.attr('data-ecf-layout-columns', String(count)).css('--ecf-layout-columns', String(count));
+
+      $('[data-ecf-layout-columns-btn][data-group="' + groupKey + '"]').each(function() {
+        var isActive = String($(this).data('ecf-layout-columns')) === String(count);
+        $(this)
+          .toggleClass('is-active', isActive)
+          .attr('aria-pressed', isActive ? 'true' : 'false');
+      });
+    });
+
+    scheduleMasonryLayouts();
+  }
+
+  var masonryLayoutTimer = null;
+  var masonryLayoutObserver = null;
+
+  function ensureMasonryLayoutObserver() {
+    if (masonryLayoutObserver || typeof window.ResizeObserver === 'undefined') {
+      return;
+    }
+
+    masonryLayoutObserver = new window.ResizeObserver(function() {
+      scheduleMasonryLayouts();
+    });
+  }
+
+  function watchMasonryLayoutItems($group) {
+    ensureMasonryLayoutObserver();
+    if (!masonryLayoutObserver || !$group.length) {
+      return;
+    }
+
+    var groupElement = $group.get(0);
+    if (groupElement && !groupElement.__ecfMasonryObserved) {
+      masonryLayoutObserver.observe(groupElement);
+      groupElement.__ecfMasonryObserved = true;
+    }
+
+    $group.children('[data-ecf-layout-item]').each(function() {
+      if (!this.__ecfMasonryObserved) {
+        masonryLayoutObserver.observe(this);
+        this.__ecfMasonryObserved = true;
+      }
+    });
+  }
+
+  function countGridTracks(value) {
+    var normalized = String(value || '').trim();
+    if (!normalized || normalized === 'none') {
+      return 0;
+    }
+
+    var parts = [];
+    var token = '';
+    var depth = 0;
+
+    for (var index = 0; index < normalized.length; index += 1) {
+      var character = normalized.charAt(index);
+      if (character === '(') {
+        depth += 1;
+        token += character;
+        continue;
+      }
+      if (character === ')') {
+        depth = Math.max(0, depth - 1);
+        token += character;
+        continue;
+      }
+      if (character === ' ' && depth === 0) {
+        if (token.trim()) {
+          parts.push(token.trim());
+        }
+        token = '';
+        continue;
+      }
+      token += character;
+    }
+
+    if (token.trim()) {
+      parts.push(token.trim());
+    }
+
+    return parts.length;
+  }
+
+  function applyMasonryLayoutToGroup($group) {
+    if (!$group.length) return;
+
+    watchMasonryLayoutItems($group);
+
+    var groupElement = $group.get(0);
+    if (!groupElement) return;
+
+    var computedGroupStyle = window.getComputedStyle(groupElement);
+    var declaredColumns = parseInt($group.attr('data-ecf-layout-columns') || $group.css('--ecf-layout-columns') || 1, 10);
+    var columns = declaredColumns && declaredColumns > 0
+      ? declaredColumns
+      : countGridTracks(computedGroupStyle.gridTemplateColumns);
+    var rowUnit = parseFloat(computedGroupStyle.getPropertyValue('--ecf-masonry-row-unit')) || 10;
+    var gap = parseFloat(computedGroupStyle.rowGap || computedGroupStyle.gap || '20') || 20;
+
+    $group.children('[data-ecf-layout-item]').each(function() {
+      var $item = $(this);
+      $item.css('--ecf-masonry-span', '1');
+      $item.css('grid-column', '');
+      $item.css('grid-row', '');
+      $item.data('ecfMasonrySpan', 1);
+
+      if (columns < 2) {
+        return;
+      }
+
+      var itemHeight = Math.ceil($item.outerHeight());
+      var span = Math.max(1, Math.ceil((itemHeight + gap) / (rowUnit + gap)));
+      $item.css('--ecf-masonry-span', String(span));
+      $item.data('ecfMasonrySpan', span);
+      $item.data('ecfMasonryHeight', itemHeight);
+    });
+
+    if (columns < 2) {
+      return;
+    }
+
+    var columnSpans = [];
+    var columnHeights = [];
+    for (var index = 0; index < columns; index += 1) {
+      columnSpans.push(0);
+      columnHeights.push(0);
+    }
+
+    $group.children('[data-ecf-layout-item]').each(function() {
+      var $item = $(this);
+      var span = parseInt($item.data('ecfMasonrySpan') || 1, 10);
+      var itemHeight = parseInt($item.data('ecfMasonryHeight') || 0, 10);
+      if (!span || span < 1) {
+        span = 1;
+      }
+      if (!itemHeight || itemHeight < 1) {
+        itemHeight = Math.ceil($item.outerHeight());
+      }
+
+      var targetColumn = 0;
+      for (var col = 1; col < columnSpans.length; col += 1) {
+        if (columnHeights[col] < columnHeights[targetColumn]) {
+          targetColumn = col;
+        }
+      }
+
+      var startRow = columnSpans[targetColumn] + 1;
+      $item.css('grid-column', String(targetColumn + 1));
+      $item.css('grid-row', startRow + ' / span ' + span);
+      columnSpans[targetColumn] += span;
+      columnHeights[targetColumn] += itemHeight + gap;
+    });
+  }
+
+  function applyMasonryLayouts() {
+    $('[data-ecf-masonry-layout]').each(function() {
+      applyMasonryLayoutToGroup($(this));
+    });
+  }
+
+  function scheduleMasonryLayouts() {
+    window.clearTimeout(masonryLayoutTimer);
+    masonryLayoutTimer = window.setTimeout(function() {
+      window.requestAnimationFrame(function() {
+        applyMasonryLayouts();
+        window.requestAnimationFrame(function() {
+          applyMasonryLayouts();
+        });
+      });
+    }, 20);
+  }
+
   function collectAllLayoutOrders() {
     var orders = {};
 
@@ -1089,11 +2056,28 @@ jQuery(function($){
     return normalizeLayoutOrders(orders);
   }
 
+  function collectAllLayoutColumns() {
+    var columns = {};
+
+    $('[data-ecf-layout-columns-group]').each(function() {
+      var $group = $(this);
+      var groupKey = String($group.data('ecf-layout-columns-group') || '');
+      var count = parseInt($group.attr('data-ecf-layout-columns') || 1, 10);
+      if (groupKey && count >= 1 && count <= 3) {
+        columns[groupKey] = count;
+      }
+    });
+
+    return normalizeLayoutColumns(columns);
+  }
+
   function saveLayoutOrders() {
     if (!layoutRestUrl || !restNonce) return;
 
     var orders = collectAllLayoutOrders();
+    var columns = collectAllLayoutColumns();
     layoutOrders = orders;
+    layoutColumns = columns;
 
     window.fetch(layoutRestUrl, {
       method: 'POST',
@@ -1102,7 +2086,7 @@ jQuery(function($){
         'Content-Type': 'application/json',
         'X-WP-Nonce': restNonce
       },
-      body: JSON.stringify({ orders: orders })
+      body: JSON.stringify({ orders: orders, columns: columns })
     }).then(function(response) {
       if (!response.ok) {
         throw new Error('layout_save_failed');
@@ -1112,14 +2096,19 @@ jQuery(function($){
       if (responseData && responseData.orders) {
         layoutOrders = normalizeLayoutOrders(responseData.orders);
       }
+      if (responseData && responseData.columns) {
+        layoutColumns = normalizeLayoutColumns(responseData.columns);
+        applySavedLayoutColumns();
+      }
       showAutosaveNotice(i18n.layout_saved || '', 'success');
     }).catch(function() {
       showAutosaveNotice(i18n.layout_failed || '', 'error');
     });
   }
 
-  function ensureLayoutHandle($item) {
-    var $handle = $item.find('[data-ecf-layout-handle]').first();
+  function ensureLayoutHandle($item, groupKey) {
+    var handleSelector = '[data-ecf-layout-handle][data-ecf-layout-handle-for="' + groupKey + '"]';
+    var $handle = $item.find(handleSelector).first();
     if ($handle.length) {
       return $handle;
     }
@@ -1154,13 +2143,24 @@ jQuery(function($){
       $target = $item;
     }
 
-    $target.attr('data-ecf-layout-handle', '1').addClass('ecf-layout-handle-zone');
+    var useStandaloneHandle = $target.is($item);
+    $target.addClass('ecf-layout-handle-zone');
 
-    if (!$target.find('.ecf-layout-handle').length && !$target.is('.ecf-settings-group__summary, .ecf-system-debug-card__summary')) {
-      $target.prepend('<span class="ecf-layout-handle" aria-hidden="true"><span class="dashicons dashicons-move"></span></span>');
+    if (useStandaloneHandle) {
+      if (!$target.children('.ecf-layout-handle').length) {
+        $target.prepend('<span class="ecf-layout-handle ecf-layout-handle--standalone" data-ecf-layout-handle="1" data-ecf-layout-handle-for="' + groupKey + '" aria-hidden="true"><span class="dashicons dashicons-move" aria-hidden="true"></span></span>');
+      }
+      return $target.find(handleSelector).first();
     }
 
-    return $target;
+    $target.attr('data-ecf-layout-handle', '1');
+    $target.attr('data-ecf-layout-handle-for', groupKey);
+
+    if (!$target.find(handleSelector).length && !$target.is('.ecf-settings-group__summary, .ecf-system-debug-card__summary')) {
+      $target.prepend('<span class="ecf-layout-handle" data-ecf-layout-handle="1" data-ecf-layout-handle-for="' + groupKey + '" aria-hidden="true"><span class="dashicons dashicons-move"></span></span>');
+    }
+
+    return $target.find(handleSelector).first();
   }
 
   function initSortableLayoutGroups() {
@@ -1168,13 +2168,14 @@ jQuery(function($){
 
     $('[data-ecf-layout-group]').each(function() {
       var $group = $(this);
+      var groupKey = String($group.data('ecf-layout-group') || '');
       applySavedLayoutToGroup($group);
 
       var $items = $group.children('[data-ecf-layout-item]');
       if ($items.length < 2) return;
 
       $items.each(function() {
-        ensureLayoutHandle($(this));
+        ensureLayoutHandle($(this), groupKey);
       });
 
       if ($group.data('ui-sortable')) {
@@ -1183,7 +2184,7 @@ jQuery(function($){
 
       $group.sortable({
         items: '> [data-ecf-layout-item]',
-        handle: '[data-ecf-layout-handle]',
+        handle: '[data-ecf-layout-handle][data-ecf-layout-handle-for="' + groupKey + '"]',
         tolerance: 'pointer',
         placeholder: 'ecf-sortable-placeholder',
         forcePlaceholderSize: true,
@@ -1209,20 +2210,48 @@ jQuery(function($){
     });
   }
 
+  $(document).on('click', '.ecf-layout-columns-btn, [data-ecf-layout-columns-btn]', function() {
+    var $button = $(this);
+    var groupKey = String($button.data('group') || '');
+    var count = parseInt($button.data('ecf-layout-columns') || 1, 10);
+    if (!groupKey || count < 1 || count > 3) return;
+
+    var $group = $('[data-ecf-layout-columns-group="' + groupKey + '"]').first();
+    if (!$group.length) return;
+
+    $group.attr('data-ecf-layout-columns', String(count)).css('--ecf-layout-columns', String(count));
+    layoutColumns[groupKey] = count;
+    applySavedLayoutColumns();
+    saveLayoutOrders();
+  });
+
   function submitSettingsAutosave() {
     if (!$settingsForm.length || !restUrl || !restNonce) return;
     if (!autosaveSkipValidation && !validateSettingsForSave()) return;
 
+    var payload = buildSettingsPayloadFromForm();
+    var payloadHash = stableStringify(payload);
+
+    if (lastSavedSettingsPayload && payloadHash === lastSavedSettingsPayload) {
+      autosaveQueued = false;
+      queuedSettingsPayload = '';
+      return;
+    }
+
     if (autosaveInFlight) {
-      autosaveQueued = true;
+      if (payloadHash !== inFlightSettingsPayload) {
+        autosaveQueued = true;
+        queuedSettingsPayload = payloadHash;
+      }
       return;
     }
 
     autosaveInFlight = true;
+    inFlightSettingsPayload = payloadHash;
     autosaveQueued = false;
+    queuedSettingsPayload = '';
     persistAdminPageState($settingsForm);
     showAutosaveNotice(i18n.autosave_saving || '', 'saving');
-    var payload = buildSettingsPayloadFromForm();
 
     window.fetch(restUrl, {
       method: 'POST',
@@ -1239,8 +2268,15 @@ jQuery(function($){
       return response.json();
     }).then(function(responseData) {
       autosaveInFlight = false;
+      inFlightSettingsPayload = '';
       var responseSettings = responseData && responseData.settings ? responseData.settings : payload;
       updateSystemInfoCards(responseData && responseData.meta ? responseData.meta : null, responseSettings);
+      syncLocalFontRowsFromSettings(responseSettings);
+      syncFontFamilyFieldFromSettings('base_font_family', responseSettings);
+      syncFontFamilyFieldFromSettings('heading_font_family', responseSettings);
+      syncInterfaceLanguageFieldFromSettings(responseSettings);
+      syncBodyTextSizeFieldFromSettings(responseSettings);
+      syncGeneralFavoriteTogglesFromSettings(responseSettings);
       if (responseSettings.admin_design_preset) {
         $('[data-ecf-admin-design-preset]').val(responseSettings.admin_design_preset);
         adminDesign.preset = responseSettings.admin_design_preset;
@@ -1250,11 +2286,17 @@ jQuery(function($){
         adminDesign.mode = responseSettings.admin_design_mode;
       }
       refreshAdminDesignChooser();
+      markCurrentStateAsSaved();
 
       if (autosaveQueued) {
-        autosaveQueued = false;
-        submitSettingsAutosave();
-        return;
+        if (queuedSettingsPayload && queuedSettingsPayload === lastSavedSettingsPayload) {
+          autosaveQueued = false;
+          queuedSettingsPayload = '';
+        } else {
+          autosaveQueued = false;
+          submitSettingsAutosave();
+          return;
+        }
       }
 
       if (autosaveReloadRequested) {
@@ -1266,9 +2308,11 @@ jQuery(function($){
       showAutosaveNotice(i18n.autosave_saved || '', 'success');
     }).catch(function() {
       autosaveInFlight = false;
+      inFlightSettingsPayload = '';
 
       if (autosaveQueued) {
         autosaveQueued = false;
+        queuedSettingsPayload = '';
       }
 
       showAutosaveNotice(i18n.autosave_failed || '', 'error');
@@ -1282,6 +2326,7 @@ jQuery(function($){
 
     var opts = options || {};
     var delay = typeof opts.delay === 'number' ? opts.delay : 700;
+    updateUnsavedBadge();
     if (opts.reloadAfterSave) {
       autosaveReloadRequested = true;
     }
@@ -1586,7 +2631,9 @@ jQuery(function($){
 
   function switchPanel(panel) {
     $('.ecf-nav-item').removeClass('is-active');
+    $('.ecf-sidebar-link[data-panel]').removeClass('is-active');
     $('.ecf-nav-item[data-panel="'+panel+'"]').addClass('is-active');
+    $('.ecf-sidebar-link[data-panel="'+panel+'"]').addClass('is-active');
     $('.ecf-panel').removeClass('is-active');
     $('.ecf-panel[data-panel="'+panel+'"]').addClass('is-active');
 
@@ -1594,34 +2641,38 @@ jQuery(function($){
       window.sessionStorage.setItem(panelStorageKey, panel);
     } catch (err) {}
 
-    // show/hide save footer
-    if ($noSavePanel.indexOf(panel) !== -1) {
-      $('#ecf-save-footer').hide();
-    } else {
-      $('#ecf-save-footer').show();
-    }
+    updateStickyTopbar(panel);
+    scrollActivePanelToTop(panel);
 
     if (panel === 'variables') {
       loadVariables();
     }
 
     refreshSortableLayoutGroups();
+    scheduleMasonryLayouts();
   }
 
   $(document).on('click', '.ecf-nav-item', function(){
     var panel = $(this).data('panel');
     markWhatsNewSeen($(this).data('ecf-new-key'));
     switchPanel(panel);
+    updateStickyTopbar(panel);
+  });
+
+  $(document).on('click', '.ecf-sidebar-link[data-panel]', function(){
+    var panel = $(this).data('panel');
+    switchPanel(panel);
+    updateStickyTopbar(panel);
   });
 
   function normalizeGeneralTab(tab) {
     if (tab === 'layout' || tab === 'colors' || tab === 'typography') {
       return 'website';
     }
-    if (tab === 'behavior') {
-      return 'editor';
+    if (tab === 'behavior' || tab === 'editor' || tab === 'ui') {
+      return 'interface';
     }
-    if (tab === 'favorites' || tab === 'website' || tab === 'editor' || tab === 'ui' || tab === 'system') {
+    if (tab === 'favorites' || tab === 'website' || tab === 'interface' || tab === 'system') {
       return tab;
     }
     return 'website';
@@ -1638,7 +2689,10 @@ jQuery(function($){
       window.sessionStorage.setItem(generalTabStorageKey, activeTab);
     } catch (err) {}
 
+    closeFontPicker($('[data-ecf-general-section="' + activeTab + '"] [data-ecf-font-picker]'));
+    scrollActivePanelToTop('components');
     refreshSortableLayoutGroups();
+    scheduleMasonryLayouts();
   }
 
   $(document).on('click', '[data-ecf-general-tab]', function() {
@@ -1650,13 +2704,18 @@ jQuery(function($){
     if (this.open) {
       markWhatsNewSeen($(this).data('ecf-new-key'));
     }
+    scheduleMasonryLayouts();
+  });
+
+  $(document).on('toggle', '[data-ecf-masonry-layout] details', function() {
+    scheduleMasonryLayouts();
   });
 
   function refreshGeneralFavoritesState() {
     var visibleCards = 0;
     $('[data-ecf-favorite-card]').each(function() {
       var key = $(this).data('ecf-favorite-card');
-      var enabled = $('[data-ecf-general-favorite-toggle][data-ecf-favorite-key="' + key + '"]').first().is(':checked');
+      var enabled = $('[data-ecf-general-favorite-toggle][data-ecf-favorite-key="' + key + '"]').filter(':checked').length > 0;
       $(this).prop('hidden', !enabled);
       if (enabled) visibleCards += 1;
     });
@@ -1836,10 +2895,20 @@ jQuery(function($){
   });
 
   $(document).on('input', 'form[action="options.php"] :input[name]:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"])', function() {
+    var $input = $(this);
+    updateUnsavedBadge();
+    if ($input.is('[name^="ecf_framework_v50[typography][scale]"]')) {
+      return;
+    }
     scheduleSettingsAutosave({ delay: 900 });
   });
 
   $(document).on('change', 'form[action="options.php"] select[name], form[action="options.php"] textarea[name], form[action="options.php"] input[type="checkbox"][name], form[action="options.php"] input[type="radio"][name], form[action="options.php"] input[type="hidden"][name]', function() {
+    updateUnsavedBadge();
+    var currentValue = $(this).val();
+    if (typeof currentValue === 'string' && currentValue.indexOf('__library__|') === 0) {
+      return;
+    }
     var isLanguageField = $(this).attr('name') === 'ecf_framework_v50[interface_language]';
     scheduleSettingsAutosave({
       delay: 250,
@@ -1848,13 +2917,73 @@ jQuery(function($){
     });
   });
 
-  $(document).on('change', '[data-ecf-base-font-preset]', function() {
-    var $custom = $('[data-ecf-base-font-custom]');
-    var showCustom = $(this).val() === '__custom__';
+  $(document).on('change', '[data-ecf-font-family-preset]', function() {
+    var $select = $(this);
+    var $field = $select.closest('[data-ecf-general-field]');
+    var fieldName = $(this).data('ecf-font-family-field') || 'base_font_family';
+    var $presetInput = $field.find('[data-ecf-font-family-preset-input][data-ecf-font-family-field="' + fieldName + '"]').first();
+    var $custom = $field.find('[data-ecf-font-family-custom][data-ecf-font-family-field="' + fieldName + '"]').first();
+    var selectedValue = String($select.val() || '');
+    var showCustom = selectedValue === '__custom__';
+
+    if (selectedValue.indexOf('__library__|') === 0) {
+      var family = selectedValue.split('|').slice(1).join('|');
+      var previousValue = String($select.data('ecf-prev-value') || 'var(--ecf-font-primary)');
+      var target = String($select.data('ecf-font-library-target') || 'body');
+
+      window.clearTimeout(autosaveTimer);
+      $select.val(previousValue);
+      $custom.val('').prop('hidden', true);
+      importLibraryFontIntoField(fieldName, target, family, $select);
+      return;
+    }
+
+    $select.data('ecf-prev-value', selectedValue);
+    $presetInput.val(selectedValue);
     $custom.prop('hidden', !showCustom);
+    syncFontFamilyCurrentLabel($field);
+    closeFontPicker($field);
     if (showCustom) {
       $custom.trigger('focus');
     }
+  });
+
+  $(document).on('focus mousedown', '[data-ecf-font-family-preset]', function() {
+    $(this).data('ecf-prev-value', String($(this).val() || ''));
+  });
+
+  $('[data-ecf-font-family-preset]').each(function() {
+    $(this).data('ecf-prev-value', String($(this).val() || ''));
+    var $field = $(this).closest('[data-ecf-general-field]');
+    $field.data('ecfFontBaseGroups', extractFontFamilyGroupsFromSelect($(this)));
+    syncFontFamilyCurrentLabel($field);
+    closeFontPicker($field);
+  });
+
+  $(document).on('focus click', '[data-ecf-font-family-search]', function() {
+    var $field = $(this).closest('[data-ecf-general-field]');
+    openFontPicker($field);
+    refreshFontFamilyList($field, $(this).val());
+  });
+
+  $(document).on('input', '[data-ecf-font-family-search]', function() {
+    var $field = $(this).closest('[data-ecf-general-field]');
+    refreshFontFamilyList($field, $(this).val());
+  });
+
+  $(document).on('input change', '[data-ecf-font-family-custom]', function() {
+    syncFontFamilyCurrentLabel($(this).closest('[data-ecf-general-field]'));
+  });
+
+  $(document).on('click', function(event) {
+    var $target = $(event.target);
+    $('[data-ecf-font-picker]').each(function() {
+      var $picker = $(this);
+      if ($picker.is($target) || $picker.has($target).length) {
+        return;
+      }
+      closeFontPicker($picker);
+    });
   });
 
   function openLocalFontsSection(callback) {
@@ -1875,6 +3004,7 @@ jQuery(function($){
 
   $(document).on('click', '[data-ecf-local-font-add]', function(e) {
     e.preventDefault();
+    pendingFontAutolinkField = String($(this).data('ecf-font-family-field') || 'base_font_family');
     openLocalFontsSection(function($section) {
       var $addButton = $section.find('.ecf-add-local-font').first();
       if ($addButton.length) {
@@ -1886,10 +3016,30 @@ jQuery(function($){
     });
   });
 
+  $(document).on('input change', '[data-ecf-local-fonts-section] .ecf-font-file-row input[name$="[family]"]', function() {
+    if (!pendingFontAutolinkField) return;
+
+    var family = $.trim($(this).val() || '');
+    if (!family) return;
+
+    var $field = getPrimaryFontFamilyField(pendingFontAutolinkField);
+    $field.find('[data-ecf-font-family-preset]').first().val('__custom__').trigger('change');
+    $field.find('[data-ecf-font-family-custom]').first().val("'" + family + "'").trigger('input').trigger('change');
+    pendingFontAutolinkField = '';
+  });
+
   $(document).on('click', '[data-ecf-local-font-remove]', function(e) {
     e.preventDefault();
     var family = $.trim($(this).data('ecf-local-font-remove') || '');
+    var fieldName = String($(this).data('ecf-font-family-field') || 'base_font_family');
     if (!family) return;
+    getFontFamilyFields(fieldName).each(function() {
+      var $field = $(this);
+      $field.find('[data-ecf-font-family-preset]').first().val('var(--ecf-font-primary)').trigger('change');
+      $field.find('[data-ecf-font-family-custom]').first().val('').prop('hidden', true);
+      syncFontFamilyCurrentLabel($field);
+      closeFontPicker($field);
+    });
     openLocalFontsSection(function($section) {
       var removed = false;
       $section.find('.ecf-font-file-row').each(function() {
@@ -1902,10 +3052,20 @@ jQuery(function($){
         }
       });
       if (removed) {
-        $('[data-ecf-base-font-preset]').val('var(--ecf-font-primary)').trigger('change');
-        $('[data-ecf-base-font-custom]').val('');
+        scheduleSettingsAutosave({ delay: 250 });
       }
     });
+  });
+
+  $(document).on('click', '[data-ecf-font-library-import]', function(e) {
+    e.preventDefault();
+    var $button = $(this);
+    var target = String($button.data('ecf-font-library-target') || 'body');
+    var fieldName = String($button.data('ecf-font-family-field') || 'base_font_family');
+    var $controls = $button.closest('[data-ecf-font-library-controls]');
+    var family = $.trim($controls.find('[data-ecf-font-library-search]').first().val() || '');
+
+    importLibraryFontIntoField(fieldName, target, family, $button);
   });
 
   function openChangelogModal() {
@@ -1937,7 +3097,7 @@ jQuery(function($){
   var initialPanel = 'tokens';
   try {
     var storedPanel = window.sessionStorage.getItem(panelStorageKey);
-    if (storedPanel && $('.ecf-nav-item[data-panel="'+storedPanel+'"]').length) {
+    if (storedPanel && $('[data-panel="'+storedPanel+'"]').filter('.ecf-nav-item, .ecf-sidebar-link').length) {
       initialPanel = storedPanel;
     }
   } catch (err) {}
@@ -1952,6 +3112,7 @@ jQuery(function($){
   } catch (err) {}
   switchGeneralTab(initialGeneralTab);
   $('[data-ecf-base-font-preset]').trigger('change');
+  markCurrentStateAsSaved();
   refreshGeneralFavoritesState();
   markWhatsNewSeen($('.ecf-nav-item.is-active').data('ecf-new-key'));
   markWhatsNewSeen($('[data-ecf-general-tab].is-active').data('ecf-new-key'));
@@ -1962,8 +3123,14 @@ jQuery(function($){
   refreshWhatsNewBadges();
   restorePageScrollPosition();
   refreshAdminDesignChooser();
+  applySavedLayoutColumns();
   initSortableLayoutGroups();
+  scheduleMasonryLayouts();
   autosaveReady = true;
+
+  $(window).on('resize', function() {
+    scheduleMasonryLayouts();
+  });
 
   $(document).on('submit', '.ecf-wrap form', function() {
     window.clearTimeout(autosaveTimer);
@@ -1988,10 +3155,12 @@ jQuery(function($){
   });
   renderTypePreview();
   renderShadowPreview();
+  refreshBodySizeLinkedState();
   updateBaseBodyTextSizeWarning();
 
   $(document).on('input change', '[name="ecf_framework_v50[root_font_size]"], [name^="ecf_framework_v50[typography][scale]"], [name^="ecf_framework_v50[typography][fonts]"]', function(){
     renderTypePreview();
+    syncBodySizeWithTypeScale(false);
     renderRootFontImpact();
     updateBaseBodyTextSizeWarning();
   });
@@ -2064,6 +3233,7 @@ jQuery(function($){
   });
 
   $(document).on('input change', '[name="ecf_framework_v50[base_body_text_size_value]"], [name="ecf_framework_v50[base_body_text_size_format]"]', function() {
+    refreshBodySizeLinkedState();
     updateBaseBodyTextSizeWarning();
   });
 
@@ -3697,10 +4867,10 @@ jQuery(function($){
   function getSpacingConfig() {
     return {
       rootBasePx: ($('[name="ecf_framework_v50[root_font_size]"]').val() === '62.5') ? 10 : 16,
-      minBase:   parseFloat($('[name="ecf_framework_v50[spacing][min_base]"]').val()) || 14,
-      maxBase:   parseFloat($('[name="ecf_framework_v50[spacing][max_base]"]').val()) || 16,
-      minRatio:  parseFloat($('[name="ecf_framework_v50[spacing][min_ratio]"]').val()) || 1.2,
-      maxRatio:  parseFloat($('[name="ecf_framework_v50[spacing][max_ratio]"]').val()) || 1.25,
+      minBase:   parseFloat($('[name="ecf_framework_v50[spacing][min_base]"]').val()) || 16,
+      maxBase:   parseFloat($('[name="ecf_framework_v50[spacing][max_base]"]').val()) || 28,
+      minRatio:  parseFloat($('[name="ecf_framework_v50[spacing][min_ratio]"]').val()) || 1.25,
+      maxRatio:  parseFloat($('[name="ecf_framework_v50[spacing][max_ratio]"]').val()) || 1.414,
       baseIndex: $('[name="ecf_framework_v50[spacing][base_index]"]').val() || 'm',
       fluid:     $('[name="ecf_framework_v50[spacing][fluid]"]').is(':checked'),
       minVw:     parseFloat($('[name="ecf_framework_v50[spacing][min_vw]"]').val()) || 375,
@@ -3737,6 +4907,11 @@ jQuery(function($){
       else { maxSize = cfg.maxBase / Math.pow(cfg.maxRatio, Math.abs(exp)); minSize = cfg.minBase / Math.pow(cfg.minRatio, Math.abs(exp)); }
       maxSize = Math.round(maxSize * 1000) / 1000;
       minSize = Math.round(minSize * 1000) / 1000;
+      if (minSize > maxSize) {
+        var swap = minSize;
+        minSize = maxSize;
+        maxSize = swap;
+      }
       var cssValue;
       if (cfg.fluid && cfg.maxVw > cfg.minVw) {
         var slope = (maxSize - minSize) / (cfg.maxVw - cfg.minVw);
@@ -3775,7 +4950,7 @@ jQuery(function($){
       var minBarH = Math.min(40, Math.max(4, Math.round(minValue)));
       var maxBarH = Math.min(40, Math.max(4, Math.round(maxValue)));
       html += '<div class="ecf-space-row' + (item.isBase ? ' is-base' : '') + '" data-ecf-space-step="' + item.step + '">'
-        + '<div class="ecf-space-row__token">' + item.token
+        + '<div class="ecf-space-row__token"><span class="ecf-space-row__token-text">' + item.token + '</span>'
         + '<span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div>'
         + '<div class="ecf-space-row__meta">'
         + '<div class="ecf-space-row__metric">'
@@ -4038,42 +5213,60 @@ jQuery(function($){
   });
 
   function updateBaseBodyTextSizeWarning() {
-    var $field = $('[data-ecf-body-size-field]');
-    if (!$field.length) return;
-
-    var value = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || '');
-    var format = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || '').toLowerCase();
-    var $warning = $field.find('[data-ecf-body-size-warning]');
-    var numeric = parseFloat(String(value).replace(',', '.'));
     var rootBasePx = ($('[name="ecf_framework_v50[root_font_size]"]').val() === '62.5') ? 10 : 16;
-    var message = '';
-    var pxEquivalent = null;
 
-    if (!value || isNaN(numeric) || numeric <= 0 || format === 'custom') {
-      $field.removeClass('is-warning');
-      $warning.prop('hidden', true).text('');
-      return;
-    }
+    $('[data-ecf-body-size-field]').each(function() {
+      var $field = $(this);
+      var value = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || '');
+      var format = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || '').toLowerCase();
+      var $warning = $field.find('[data-ecf-body-size-warning]');
+      var numeric = parseFloat(String(value).replace(',', '.'));
+      var message = '';
+      var pxEquivalent = null;
 
-    if (format === 'px') {
-      pxEquivalent = numeric;
-    } else if (format === 'rem' || format === 'em') {
-      pxEquivalent = numeric * rootBasePx;
-    }
+      if (!value) {
+        message = i18n.size_value_required || '';
+      } else if (format === 'custom') {
+        var normalizedCustom = value.toLowerCase();
+        if (/^(?:0|0px|0rem|0em|0ch|0%|0vw|0vh)$/.test(normalizedCustom)) {
+          message = i18n.size_value_positive || '';
+        }
+      } else if (isNaN(numeric) || numeric <= 0) {
+        message = i18n.size_value_positive || '';
+      }
 
-    if ((format === 'rem' || format === 'em') && numeric >= 8) {
-      message = i18n.body_size_warn_large_unit || '';
-    } else if (pxEquivalent !== null && (pxEquivalent < 10 || pxEquivalent > 32)) {
-      message = i18n.body_size_warn_unusual || '';
-    }
+      if (message) {
+        $field.addClass('is-warning');
+        $warning.prop('hidden', false).text(message);
+        return;
+      }
 
-    if (message) {
-      $field.addClass('is-warning');
-      $warning.prop('hidden', false).text(message);
-    } else {
-      $field.removeClass('is-warning');
-      $warning.prop('hidden', true).text('');
-    }
+      if (format === 'custom') {
+        $field.removeClass('is-warning');
+        $warning.prop('hidden', true).text('');
+        return;
+      }
+
+      if (format === 'px') {
+        pxEquivalent = numeric;
+      } else if (format === 'rem' || format === 'em') {
+        pxEquivalent = numeric * rootBasePx;
+      }
+
+      if ((format === 'rem' || format === 'em') && numeric >= 8) {
+        message = i18n.body_size_warn_large_unit || '';
+      } else if (pxEquivalent !== null && (pxEquivalent < 10 || pxEquivalent > 32)) {
+        message = i18n.body_size_warn_unusual || '';
+      }
+
+      if (message) {
+        $field.addClass('is-warning');
+        $warning.prop('hidden', false).text(message);
+      } else {
+        $field.removeClass('is-warning');
+        $warning.prop('hidden', true).text('');
+      }
+    });
   }
 
   applyStarterClassFilter('all');

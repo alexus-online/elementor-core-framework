@@ -794,11 +794,9 @@ trait ECF_Framework_Updater_Trait {
             return;
         }
 
-        if (empty($_GET['ecf_update_check']) || empty($_GET['ecf_message'])) {
+        if (empty($_GET['ecf_update_check'])) {
             return;
         }
-
-        $message = sanitize_text_field(wp_unslash($_GET['ecf_message']));
-        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($message) . '</p></div>';
+        $this->render_consumed_admin_notices('plugins', '');
     }
 }

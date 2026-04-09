@@ -100,6 +100,36 @@ trait ECF_Framework_Editor_Preview_Trait {
         echo '<button type="button" class="button button-secondary ecf-add-local-font">' . esc_html__('Add local font file', 'ecf-framework') . '</button>';
     }
 
+    private function render_imported_local_font_rows($rows, $input_key) {
+        echo '<div class="ecf-font-file-table ecf-font-file-table--imported" data-local-font-table data-input-key="' . esc_attr($input_key) . '">';
+        if (empty($rows)) {
+            echo '<p class="ecf-muted-copy">' . esc_html__('No local fonts imported yet. Import a font from the Body or Heading selectors above and it will appear here.', 'ecf-framework') . '</p>';
+        }
+        foreach ($rows as $i => $row) {
+            $family = (string) ($row['family'] ?? '');
+            $src = (string) ($row['src'] ?? '');
+            $file_label = wp_basename(wp_parse_url($src, PHP_URL_PATH) ?: $src);
+            echo '<div class="ecf-font-file-row ecf-font-file-row--imported">';
+            echo '<input type="hidden" name="' . esc_attr($input_key . '[' . $i . '][name]') . '" value="' . esc_attr($row['name'] ?? '') . '" />';
+            echo '<input type="hidden" name="' . esc_attr($input_key . '[' . $i . '][family]') . '" value="' . esc_attr($family) . '" />';
+            echo '<input type="hidden" class="ecf-font-file-url" name="' . esc_attr($input_key . '[' . $i . '][src]') . '" value="' . esc_attr($src) . '" />';
+            echo '<input type="hidden" name="' . esc_attr($input_key . '[' . $i . '][weight]') . '" value="' . esc_attr($row['weight'] ?? '400') . '" />';
+            echo '<input type="hidden" name="' . esc_attr($input_key . '[' . $i . '][style]') . '" value="' . esc_attr($row['style'] ?? 'normal') . '" />';
+            echo '<input type="hidden" name="' . esc_attr($input_key . '[' . $i . '][display]') . '" value="' . esc_attr($row['display'] ?? 'swap') . '" />';
+            echo '<div class="ecf-font-imported-summary">';
+            echo '<strong>' . esc_html($family) . '</strong>';
+            echo '<span>' . esc_html($file_label !== '' ? $file_label : __('Local media file', 'ecf-framework')) . '</span>';
+            echo '</div>';
+            echo '<div class="ecf-font-imported-meta">';
+            echo '<span>' . esc_html(sprintf(__('Weight: %s', 'ecf-framework'), (string) ($row['weight'] ?? '400'))) . '</span>';
+            echo '<span>' . esc_html(sprintf(__('Style: %s', 'ecf-framework'), (string) ($row['style'] ?? 'normal'))) . '</span>';
+            echo '</div>';
+            echo '<button type="button" class="button ecf-remove-row">×</button>';
+            echo '</div>';
+        }
+        echo '</div>';
+    }
+
     private function find_preview_item_by_step($items, $step) {
         foreach ((array) $items as $item) {
             if (($item['step'] ?? '') === $step) {

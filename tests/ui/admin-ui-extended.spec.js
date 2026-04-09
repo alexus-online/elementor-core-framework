@@ -36,6 +36,8 @@ const {
   updateRestSettings,
   reorderLayoutGroup,
   getLayoutOrder,
+  setLayoutColumns,
+  getLayoutColumns,
 } = require('./helpers/ecf-admin');
 
 test.describe('ECF extended admin UI flows', () => {
@@ -375,5 +377,281 @@ test.describe('ECF extended admin UI flows', () => {
     await reorderLayoutGroup(page, 'components-website', 'website-type-size', 'website-widths');
     await waitForSuccessNotice(page);
     await expect.poll(async () => getLayoutOrder(page, 'components-website')).toEqual(originalOrder);
+  });
+
+  test('website card order persists after reload', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const originalOrder = await getLayoutOrder(page, 'components-website');
+    const reordered = [
+      'website-base-colors',
+      ...originalOrder.filter((id) => id !== 'website-base-colors'),
+    ];
+
+    await reorderLayoutGroup(page, 'components-website', 'website-base-colors', originalOrder[0]);
+    await waitForSuccessNotice(page);
+    await expect.poll(async () => getLayoutOrder(page, 'components-website')).toEqual(reordered);
+
+    await page.reload();
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+    await expect.poll(async () => getLayoutOrder(page, 'components-website')).toEqual(reordered);
+
+    let currentOrder = await getLayoutOrder(page, 'components-website');
+    for (let index = 0; index < originalOrder.length; index += 1) {
+      const expectedItem = originalOrder[index];
+      if (currentOrder[index] === expectedItem) {
+        continue;
+      }
+
+      await reorderLayoutGroup(page, 'components-website', expectedItem, currentOrder[index]);
+      await waitForSuccessNotice(page);
+      currentOrder = await getLayoutOrder(page, 'components-website');
+    }
+
+    await expect.poll(async () => getLayoutOrder(page, 'components-website')).toEqual(originalOrder);
+  });
+
+  test('website cards show visible drag handles for reordering', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const items = page.locator('[data-ecf-layout-group="components-website"] > [data-ecf-layout-item]');
+    const itemCount = await items.count();
+    expect(itemCount).toBeGreaterThan(1);
+
+    for (let index = 0; index < itemCount; index += 1) {
+      const handle = items.nth(index).locator('[data-ecf-layout-handle][data-ecf-layout-handle-for="components-website"]').first();
+      await expect(handle).toBeVisible();
+    }
+  });
+
+  test('website type and size cards can be reordered and columnized', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const originalOrder = await getLayoutOrder(page, 'components-website-type-size');
+    const originalColumns = await getLayoutColumns(page, 'components-website-type-size');
+    const targetColumns = originalColumns === 3 ? 2 : 3;
+    const reordered = [
+      'type-size-body',
+      ...originalOrder.filter((id) => id !== 'type-size-body'),
+    ];
+
+    await setLayoutColumns(page, 'components-website-type-size', targetColumns);
+    await waitForSuccessNotice(page);
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(targetColumns);
+
+    await reorderLayoutGroup(page, 'components-website-type-size', 'type-size-body', originalOrder[0]);
+    await waitForSuccessNotice(page);
+    await expect.poll(async () => getLayoutOrder(page, 'components-website-type-size')).toEqual(reordered);
+
+    await page.reload();
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(targetColumns);
+    await expect.poll(async () => getLayoutOrder(page, 'components-website-type-size')).toEqual(reordered);
+
+    await setLayoutColumns(page, 'components-website-type-size', originalColumns);
+    await waitForSuccessNotice(page);
+
+    let currentOrder = await getLayoutOrder(page, 'components-website-type-size');
+    for (let index = 1; index < originalOrder.length; index += 1) {
+      const expectedItem = originalOrder[index];
+      if (currentOrder[index] === expectedItem) {
+        continue;
+      }
+
+      await reorderLayoutGroup(page, 'components-website-type-size', expectedItem, originalOrder[index - 1]);
+      await waitForSuccessNotice(page);
+      currentOrder = await getLayoutOrder(page, 'components-website-type-size');
+    }
+
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(originalColumns);
+    await expect.poll(async () => getLayoutOrder(page, 'components-website-type-size')).toEqual(originalOrder);
+  });
+
+  test('website type and size layout shows both icon toggles and highlights the active desktop mode', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const innerHelp = page.locator('[data-ecf-layout-columns-toolbar][data-group="components-website-type-size"] .ecf-layout-columns-toolbar__help').first();
+    const toggleButtons = page.locator('[data-ecf-layout-columns-toolbar][data-group="components-website-type-size"] [data-ecf-layout-columns-btn]:visible');
+    const oneColumnButtons = page.locator('[data-ecf-layout-columns-toolbar][data-group="components-website-type-size"] [data-ecf-layout-columns-btn][data-ecf-layout-columns="1"]');
+    await expect(innerHelp).toContainText(/2 or 3 columns|2 oder 3 Spalten/i);
+
+    const originalInner = await getLayoutColumns(page, 'components-website-type-size');
+    await expect(oneColumnButtons).toHaveCount(0);
+    await expect(toggleButtons).toHaveCount(2);
+    await expect(toggleButtons.nth(0)).toHaveAttribute('aria-pressed', originalInner === 2 ? 'true' : 'false');
+    await expect(toggleButtons.nth(1)).toHaveAttribute('aria-pressed', originalInner === 3 ? 'true' : 'false');
+
+    await setLayoutColumns(page, 'components-website-type-size', 3);
+    await waitForSuccessNotice(page);
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(3);
+    await expect(toggleButtons).toHaveCount(2);
+    await expect(toggleButtons.nth(0)).toHaveAttribute('aria-pressed', 'false');
+    await expect(toggleButtons.nth(1)).toHaveAttribute('aria-pressed', 'true');
+
+    await page.reload();
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(3);
+
+    await setLayoutColumns(page, 'components-website-type-size', originalInner);
+    await waitForSuccessNotice(page);
+  });
+
+  test('website type and size cards do not overlap in two-column mode and keep font notes out of the block', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const originalColumns = await getLayoutColumns(page, 'components-website-type-size');
+
+    const changedToTwo = await setLayoutColumns(page, 'components-website-type-size', 2);
+    if (changedToTwo) {
+      await waitForSuccessNotice(page);
+    }
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(2);
+
+    const bodyCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-body"]').first();
+    const rootCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-root"]').first();
+    const groupNote = page.locator('.ecf-form-grid--website-type-size .ecf-font-family-note--group');
+
+    const bodyBox = await bodyCard.boundingBox();
+    const rootBox = await rootCard.boundingBox();
+
+    expect(bodyBox).not.toBeNull();
+    expect(rootBox).not.toBeNull();
+    const bodyRight = bodyBox.x + bodyBox.width;
+    const bodyBottom = bodyBox.y + bodyBox.height;
+    const rootRight = rootBox.x + rootBox.width;
+    const rootBottom = rootBox.y + rootBox.height;
+    const overlaps = !(
+      bodyRight <= rootBox.x + 2 ||
+      rootRight <= bodyBox.x + 2 ||
+      bodyBottom <= rootBox.y + 2 ||
+      rootBottom <= bodyBox.y + 2
+    );
+    expect(overlaps).toBe(false);
+    expect(rootBox.x).toBeGreaterThan(bodyBox.x + 40);
+    expect(Math.abs(rootBox.y - bodyBox.y)).toBeLessThan(80);
+    await expect(groupNote).toHaveCount(0);
+
+    const restoredOriginal = await setLayoutColumns(page, 'components-website-type-size', originalColumns);
+    if (restoredOriginal) {
+      await waitForSuccessNotice(page);
+    }
+  });
+
+  test('website type and size uses masonry-like packing in two-column mode', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const originalColumns = await getLayoutColumns(page, 'components-website-type-size');
+    const changedToTwo = await setLayoutColumns(page, 'components-website-type-size', 2);
+    if (changedToTwo) {
+      await waitForSuccessNotice(page);
+    }
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(2);
+
+    const bodyCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-body"]').first();
+    const rootCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-root"]').first();
+    const baseFontCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-base-font"]').first();
+    const headingFontCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-heading-font"]').first();
+
+    const bodyBox = await bodyCard.boundingBox();
+    const rootBox = await rootCard.boundingBox();
+    const baseFontBox = await baseFontCard.boundingBox();
+    const headingFontBox = await headingFontCard.boundingBox();
+
+    expect(bodyBox).not.toBeNull();
+    expect(rootBox).not.toBeNull();
+    expect(baseFontBox).not.toBeNull();
+    expect(headingFontBox).not.toBeNull();
+
+    expect(rootBox.x).toBeGreaterThan(bodyBox.x + 40);
+    expect(Math.abs(baseFontBox.x - rootBox.x)).toBeLessThan(80);
+    expect(Math.abs(headingFontBox.x - bodyBox.x)).toBeLessThan(80);
+    expect(baseFontBox.y).toBeLessThan(headingFontBox.y - 10);
+    expect(baseFontBox.y).toBeLessThanOrEqual(bodyBox.y + bodyBox.height + 12);
+
+    const restoredOriginal = await setLayoutColumns(page, 'components-website-type-size', originalColumns);
+    if (restoredOriginal) {
+      await waitForSuccessNotice(page);
+    }
+  });
+
+  test('website type and size uses masonry-like packing in three-column mode', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    const originalColumns = await getLayoutColumns(page, 'components-website-type-size');
+    const changedToThree = await setLayoutColumns(page, 'components-website-type-size', 3);
+    if (changedToThree) {
+      await waitForSuccessNotice(page);
+    }
+    await expect.poll(async () => getLayoutColumns(page, 'components-website-type-size')).toBe(3);
+
+    const bodyCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-body"]').first();
+    const rootCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-root"]').first();
+    const baseFontCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-base-font"]').first();
+    const headingFontCard = page.locator('[data-ecf-layout-group="components-website-type-size"] > [data-ecf-layout-item="type-size-heading-font"]').first();
+
+    const bodyBox = await bodyCard.boundingBox();
+    const rootBox = await rootCard.boundingBox();
+    const baseFontBox = await baseFontCard.boundingBox();
+    const headingFontBox = await headingFontCard.boundingBox();
+
+    expect(bodyBox).not.toBeNull();
+    expect(rootBox).not.toBeNull();
+    expect(baseFontBox).not.toBeNull();
+    expect(headingFontBox).not.toBeNull();
+
+    expect(rootBox.x).toBeGreaterThan(bodyBox.x + 40);
+    expect(baseFontBox.x).toBeGreaterThan(rootBox.x + 40);
+    expect(Math.abs(headingFontBox.x - rootBox.x)).toBeLessThan(80);
+    expect(headingFontBox.y).toBeGreaterThan(rootBox.y + rootBox.height - 8);
+    expect(headingFontBox.y).toBeLessThanOrEqual(bodyBox.y + bodyBox.height + 24);
+
+    const restoredOriginal = await setLayoutColumns(page, 'components-website-type-size', originalColumns);
+    if (restoredOriginal) {
+      await waitForSuccessNotice(page);
+    }
+  });
+
+  test('help panel dashboard cards use masonry-like packing', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openPanel(page, 'help');
+
+    const startCard = page.locator('[data-ecf-layout-group="help-main"] > [data-ecf-layout-item="help-start"]').first();
+    const quickCard = page.locator('[data-ecf-layout-group="help-main"] > [data-ecf-layout-item="help-quick"]').first();
+    const changelogCard = page.locator('[data-ecf-layout-group="help-main"] > [data-ecf-layout-item="help-changelog-link"]').first();
+    const diagnosticsCard = page.locator('[data-ecf-layout-group="help-main"] > [data-ecf-layout-item="help-diagnostics"]').first();
+
+    const startBox = await startCard.boundingBox();
+    const quickBox = await quickCard.boundingBox();
+    const changelogBox = await changelogCard.boundingBox();
+    const diagnosticsBox = await diagnosticsCard.boundingBox();
+
+    expect(startBox).not.toBeNull();
+    expect(quickBox).not.toBeNull();
+    expect(changelogBox).not.toBeNull();
+    expect(diagnosticsBox).not.toBeNull();
+
+    expect(startBox.x).toBeGreaterThan(quickBox.x + 40);
+    expect(Math.abs(changelogBox.x - quickBox.x)).toBeLessThan(80);
+    expect(Math.abs(diagnosticsBox.x - startBox.x)).toBeLessThan(80);
+    expect(changelogBox.y).toBeGreaterThan(quickBox.y + 20);
+    expect(diagnosticsBox.y).toBeGreaterThan(startBox.y + 20);
   });
 });

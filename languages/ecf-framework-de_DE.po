@@ -13,8 +13,14 @@ msgstr " Eintrag/Einträge löschen?"
 msgid "% of limit"
 msgstr "% zu Limit"
 
+msgid "%1$d ECF classes were removed from Elementor. You can now sync them again as clean empty classes."
+msgstr "%1$d ECF-Klassen wurden aus Elementor entfernt. Du kannst sie jetzt wieder als saubere leere Klassen synchronisieren."
+
 msgid "%1$d created"
 msgstr "%1$d erstellt"
+
+msgid "%1$d new Global Classes were skipped because Elementor can currently not create more than %3$d Global Classes and already uses %2$d."
+msgstr "%1$d neue globale Klassen wurden übersprungen, weil Elementor aktuell nicht mehr als %3$d globale Klassen erstellen kann und bereits %2$d verwendet."
 
 msgid "%1$d removed."
 msgstr "%1$d entfernt."
@@ -22,11 +28,35 @@ msgstr "%1$d entfernt."
 msgid "%1$d updated"
 msgstr "%1$d aktualisiert"
 
+msgid "%1$d variables and %2$d global classes were removed. The Elementor cache was cleared automatically."
+msgstr "%1$d Variablen und %2$d globale Klassen wurden entfernt. Der Elementor-Cache wurde automatisch geleert."
+
 msgid "%1$s / %2$s"
 msgstr "%1$s / %2$s"
 
 msgid "%1$s classes / %2$s variables"
 msgstr "%1$s Klassen / %2$s Variablen"
+
+msgid "%1$s: %2$s."
+msgstr "%1$s: %2$s."
+
+msgid "%d class added."
+msgstr "%d Klasse hinzugefügt."
+
+msgid "%d classes added."
+msgstr "%d Klassen hinzugefügt."
+
+msgid "%s%% (%spx = 1rem)"
+msgstr "%s%% (%spx = 1rem)"
+
+msgid "%spx = 1rem"
+msgstr "%spx = 1rem"
+
+msgid "2 columns"
+msgstr "2 Spalten"
+
+msgid "3 columns"
+msgstr "3 Spalten"
 
 msgid "Accent variant for highlighted sections or content blocks."
 msgstr "Akzent-Variante für hervorgehobene Bereiche oder Content-Blöcke."
@@ -36,6 +66,9 @@ msgstr "Barrierefreiheit"
 
 msgid "Accessibility helper for screen-reader-friendly behavior."
 msgstr "Barrierefreiheits-Helfer für screenreaderfreundliches Verhalten."
+
+msgid "Accessibility helpers such as visually hidden content for screen-reader-only text."
+msgstr "Barrierefreiheits-Helfer wie visuell versteckte Inhalte für reinen Screenreader-Text."
 
 msgid "Action area for buttons or controls."
 msgstr "Aktionsbereich für Buttons oder Steuerelemente."
@@ -67,11 +100,17 @@ msgstr "Kleinere Stufe hinzufügen"
 msgid "Add to Favorites"
 msgstr "Zu Favoriten hinzufügen"
 
+msgid "Additional ECF classes separated by spaces."
+msgstr "Zusätzliche ECF-Klassen, durch Leerzeichen getrennt."
+
 msgid "Additional elements"
 msgstr "Weitere Elemente"
 
 msgid "Additional modifiers"
 msgstr "Weitere Modifier"
+
+msgid "Adjust colors, radius, spacing, shadows and typography tokens until the preview feels right."
+msgstr "Passe Farben, Radius, Abstände, Schatten und Typografie-Tokens an, bis sich die Vorschau richtig anfühlt."
 
 msgid "Adjust foreign Elementor variables directly from the search results."
 msgstr "Passe fremde Elementor-Variablen direkt aus der Suche an."
@@ -99,6 +138,9 @@ msgstr "Alle"
 
 msgid "All classes"
 msgstr "Alle Klassen"
+
+msgid "All generated classes already exist."
+msgstr "Alle generierten Klassen existieren bereits."
 
 msgid "All relevant plugin changes are documented here in the current backend language."
 msgstr "Alle relevanten Plugin-Änderungen werden hier in der aktuellen Backend-Sprache dokumentiert."
@@ -130,6 +172,18 @@ msgstr "Bereich"
 msgid "Aurora"
 msgstr "Aurora"
 
+msgid "Automatic updates delivered from the GitHub repository."
+msgstr "Automatische Updates werden aus dem GitHub-Repository bereitgestellt."
+
+msgid "Automatic updates disabled for this plugin."
+msgstr "Automatische Updates für dieses Plugin deaktiviert."
+
+msgid "Automatic updates enabled for this plugin."
+msgstr "Automatische Updates für dieses Plugin aktiviert."
+
+msgid "Autosave active"
+msgstr "Autosave aktiv"
+
 msgid "BEM class generator"
 msgstr "BEM-Klassengenerator"
 
@@ -141,6 +195,9 @@ msgstr "Basis-Hintergrundfarbe"
 
 msgid "Base Body Text Size"
 msgstr "Basis-Schriftgröße für Fließtext"
+
+msgid "Base Colors"
+msgstr "Basis-Farben"
 
 msgid "Base Font Family"
 msgstr "Basis-Schriftfamilie"
@@ -157,20 +214,53 @@ msgstr "Basis-Textfarbe"
 msgid "Base font stack for the whole site body and normal flowing text. Headings can keep using your separate Primary typography font."
 msgstr "Basis-Schriftfamilie für den gesamten Body und normalen Fließtext der Website. Überschriften können weiterhin deine separate Primärschrift aus der Typografie verwenden."
 
+msgid "Base font stack for the whole site body and normal flowing text. This should drive the body font family for normal reading text across the site."
+msgstr "Basis-Schriftfamilie für den gesamten Body und normalen Fließtext der Website. Sie sollte die Body-Schriftfamilie für normalen Lesetext auf der ganzen Website steuern."
+
 msgid "Base layout class for the overall page structure."
 msgstr "Basis-Layout-Klasse für den generellen Seitenaufbau."
+
+msgid "Base spacing size at the largest viewport (desktop). Typically slightly larger than the min size."
+msgstr "Basis-Abstandsgröße am größten Viewport (Desktop). Typischerweise etwas größer als die Minimalgröße."
+
+msgid "Base spacing size at the smallest viewport (mobile). All other steps scale relative to this."
+msgstr "Basis-Abstandsgröße am kleinsten Viewport (mobil). Alle anderen Stufen skalieren relativ dazu."
 
 msgid "Base step"
 msgstr "Basisstufe"
 
+msgid "Basic"
+msgstr "Basis"
+
 msgid "Behavior"
 msgstr "Verhalten"
+
+msgid "Body Font"
+msgstr "Body-Schrift"
+
+msgid "Body Large"
+msgstr "Body Large"
+
+msgid "Body Medium"
+msgstr "Body Medium"
+
+msgid "Body Small"
+msgstr "Body Small"
 
 msgid "Bold purple product UI inspired by modern component systems."
 msgstr "Kräftige violette Produktoberfläche, inspiriert von modernen Components-Systemen."
 
+msgid "Box Shadow - Vars"
+msgstr "Box Shadow - Variablen"
+
 msgid "Brand or logo area inside the header."
 msgstr "Brand- oder Logo-Bereich im Header."
+
+msgid "Build your tokens"
+msgstr "Erstelle deine Tokens"
+
+msgid "Button"
+msgstr "Button"
 
 msgid "Button component class for interactive call-to-actions."
 msgstr "Button-Komponentenklasse für interaktive Call-to-Actions."
@@ -178,11 +268,29 @@ msgstr "Button-Komponentenklasse für interaktive Call-to-Actions."
 msgid "Button variant styled more like a text link."
 msgstr "Button-Variante, die eher wie ein Textlink wirkt."
 
+msgid "Buttons"
+msgstr "Buttons"
+
 msgid "Cancel"
 msgstr "Abbrechen"
 
+msgid "Caption"
+msgstr "Caption"
+
+msgid "Card"
+msgstr "Card"
+
 msgid "Card component class for grouped content inside a surface."
 msgstr "Card-Komponentenklasse für gruppierte Inhalte auf einer Fläche."
+
+msgid "Card layout saved."
+msgstr "Kartenlayout gespeichert."
+
+msgid "Cards"
+msgstr "Cards"
+
+msgid "Center Inline"
+msgstr "Inline zentrieren"
 
 msgid "Centers inline content inside its available width."
 msgstr "Zentriert Inline-Inhalte innerhalb der verfügbaren Breite."
@@ -199,11 +307,35 @@ msgstr "Zeichenbasierte Breite. Ideal für lesbare Textspalten wie 65ch oder 72c
 msgid "Check for updates"
 msgstr "Auf Updates prüfen"
 
+msgid "Checks whether Elementor Pro is loaded. Some variables, sync and editor features can depend on it."
+msgstr "Prüft, ob Elementor Pro geladen ist. Einige Variablen-, Sync- und Editor-Funktionen können davon abhängen."
+
+msgid "Checks whether Elementor's Design System Sync module is available. This can affect caches and synchronization behavior."
+msgstr "Prüft, ob Elementors Design System Sync-Modul verfügbar ist. Das kann Caches und Synchronisationsverhalten beeinflussen."
+
+msgid "Checks whether Elementor's Global Classes module is available for ECF class sync."
+msgstr "Prüft, ob Elementors Global Classes-Modul für den ECF-Klassensync verfügbar ist."
+
+msgid "Checks whether Elementor's Variables module is available, which is required for ECF variable sync and picker integration."
+msgstr "Prüft, ob Elementors Variables-Modul verfügbar ist, das für ECF-Variablensync und Picker-Integration nötig ist."
+
+msgid "Checks whether the Elementor core plugin is loaded and available to ECF on this website."
+msgstr "Prüft, ob das Elementor-Core-Plugin auf dieser Website geladen und für ECF verfügbar ist."
+
+msgid "Choose Color for color values, Size for lengths like px/rem/clamp(...), and Text only for real text strings."
+msgstr "Wähle Farbe für Farbwerte, Größe für Längen wie px/rem/clamp(...) und Text nur für echte Textwerte."
+
 msgid "Choose a section, add elements or modifiers, and generate clean ECF BEM names for your own classes."
 msgstr "Wähle einen Bereich, ergänze Elemente oder Modifier und erzeuge saubere ECF-BEM-Namen für eigene Klassen."
 
+msgid "Choose an area and the preview will appear here."
+msgstr "Wähle einen Bereich, dann erscheint hier die Vorschau."
+
 msgid "Choose font file"
 msgstr "Schriftdatei wählen"
+
+msgid "Choose the active body and heading fonts here. Imported fonts are stored locally in the media library and can be removed again below."
+msgstr "Wähle hier die aktiven Body- und Überschriften-Schriften. Importierte Schriften werden lokal in der Mediathek gespeichert und können unten wieder entfernt werden."
 
 msgid "Choose the admin look of ECF. Current design keeps the existing appearance; other presets restyle the interface."
 msgstr "Wähle das Admin-Design von ECF. Aktuelles Design behält das bisherige Erscheinungsbild, andere Presets gestalten die Oberfläche neu."
@@ -213,6 +345,15 @@ msgstr "Wähle die Einheit für einfache Werte. Nutze f(x) für komplette CSS-Au
 
 msgid "Choose the unit for simple values. ch is usually best for readable text widths. Use f(x) for full CSS expressions."
 msgstr "Wähle die Einheit für einfache Werte. ch ist meist am besten für lesbare Textbreiten. Nutze f(x) für komplette CSS-Ausdrücke."
+
+msgid "Choose what should sync"
+msgstr "Wähle, was synchronisiert werden soll"
+
+msgid "Clamp"
+msgstr "Clamp"
+
+msgid "Class"
+msgstr "Klasse"
 
 msgid "Class Name"
 msgstr "Klassenname"
@@ -226,6 +367,9 @@ msgstr "Klassen-Übersicht"
 msgid "Classes"
 msgstr "Klassen"
 
+msgid "Classes are reusable styling bundles. In ECF they can be starter classes for semantic naming or compact utility classes for repeated helper patterns."
+msgstr "Klassen sind wiederverwendbare Styling-Bündel. In ECF können sie Starter-Klassen für semantische Benennung oder kompakte Utility-Klassen für wiederkehrende Helfer-Muster sein."
+
 msgid "Clean slate interface with crisp contrast and restrained accents."
 msgstr "Klare Slate-Oberfläche mit prägnantem Kontrast und zurückhaltenden Akzenten."
 
@@ -234,6 +378,9 @@ msgstr "ECF-Klassen bereinigen"
 
 msgid "Cleanup ECF from Elementor"
 msgstr "ECF aus Elementor entfernen"
+
+msgid "Clear"
+msgstr "Leeren"
 
 msgid "Click a scale step to inspect it in detail."
 msgstr "Klicke auf eine Schriftstufe, um sie im Detail zu prüfen."
@@ -244,14 +391,26 @@ msgstr "Klicke auf einen Schatten-Token, um ihn im Detail zu prüfen."
 msgid "Close"
 msgstr "Schließen"
 
+msgid "Cluster"
+msgstr "Cluster"
+
 msgid "Color"
 msgstr "Farbe"
+
+msgid "Color is for values like #3b82f6, rgb(...) or hsl(...)."
+msgstr "Farbe ist für Werte wie #3b82f6, rgb(...) oder hsl(...)."
 
 msgid "Colors"
 msgstr "Farben"
 
 msgid "Colors & Radius"
 msgstr "Farben & Radius"
+
+msgid "Columns"
+msgstr "Spalten"
+
+msgid "Commerce"
+msgstr "Commerce"
 
 msgid "Consistent, semantic naming instead of improvised labels per page."
 msgstr "Einheitliches, semantisches Benennungssystem statt spontaner Namen pro Seite."
@@ -283,6 +442,30 @@ msgstr "Kopiert!"
 msgid "Copy"
 msgstr "Kopieren"
 
+msgid "Core Font Tokens"
+msgstr "Core-Font-Tokens"
+
+msgid "Core font tokens"
+msgstr "Core-Font-Tokens"
+
+msgid "Could not normalize the GitHub plugin folder after installation."
+msgstr "Der GitHub-Plugin-Ordner konnte nach der Installation nicht normalisiert werden."
+
+msgid "Could not prepare the GitHub update package for installation."
+msgstr "Das GitHub-Update-Paket konnte nicht für die Installation vorbereitet werden."
+
+msgid "Could not save card layout."
+msgstr "Kartenlayout konnte nicht gespeichert werden."
+
+msgid "Could not save settings automatically."
+msgstr "Einstellungen konnten nicht automatisch gespeichert werden."
+
+msgid "Creates the CSS token --ecf-container-boxed and the helper class .ecf-container-boxed. Choose a format like px, %, rem or switch to f(x) for values like min(...), calc(...) or clamp(...)."
+msgstr "Erstellt das CSS-Token --ecf-container-boxed und die Helferklasse .ecf-container-boxed. Wähle ein Format wie px, %, rem oder wechsle zu f(x) für Werte wie min(...), calc(...) oder clamp(...)."
+
+msgid "Creates the CSS token --ecf-content-max-width for readable text/content wrappers. ch works especially well for article-like content widths."
+msgstr "Erstellt das CSS-Token --ecf-content-max-width für lesbare Text- und Inhalts-Wrapper. ch funktioniert besonders gut für artikelartige Inhaltsbreiten."
+
 msgid "Curated helper styles for headings, text and a few safe layout patterns."
 msgstr "Kuratiertes Set an Helfer-Stilen für Heading-, Text- und einige sichere Layout-Muster."
 
@@ -295,11 +478,20 @@ msgstr "Aktuelles Design"
 msgid "Current rem base"
 msgstr "Aktuelle rem-Basis"
 
+msgid "Current root font size: %spx = 1rem."
+msgstr "Aktuelle Root-Schriftgröße: %spx = 1rem."
+
 msgid "Current status"
 msgstr "Aktueller Status"
 
+msgid "Currently found in Elementor: %1$d ECF variables and %2$d Global Classes."
+msgstr "Aktuell in Elementor: %1$d ECF-Variablen und %2$d Globale Klassen."
+
 msgid "Currently: %spx = 1rem"
 msgstr "Aktuell: %spx = 1rem"
+
+msgid "Custom"
+msgstr "Eigene"
 
 msgid "Custom classes"
 msgstr "Eigene Klassen"
@@ -316,11 +508,20 @@ msgstr "Dunkelmodus"
 msgid "Dark variant for sections with a darker surface."
 msgstr "Dunkle Variante für Bereiche mit dunkler Oberfläche."
 
+msgid "Debug"
+msgstr "Debug"
+
+msgid "Debug history cleared."
+msgstr "Debug-Historie geleert."
+
 msgid "Default body text size for regular paragraphs and flowing content."
 msgstr "Standard-Schriftgröße für normale Absätze und Fließtext."
 
 msgid "Default body text style for regular paragraphs."
 msgstr "Standard-Fließtext-Stil für normale Absätze."
+
+msgid "Default font for flowing text and normal site copy."
+msgstr "Standardschrift für Fließtext und normalen Website-Text."
 
 msgid "Default font size for normal paragraph text across the site. By default this follows the current max value of your active body token and can be overridden here if needed."
 msgstr "Standard-Schriftgröße für normalen Fließtext auf der ganzen Website. Standardmäßig folgt sie dem aktuellen Maximalwert deines aktiven Body-Tokens und kann hier bei Bedarf überschrieben werden."
@@ -349,6 +550,9 @@ msgstr "Design System Sync aktiv"
 msgid "Design Tokens"
 msgstr "Design-Tokens"
 
+msgid "Desktop stays in 2 or 3 columns. On smaller screens the cards stack automatically into one column."
+msgstr "Desktop bleibt bei 2 oder 3 Spalten. Auf kleineren Bildschirmen stapeln sich die Karten automatisch zu einer Spalte."
+
 msgid "Detected from the installed Elementor version on this website. Use Reload to fetch the current values again."
 msgstr "Erkannt aus installiertem Elementor auf dieser Website. Mit Neu einlesen holst du die aktuellen Werte erneut."
 
@@ -357,6 +561,9 @@ msgstr "Erkannte Limits"
 
 msgid "Detected settings groups: %s"
 msgstr "Erkannte Einstellungsgruppen: %s"
+
+msgid "Diagnostics"
+msgstr "Diagnose"
 
 msgid "Dialog or modal class for overlays and focused interactions."
 msgstr "Dialog- oder Modal-Klasse für Overlays und fokussierte Interaktionen."
@@ -370,6 +577,9 @@ msgstr "Automatische Aktualisierungen deaktivieren"
 msgid "Disabled"
 msgstr "Inaktiv"
 
+msgid "Display"
+msgstr "Anzeige"
+
 msgid "Displays children inline with flexible spacing."
 msgstr "Zeigt Inhalte inline mit flexiblem Abstand an."
 
@@ -381,6 +591,15 @@ msgstr "Möchtest du wirklich %1$d ECF-Klassen aus Elementor entfernen, damit si
 
 msgid "Do you really want to remove %1$d ECF variables and %2$d Global Classes from Elementor?"
 msgstr "Möchtest du wirklich %1$d ECF-Variablen und %2$d globale Klassen aus Elementor entfernen?"
+
+msgid "ECF"
+msgstr "ECF"
+
+msgid "ECF Classes"
+msgstr "ECF-Klassen"
+
+msgid "ECF Framework"
+msgstr "ECF Framework"
 
 msgid "ECF Variables"
 msgstr "ECF Variablen"
@@ -418,8 +637,17 @@ msgstr "Elementor"
 msgid "Elementor Boxed Width"
 msgstr "Elementor Boxed-Breite"
 
+msgid "Elementor Classes"
+msgstr "Elementor-Klassen"
+
+msgid "Elementor Core"
+msgstr "Elementor Core"
+
 msgid "Elementor Core recognized"
 msgstr "Elementor Core erkannt"
+
+msgid "Elementor Editor Panel"
+msgstr "Elementor-Editor-Panel"
 
 msgid "Elementor Global Classes"
 msgstr "Elementor Globale Klassen"
@@ -428,7 +656,7 @@ msgid "Elementor Pro recognized"
 msgstr "Elementor Pro erkannt"
 
 msgid "Elementor Variables"
-msgstr "Elementor Variablen"
+msgstr "Elementor-Variablen"
 
 msgid "Elementor editor helpers and variable filtering behavior."
 msgstr "Elementor-Editor-Helfer und das Filterverhalten der Variablen."
@@ -454,6 +682,9 @@ msgstr "Aktiviere zuerst die GitHub-Update-Prüfungen unter ECF > Allgemeine Ein
 msgid "Enable auto-updates"
 msgstr "Automatische Aktualisierungen aktivieren"
 
+msgid "Enable only the starter classes and utility classes you really want to keep maintainable in Elementor."
+msgstr "Aktiviere nur die Starter- und Utility-Klassen, die du in Elementor wirklich pflegbar halten willst."
+
 msgid "Enabled"
 msgstr "Aktiv"
 
@@ -462,6 +693,9 @@ msgstr "Englisch"
 
 msgid "English (matches current WordPress language)"
 msgstr "Englisch (entspricht der aktuellen WordPress-Sprache)"
+
+msgid "Enter a custom block name and the preview will appear here."
+msgstr "Gib einen eigenen Blocknamen ein, dann erscheint hier die Vorschau."
 
 msgid "Enter either a plain value like 1140 or, with f(x), a full CSS expression such as clamp(20rem, 80vw, 1140px)."
 msgstr "Gib entweder einen einfachen Wert wie 1140 ein oder mit f(x) einen kompletten CSS-Ausdruck wie clamp(20rem, 80vw, 1140px)."
@@ -472,14 +706,29 @@ msgstr "Gib entweder einen einfachen Wert wie 72 ein oder mit f(x) einen komplet
 msgid "Entry deleted."
 msgstr "Eintrag gelöscht."
 
+msgid "Error:"
+msgstr "Fehler:"
+
 msgid "Error: "
 msgstr "Fehler: "
+
+msgid "Export / Import"
+msgstr "Export / Import"
 
 msgid "Export JSON"
 msgstr "JSON exportieren"
 
 msgid "Export settings as JSON or import from another installation."
 msgstr "Einstellungen als JSON exportieren oder von einer anderen Installation importieren."
+
+msgid "Exported at: %s"
+msgstr "Exportiert am: %s"
+
+msgid "Exported from plugin version: %s"
+msgstr "Exportiert aus Plugin-Version: %s"
+
+msgid "Extras"
+msgstr "Extras"
 
 msgid "Family"
 msgstr "Familie"
@@ -493,6 +742,12 @@ msgstr "Favoriten"
 msgid "File URL"
 msgstr "Datei-URL"
 
+msgid "File upload failed."
+msgstr "Datei-Upload fehlgeschlagen."
+
+msgid "File: %s"
+msgstr "Datei: %s"
+
 msgid "Filter for"
 msgstr "Filtern für"
 
@@ -501,6 +756,30 @@ msgstr "Filtere die Starter-Klassen nach Bereich."
 
 msgid "Filter variables by field type"
 msgstr "Variablen nach Feldtyp filtern"
+
+msgid "Filters border-radius style variables into matching radius fields."
+msgstr "Filtert Border-Radius-Variablen in passende Radius-Felder."
+
+msgid "Filters color variables like brand, text, border or background colors to color-compatible Elementor fields."
+msgstr "Filtert Farbvariablen wie Marken-, Text-, Rahmen- oder Hintergrundfarben in passende farbfähige Elementor-Felder."
+
+msgid "Filters remaining string-based values that are neither size nor color, for example free text-like CSS values."
+msgstr "Filtert verbleibende stringbasierte Werte, die weder Größe noch Farbe sind, zum Beispiel freie textartige CSS-Werte."
+
+msgid "Filters spacing variables like gaps, padding or margins into spacing-compatible Elementor fields."
+msgstr "Filtert Abstands-Variablen wie Gaps, Padding oder Margins in passende abstandsbezogene Elementor-Felder."
+
+msgid "Filters typography variables like text sizes so they appear only in matching typography-related Elementor controls."
+msgstr "Filtert Typografie-Variablen wie Textgrößen so, dass sie nur in passenden typografiebezogenen Elementor-Feldern erscheinen."
+
+msgid "Fixed pixel value. Best default here, because the field inherits the max px value from your active body token such as --ecf-text-m."
+msgstr "Fester Pixelwert. Beste Standardwahl hier, weil das Feld den maximalen px-Wert deines aktiven Body-Tokens wie --ecf-text-m übernimmt."
+
+msgid "Fluid"
+msgstr "Fluid"
+
+msgid "Fluid (clamp)"
+msgstr "Fluid (clamp)"
 
 msgid "Focus Color"
 msgstr "Fokus-Farbe"
@@ -511,11 +790,32 @@ msgstr "Schriftarten"
 msgid "Font Weights"
 msgstr "Schriftstärken"
 
+msgid "Font imported locally and activated."
+msgstr "Schrift lokal importiert und aktiviert."
+
+msgid "Font imported locally."
+msgstr "Schrift lokal importiert."
+
+msgid "Font is being imported locally…"
+msgstr "Schrift wird lokal importiert…"
+
+msgid "Font size at the largest viewport (desktop). The base step gets this size."
+msgstr "Schriftgröße am größten Viewport (Desktop). Die Basisstufe erhält diesen Wert."
+
+msgid "Font size at the smallest viewport (mobile). The base step gets this size."
+msgstr "Schriftgröße am kleinsten Viewport (mobil). Die Basisstufe erhält diesen Wert."
+
+msgid "Footer"
+msgstr "Footer"
+
 msgid "Footer class for the bottom area of the website."
 msgstr "Footer-Klasse für den unteren Bereich der Website."
 
 msgid "For CTA buttons with icons, labels and variants."
 msgstr "Für CTA-Buttons mit Icons, Labels und Varianten."
+
+msgid "For Size, enter a simple number plus format like 24 + px. If the variable uses clamp(...), edit the Minimum and Maximum px values below instead."
+msgstr "Für Größe gib einen einfachen Wert plus Einheit wie 24 + px ein. Wenn die Variable clamp(...) nutzt, bearbeite stattdessen unten die minimalen und maximalen px-Werte."
 
 msgid "For brand, navigation and actions in the top area."
 msgstr "Für Brand, Navigation und Actions im oberen Bereich."
@@ -541,6 +841,9 @@ msgstr "Für den zentralen Einstiegsbereich mit Text, Media und CTAs."
 msgid "Foreign"
 msgstr "Fremd"
 
+msgid "Foreign Classes"
+msgstr "Fremde Klassen"
+
 msgid "Foreign Variables"
 msgstr "Fremde Variablen"
 
@@ -550,8 +853,14 @@ msgstr "Formular"
 msgid "Form class for form layout, groups or actions."
 msgstr "Form-Klasse für Formularlayout, Gruppen oder Aktionen."
 
+msgid "Format"
+msgstr "Format"
+
 msgid "Forms"
 msgstr "Formulare"
+
+msgid "Full CSS expression. Use values like clamp(16px, 1rem + 0.2vw, 18px)."
+msgstr "Voller CSS-Ausdruck. Nutze Werte wie clamp(16px, 1rem + 0.2vw, 18px)."
 
 msgid "Full CSS expression. Use values like clamp(1rem, 0.95rem + 0.2vw, 1.125rem)."
 msgstr "Voller CSS-Ausdruck. Nutze Werte wie clamp(1rem, 0.95rem + 0.2vw, 1.125rem)."
@@ -565,17 +874,29 @@ msgstr "Voller CSS-Ausdruck. Nutze Werte wie min(72ch, 100% - 2rem), calc(...) o
 msgid "General Settings"
 msgstr "Allgemeine Einstellungen"
 
+msgid "General Settings control global basics like root font size, plugin language, container widths, base colors, body font, and editor helper behavior."
+msgstr "Allgemeine Einstellungen steuern globale Grundlagen wie Root-Schriftgröße, Plugin-Sprache, Container-Breiten, Basisfarben, Body-Schrift und Editor-Helfer."
+
+msgid "Generated ECF variables cannot be edited here."
+msgstr "Generierte ECF-Variablen können hier nicht bearbeitet werden."
+
 msgid "German"
 msgstr "Deutsch"
 
 msgid "German (matches current WordPress language)"
 msgstr "Deutsch (entspricht der aktuellen WordPress-Sprache)"
 
+msgid "Getting started"
+msgstr "Erste Schritte"
+
 msgid "Ghost-style variant with minimal visual weight."
 msgstr "Ghost-Variante mit geringem visuellem Gewicht."
 
 msgid "GitHub update checks"
 msgstr "GitHub-Update-Prüfungen"
+
+msgid "GitHub update checks are disabled in ECF General Settings > System."
+msgstr "GitHub-Update-Prüfungen sind in ECF Allgemeine Einstellungen > System deaktiviert."
 
 msgid "Global Class"
 msgstr "Globale Klasse"
@@ -585,6 +906,9 @@ msgstr "Globale Klassen"
 
 msgid "Global Classes active"
 msgstr "Global Classes aktiv"
+
+msgid "Global Classes count against Elementor’s class limit. Synced ECF variables count against Elementor’s variable limit. Keep utility classes intentionally compact."
+msgstr "Globale Klassen zählen gegen Elementors Klassenlimit. Synchronisierte ECF-Variablen zählen gegen Elementors Variablenlimit. Halte Utility-Klassen bewusst kompakt."
 
 msgid "Global Classes should be managed in Elementor or through the ECF sync, not directly in the search results."
 msgstr "Globale Klassen sollten in Elementor oder über den ECF-Sync verwaltet werden, nicht direkt in den Suchtreffern."
@@ -598,6 +922,9 @@ msgstr "Globale Body-Schriftfamilie und grundlegende Typografie-Auswahl."
 msgid "Global layout widths for readable content and boxed containers."
 msgstr "Globale Layout-Breiten für lesbaren Content und zentrierte Container."
 
+msgid "Google Fonts library"
+msgstr "Google-Fonts-Bibliothek"
+
 msgid "Graphite"
 msgstr "Graphit"
 
@@ -607,14 +934,44 @@ msgstr "Gruppiert Elemente als horizontale, umbrechende Cluster-Reihe."
 msgid "Groups related fields or controls together."
 msgstr "Gruppiert zusammengehörige Felder oder Steuerelemente."
 
+msgid "Header"
+msgstr "Header"
+
+msgid "Heading 1"
+msgstr "Überschrift 1"
+
+msgid "Heading 2"
+msgstr "Überschrift 2"
+
+msgid "Heading 3"
+msgstr "Überschrift 3"
+
+msgid "Heading 4"
+msgstr "Überschrift 4"
+
+msgid "Heading 5"
+msgstr "Überschrift 5"
+
+msgid "Heading Font"
+msgstr "Überschriften-Schrift"
+
+msgid "Heading Font Family"
+msgstr "Überschriften-Schriftfamilie"
+
 msgid "Help"
 msgstr "Hilfe"
+
+msgid "Help & Support"
+msgstr "Hilfe & Support"
 
 msgid "Hero"
 msgstr "Hero"
 
 msgid "Hero section class for the main entry area of a page."
 msgstr "Hero-Klasse für den zentralen Einstiegsbereich einer Seite."
+
+msgid "Hidden"
+msgstr "Versteckt"
 
 msgid "Hides the element visually."
 msgstr "Blendet das Element visuell aus."
@@ -625,8 +982,20 @@ msgstr "Icon-Element innerhalb der übergeordneten Komponente."
 msgid "Import"
 msgstr "Importieren"
 
+msgid "Import preview"
+msgstr "Import-Vorschau"
+
 msgid "Import/Export"
 msgstr "Import/Export"
+
+msgid "Imported Local Fonts"
+msgstr "Importierte lokale Schriften"
+
+msgid "Imported font could not be resolved from the media library."
+msgstr "Die importierte Schrift konnte in der Mediathek nicht aufgelöst werden."
+
+msgid "Imported from plugin version %1$s into %2$s. Please review General Settings, Sync, and editor-related options afterwards."
+msgstr "Importiert von Plugin-Version %1$s in %2$s. Bitte prüfe danach Allgemeine Einstellungen, Sync und editorbezogene Optionen."
 
 msgid "Improves text wrapping for more pleasant paragraph breaks."
 msgstr "Verbessert den Zeilenumbruch für angenehmere Absatzumbrüche."
@@ -634,14 +1003,32 @@ msgstr "Verbessert den Zeilenumbruch für angenehmere Absatzumbrüche."
 msgid "In the Elementor editor, find the <strong>ECF Framework</strong> section under the <strong>Advanced</strong> tab of any element."
 msgstr "Im Elementor-Editor findest du im Tab <strong>Advanced</strong> jedes Elements den Bereich <strong>ECF Framework</strong>."
 
+msgid "Inline Block"
+msgstr "Inline-Block"
+
+msgid "Inline Flex"
+msgstr "Inline-Flex"
+
 msgid "Inner wrapper for the parent section or component."
 msgstr "Innerer Wrapper für den übergeordneten Bereich oder die Komponente."
 
 msgid "Interaction"
 msgstr "Interaktion"
 
+msgid "Interactive classes for buttons, forms, and dialog-based UI elements."
+msgstr "Interaktive Klassen für Buttons, Formulare und dialogbasierte UI-Elemente."
+
+msgid "Invalid JSON file."
+msgstr "Ungültige JSON-Datei."
+
 msgid "Invalid JSON payload."
 msgstr "Ungültige JSON-Nutzlast."
+
+msgid "Invalid font target."
+msgstr "Ungültiges Schriftziel."
+
+msgid "Invalid layout payload."
+msgstr "Ungültige Layout-Nutzlast."
 
 msgid "Invalid variable value."
 msgstr "Ungültiger Variablenwert."
@@ -658,11 +1045,20 @@ msgstr "Hält Benennung und Elementor-Sync überschaubar und berücksichtigt das
 msgid "Keeps the existing ECF look exactly as it is right now."
 msgstr "Behält das bestehende ECF-Erscheinungsbild exakt so bei, wie es gerade ist."
 
+msgid "Key"
+msgstr "Key"
+
 msgid "Large body text style for intros or highlighted copy."
 msgstr "Großer Fließtext-Stil für Einleitungen oder hervorgehobene Texte."
 
 msgid "Larger size variant for stronger emphasis."
 msgstr "Größere Variante für mehr visuelle Betonung."
+
+msgid "Largest size of the clamp value, shown here in px for easier editing."
+msgstr "Größte Größe des Clamp-Werts, hier zur einfacheren Bearbeitung in px angezeigt."
+
+msgid "Layout"
+msgstr "Layout"
 
 msgid "Layout & content"
 msgstr "Layout & Inhalt"
@@ -670,8 +1066,17 @@ msgstr "Layout & Inhalt"
 msgid "Layout helper for simple spacing or positioning patterns."
 msgstr "Layout-Helfer für einfache Abstands- oder Positionierungs-Muster."
 
+msgid "Layout order updated."
+msgstr "Layout-Reihenfolge aktualisiert."
+
+msgid "Legacy export without metadata. Import is still possible."
+msgstr "Legacy-Export ohne Metadaten. Import ist trotzdem möglich."
+
 msgid "Letter Spacing"
 msgstr "Buchstabenabstand"
+
+msgid "Library fonts are downloaded into your own media library on the server and then served locally, so the frontend does not need live requests to external font providers."
+msgstr "Bibliotheksschriften werden in die eigene Mediathek auf dem Server geladen und dann lokal ausgeliefert, sodass das Frontend keine Live-Anfragen an externe Font-Anbieter braucht."
 
 msgid "Limit Elementor variables by field type"
 msgstr "Elementor-Variablen nach Feldtyp begrenzen"
@@ -703,6 +1108,12 @@ msgstr "Lade…"
 msgid "Local Font Files"
 msgstr "Lokale Schriftdateien"
 
+msgid "Local fonts"
+msgstr "Lokale Schriften"
+
+msgid "Local media file"
+msgstr "Lokale Mediendatei"
+
 msgid "Main body area for text and content."
 msgstr "Hauptbereich für Text und Inhalte."
 
@@ -714,6 +1125,18 @@ msgstr "Lässt ein Element wie ein Inline-Block verhalten."
 
 msgid "Manage starter classes and optional utility classes in the Klassen tab. Add class names here only when you really need them on the current element."
 msgstr "Verwalte Starter-Klassen und optionale Utility-Klassen im Klassen-Tab. Trage hier nur dann Klassennamen ein, wenn du sie am aktuellen Element wirklich brauchst."
+
+msgid "Manage the fonts that were imported locally from the library."
+msgstr "Verwalte die Schriften, die lokal aus der Bibliothek importiert wurden."
+
+msgid "Marketing"
+msgstr "Marketing"
+
+msgid "Max"
+msgstr "Max"
+
+msgid "Max Font Size (px)"
+msgstr "Max. Schriftgröße (px)"
 
 msgid "Max Scale Ratio"
 msgstr "Max. Skalierung"
@@ -727,11 +1150,23 @@ msgstr "Max. Viewport (px)"
 msgid "Max viewport (px)"
 msgstr "Max. Viewport (px)"
 
+msgid "Maximum"
+msgstr "Maximum"
+
+msgid "Maximum (px)"
+msgstr "Maximum (px)"
+
 msgid "Media slot for image, video or illustration."
 msgstr "Media-Bereich für Bild, Video oder Illustration."
 
 msgid "Meta information such as date, category or label."
 msgstr "Meta-Informationen wie Datum, Kategorie oder Label."
+
+msgid "Min"
+msgstr "Min"
+
+msgid "Min Font Size (px)"
+msgstr "Min. Schriftgröße (px)"
 
 msgid "Min Scale Ratio"
 msgstr "Min. Skalierung"
@@ -748,6 +1183,15 @@ msgstr "Min. Viewport (px)"
 msgid "Minimal"
 msgstr "Minimal"
 
+msgid "Minimum"
+msgstr "Minimum"
+
+msgid "Minimum (px)"
+msgstr "Minimum (px)"
+
+msgid "Missing required fields."
+msgstr "Erforderliche Felder fehlen."
+
 msgid "Mode"
 msgstr "Modus"
 
@@ -757,11 +1201,35 @@ msgstr "Modifier"
 msgid "Mono"
 msgstr "Mono"
 
+msgid "Multiplier between spacing steps on desktop. A higher ratio creates more visual contrast between sizes."
+msgstr "Multiplikator zwischen den Abstands-Stufen auf dem Desktop. Ein höherer Wert erzeugt mehr visuellen Kontrast zwischen den Größen."
+
+msgid "Multiplier between spacing steps on mobile. 1.25 means each step is 25% larger than the previous."
+msgstr "Multiplikator zwischen den Abstands-Stufen auf Mobilgeräten. 1.25 bedeutet, dass jede Stufe 25 % größer als die vorherige ist."
+
+msgid "Multiplier between steps at desktop size. A higher ratio creates more contrast between sizes."
+msgstr "Multiplikator zwischen den Stufen in der Desktop-Größe. Ein höherer Wert erzeugt mehr Kontrast zwischen den Größen."
+
+msgid "Multiplier between steps at mobile size. E.g. 1.125 means each step is 12.5% larger."
+msgstr "Multiplikator zwischen den Stufen in der mobilen Größe. 1.125 bedeutet zum Beispiel, dass jede Stufe 12,5 % größer wird."
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Named weight tokens for text styles and component typography."
+msgstr "Benannte Gewichtungs-Token für Textstile und Komponenten-Typografie."
+
+msgid "Named width sizes for wrappers and layout containers."
+msgstr "Benannte Breitenstufen für Wrapper und Layout-Container."
+
 msgid "Naming Convention"
 msgstr "Bezeichnung"
 
 msgid "Native Elementor Sync"
 msgstr "Nativer Elementor Sync"
+
+msgid "Navigation"
+msgstr "Navigation"
 
 msgid "Navigation-related class for header or menu structure."
 msgstr "Navigationsbezogene Klasse für Header- oder Menüstruktur."
@@ -776,7 +1244,7 @@ msgid "New: Pin important settings here and edit them directly without leaving t
 msgstr "Neu: Wichtige Einstellungen können jetzt hier angeheftet und direkt bearbeitet werden."
 
 msgid "Next"
-msgstr "Next"
+msgstr "Weiter"
 
 msgid "No"
 msgstr "Nein"
@@ -784,8 +1252,14 @@ msgstr "Nein"
 msgid "No ECF classes found in Elementor."
 msgstr "Keine ECF-Klassen in Elementor gefunden."
 
+msgid "No ECF global classes were found in Elementor."
+msgstr "Keine ECF-globalen Klassen in Elementor gefunden."
+
 msgid "No ECF variables or classes found in Elementor."
 msgstr "Keine ECF-Variablen oder Klassen in Elementor gefunden."
+
+msgid "No ECF variables or global classes were found in Elementor."
+msgstr "Keine ECF-Variablen oder globalen Klassen in Elementor gefunden."
 
 msgid "No IDs were provided."
 msgstr "Es wurden keine IDs übergeben."
@@ -793,8 +1267,17 @@ msgstr "Es wurden keine IDs übergeben."
 msgid "No active Elementor kit found."
 msgstr "Es wurde kein aktives Elementor-Kit gefunden."
 
+msgid "No changelog available."
+msgstr "Kein Changelog verfügbar."
+
 msgid "No changelog entries found."
 msgstr "Keine Changelog-Einträge gefunden."
+
+msgid "No debug history recorded yet. Entries appear here when WP_DEBUG is enabled and ECF logs an internal event."
+msgstr "Noch keine Debug-Historie vorhanden. Einträge erscheinen hier, wenn WP_DEBUG aktiv ist und ECF ein internes Ereignis protokolliert."
+
+msgid "No downloadable font file could be found for this font."
+msgstr "Für diese Schrift konnte keine herunterladbare Schriftdatei gefunden werden."
 
 msgid "No entries found."
 msgstr "Keine Einträge vorhanden."
@@ -805,11 +1288,29 @@ msgstr "Keine Einträge ausgewählt."
 msgid "No favorites selected yet. Mark important settings with the heart icon."
 msgstr "Noch keine Favoriten ausgewählt. Markiere wichtige Einstellungen mit dem Herz-Symbol."
 
+msgid "No file uploaded."
+msgstr "Keine Datei hochgeladen."
+
+msgid "No font family was selected."
+msgstr "Es wurde keine Schriftfamilie ausgewählt."
+
+msgid "No local fonts imported yet. Import a font from the Body or Heading selectors above and it will appear here."
+msgstr "Noch keine lokalen Schriften importiert. Importiere eine Schrift über die Body- oder Überschriften-Auswahl oben, dann erscheint sie hier."
+
+msgid "No matching fonts found."
+msgstr "Keine passenden Schriften gefunden."
+
 msgid "Ocean"
 msgstr "Ozean"
 
+msgid "Only values greater than 0 can be saved here."
+msgstr "Hier können nur Werte größer als 0 gespeichert werden."
+
 msgid "Open Elementor tabs should be reloaded once."
 msgstr "Offene Elementor-Tabs bitte einmal neu laden."
+
+msgid "Open General Settings and define root size, body text size, body font, heading font and the base colors of the site."
+msgstr "Öffne die Allgemeinen Einstellungen und definiere Root-Größe, Body-Textgröße, Body-Schrift, Überschriften-Schrift und die Basisfarben der Website."
 
 msgid "Open changelog"
 msgstr "Changelog öffnen"
@@ -822,6 +1323,9 @@ msgstr "Sonstige"
 
 msgid "Other text values"
 msgstr "Sonstige Textwerte"
+
+msgid "Overline"
+msgstr "Overline"
 
 msgid "Own block name"
 msgstr "Eigener Blockname"
@@ -838,6 +1342,24 @@ msgstr "Prozentwert. Beispiel: 90 wird zu 90%."
 msgid "Pinned quick settings from Website and Plugin basics."
 msgstr "Angeheftete Schnelleinstellungen aus Website- und Plugin-Grundlagen."
 
+msgid "Please choose a font from the library list first."
+msgstr "Bitte wähle zuerst eine Schrift aus der Bibliotheksliste."
+
+msgid "Please enter minimum and maximum as numbers."
+msgstr "Bitte gib Minimum und Maximum als Zahlen ein."
+
+msgid "Please fix the highlighted field before saving."
+msgstr "Bitte korrigiere das markierte Feld, bevor gespeichert wird."
+
+msgid "Please upload a valid JSON file."
+msgstr "Bitte lade eine gültige JSON-Datei hoch."
+
+msgid "Please use a valid variable label. Spaces are converted to hyphens automatically."
+msgstr "Bitte verwende ein gültiges Variablen-Label. Leerzeichen werden automatisch in Bindestriche umgewandelt."
+
+msgid "Plugin"
+msgstr "Plugin"
+
 msgid "Plugin Changelog"
 msgstr "Plugin-Changelog"
 
@@ -846,6 +1368,15 @@ msgstr "Plugin-Sprache"
 
 msgid "Plugin interface language and the ECF backend appearance."
 msgstr "Plugin-Sprache und das Erscheinungsbild des ECF-Backends."
+
+msgid "Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered."
+msgstr "Plugin-Update-Prüfung abgeschlossen. Installiert: %1$s. GitHub-Remote: %2$s. Es wurde keine neuere Version registriert."
+
+msgid "Plugin update check failed. Installed: %1$s. GitHub request error: %2$s."
+msgstr "Plugin-Update-Prüfung fehlgeschlagen. Installiert: %1$s. GitHub-Anfragefehler: %2$s."
+
+msgid "Prefix used for CSS tokens, e.g. \"space\" → --ecf-space-m. Change to rename all tokens."
+msgstr "Präfix für CSS-Tokens, zum Beispiel \"space\" → --ecf-space-m. Eine Änderung benennt alle Tokens um."
 
 msgid "Preview"
 msgstr "Vorschau"
@@ -865,14 +1396,26 @@ msgstr "Primär"
 msgid "Primary variant for the main emphasis action or element."
 msgstr "Primäre Variante für die wichtigste Aktion oder den wichtigsten Akzent."
 
+msgid "Privacy note: imported library fonts are downloaded into your own media library on the server and served locally, so the frontend does not need live requests to external font providers."
+msgstr "Datenschutzhinweis: Importierte Bibliotheksschriften werden in die eigene Mediathek auf dem Server geladen und lokal ausgeliefert, sodass das Frontend keine Live-Anfragen an externe Font-Anbieter braucht."
+
+msgid "Quick help"
+msgstr "Schnellhilfe"
+
 msgid "Quick view of the latest documented plugin changes."
 msgstr "Schnellansicht der zuletzt dokumentierten Plugin-Änderungen."
+
+msgid "Radius"
+msgstr "Radius"
 
 msgid "Radius token"
 msgstr "Radius-Token"
 
 msgid "Readable width for text/content areas."
 msgstr "Lesbare Breite für Text-/Content-Bereiche."
+
+msgid "Recent debug history"
+msgstr "Aktuelle Debug-Historie"
 
 msgid "Reduced monochrome admin look with subtle borders and quiet emphasis."
 msgstr "Reduzierter monochromer Admin-Look mit subtilen Rahmen und ruhiger Betonung."
@@ -907,6 +1450,9 @@ msgstr "Entfernt %1$d Variablen und %2$d Klassen aus Elementor."
 msgid "Reset"
 msgstr "Zurücksetzen"
 
+msgid "Reusable typography stacks like Primary, Secondary and Mono."
+msgstr "Wiederverwendbare Typografie-Stacks wie Primary, Secondary und Mono."
+
 msgid "Reusable utility class for common styling helpers."
 msgstr "Wiederverwendbare Utility-Klasse für häufige Styling-Helfer."
 
@@ -919,8 +1465,14 @@ msgstr "Root-basierte Einheit. Beste Standardwahl für Fließtext wie 1rem oder 
 msgid "Root-based unit. Example: 72 becomes 72rem."
 msgstr "Root-basierte Einheit. Beispiel: 72 wird zu 72rem."
 
+msgid "Root-based unit. Use this only if you want to override the body size intentionally in rem."
+msgstr "Root-basierte Einheit. Nutze sie hier nur, wenn du die Body-Größe bewusst in rem überschreiben willst."
+
 msgid "Root-based unit. Useful if content width should scale with your root font size."
 msgstr "Root-basierte Einheit. Nützlich, wenn die Inhaltsbreite mit der Root Font Size mitskalieren soll."
+
+msgid "Run Sync & Export, then reload open Elementor tabs once so the new variables and classes appear reliably."
+msgstr "Führe Sync & Export aus und lade offene Elementor-Tabs danach einmal neu, damit die neuen Variablen und Klassen zuverlässig erscheinen."
 
 msgid "Save"
 msgstr "Speichern"
@@ -928,17 +1480,44 @@ msgstr "Speichern"
 msgid "Save framework settings"
 msgstr "Einstellungen speichern"
 
+msgid "Save settings"
+msgstr "Einstellungen speichern"
+
+msgid "Saving…"
+msgstr "Speichere…"
+
+msgid "Scale Impact"
+msgstr "Skalenwirkung"
+
+msgid "Schema version: %s"
+msgstr "Schema-Version: %s"
+
+msgid "Screen width at which maximum spacing sizes apply. Usually 1280px (desktop)."
+msgstr "Bildschirmbreite, ab der die maximalen Abstände gelten. Üblicherweise 1280px (Desktop)."
+
+msgid "Screen width at which minimum spacing sizes apply. Usually 375px (iPhone)."
+msgstr "Bildschirmbreite, ab der die minimalen Abstände gelten. Üblicherweise 375px (iPhone)."
+
 msgid "Search classes…"
 msgstr "Klassen durchsuchen…"
 
+msgid "Search local and Google fonts"
+msgstr "Lokale und Google-Schriften suchen"
+
 msgid "Search variables…"
 msgstr "Variablen durchsuchen…"
+
+msgid "Searching the font library…"
+msgstr "Durchsuche die Schriftbibliothek…"
 
 msgid "Secondary"
 msgstr "Sekundär"
 
 msgid "Secondary variant for quieter supporting actions or elements."
 msgstr "Sekundäre Variante für ruhigere unterstützende Aktionen oder Elemente."
+
+msgid "Section"
+msgstr "Sektion"
 
 msgid "Section wrapper for grouping a complete content block."
 msgstr "Section-Wrapper zum Gruppieren eines vollständigen Inhaltsbereichs."
@@ -949,6 +1528,9 @@ msgstr "Sektionen"
 msgid "Security check failed. Please reload the page and try again."
 msgstr "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut."
 
+msgid "See how the current root size affects typography, spacing and radius tokens."
+msgstr "Sieh dir an, wie sich die aktuelle Root-Größe auf Typografie-, Abstands- und Radius-Tokens auswirkt."
+
 msgid "Select a local upload"
 msgstr "Lokalen Upload wählen"
 
@@ -958,20 +1540,44 @@ msgstr "Alle wählen"
 msgid "Select file"
 msgstr "Datei wählen"
 
+msgid "Semantic classes for the big page sections such as header, navigation, hero, and footer."
+msgstr "Semantische Klassen für die großen Seitenbereiche wie Header, Navigation, Hero und Footer."
+
 msgid "Semantic starter class for consistent naming and structure."
 msgstr "Semantische Starter-Klasse für konsistente Benennung und Struktur."
+
+msgid "Separate font family for h1 to h6 and heading-like elements."
+msgstr "Separate Schriftfamilie für h1 bis h6 und überschriftenähnliche Elemente."
+
+msgid "Separate heading font stack for h1 to h6. This lets you keep one font for the body text and another one for headings."
+msgstr "Separate Überschriften-Schriftfamilie für h1 bis h6. So kannst du eine Schrift für den Fließtext und eine andere für Überschriften verwenden."
 
 msgid "Set the root rem size plus the default body type choices for your site."
 msgstr "Lege hier die Root-rem-Größe und die Standard-Typografie für den Fließtext deiner Website fest."
 
-msgid "Sets the token <code>%1$s</code>. Default source: max value from <code>%2$s</code> (%3$s %4$s)."
-msgstr "Setzt das Token <code>%1$s</code>. Standardquelle: Maximalwert von <code>%2$s</code> (%3$s %4$s)."
+msgid "Set the site basics"
+msgstr "Lege die Website-Grundlagen fest"
+
+msgid "Sets the token <code>%1$s</code>. By default it follows the max value from <code>%2$s</code> (%3$s %4$s)."
+msgstr "Setzt das Token <code>%1$s</code>. Standardmäßig folgt es dem Maximalwert von <code>%2$s</code> (%3$s %4$s)."
+
+msgid "Sets the token <code>%1$s</code>. This value is currently set manually to %2$s %3$s and no longer follows <code>%4$s</code> automatically (%5$s %6$s)."
+msgstr "Setzt das Token <code>%1$s</code>. Dieser Wert ist aktuell manuell auf %2$s %3$s gesetzt und folgt <code>%4$s</code> nicht mehr automatisch (%5$s %6$s)."
 
 msgid "Settings"
 msgstr "Einstellungen"
 
+msgid "Settings imported successfully."
+msgstr "Einstellungen erfolgreich importiert."
+
+msgid "Settings saved automatically."
+msgstr "Einstellungen automatisch gespeichert."
+
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
+
+msgid "Settings updated."
+msgstr "Einstellungen aktualisiert."
 
 msgid "Shadow"
 msgstr "Schatten"
@@ -985,6 +1591,15 @@ msgstr "Clamp-Wert anzeigen"
 msgid "Show status cards in Variables & Sync"
 msgstr "Statuskarten in Variablen & Sync anzeigen"
 
+msgid "Shows the class and variable limits ECF currently assumes from the installed Elementor setup."
+msgstr "Zeigt die Klassen- und Variablenlimits, die ECF aktuell aus dem installierten Elementor-Setup ableitet."
+
+msgid "Shows the complete starter library so you can enable a full naming system at once."
+msgstr "Zeigt die komplette Starter-Bibliothek, damit du ein vollständiges Benennungssystem auf einmal aktivieren kannst."
+
+msgid "Shows the complete utility set with all available text, alignment, layout, and accessibility helpers."
+msgstr "Zeigt das komplette Utility-Set mit allen verfügbaren Text-, Ausrichtungs-, Layout- und Barrierefreiheits-Helfern."
+
 msgid "Simple pixel value. Example: 1140 becomes 1140px."
 msgstr "Einfacher Pixelwert. Beispiel: 1140 wird zu 1140px."
 
@@ -994,11 +1609,20 @@ msgstr "Einfacher Pixelwert. Gut für feste Inhaltsbreiten wie 720px."
 msgid "Single item inside a repeated list or navigation."
 msgstr "Ein einzelnes Element innerhalb einer Liste oder Navigation."
 
+msgid "Site Font Assignment"
+msgstr "Website-Schriftzuweisung"
+
 msgid "Size"
 msgstr "Größe"
 
+msgid "Size is for values like 24px, 1.5rem or clamp(...). Tokens like text-2xl also belong here."
+msgstr "Größe ist für Werte wie 24px, 1.5rem oder clamp(...). Tokens wie text-2xl gehören ebenfalls hierhin."
+
 msgid "Small caption style for image notes or meta text."
 msgstr "Kleiner Caption-Stil für Bildhinweise oder Meta-Text."
+
+msgid "Small layout helpers for inline, cluster, centering, and visibility behavior."
+msgstr "Kleine Layout-Helfer für Inline-, Cluster-, Zentrierungs- und Sichtbarkeits-Verhalten."
 
 msgid "Small optional helpers for text styles, alignment, and a few safe layout utilities. They are intentionally limited so the class system stays manageable."
 msgstr "Kleine optionale Helfer für Textstile, Ausrichtung und einige sichere Layout-Utilities. Sie sind bewusst begrenzt, damit das Klassensystem überschaubar bleibt."
@@ -1008,6 +1632,9 @@ msgstr "Kleiner Overline-Stil für Labels über Überschriften."
 
 msgid "Smaller body text style for secondary information."
 msgstr "Kleinerer Fließtext-Stil für sekundäre Informationen."
+
+msgid "Smallest size of the clamp value, shown here in px for easier editing."
+msgstr "Kleinste Größe des Clamp-Werts, hier zur einfacheren Bearbeitung in px angezeigt."
 
 msgid "Soft editorial workspace with calm surfaces and gentle blue structure."
 msgstr "Sanfter editorialer Workspace mit ruhigen Flächen und sanfter blauer Struktur."
@@ -1030,6 +1657,9 @@ msgstr "Starter-Klasse"
 msgid "Starter classes for common page elements like header, hero, buttons or footer."
 msgstr "Starter-Klassen für gängige Seitenelemente wie Header, Hero, Buttons oder Footer."
 
+msgid "Starter classes give you a semantic naming system for common page areas and components such as headers, heroes, cards, buttons, and footers."
+msgstr "Starter-Klassen geben dir ein semantisches Benennungssystem für häufige Seitenbereiche und Komponenten wie Header, Heroes, Cards, Buttons und Footer."
+
 msgid "Static"
 msgstr "Statisch"
 
@@ -1039,14 +1669,32 @@ msgstr "Statuskarten in Variablen & Sync"
 msgid "String"
 msgstr "Text"
 
+msgid "Structural and content-oriented classes for layout shells, sections, cards, and general content areas."
+msgstr "Strukturelle und inhaltsorientierte Klassen für Layout-Hüllen, Sektionen, Cards und allgemeine Inhaltsbereiche."
+
 msgid "Style"
 msgstr "Stil"
+
+msgid "Style: %s"
+msgstr "Stil: %s"
 
 msgid "Suggestions for quick, clean custom names. Click a chip to insert it into a free row."
 msgstr "Vorschläge für schnelle, saubere eigene Namen. Klick auf einen Chip, um ihn in eine freie Zeile zu setzen."
 
+msgid "Switch to 2 columns"
+msgstr "Zu 2 Spalten wechseln"
+
+msgid "Switch to 3 columns"
+msgstr "Zu 3 Spalten wechseln"
+
 msgid "Sync"
 msgstr "Sync"
+
+msgid "Sync & Export"
+msgstr "Sync & Export"
+
+msgid "Sync and verify"
+msgstr "Synchronisieren und prüfen"
 
 msgid "Sync only the utility classes that are currently enabled here."
 msgstr "Synchronisiere nur die Utility-Klassen, die hier aktuell aktiviert sind."
@@ -1066,26 +1714,104 @@ msgstr "System"
 msgid "System status, update checks, limits and integrated help."
 msgstr "Systemstatus, Update-Prüfungen, Limits und integrierte Hilfe."
 
+msgid "System status, updater behavior and Elementor limits live here. Guidance and changelog details are grouped in the Help area."
+msgstr "Hier befinden sich Systemstatus, Updater-Verhalten und Elementor-Limits. Hinweise und Changelog-Details sind im Hilfe-Bereich gebündelt."
+
 msgid "System status, updater behavior, Elementor limits and the built-in help live here."
 msgstr "Hier befinden sich Systemstatus, Updater-Verhalten, Elementor-Limits und die integrierte Hilfe."
 
 msgid "System-wide base settings like the root rem size."
 msgstr "Systemweite Grundeinstellungen wie die globale rem-Basis."
 
+msgid "Technical status, updater controls and live Elementor limits are available under Settings > System. The latest debug entries are mirrored here for quick support review."
+msgstr "Technischer Status, Updater-Steuerung und Live-Elementor-Limits findest du unter Einstellungen > System. Die neuesten Debug-Einträge werden hier für eine schnelle Support-Prüfung gespiegelt."
+
+msgid "Text"
+msgstr "Text"
+
+msgid "Text Balance"
+msgstr "Text ausbalancieren"
+
+msgid "Text Center"
+msgstr "Text zentrieren"
+
+msgid "Text Left"
+msgstr "Text links"
+
+msgid "Text Pretty"
+msgstr "Schöner Textumbruch"
+
+msgid "Text Right"
+msgstr "Text rechts"
+
+msgid "Text helpers for alignment and text behavior such as balanced or pretty wrapping."
+msgstr "Text-Helfer für Ausrichtung und Textverhalten wie ausgewogenen oder schöneren Umbruch."
+
+msgid "Text is only meant for real strings, not for text sizes like text-2xl."
+msgstr "Text ist nur für echte Textwerte gedacht, nicht für Textgrößen wie text-2xl."
+
 msgid "Text utility for alignment or text-flow behavior."
 msgstr "Text-Utility für Ausrichtung oder Textfluss-Verhalten."
+
+msgid "The JSON file is empty or too large."
+msgstr "Die JSON-Datei ist leer oder zu groß."
+
+msgid "The fastest setup path for a fresh project: define the basics first, then sync only the parts you really want in Elementor."
+msgstr "Der schnellste Setup-Weg für ein neues Projekt: zuerst die Grundlagen festlegen, dann nur die Teile synchronisieren, die du wirklich in Elementor brauchst."
+
+msgid "The font could not be imported locally."
+msgstr "Die Schrift konnte nicht lokal importiert werden."
+
+msgid "The font library returned an empty stylesheet."
+msgstr "Die Schriftbibliothek hat ein leeres Stylesheet zurückgegeben."
+
+msgid "The font library search could not be loaded right now."
+msgstr "Die Suche der Schriftbibliothek konnte gerade nicht geladen werden."
+
+msgid "The old manual upload flow is intentionally hidden here to keep the typography workflow focused and consistent."
+msgstr "Der alte manuelle Upload-Flow ist hier bewusst ausgeblendet, damit der Typografie-Workflow fokussiert und konsistent bleibt."
 
 msgid "The preview updates live while you edit the scale settings."
 msgstr "Die Vorschau aktualisiert sich live, während du die Skala bearbeitest."
 
+msgid "The selected file is not a valid ECF JSON export."
+msgstr "Die ausgewählte Datei ist kein gültiger ECF-JSON-Export."
+
+msgid "The step that equals your base font size. Steps above are larger, steps below are smaller."
+msgstr "Die Stufe, die deiner Basis-Schriftgröße entspricht. Stufen darüber sind größer, Stufen darunter kleiner."
+
+msgid "The step that equals your base spacing size. Steps above are larger, steps below are smaller."
+msgstr "Die Stufe, die deiner Basis-Abstandsgröße entspricht. Stufen darüber sind größer, Stufen darunter kleiner."
+
 msgid "These colors affect the site basis directly and are also exposed as global ECF tokens."
 msgstr "Diese Farben wirken direkt auf die Website-Basis und werden zusätzlich als globale ECF-Tokens ausgegeben."
+
+msgid "These colors define the default visual baseline before component-specific styles take over."
+msgstr "Diese Farben definieren die visuelle Standardbasis, bevor komponentenspezifische Styles übernehmen."
+
+msgid "These colors define the visual starting point before component-specific styles take over."
+msgstr "Diese Farben definieren den visuellen Ausgangspunkt, bevor komponentenspezifische Styles übernehmen."
+
+msgid "These options affect the Elementor editor, plugin language and the ECF backend appearance, not your frontend design."
+msgstr "Diese Optionen betreffen den Elementor-Editor, die Plugin-Sprache und das ECF-Backend, nicht das Frontend-Design deiner Website."
 
 msgid "These options only affect the Elementor editor experience, not the frontend design itself."
 msgstr "Diese Optionen betreffen nur das Erlebnis im Elementor-Editor, nicht das Frontend-Design der Website."
 
 msgid "This ECF variable is generated from the framework settings. Please change it in the matching ECF section instead."
 msgstr "Diese ECF-Variable wird aus den Framework-Einstellungen generiert. Bitte ändere sie im passenden ECF-Bereich."
+
+msgid "This body text size looks unusual for normal reading text. Please double-check the unit and value."
+msgstr "Diese Body-Textgröße wirkt für normalen Lesetext ungewöhnlich. Bitte prüfe Einheit und Wert noch einmal."
+
+msgid "This field cannot be empty."
+msgstr "Dieses Feld darf nicht leer sein."
+
+msgid "This file was exported from another plugin version. Please review General Settings, Sync, and editor-related options after import."
+msgstr "Diese Datei wurde aus einer anderen Plugin-Version exportiert. Bitte prüfe danach Allgemeine Einstellungen, Sync und editorbezogene Optionen."
+
+msgid "This value looks unusually large for rem/em body text. Did you mean px or the value from your active type scale token?"
+msgstr "Dieser Wert wirkt für rem/em-Fließtext ungewöhnlich groß. Meintest du vielleicht px oder den Wert aus deinem aktiven Schriftskalen-Token?"
 
 msgid "Title element inside this component."
 msgstr "Titel-Element innerhalb dieser Komponente."
@@ -1098,6 +1824,9 @@ msgstr "Toggle-Steuerung, zum Beispiel für eine mobile Navigation."
 
 msgid "Total"
 msgstr "Gesamt"
+
+msgid "Tracking tokens for tighter headings or looser interface labels."
+msgstr "Tracking-Token für engere Überschriften oder luftigere Interface-Labels."
 
 msgid "Trust"
 msgstr "Vertrauen"
@@ -1117,6 +1846,9 @@ msgstr "Typografie"
 msgid "Typography helper class for reusable text styles."
 msgstr "Typografie-Helferklasse für wiederverwendbare Textstile."
 
+msgid "Typography helpers for heading and body text styles that reuse your ECF text tokens."
+msgstr "Typografie-Helfer für Überschriften- und Fließtext-Stile, die deine ECF-Text-Tokens wiederverwenden."
+
 msgid "Typography token"
 msgstr "Typografie-Token"
 
@@ -1127,7 +1859,10 @@ msgid "Unsupported variable type."
 msgstr "Nicht unterstützter Variablentyp."
 
 msgid "Untitled"
-msgstr "Untitled"
+msgstr "Unbenannt"
+
+msgid "Update found: installed %1$s, remote %2$s."
+msgstr "Update gefunden: installiert %1$s, remote %2$s."
 
 msgid "Updater & privacy"
 msgstr "Updater & Datenschutz"
@@ -1168,14 +1903,23 @@ msgstr "Sinnvoll, wenn du eine kleine wiederverwendbare Utility-Ebene willst, oh
 msgid "Utilities also count toward Elementor’s 100 global classes and should stay intentionally compact."
 msgstr "Utilities zählen ebenfalls in Elementors 100 globale Klassen hinein und sollten deshalb bewusst kompakt bleiben."
 
+msgid "Utility"
+msgstr "Utility"
+
 msgid "Utility classes"
 msgstr "Utility-Klassen"
+
+msgid "Utility classes are a small curated helper set for text styles, alignment, and a few safe layout patterns. Use them sparingly because they also count toward Elementor’s class limit."
+msgstr "Utility-Klassen sind ein kleines kuratiertes Helfer-Set für Textstile, Ausrichtung und einige sichere Layout-Muster. Nutze sie sparsam, weil sie ebenfalls gegen Elementors Klassenlimit zählen."
 
 msgid "Value"
 msgstr "Wert"
 
 msgid "Values in CSS box-shadow syntax, e.g. <code>0 4px 16px rgba(0,0,0,0.1)</code>."
 msgstr "Werte als CSS box-shadow-Syntax, z.B. <code>0 4px 16px rgba(0,0,0,0.1)</code>."
+
+msgid "Variable could not be updated: %s"
+msgstr "Variable konnte nicht aktualisiert werden: %s"
 
 msgid "Variable name"
 msgstr "Variablenname"
@@ -1189,6 +1933,9 @@ msgstr "Variable aktualisiert."
 msgid "Variables"
 msgstr "Variablen"
 
+msgid "Variables are reusable design tokens such as colors, spacing, radius, shadows, and text sizes. They help you keep Elementor and your CSS values consistent."
+msgstr "Variablen sind wiederverwendbare Design-Tokens wie Farben, Abstände, Radius, Schatten und Textgrößen. Sie helfen dir, Elementor und CSS-Werte konsistent zu halten."
+
 msgid "Variables module active"
 msgstr "Variables-Modul aktiv"
 
@@ -1198,11 +1945,20 @@ msgstr "Version %s"
 msgid "Version Changelog"
 msgstr "Versions-Changelog"
 
+msgid "Vertical rhythm tokens for readable paragraphs and display text."
+msgstr "Vertikale Rhythmus-Token für lesbare Absätze und größere Display-Texte."
+
 msgid "Viewport height unit. Example: 80 becomes 80vh."
 msgstr "Viewport-Höhen-Einheit. Beispiel: 80 wird zu 80vh."
 
 msgid "Viewport height unit. Usually uncommon here, but available if needed."
 msgstr "Viewport-Höhen-Einheit. Hier meist unüblich, aber bei Bedarf verfügbar."
+
+msgid "Viewport width at which the maximum font sizes apply (typically 1280px for desktop)."
+msgstr "Viewport-Breite, ab der die maximalen Schriftgrößen gelten, typischerweise 1280px für Desktop."
+
+msgid "Viewport width at which the minimum font sizes apply (typically 375px for mobile)."
+msgstr "Viewport-Breite, ab der die minimalen Schriftgrößen gelten, typischerweise 375px für Mobilgeräte."
 
 msgid "Viewport width unit. Example: 90 becomes 90vw."
 msgstr "Viewport-Breiten-Einheit. Beispiel: 90 wird zu 90vw."
@@ -1212,6 +1968,9 @@ msgstr "Viewport-Breiten-Einheit. Nützlich für fluide Lesebreiten."
 
 msgid "Visible effect of the root font size"
 msgstr "Sichtbare Auswirkung der Root Font Size"
+
+msgid "Visually Hidden"
+msgstr "Visuell verborgen"
 
 msgid "Website"
 msgstr "Webseite"
@@ -1227,6 +1986,21 @@ msgstr "Website-weite Grundlagen wie Root-Größe, Breiten, Fließtext-Schrift u
 
 msgid "Weight"
 msgstr "Stärke"
+
+msgid "Weight: %s"
+msgstr "Stärke: %s"
+
+msgid "What are Classes?"
+msgstr "Was sind Klassen?"
+
+msgid "What are Variables?"
+msgstr "Was sind Variablen?"
+
+msgid "What counts against Elementor limits?"
+msgstr "Was zählt gegen die Elementor-Limits?"
+
+msgid "What do General Settings do?"
+msgstr "Was machen die Allgemeinen Einstellungen?"
 
 msgid "When enabled, ECF can contact api.github.com and codeload.github.com from your server to check update metadata and download plugin updates. If an ECF_GITHUB_TOKEN is configured, it is sent only to GitHub for authenticated update requests."
 msgstr "Wenn aktiv, kann ECF von deinem Server aus api.github.com und codeload.github.com kontaktieren, um Update-Metadaten zu prüfen und Plugin-Updates zu laden. Wenn ein ECF_GITHUB_TOKEN konfiguriert ist, wird er nur für authentifizierte Update-Anfragen an GitHub gesendet."
@@ -1249,11 +2023,26 @@ msgstr "Arbeitet im <strong>Merge-Modus</strong> — ECF ergänzt bestehende Ele
 msgid "Yes"
 msgstr "Ja"
 
+msgid "You are not allowed to perform this action."
+msgstr "Du darfst diese Aktion nicht ausführen."
+
+msgid "Your own semantic class names. Use this area for project-specific naming that does not fit the predefined library."
+msgstr "Deine eigenen semantischen Klassennamen. Nutze diesen Bereich für projektspezifische Benennung, die nicht in die vordefinierte Bibliothek passt."
+
 msgid "Your pinned quick settings. Use the star icon on any supported setting to add or remove it here."
 msgstr "Deine angehefteten Schnelleinstellungen. Nutze das Stern-Symbol an einer unterstützten Einstellung, um sie hier hinzuzufügen oder wieder zu entfernen."
 
+msgid "auto"
+msgstr "auto"
+
+msgid "block"
+msgstr "block"
+
 msgid "by"
 msgstr "von"
+
+msgid "by Alexander Kaiser"
+msgstr "von Alexander Kaiser"
 
 msgid "class name"
 msgstr "Klassenname"
@@ -1270,11 +2059,26 @@ msgstr "z.B. dark, compact"
 msgid "e.g. subtitle, badge"
 msgstr "z.B. subtitle, badge"
 
+msgid "entry/entries delete?"
+msgstr "Eintrag/Einträge löschen?"
+
+msgid "fallback"
+msgstr "fallback"
+
+msgid "italic"
+msgstr "italic"
+
 msgid "name"
 msgstr "Name"
 
 msgid "no changes"
 msgstr "keine Änderungen"
+
+msgid "normal"
+msgstr "normal"
+
+msgid "oblique"
+msgstr "oblique"
 
 msgid "of"
 msgstr "von"
@@ -1282,11 +2086,23 @@ msgstr "von"
 msgid "of current Elementor limit"
 msgstr "des aktuell erkannten Elementor-Limits"
 
+msgid "optional"
+msgstr "optional"
+
 msgid "optional, e.g. testimonials"
 msgstr "optional, z.B. testimonials"
+
+msgid "primary-regular"
+msgstr "primary-regular"
 
 msgid "selected starter classes and selected utility classes"
 msgstr "ausgewählte Starter-Klassen und ausgewählte Utility-Klassen"
 
+msgid "swap"
+msgstr "swap"
+
 msgid "variables currently found in Elementor"
 msgstr "Variablen aktuell in Elementor gefunden"
+
+msgid "⚠ Sync actions change your Elementor data. Please create a backup first."
+msgstr "⚠ Sync-Aktionen ändern deine Elementor-Daten. Bitte vorher ein Backup erstellen."

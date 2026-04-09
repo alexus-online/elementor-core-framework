@@ -1,6 +1,48 @@
 <?php
 
 trait ECF_Framework_Admin_Page_Sections_Trait {
+    private function help_getting_started_items() {
+        return [
+            [
+                'title' => __('Set the site basics', 'ecf-framework'),
+                'description' => __('Open General Settings and define root size, body text size, body font, heading font and the base colors of the site.', 'ecf-framework'),
+            ],
+            [
+                'title' => __('Build your tokens', 'ecf-framework'),
+                'description' => __('Adjust colors, radius, spacing, shadows and typography tokens until the preview feels right.', 'ecf-framework'),
+            ],
+            [
+                'title' => __('Choose what should sync', 'ecf-framework'),
+                'description' => __('Enable only the starter classes and utility classes you really want to keep maintainable in Elementor.', 'ecf-framework'),
+            ],
+            [
+                'title' => __('Sync and verify', 'ecf-framework'),
+                'description' => __('Run Sync & Export, then reload open Elementor tabs once so the new variables and classes appear reliably.', 'ecf-framework'),
+            ],
+        ];
+    }
+
+    private function help_quick_help_items() {
+        return [
+            [
+                'title' => __('What are Variables?', 'ecf-framework'),
+                'description' => __('Variables are reusable design tokens such as colors, spacing, radius, shadows, and text sizes. They help you keep Elementor and your CSS values consistent.', 'ecf-framework'),
+            ],
+            [
+                'title' => __('What are Classes?', 'ecf-framework'),
+                'description' => __('Classes are reusable styling bundles. In ECF they can be starter classes for semantic naming or compact utility classes for repeated helper patterns.', 'ecf-framework'),
+            ],
+            [
+                'title' => __('What counts against Elementor limits?', 'ecf-framework'),
+                'description' => __('Global Classes count against Elementor’s class limit. Synced ECF variables count against Elementor’s variable limit. Keep utility classes intentionally compact.', 'ecf-framework'),
+            ],
+            [
+                'title' => __('What do General Settings do?', 'ecf-framework'),
+                'description' => __('General Settings control global basics like root font size, plugin language, container widths, base colors, body font, and editor helper behavior.', 'ecf-framework'),
+            ],
+        ];
+    }
+
     private function render_variables_panel($args) {
         extract($args, EXTR_SKIP);
         ?>
@@ -113,7 +155,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     </div>
                 </div>
             </div>
-            <div class="ecf-grid" data-ecf-layout-group="variables-main">
+            <div class="ecf-grid" data-ecf-layout-group="variables-main" data-ecf-masonry-layout="1">
                 <div class="ecf-card" id="ecf-vars-ecf" data-ecf-layout-item="ecf-vars-ecf">
                     <div class="ecf-vargroup-header">
                         <h2><?php echo esc_html__('ECF Variables', 'ecf-framework'); ?> <span class="ecf-badge" id="ecf-badge-ecf">–</span></h2>
@@ -157,7 +199,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
     private function render_tokens_panel($settings) {
         ?>
         <div class="ecf-panel" data-panel="tokens">
-            <div class="ecf-grid" data-ecf-layout-group="tokens-main">
+            <div class="ecf-grid" data-ecf-layout-group="tokens-main" data-ecf-masonry-layout="1">
                 <div class="ecf-card" data-ecf-layout-item="tokens-colors">
                     <h2><?php echo esc_html__('Colors', 'ecf-framework'); ?></h2>
                     <?php $this->render_rows('colors', $settings['colors']); ?>
@@ -414,7 +456,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             <span class="ecf-select-all__icon" data-ecf-class-select-all-icon aria-hidden="true"></span>
                             <span data-ecf-class-select-all-label><?php echo esc_html__('Select all', 'ecf-framework'); ?></span>
                         </button>
-                        <button type="button" class="ecf-btn ecf-btn--primary" data-ecf-class-sync-button data-ecf-class-sync-url="<?php echo esc_url(admin_url('admin-post.php?action=ecf_class_library_sync')); ?>">
+                        <button type="button" class="ecf-btn ecf-btn--secondary ecf-btn--class-sync" data-ecf-class-sync-button data-ecf-class-sync-url="<?php echo esc_url(admin_url('admin-post.php?action=ecf_class_library_sync')); ?>">
                             <span class="dashicons dashicons-update" aria-hidden="true"></span>
                             <span><?php echo esc_html__('Sync with Elementor', 'ecf-framework'); ?></span>
                         </button>
@@ -565,7 +607,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 <span class="ecf-select-all__icon" data-ecf-class-select-all-icon aria-hidden="true"></span>
                                 <span data-ecf-class-select-all-label><?php echo esc_html__('Select all', 'ecf-framework'); ?></span>
                             </button>
-                            <button type="button" class="ecf-btn ecf-btn--primary" data-ecf-class-sync-button data-ecf-class-sync-url="<?php echo esc_url(admin_url('admin-post.php?action=ecf_class_library_sync')); ?>">
+                            <button type="button" class="ecf-btn ecf-btn--secondary ecf-btn--class-sync" data-ecf-class-sync-button data-ecf-class-sync-url="<?php echo esc_url(admin_url('admin-post.php?action=ecf_class_library_sync')); ?>">
                                 <span class="dashicons dashicons-update" aria-hidden="true"></span>
                                 <span><?php echo esc_html__('Sync with Elementor', 'ecf-framework'); ?></span>
                             </button>
@@ -648,21 +690,47 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     </div>
                     <div class="ecf-var-tabs ecf-general-tabs" data-ecf-general-tabs>
                         <button type="button" class="ecf-var-tab is-active" data-ecf-general-tab="website" title="<?php echo esc_attr__('Website-wide basics like root size, widths, body font and base colors.', 'ecf-framework'); ?>"><span class="dashicons dashicons-admin-home" aria-hidden="true"></span><?php echo esc_html__('Website', 'ecf-framework'); ?></button>
-                        <button type="button" class="ecf-var-tab" data-ecf-general-tab="editor" title="<?php echo esc_attr__('Elementor editor helpers and variable filtering behavior.', 'ecf-framework'); ?>"><span class="dashicons dashicons-edit-page" aria-hidden="true"></span><?php echo esc_html__('Editor', 'ecf-framework'); ?></button>
-                        <button type="button" class="ecf-var-tab" data-ecf-general-tab="ui" title="<?php echo esc_attr__('Plugin interface language and the ECF backend appearance.', 'ecf-framework'); ?>"><span class="dashicons dashicons-admin-customizer" aria-hidden="true"></span><?php echo esc_html__('UI', 'ecf-framework'); ?></button>
+                        <button type="button" class="ecf-var-tab" data-ecf-general-tab="interface" title="<?php echo esc_attr__('Elementor editor helpers, plugin language and the ECF backend appearance.', 'ecf-framework'); ?>"><span class="dashicons dashicons-admin-customizer" aria-hidden="true"></span><?php echo esc_html__('Interface', 'ecf-framework'); ?></button>
                         <button type="button" class="ecf-var-tab" data-ecf-general-tab="system" title="<?php echo esc_attr__('System status, update checks, limits and integrated help.', 'ecf-framework'); ?>"><span class="dashicons dashicons-admin-generic" aria-hidden="true"></span><?php echo esc_html__('System', 'ecf-framework'); ?></button>
-                        <button type="button" class="ecf-var-tab" data-ecf-general-tab="favorites" data-ecf-new-key="general-favorites" title="<?php echo esc_attr__('Pinned quick settings from Website and Plugin basics.', 'ecf-framework'); ?>"><span class="dashicons dashicons-heart" aria-hidden="true"></span><?php echo esc_html__('Favorites', 'ecf-framework'); ?><span class="ecf-new-dot" data-ecf-new-badge hidden data-tip="<?php echo esc_attr__('New: Pin important settings here and edit them directly without leaving this tab.', 'ecf-framework'); ?>" aria-label="<?php echo esc_attr__('New: Pin important settings here and edit them directly without leaving this tab.', 'ecf-framework'); ?>"></span></button>
+                        <button type="button" class="ecf-var-tab" data-ecf-general-tab="favorites" data-ecf-new-key="general-favorites" title="<?php echo esc_attr__('Pinned quick settings from Website and Plugin basics.', 'ecf-framework'); ?>"><span class="dashicons dashicons-heart" aria-hidden="true"></span><?php echo esc_html__('Favorites', 'ecf-framework'); ?></button>
                     </div>
-                    <div class="ecf-general-section is-active" data-ecf-general-section="website" data-ecf-layout-group="components-website">
+                    <div class="ecf-general-section is-active ecf-general-section--website" data-ecf-general-section="website" data-ecf-layout-group="components-website">
                         <div class="ecf-settings-group" data-ecf-layout-item="website-type-size">
                             <div class="ecf-settings-group__header">
                                 <h3><?php echo esc_html__('Type & Size', 'ecf-framework'); ?></h3>
                                 <p><?php echo esc_html__('Set the root rem size plus the default body type choices for your site.', 'ecf-framework'); ?></p>
                             </div>
-                            <div class="ecf-form-grid ecf-form-grid--two">
-                                <?php $this->render_root_font_size_select($settings, true); ?>
-                                <?php $this->render_base_body_text_size_field($settings); ?>
-                                <?php $this->render_base_font_family_field($settings); ?>
+                            <div class="ecf-layout-columns-toolbar ecf-layout-columns-toolbar--inner ecf-layout-columns-toolbar--toggle" data-ecf-layout-columns-toolbar data-group="components-website-type-size" aria-label="<?php echo esc_attr__('Columns', 'ecf-framework'); ?>">
+                                <span class="ecf-layout-columns-toolbar__label"><?php echo esc_html__('Layout', 'ecf-framework'); ?></span>
+                                <div class="ecf-layout-columns-toolbar__options" role="group" aria-label="<?php echo esc_attr__('Columns', 'ecf-framework'); ?>">
+                                    <button type="button" class="ecf-layout-columns-btn is-active" data-ecf-layout-columns-btn="1" data-ecf-layout-columns="2" data-group="components-website-type-size" aria-label="<?php echo esc_attr__('Switch to 2 columns', 'ecf-framework'); ?>" title="<?php echo esc_attr__('2 columns side by side', 'ecf-framework'); ?>">
+                                        <span class="ecf-layout-columns-btn__icon ecf-layout-columns-btn__icon--2" aria-hidden="true">
+                                            <span></span><span></span>
+                                        </span>
+                                        <span class="ecf-layout-columns-btn__label"><?php echo esc_html__('2 columns', 'ecf-framework'); ?></span>
+                                    </button>
+                                    <button type="button" class="ecf-layout-columns-btn" data-ecf-layout-columns-btn="1" data-ecf-layout-columns="3" data-group="components-website-type-size" aria-label="<?php echo esc_attr__('Switch to 3 columns', 'ecf-framework'); ?>" title="<?php echo esc_attr__('3 columns side by side', 'ecf-framework'); ?>">
+                                        <span class="ecf-layout-columns-btn__icon ecf-layout-columns-btn__icon--3" aria-hidden="true">
+                                            <span></span><span></span><span></span>
+                                        </span>
+                                        <span class="ecf-layout-columns-btn__label"><?php echo esc_html__('3 columns', 'ecf-framework'); ?></span>
+                                    </button>
+                                </div>
+                                <p class="ecf-layout-columns-toolbar__help"><?php echo esc_html__('Desktop stays in 2 or 3 columns. On smaller screens the cards stack automatically into one column.', 'ecf-framework'); ?></p>
+                            </div>
+                            <div class="ecf-form-grid ecf-form-grid--single ecf-form-grid--website-type-size" data-ecf-layout-group="components-website-type-size" data-ecf-layout-columns-group="components-website-type-size" data-ecf-layout-columns="2" data-ecf-masonry-layout="1" style="--ecf-layout-columns:2;">
+                                <div class="ecf-type-size-card" data-ecf-layout-item="type-size-body">
+                                    <?php $this->render_base_body_text_size_field($settings); ?>
+                                </div>
+                                <div class="ecf-type-size-card" data-ecf-layout-item="type-size-root">
+                                    <?php $this->render_root_font_size_select($settings, true); ?>
+                                </div>
+                                <div class="ecf-type-size-card" data-ecf-layout-item="type-size-base-font">
+                                    <?php $this->render_base_font_family_field($settings, false); ?>
+                                </div>
+                                <div class="ecf-type-size-card" data-ecf-layout-item="type-size-heading-font">
+                                    <?php $this->render_heading_font_family_field($settings, false); ?>
+                                </div>
                             </div>
                         </div>
                         <div class="ecf-settings-group" data-ecf-layout-item="website-widths">
@@ -670,7 +738,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 <h3><?php echo esc_html__('Widths', 'ecf-framework'); ?></h3>
                                 <p><?php echo esc_html__('Keep readable content widths and wider layout containers together in one place.', 'ecf-framework'); ?></p>
                             </div>
-                            <div class="ecf-form-grid ecf-form-grid--single">
+                            <div class="ecf-form-grid ecf-form-grid--two ecf-form-grid--website-widths">
                                 <label data-ecf-general-field="content_max_width">
                                     <span class="ecf-general-label-with-favorite">
                                         <?php echo $this->general_setting_label(__('Content Max Width', 'ecf-framework'), 'Creates the CSS token --ecf-content-max-width for readable text/content wrappers. ch works especially well for article-like content widths.', 'align-wide'); ?>
@@ -736,7 +804,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                         <div class="ecf-settings-group" data-ecf-layout-item="website-base-colors">
                             <div class="ecf-settings-group__header">
                                 <h3><?php echo esc_html__('Base Colors', 'ecf-framework'); ?></h3>
-                                <p><?php echo esc_html__('These colors define the default visual baseline before component-specific styles take over.', 'ecf-framework'); ?></p>
+                                <p><?php echo esc_html__('These colors define the visual starting point before component-specific styles take over.', 'ecf-framework'); ?></p>
                             </div>
                             <div class="ecf-form-grid ecf-form-grid--two">
                                 <?php $this->render_general_color_field($settings, 'base_text_color', 'Base Text Color', 'Basis-Textfarbe', 'Default body text color for the whole site.', 'Standard-Textfarbe für den Fließtext der ganzen Website.', 'editor-textcolor'); ?>
@@ -840,7 +908,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             </div>
                         </details>
                     </div>
-                    <div class="ecf-general-section" data-ecf-general-section="editor" hidden>
+                    <div class="ecf-general-section" data-ecf-general-section="interface" hidden>
                         <div class="ecf-form-grid ecf-form-grid--single">
                             <label class="ecf-form-grid__checkbox" data-ecf-general-field="show_elementor_status_cards">
                                 <input type="checkbox" name="<?php echo esc_attr($this->option_name); ?>[show_elementor_status_cards]" value="1" <?php checked(!empty($settings['show_elementor_status_cards'])); ?>>
@@ -874,7 +942,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                     </label>
                                     <label class="ecf-form-grid__checkbox">
                                         <input type="checkbox" name="<?php echo esc_attr($this->option_name); ?>[elementor_variable_type_filter_scopes][shadow]" value="1" <?php checked(!empty($settings['elementor_variable_type_filter_scopes']['shadow'])); ?>>
-                                        <span><?php echo $this->tip_hover_label(__('Shadows', 'ecf-framework'), 'Filters shadow variables into matching box-shadow or shadow-related Elementor fields.', ''); ?></span>
+                                        <span><?php echo $this->tip_hover_label(__('Shadows', 'ecf-framework'), 'Filters shadow variables into matching box-shadow or shadow-related Elementor fields.', 'Filtert Schatten-Variablen nur in passende box-shadow- oder schattenbezogene Elementor-Felder.'); ?></span>
                                     </label>
                                     <label class="ecf-form-grid__checkbox">
                                         <input type="checkbox" name="<?php echo esc_attr($this->option_name); ?>[elementor_variable_type_filter_scopes][string]" value="1" <?php checked(!empty($settings['elementor_variable_type_filter_scopes']['string'])); ?>>
@@ -882,15 +950,10 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                     </label>
                                 </div>
                             </details>
-                        </div>
-                        <p class="ecf-muted-copy"><?php echo esc_html__('These options only affect the Elementor editor experience, not the frontend design itself.', 'ecf-framework'); ?></p>
-                    </div>
-                    <div class="ecf-general-section" data-ecf-general-section="ui" hidden>
-                        <div class="ecf-form-grid ecf-form-grid--single">
                             <?php $this->render_interface_language_field($settings); ?>
                             <?php $this->render_admin_design_field($settings); ?>
                         </div>
-                        <p class="ecf-muted-copy"><?php echo esc_html__('Adjust the ECF backend language and interface appearance here. This changes only the plugin UI, not your website design.', 'ecf-framework'); ?></p>
+                        <p class="ecf-muted-copy"><?php echo esc_html__('These options affect the Elementor editor, plugin language and the ECF backend appearance, not your frontend design.', 'ecf-framework'); ?></p>
                     </div>
                     <div class="ecf-general-section" data-ecf-general-section="system" hidden data-ecf-layout-group="components-system">
                         <div class="ecf-form-grid ecf-form-grid--single">
@@ -1005,14 +1068,16 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                             ]);
                                             ?>
                                             <div class="ecf-system-debug-card__history-item">
-                                                <div class="ecf-system-debug-card__history-meta">
+                                                <div class="ecf-system-debug-card__history-line">
                                                     <time><?php echo esc_html((string) ($entry['time'] ?? '')); ?></time>
                                                     <span class="ecf-debug-type ecf-debug-type--<?php echo esc_attr($entry_type); ?>"><?php echo esc_html($entry_type_label); ?></span>
+                                                    <span class="ecf-system-debug-card__history-message"><?php echo esc_html((string) ($entry['message'] ?? '')); ?></span>
                                                     <button type="button" class="ecf-debug-copy" data-ecf-copy-text="<?php echo esc_attr(implode(' ', $entry_copy_parts)); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></button>
                                                 </div>
-                                                <strong><?php echo esc_html((string) ($entry['message'] ?? '')); ?></strong>
                                                 <?php if (!empty($entry['context'])): ?>
-                                                    <code><?php echo esc_html((string) $entry['context']); ?></code>
+                                                    <div class="ecf-system-debug-card__history-context">
+                                                        <code><?php echo esc_html((string) $entry['context']); ?></code>
+                                                    </div>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
@@ -1076,14 +1141,61 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                         <p class="ecf-muted-copy"><?php echo esc_html__('The preview updates live while you edit the scale settings.', 'ecf-framework'); ?></p>
                     </div>
                     <div class="ecf-card">
-                        <h2><?php echo esc_html__('Font Families', 'ecf-framework'); ?></h2>
-                        <?php $this->render_rows('typography_fonts', $settings['typography']['fonts'], $this->option_name.'[typography][fonts]'); ?>
+                        <h2><?php echo esc_html__('Site Font Assignment', 'ecf-framework'); ?></h2>
+                        <p class="ecf-muted-copy"><?php echo esc_html__('Choose the active body and heading fonts here. Imported fonts are stored locally in the media library and can be removed again below.', 'ecf-framework'); ?></p>
+                        <p class="ecf-muted-copy ecf-font-assignment-note"><?php echo esc_html__('Privacy note: imported library fonts are downloaded into your own media library on the server and served locally, so the frontend does not need live requests to external font providers.', 'ecf-framework'); ?></p>
+                        <div class="ecf-font-assignment-accordion">
+                            <details class="ecf-settings-group ecf-settings-group--details ecf-font-assignment-accordion__item" open>
+                                <summary class="ecf-settings-group__summary">
+                                    <span>
+                                        <strong><?php echo esc_html__('Body Font', 'ecf-framework'); ?></strong>
+                                        <small><?php echo esc_html__('Default font for flowing text and normal site copy.', 'ecf-framework'); ?></small>
+                                    </span>
+                                    <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                                </summary>
+                                <div class="ecf-font-assignment-accordion__content">
+                                    <?php $this->render_base_font_family_field($settings, false); ?>
+                                </div>
+                            </details>
+                            <details class="ecf-settings-group ecf-settings-group--details ecf-font-assignment-accordion__item">
+                                <summary class="ecf-settings-group__summary">
+                                    <span>
+                                        <strong><?php echo esc_html__('Heading Font', 'ecf-framework'); ?></strong>
+                                        <small><?php echo esc_html__('Separate font family for h1 to h6 and heading-like elements.', 'ecf-framework'); ?></small>
+                                    </span>
+                                    <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                                </summary>
+                                <div class="ecf-font-assignment-accordion__content">
+                                    <?php $this->render_heading_font_family_field($settings, false); ?>
+                                </div>
+                            </details>
+                        </div>
                     </div>
-                    <div class="ecf-card" data-ecf-local-fonts-section>
-                        <h2><?php echo esc_html__('Local Font Files', 'ecf-framework'); ?></h2>
-                        <p class="ecf-muted-copy"><?php echo esc_html__('Upload font files into the WordPress media library and then use their family names in your Primary, Secondary or Mono stacks.', 'ecf-framework'); ?></p>
-                        <?php $this->render_local_font_rows($settings['typography']['local_fonts'] ?? [], $this->option_name.'[typography][local_fonts]'); ?>
-                    </div>
+                    <details class="ecf-card ecf-card--details" open>
+                        <summary class="ecf-card__summary">
+                            <span>
+                                <strong><?php echo esc_html__('Core Font Tokens', 'ecf-framework'); ?></strong>
+                                <small><?php echo esc_html__('Reusable typography stacks like Primary, Secondary and Mono.', 'ecf-framework'); ?></small>
+                            </span>
+                            <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                        </summary>
+                        <div class="ecf-card__content">
+                            <?php $this->render_rows('typography_fonts', $settings['typography']['fonts'], $this->option_name.'[typography][fonts]'); ?>
+                        </div>
+                    </details>
+                    <details class="ecf-card ecf-card--details" data-ecf-local-fonts-section>
+                        <summary class="ecf-card__summary">
+                            <span>
+                                <strong><?php echo esc_html__('Imported Local Fonts', 'ecf-framework'); ?></strong>
+                                <small><?php echo esc_html__('Manage the fonts that were imported locally from the library.', 'ecf-framework'); ?></small>
+                            </span>
+                            <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                        </summary>
+                        <div class="ecf-card__content">
+                            <p class="ecf-muted-copy"><?php echo esc_html__('The old manual upload flow is intentionally hidden here to keep the typography workflow focused and consistent.', 'ecf-framework'); ?></p>
+                            <?php $this->render_imported_local_font_rows($settings['typography']['local_fonts'] ?? [], $this->option_name.'[typography][local_fonts]'); ?>
+                        </div>
+                    </details>
                 </div>
                 <div class="ecf-card ecf-typography-preview-card"
                      data-ecf-layout-item="typography-preview"
@@ -1136,11 +1248,11 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             </div>
                                 <div class="ecf-typography-focus__sizes">
                                 <div class="ecf-typography-focus__size-line">
-                                    <strong data-ecf-focus-min-line><?php echo esc_html__('Minimum', 'ecf-framework'); ?></strong>
+                                    <strong data-ecf-focus-min-line><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                     <span><i class="dashicons dashicons-smartphone"></i><?php echo esc_html__('Minimum', 'ecf-framework'); ?></span>
                                 </div>
                                 <div class="ecf-typography-focus__size-line ecf-typography-focus__size-line--max">
-                                    <strong data-ecf-focus-max-line><?php echo esc_html__('Maximum', 'ecf-framework'); ?></strong>
+                                    <strong data-ecf-focus-max-line><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                     <span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span>
                                 </div>
                             </div>
@@ -1165,11 +1277,11 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 </div>
                                 <div class="ecf-type-row__sample">
                                     <div class="ecf-type-row__sample-line">
-                                        <strong style="font-size:<?php echo esc_attr($item['min_px']); ?>px;"><?php echo esc_html__('Minimum', 'ecf-framework'); ?></strong>
+                                        <strong style="font-size:<?php echo esc_attr($item['min_px']); ?>px;"><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                         <span><i class="dashicons dashicons-smartphone"></i><?php echo esc_html__('Minimum', 'ecf-framework'); ?></span>
                                     </div>
                                     <div class="ecf-type-row__sample-line ecf-type-row__sample-line--max">
-                                        <strong style="font-size:<?php echo esc_attr($item['max_px']); ?>px;"><?php echo esc_html__('Maximum', 'ecf-framework'); ?></strong>
+                                        <strong style="font-size:<?php echo esc_attr($item['max_px']); ?>px;"><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                         <span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span>
                                     </div>
                                 </div>
@@ -1182,19 +1294,43 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     </div>
                 </div>
             </div>
-            <div class="ecf-grid" data-ecf-layout-group="typography-secondary">
-                <div class="ecf-card" data-ecf-layout-item="typography-weights">
-                    <h2><?php echo esc_html__('Font Weights', 'ecf-framework'); ?></h2>
-                    <?php $this->render_rows('typography_weights', $settings['typography']['weights'], $this->option_name.'[typography][weights]'); ?>
-                </div>
-                <div class="ecf-card" data-ecf-layout-item="typography-line-heights">
-                    <h2><?php echo esc_html__('Line Heights', 'ecf-framework'); ?></h2>
-                    <?php $this->render_rows('typography_leading', $settings['typography']['leading'], $this->option_name.'[typography][leading]'); ?>
-                </div>
-                <div class="ecf-card" data-ecf-layout-item="typography-letter-spacing">
-                    <h2><?php echo esc_html__('Letter Spacing', 'ecf-framework'); ?></h2>
-                    <?php $this->render_rows('typography_tracking', $settings['typography']['tracking'], $this->option_name.'[typography][tracking]'); ?>
-                </div>
+            <div class="ecf-grid" data-ecf-layout-group="typography-secondary" data-ecf-masonry-layout="1">
+                <details class="ecf-card ecf-card--details" data-ecf-layout-item="typography-weights" open>
+                    <summary class="ecf-card__summary">
+                        <span>
+                            <strong><?php echo esc_html__('Font Weights', 'ecf-framework'); ?></strong>
+                            <small><?php echo esc_html__('Named weight tokens for text styles and component typography.', 'ecf-framework'); ?></small>
+                        </span>
+                        <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                    </summary>
+                    <div class="ecf-card__content">
+                        <?php $this->render_rows('typography_weights', $settings['typography']['weights'], $this->option_name.'[typography][weights]'); ?>
+                    </div>
+                </details>
+                <details class="ecf-card ecf-card--details" data-ecf-layout-item="typography-line-heights">
+                    <summary class="ecf-card__summary">
+                        <span>
+                            <strong><?php echo esc_html__('Line Heights', 'ecf-framework'); ?></strong>
+                            <small><?php echo esc_html__('Vertical rhythm tokens for readable paragraphs and display text.', 'ecf-framework'); ?></small>
+                        </span>
+                        <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                    </summary>
+                    <div class="ecf-card__content">
+                        <?php $this->render_rows('typography_leading', $settings['typography']['leading'], $this->option_name.'[typography][leading]'); ?>
+                    </div>
+                </details>
+                <details class="ecf-card ecf-card--details" data-ecf-layout-item="typography-letter-spacing">
+                    <summary class="ecf-card__summary">
+                        <span>
+                            <strong><?php echo esc_html__('Letter Spacing', 'ecf-framework'); ?></strong>
+                            <small><?php echo esc_html__('Tracking tokens for tighter headings or looser interface labels.', 'ecf-framework'); ?></small>
+                        </span>
+                        <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                    </summary>
+                    <div class="ecf-card__content">
+                        <?php $this->render_rows('typography_tracking', $settings['typography']['tracking'], $this->option_name.'[typography][tracking]'); ?>
+                    </div>
+                </details>
             </div>
         </div>
         <?php
@@ -1244,16 +1380,24 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             </label>
                         </div>
                     </div>
-                    <div class="ecf-card" style="margin-top:14px;">
-                        <h2><?php echo esc_html__('Container Widths', 'ecf-framework'); ?></h2>
-                        <div class="ecf-form-grid ecf-form-grid--single">
-                            <?php foreach (['sm','md','lg','xl'] as $size): ?>
-                                <label><?php echo esc_html(strtoupper($size)); ?>
-                                    <input type="text" name="<?php echo $this->option_name; ?>[container][<?php echo esc_attr($size); ?>]" value="<?php echo esc_attr($settings['container'][$size]); ?>">
-                                </label>
-                            <?php endforeach; ?>
+                    <details class="ecf-card ecf-card--details" style="margin-top:14px;" open>
+                        <summary class="ecf-card__summary">
+                            <span>
+                                <strong><?php echo esc_html__('Container Widths', 'ecf-framework'); ?></strong>
+                                <small><?php echo esc_html__('Named width sizes for wrappers and layout containers.', 'ecf-framework'); ?></small>
+                            </span>
+                            <span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+                        </summary>
+                        <div class="ecf-card__content">
+                            <div class="ecf-form-grid ecf-form-grid--single">
+                                <?php foreach (['sm','md','lg','xl'] as $size): ?>
+                                    <label><?php echo esc_html(strtoupper($size)); ?>
+                                        <input type="text" name="<?php echo $this->option_name; ?>[container][<?php echo esc_attr($size); ?>]" value="<?php echo esc_attr($settings['container'][$size]); ?>">
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                    </div>
+                    </details>
                 </div>
 
                 <div class="ecf-card ecf-spacing-preview-card"
@@ -1285,7 +1429,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             $bar_pct = $max_val > 0 ? round(($item['max'] / $max_val) * 100, 1) : 0;
                         ?>
                         <div class="ecf-space-row<?php echo $item['is_base'] ? ' is-base' : ''; ?>" data-ecf-space-step="<?php echo esc_attr($item['step']); ?>">
-                            <div class="ecf-space-row__token"><?php echo esc_html($item['token']); ?><span class="ecf-copy-pill" data-copy="<?php echo esc_attr($item['token']); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></span></div>
+                            <div class="ecf-space-row__token"><span class="ecf-space-row__token-text"><?php echo esc_html($item['token']); ?></span><span class="ecf-copy-pill" data-copy="<?php echo esc_attr($item['token']); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></span></div>
                             <div class="ecf-space-row__meta">
                                 <div><span><i class="dashicons dashicons-smartphone"></i><?php echo esc_html__('Minimum', 'ecf-framework'); ?></span><strong><?php echo esc_html($item['min_px']); ?>px</strong></div>
                                 <div><span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span><strong><?php echo esc_html($item['max_px']); ?>px</strong></div>
@@ -1310,9 +1454,12 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
         extract($args, EXTR_SKIP);
         ?>
         <div class="ecf-panel" data-panel="sync">
-            <div class="ecf-grid" data-ecf-layout-group="sync-main">
+            <div class="ecf-grid" data-ecf-layout-group="sync-main" data-ecf-masonry-layout="1">
                 <div class="ecf-card" data-ecf-layout-item="sync-native">
                     <h2><?php echo esc_html__('Native Elementor Sync', 'ecf-framework'); ?></h2>
+                    <div class="ecf-notice ecf-notice--warning">
+                        <?php echo esc_html__('⚠ Sync actions change your Elementor data. Please create a backup first.', 'ecf-framework'); ?>
+                    </div>
                     <p class="ecf-sync-status">
                         <?php
                         echo esc_html(
@@ -1402,28 +1549,32 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
 
     private function render_help_panel($changelog_entries) {
         $debug_history = $this->debug_history_entries();
+        $getting_started_items = $this->help_getting_started_items();
+        $quick_help_items = $this->help_quick_help_items();
         ?>
         <div class="ecf-panel" data-panel="help">
-            <div class="ecf-grid" data-ecf-layout-group="help-main">
+            <div class="ecf-grid" data-ecf-layout-group="help-main" data-ecf-masonry-layout="1">
+                <div class="ecf-card ecf-help-start-card" data-ecf-layout-item="help-start">
+                    <h2><?php echo esc_html__('Getting started', 'ecf-framework'); ?></h2>
+                    <p class="ecf-muted-copy"><?php echo esc_html__('The fastest setup path for a fresh project: define the basics first, then sync only the parts you really want in Elementor.', 'ecf-framework'); ?></p>
+                    <ol class="ecf-help-start-list">
+                        <?php foreach ($getting_started_items as $item): ?>
+                            <li>
+                                <strong><?php echo esc_html($item['title']); ?></strong>
+                                <span><?php echo esc_html($item['description']); ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                </div>
                 <div class="ecf-card" data-ecf-layout-item="help-quick">
                     <h2><?php echo esc_html__('Quick help', 'ecf-framework'); ?></h2>
                     <div class="ecf-system-help-card__content">
-                        <div class="ecf-system-help-card__item">
-                            <strong><?php echo esc_html__('What are Variables?', 'ecf-framework'); ?></strong>
-                            <p><?php echo esc_html__('Variables are reusable design tokens such as colors, spacing, radius, shadows, and text sizes. They help you keep Elementor and your CSS values consistent.', 'ecf-framework'); ?></p>
-                        </div>
-                        <div class="ecf-system-help-card__item">
-                            <strong><?php echo esc_html__('What are Classes?', 'ecf-framework'); ?></strong>
-                            <p><?php echo esc_html__('Classes are reusable styling bundles. In ECF they can be starter classes for semantic naming or compact utility classes for repeated helper patterns.', 'ecf-framework'); ?></p>
-                        </div>
-                        <div class="ecf-system-help-card__item">
-                            <strong><?php echo esc_html__('What counts against Elementor limits?', 'ecf-framework'); ?></strong>
-                            <p><?php echo esc_html__('Global Classes count against Elementor’s class limit. Synced ECF variables count against Elementor’s variable limit. Keep utility classes intentionally compact.', 'ecf-framework'); ?></p>
-                        </div>
-                        <div class="ecf-system-help-card__item">
-                            <strong><?php echo esc_html__('What do General Settings do?', 'ecf-framework'); ?></strong>
-                            <p><?php echo esc_html__('General Settings control global basics like root font size, plugin language, container widths, base colors, body font, and editor helper behavior.', 'ecf-framework'); ?></p>
-                        </div>
+                        <?php foreach ($quick_help_items as $item): ?>
+                            <div class="ecf-system-help-card__item">
+                                <strong><?php echo esc_html($item['title']); ?></strong>
+                                <p><?php echo esc_html($item['description']); ?></p>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
                 <div class="ecf-card" data-ecf-layout-item="help-changelog-link">
