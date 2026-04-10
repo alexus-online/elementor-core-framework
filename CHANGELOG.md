@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.10 (2026-04-10)
+
+### Fix
+- Stabilized admin autosave after successful REST saves by removing a broken browser-side follow-up call and hardening the autosave init flow.
+- Admin-Autosave nach erfolgreichen REST-Saves stabilisiert, indem ein fehlerhafter browserseitiger Folgeaufruf entfernt und die Autosave-Initialisierung robuster gemacht wurde.
+- Ensured font preset changes, typography scale updates, repeated step fields, and invalid-to-valid recovery states trigger and persist autosave correctly.
+- Sichergestellt, dass Schrift-Preset-Wechsel, Typografie-Skalierungsänderungen, wiederholte Step-Felder und Recoverys von ungültig zu gültig Autosave korrekt auslösen und persistieren.
+- Cleared frontend-relevant caches after REST saves so color and token changes become visible immediately.
+- Frontend-relevante Caches nach REST-Saves geleert, damit Farb- und Token-Änderungen sofort sichtbar werden.
+- Added a direct local-font import entry in the font-family UI and tightened language loading for interface switching.
+- Direkten Einstieg für den Import lokaler Schriften im Font-Family-UI ergänzt und das Sprachladen für die Interface-Umschaltung nachgeschärft.
+
+### Test
+- Expanded and updated the remote Playwright coverage for autosave, import/export metadata, language switching, font flows, layout persistence, and current accordion/layout expectations.
+- Remote-Playwright-Abdeckung für Autosave, Import-/Export-Metadaten, Sprachumschaltung, Schrift-Flows, Layout-Persistenz und die aktuellen Accordion-/Layout-Erwartungen erweitert und aktualisiert.
+- Verified the full admin UI suite against the test site with `83 passed`, `2 skipped`, `0 failed`.
+- Komplette Admin-UI-Suite gegen die Testseite mit `83 bestanden`, `2 übersprungen`, `0 fehlgeschlagen` verifiziert.
+
 ## 0.2.8 (2026-04-09)
 
 ### Fix
