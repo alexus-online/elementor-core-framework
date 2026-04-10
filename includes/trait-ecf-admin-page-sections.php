@@ -1108,18 +1108,24 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                         <h2><?php echo esc_html__('Type Scale', 'ecf-framework'); ?></h2>
                         <?php $this->render_root_font_size_select($settings, false); ?>
                         <div class="ecf-form-grid ecf-form-grid--compact">
-                            <label><?php echo $this->tip_hover_label(__('Min Font Size (px)', 'ecf-framework'), 'Font size at the smallest viewport (mobile). The base step gets this size.', ''); ?>
-                                <input type="number" step="0.01" name="<?php echo $this->option_name; ?>[typography][scale][min_base]" value="<?php echo esc_attr($settings['typography']['scale']['min_base'] ?? 16); ?>">
-                            </label>
-                            <label><?php echo $this->tip_hover_label(__('Min Scale Ratio', 'ecf-framework'), 'Multiplier between steps at mobile size. E.g. 1.125 means each step is 12.5% larger.', ''); ?>
-                                <?php $this->render_scale_ratio_select($this->option_name . '[typography][scale][min_ratio]', $settings['typography']['scale']['min_ratio'] ?? ($settings['typography']['scale']['ratio'] ?? 1.125)); ?>
-                            </label>
-                            <label><?php echo $this->tip_hover_label(__('Max Font Size (px)', 'ecf-framework'), 'Font size at the largest viewport (desktop). The base step gets this size.', ''); ?>
-                                <input type="number" step="0.01" name="<?php echo $this->option_name; ?>[typography][scale][max_base]" value="<?php echo esc_attr($settings['typography']['scale']['max_base'] ?? 18); ?>">
-                            </label>
-                            <label><?php echo $this->tip_hover_label(__('Max Scale Ratio', 'ecf-framework'), 'Multiplier between steps at desktop size. A higher ratio creates more contrast between sizes.', ''); ?>
-                                <?php $this->render_scale_ratio_select($this->option_name . '[typography][scale][max_ratio]', $settings['typography']['scale']['max_ratio'] ?? ($settings['typography']['scale']['ratio'] ?? 1.25)); ?>
-                            </label>
+                            <div class="ecf-scale-group">
+                                <strong class="ecf-scale-group__title"><?php echo esc_html__('Minimum', 'ecf-framework'); ?></strong>
+                                <label><?php echo $this->tip_hover_label(__('Min Font Size (px)', 'ecf-framework'), 'Font size at the smallest viewport (mobile). The base step gets this size.', ''); ?>
+                                    <input type="number" step="0.01" name="<?php echo $this->option_name; ?>[typography][scale][min_base]" value="<?php echo esc_attr($settings['typography']['scale']['min_base'] ?? 16); ?>">
+                                </label>
+                                <label><?php echo $this->tip_hover_label(__('Min Scale Ratio', 'ecf-framework'), 'Multiplier between steps at mobile size. E.g. 1.125 means each step is 12.5% larger.', ''); ?>
+                                    <?php $this->render_scale_ratio_select($this->option_name . '[typography][scale][min_ratio]', $settings['typography']['scale']['min_ratio'] ?? ($settings['typography']['scale']['ratio'] ?? 1.125)); ?>
+                                </label>
+                            </div>
+                            <div class="ecf-scale-group ecf-scale-group--divider">
+                                <strong class="ecf-scale-group__title"><?php echo esc_html__('Maximum', 'ecf-framework'); ?></strong>
+                                <label><?php echo $this->tip_hover_label(__('Max Font Size (px)', 'ecf-framework'), 'Font size at the largest viewport (desktop). The base step gets this size.', ''); ?>
+                                    <input type="number" step="0.01" name="<?php echo $this->option_name; ?>[typography][scale][max_base]" value="<?php echo esc_attr($settings['typography']['scale']['max_base'] ?? 18); ?>">
+                                </label>
+                                <label><?php echo $this->tip_hover_label(__('Max Scale Ratio', 'ecf-framework'), 'Multiplier between steps at desktop size. A higher ratio creates more contrast between sizes.', ''); ?>
+                                    <?php $this->render_scale_ratio_select($this->option_name . '[typography][scale][max_ratio]', $settings['typography']['scale']['max_ratio'] ?? ($settings['typography']['scale']['ratio'] ?? 1.25)); ?>
+                                </label>
+                            </div>
                             <label><?php echo $this->tip_hover_label(__('Base step', 'ecf-framework'), 'The step that equals your base font size. Steps above are larger, steps below are smaller.', ''); ?>
                                 <select name="<?php echo $this->option_name; ?>[typography][scale][base_index]">
                                     <?php foreach ($settings['typography']['scale']['steps'] as $step): ?>
@@ -1277,12 +1283,12 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 </div>
                                 <div class="ecf-type-row__sample">
                                     <div class="ecf-type-row__sample-line">
-                                        <strong style="font-size:<?php echo esc_attr($item['min_px']); ?>px;"><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                         <span><i class="dashicons dashicons-smartphone"></i><?php echo esc_html__('Minimum', 'ecf-framework'); ?></span>
+                                        <strong style="font-size:<?php echo esc_attr($item['min_px']); ?>px;"><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                     </div>
                                     <div class="ecf-type-row__sample-line ecf-type-row__sample-line--max">
-                                        <strong style="font-size:<?php echo esc_attr($item['max_px']); ?>px;"><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                         <span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span>
+                                        <strong style="font-size:<?php echo esc_attr($item['max_px']); ?>px;"><?php echo esc_html__('Typography', 'ecf-framework'); ?></strong>
                                     </div>
                                 </div>
                             </button>

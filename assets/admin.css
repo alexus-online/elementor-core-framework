@@ -21,6 +21,7 @@
   --ecf-text:      #e2e8f0;
   --ecf-muted:     #64748b;
   --ecf-muted-2:   #94a3b8;
+  --font-mono:     var(--ecf-font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
   --ecf-radius:    10px;
   --ecf-sidebar:   220px;
 }
@@ -2052,6 +2053,24 @@
   display: flex;
   flex-direction: column;
 }
+.ecf-scale-group {
+  display: grid;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+.ecf-scale-group--divider {
+  border-top: .5px solid rgba(255,255,255,.06);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+.ecf-scale-group__title {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ecf-muted);
+}
 .ecf-type-row {
   --ecf-preview-size: 16px;
   appearance: none;
@@ -2098,10 +2117,11 @@
   box-shadow: inset 3px 0 0 var(--ecf-primary);
 }
 .ecf-type-row__token {
-  color: var(--ecf-muted-2);
-  font-size: 15px;
+  color: rgba(255,255,255,.6);
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
+  font-family: var(--font-mono);
 }
 .ecf-type-row__meta {
   display: grid;
@@ -2181,8 +2201,9 @@
 }
 .ecf-type-row__sample-line {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 .ecf-type-row__sample-line strong {
   font-family: var(--ecf-preview-font);
@@ -2202,6 +2223,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: .08em;
+  margin-bottom: 4px;
 }
 .ecf-type-row__sample-line .dashicons {
   width: 14px;
@@ -5451,7 +5473,7 @@ body.ecf-modal-open {
     align-items: center;
   }
   .ecf-type-row__token {
-    font-size: 13px;
+    font-size: 12px;
   }
   .ecf-type-row__meta strong {
     font-size: 14px;
@@ -5460,9 +5482,9 @@ body.ecf-modal-open {
     gap: 10px;
   }
   .ecf-type-row__sample-line {
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
   }
   .ecf-type-row__sample-line strong {
     font-size: clamp(18px, 3.2vw, 26px);
