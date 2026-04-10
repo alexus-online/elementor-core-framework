@@ -4,7 +4,7 @@
  * Description: Core-Framework-style tokens, editor panel, and native Elementor variable/class sync.
  * Version: 0.3.0
  * Author: Alexander Kaiser
- * Update URI: https://github.com/alexus-online/Layrix
+ * Update URI: https://github.com/alexus-online/elementor-core-framework
  * Text Domain: ecf-framework
  * Domain Path: /languages
  */
@@ -58,7 +58,7 @@ class ECF_Framework {
     use ECF_Framework_REST_API_Trait;
 
     private $option_name = 'ecf_framework_v50';
-    private $github_repo = 'alexus-online/Layrix';
+    private $github_repo = 'alexus-online/elementor-core-framework';
     private $github_branch = 'master';
     private $update_cache_key = 'ecf_framework_github_update';
     private $canonical_plugin_slug = 'Layrix-master';
