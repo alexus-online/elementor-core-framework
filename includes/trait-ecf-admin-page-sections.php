@@ -158,7 +158,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
             <div class="ecf-grid" data-ecf-layout-group="variables-main" data-ecf-masonry-layout="1">
                 <div class="ecf-card" id="ecf-vars-ecf" data-ecf-layout-item="ecf-vars-ecf">
                     <div class="ecf-vargroup-header">
-                        <h2><?php echo esc_html__('ECF Variables', 'ecf-framework'); ?> <span class="ecf-badge" id="ecf-badge-ecf">–</span></h2>
+                        <h2><?php echo esc_html__('Layrix Variablen', 'ecf-framework'); ?> <span class="ecf-badge" id="ecf-badge-ecf">–</span></h2>
                         <div class="ecf-vargroup-tools">
                             <div class="ecf-vargroup-actions">
                                 <button type="button" class="ecf-btn ecf-btn--ghost ecf-btn--sm ecf-select-all" data-group="ecf">
@@ -243,8 +243,8 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             <strong data-ecf-shadow-token><?php echo esc_html('--ecf-shadow-' . sanitize_key($settings['shadows'][0]['name'] ?? 'xs')); ?></strong>
             <p data-ecf-shadow-helper><?php echo esc_html__('Click a shadow token to inspect it in detail.', 'ecf-framework'); ?></p>
                         </div>
-                        <div class="ecf-shadow-focus__sample">
-                            <div class="ecf-shadow-focus__surface" data-ecf-shadow-surface style="box-shadow:<?php echo esc_attr($settings['shadows'][0]['value'] ?? '0 1px 2px rgba(0,0,0,0.05)'); ?>;">
+                        <div class="ecf-shadow-focus__sample ecf-shadow-preview-bg">
+                            <div class="ecf-shadow-focus__surface ecf-shadow-preview-bg" data-ecf-shadow-surface style="box-shadow:<?php echo esc_attr($settings['shadows'][0]['value'] ?? '0 1px 2px rgba(0,0,0,0.05)'); ?>;">
                                 <span class="ecf-shadow-preview-label" data-ecf-shadow-label><?php echo esc_html('--ecf-shadow-' . sanitize_key($settings['shadows'][0]['name'] ?? 'xs')); ?></span>
                                 <strong data-ecf-shadow-name><?php echo esc_html(ucfirst(sanitize_key($settings['shadows'][0]['name'] ?? 'xs'))); ?></strong>
                                 <small data-ecf-shadow-css><?php echo esc_html($settings['shadows'][0]['value'] ?? '0 1px 2px rgba(0,0,0,0.05)'); ?></small>
@@ -257,7 +257,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             <button type="button" class="ecf-shadow-row<?php echo $index === 0 ? ' is-active' : ''; ?>" data-ecf-shadow-step="<?php echo esc_attr($shadow_name); ?>">
                                 <div class="ecf-shadow-row__token"><?php echo esc_html('--ecf-shadow-' . $shadow_name); ?></div>
                                 <div class="ecf-shadow-row__value"><code><?php echo esc_html($row['value']); ?></code></div>
-                                <div class="ecf-shadow-row__sample">
+                                <div class="ecf-shadow-row__sample ecf-shadow-preview-bg">
                                     <div class="ecf-shadow-row__mini" style="box-shadow:<?php echo esc_attr($row['value']); ?>;"></div>
                                 </div>
                             </button>
@@ -1069,9 +1069,9 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                             ?>
                                             <div class="ecf-system-debug-card__history-item">
                                                 <div class="ecf-system-debug-card__history-line">
-                                                    <time><?php echo esc_html((string) ($entry['time'] ?? '')); ?></time>
+                                                    <time class="ecf-debug-timestamp"><?php echo esc_html((string) ($entry['time'] ?? '')); ?></time>
                                                     <span class="ecf-debug-type ecf-debug-type--<?php echo esc_attr($entry_type); ?>"><?php echo esc_html($entry_type_label); ?></span>
-                                                    <span class="ecf-system-debug-card__history-message"><?php echo esc_html((string) ($entry['message'] ?? '')); ?></span>
+                                                    <span class="ecf-system-debug-card__history-message ecf-debug-message"><?php echo esc_html((string) ($entry['message'] ?? '')); ?></span>
                                                     <button type="button" class="ecf-debug-copy" data-ecf-copy-text="<?php echo esc_attr(implode(' ', $entry_copy_parts)); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></button>
                                                 </div>
                                                 <?php if (!empty($entry['context'])): ?>
@@ -1426,16 +1426,21 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                         <?php
                         $max_val = max(array_column($spacing_preview, 'max'));
                         foreach ($spacing_preview as $item):
-                            $bar_pct = $max_val > 0 ? round(($item['max'] / $max_val) * 100, 1) : 0;
+                            $item_min = (float) ($item['min_px'] ?? $item['min'] ?? 0);
+                            $item_max = (float) ($item['max_px'] ?? $item['max'] ?? 0);
+                            if ($item_min > $item_max) {
+                                [$item_min, $item_max] = [$item_max, $item_min];
+                            }
+                            $bar_pct = $max_val > 0 ? round(($item_max / $max_val) * 100, 1) : 0;
                         ?>
                         <div class="ecf-space-row<?php echo $item['is_base'] ? ' is-base' : ''; ?>" data-ecf-space-step="<?php echo esc_attr($item['step']); ?>">
-                            <div class="ecf-space-row__token"><span class="ecf-space-row__token-text"><?php echo esc_html($item['token']); ?></span><span class="ecf-copy-pill" data-copy="<?php echo esc_attr($item['token']); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></span></div>
+                            <div class="ecf-space-row__token"><span class="ecf-space-row__token-text ecf-spacing-token-name"><?php echo esc_html($item['token']); ?></span><span class="ecf-copy-pill" data-copy="<?php echo esc_attr($item['token']); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></span></div>
                             <div class="ecf-space-row__meta">
-                                <div><span><i class="dashicons dashicons-smartphone"></i><?php echo esc_html__('Minimum', 'ecf-framework'); ?></span><strong><?php echo esc_html($item['min_px']); ?>px</strong></div>
-                                <div><span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span><strong><?php echo esc_html($item['max_px']); ?>px</strong></div>
+                                <div><span><i class="dashicons dashicons-smartphone"></i><?php echo esc_html__('Minimum', 'ecf-framework'); ?></span><strong><?php echo esc_html($this->format_preview_number($item_min, 3)); ?>px</strong></div>
+                                <div><span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span><strong><?php echo esc_html($this->format_preview_number($item_max, 3)); ?>px</strong></div>
                             </div>
                             <div class="ecf-space-row__bar">
-                                <div class="ecf-space-row__bar-fill" style="width:<?php echo esc_attr($bar_pct); ?>%;height:<?php echo esc_attr(min(40, max(4, round($item['max'])))); ?>px;"></div>
+                                <div class="ecf-space-row__bar-fill" style="width:<?php echo esc_attr($bar_pct); ?>%;height:<?php echo esc_attr(min(40, max(4, round($item_max)))); ?>px;"></div>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -1540,7 +1545,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
 
                 <div class="ecf-card" data-ecf-layout-item="sync-editor-panel">
                     <h2><?php echo esc_html__('Elementor Editor Panel', 'ecf-framework'); ?></h2>
-                    <p style="color:#9ca3af;font-size:13px;"><?php echo wp_kses(__('In the Elementor editor, find the <strong>ECF Framework</strong> section under the <strong>Advanced</strong> tab of any element.', 'ecf-framework'), ['strong' => []]); ?></p>
+                    <p style="color:#9ca3af;font-size:13px;"><?php echo wp_kses(__('In the Elementor editor, find the <strong>Layrix</strong> section under the <strong>Advanced</strong> tab of any element.', 'ecf-framework'), ['strong' => []]); ?></p>
                 </div>
             </div>
         </div>
@@ -1608,10 +1613,10 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 ?>
                                 <div class="ecf-system-debug-card__history-item">
                                     <div class="ecf-system-debug-card__history-meta">
-                                        <time><?php echo esc_html((string) ($entry['time'] ?? '')); ?></time>
+                                        <time class="ecf-debug-timestamp"><?php echo esc_html((string) ($entry['time'] ?? '')); ?></time>
                                         <span class="ecf-debug-type ecf-debug-type--<?php echo esc_attr($entry_type); ?>"><?php echo esc_html($entry_type_label); ?></span>
                                     </div>
-                                    <strong><?php echo esc_html((string) ($entry['message'] ?? '')); ?></strong>
+                                    <strong class="ecf-debug-message"><?php echo esc_html((string) ($entry['message'] ?? '')); ?></strong>
                                 </div>
                             <?php endforeach; ?>
                         </div>

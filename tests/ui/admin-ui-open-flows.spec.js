@@ -44,7 +44,7 @@ test.describe('ECF open UI flows', () => {
 
     await setImportFile(page, {
       meta: {
-        plugin: 'ECF Framework',
+        plugin: 'Layrix',
         plugin_version: '9.9.9',
         schema_version: 1,
         exported_at: '2026-04-08T12:00:00Z',

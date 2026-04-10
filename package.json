@@ -1,5 +1,5 @@
 {
-  "name": "elementor-core-framework",
+  "name": "layrix",
   "version": "0.2.10",
   "private": true,
   "scripts": {
@@ -16,7 +16,7 @@
   ],
   "author": "Alexander Kaiser",
   "license": "UNLICENSED",
-  "description": "Browser and regression checks for the ECF Elementor v4 Core Framework plugin.",
+  "description": "Browser and regression checks for the Layrix plugin.",
   "devDependencies": {
     "@playwright/test": "^1.59.1"
   }

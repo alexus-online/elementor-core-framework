@@ -8,7 +8,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
     private function export_payload($settings) {
         return [
             'meta' => [
-                'plugin' => 'ECF Framework',
+                'plugin' => 'Layrix',
                 'plugin_version' => $this->current_plugin_version(),
                 'schema_version' => 1,
                 'exported_at' => gmdate('c'),

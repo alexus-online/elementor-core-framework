@@ -172,7 +172,7 @@ trait ECF_Framework_Editor_Preview_Trait {
         }
 
         $element->start_controls_section('ecf_framework_section', [
-            'label' => esc_html__('ECF Framework', 'ecf-framework'),
+            'label' => esc_html__('Layrix', 'ecf-framework'),
             'tab' => \Elementor\Controls_Manager::TAB_ADVANCED,
         ]);
 

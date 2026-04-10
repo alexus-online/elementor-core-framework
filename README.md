@@ -1,4 +1,4 @@
-# ECF Elementor v4 Core Framework
+# Layrix
 
 WordPress plugin for managing design tokens, typography, spacing, shadows, utility classes and Elementor sync from one structured admin UI.
 

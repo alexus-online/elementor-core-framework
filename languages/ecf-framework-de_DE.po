@@ -598,12 +598,6 @@ msgstr "ECF"
 msgid "ECF Classes"
 msgstr "ECF-Klassen"
 
-msgid "ECF Framework"
-msgstr "ECF Framework"
-
-msgid "ECF Variables"
-msgstr "ECF Variablen"
-
 msgid "ECF fallback"
 msgstr "ECF-Fallback"
 
@@ -1000,8 +994,8 @@ msgstr "Importiert von Plugin-Version %1$s in %2$s. Bitte prüfe danach Allgemei
 msgid "Improves text wrapping for more pleasant paragraph breaks."
 msgstr "Verbessert den Zeilenumbruch für angenehmere Absatzumbrüche."
 
-msgid "In the Elementor editor, find the <strong>ECF Framework</strong> section under the <strong>Advanced</strong> tab of any element."
-msgstr "Im Elementor-Editor findest du im Tab <strong>Advanced</strong> jedes Elements den Bereich <strong>ECF Framework</strong>."
+msgid "In the Elementor editor, find the <strong>Layrix</strong> section under the <strong>Advanced</strong> tab of any element."
+msgstr "Im Elementor-Editor findest du im Tab <strong>Advanced</strong> jedes Elements den Bereich <strong>Layrix</strong>."
 
 msgid "Inline Block"
 msgstr "Inline-Block"
@@ -1068,6 +1062,12 @@ msgstr "Layout-Helfer für einfache Abstands- oder Positionierungs-Muster."
 
 msgid "Layout order updated."
 msgstr "Layout-Reihenfolge aktualisiert."
+
+msgid "Layrix"
+msgstr "Layrix"
+
+msgid "Layrix Variablen"
+msgstr "Layrix Variablen"
 
 msgid "Legacy export without metadata. Import is still possible."
 msgstr "Legacy-Export ohne Metadaten. Import ist trotzdem möglich."

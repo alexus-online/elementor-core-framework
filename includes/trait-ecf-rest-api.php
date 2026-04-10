@@ -181,7 +181,7 @@ trait ECF_Framework_REST_API_Trait {
         $response = wp_remote_get('https://fonts.googleapis.com/css2?family=' . $query . '&display=swap', [
             'timeout' => 30,
             'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (compatible; ECF Framework Font Import)',
+                'User-Agent' => 'Mozilla/5.0 (compatible; Layrix Font Import)',
             ],
         ]);
 
@@ -225,7 +225,7 @@ trait ECF_Framework_REST_API_Trait {
         $response = wp_remote_get('https://fonts.google.com/metadata/fonts', [
             'timeout' => 30,
             'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (compatible; ECF Framework Font Search)',
+                'User-Agent' => 'Mozilla/5.0 (compatible; Layrix Font Search)',
             ],
         ]);
 

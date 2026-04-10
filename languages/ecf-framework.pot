@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ECF Elementor v4 Core Framework\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 02:27+0000\n"
+"POT-Creation-Date: 2026-04-10 05:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -133,7 +133,7 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1707
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:573
-#: includes/trait-ecf-admin-page-sections.php:1707
+#: includes/trait-ecf-admin-page-sections.php:1712
 #: includes/trait-ecf-admin-page-sections.php:573
 msgid "Active"
 msgstr ""
@@ -153,7 +153,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1292
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1444
 #: includes/trait-ecf-admin-page-sections.php:1292
-#: includes/trait-ecf-admin-page-sections.php:1444
+#: includes/trait-ecf-admin-page-sections.php:1449
 msgid "Add larger step"
 msgstr ""
 
@@ -301,7 +301,7 @@ msgid "Automatic updates enabled for this plugin."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:278
-#: elementor-core-framework.php:278
+#: Layrix.php:278
 msgid "Autosave active"
 msgstr ""
 
@@ -477,7 +477,7 @@ msgid "Centers text content horizontally."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:256
-#: elementor-core-framework.php:256
+#: Layrix.php:256
 msgid "Changelog"
 msgstr ""
 
@@ -600,7 +600,7 @@ msgid "Class usage overview"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:247
-#: elementor-core-framework.php:247
+#: Layrix.php:247
 msgid "Classes"
 msgstr ""
 
@@ -615,12 +615,12 @@ msgid "Clean slate interface with crisp contrast and restrained accents."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1508
-#: includes/trait-ecf-admin-page-sections.php:1508
+#: includes/trait-ecf-admin-page-sections.php:1513
 msgid "Cleanup ECF Classes"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1513
-#: includes/trait-ecf-admin-page-sections.php:1513
+#: includes/trait-ecf-admin-page-sections.php:1518
 msgid "Cleanup ECF from Elementor"
 msgstr ""
 
@@ -646,7 +646,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:100
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1637
 #: includes/trait-ecf-admin-page-sections.php:100
-#: includes/trait-ecf-admin-page-sections.php:1637
+#: includes/trait-ecf-admin-page-sections.php:1642
 msgid "Close"
 msgstr ""
 
@@ -679,8 +679,8 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:240
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:275
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:130
-#: elementor-core-framework.php:240
-#: elementor-core-framework.php:275
+#: Layrix.php:240
+#: Layrix.php:275
 #: includes/trait-ecf-asset-loading.php:130
 msgid "Colors & Radius"
 msgstr ""
@@ -746,7 +746,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:114
 #: includes/trait-ecf-admin-page-sections.php:1075
 #: includes/trait-ecf-admin-page-sections.php:1273
-#: includes/trait-ecf-admin-page-sections.php:1432
+#: includes/trait-ecf-admin-page-sections.php:1437
 #: includes/trait-ecf-asset-loading.php:114
 msgid "Copy"
 msgstr ""
@@ -823,7 +823,7 @@ msgid "Current:"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1467
-#: includes/trait-ecf-admin-page-sections.php:1467
+#: includes/trait-ecf-admin-page-sections.php:1472
 msgid "Currently found in Elementor: %1$d ECF variables and %2$d Global Classes."
 msgstr ""
 
@@ -922,7 +922,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:239
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-general.php:112
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-general.php:400
-#: elementor-core-framework.php:239
+#: Layrix.php:239
 #: includes/trait-ecf-admin-general.php:112
 #: includes/trait-ecf-admin-general.php:400
 msgid "Design"
@@ -954,7 +954,7 @@ msgid "Detected settings groups: %s"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1593
-#: includes/trait-ecf-admin-page-sections.php:1593
+#: includes/trait-ecf-admin-page-sections.php:1598
 msgid "Diagnostics"
 msgstr ""
 
@@ -1006,12 +1006,12 @@ msgid "Do you really want to delete \"%s\"?"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1505
-#: includes/trait-ecf-admin-page-sections.php:1505
+#: includes/trait-ecf-admin-page-sections.php:1510
 msgid "Do you really want to remove %1$d ECF Global Classes from Elementor so they can be synced again as empty classes?"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1510
-#: includes/trait-ecf-admin-page-sections.php:1510
+#: includes/trait-ecf-admin-page-sections.php:1515
 msgid "Do you really want to remove %1$d ECF variables and %2$d Global Classes from Elementor?"
 msgstr ""
 
@@ -1029,15 +1029,11 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:232
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-editor-preview.php:174
-#: elementor-core-framework.php:232
-#: includes/trait-ecf-editor-preview.php:175
 msgid "ECF Framework"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:161
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:195
-#: includes/trait-ecf-admin-page-sections.php:161
-#: includes/trait-ecf-asset-loading.php:195
 msgid "ECF Variables"
 msgstr ""
 
@@ -1086,7 +1082,7 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:245
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:407
-#: elementor-core-framework.php:245
+#: Layrix.php:245
 #: includes/trait-ecf-admin-page-sections.php:407
 msgid "Elementor"
 msgstr ""
@@ -1116,12 +1112,12 @@ msgid "Elementor Core recognized"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1542
-#: includes/trait-ecf-admin-page-sections.php:1542
+#: includes/trait-ecf-admin-page-sections.php:1547
 msgid "Elementor Editor Panel"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1476
-#: includes/trait-ecf-admin-page-sections.php:1476
+#: includes/trait-ecf-admin-page-sections.php:1481
 msgid "Elementor Global Classes"
 msgstr ""
 
@@ -1243,17 +1239,17 @@ msgid "Error:"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1519
-#: includes/trait-ecf-admin-page-sections.php:1519
+#: includes/trait-ecf-admin-page-sections.php:1524
 msgid "Export / Import"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1525
-#: includes/trait-ecf-admin-page-sections.php:1525
+#: includes/trait-ecf-admin-page-sections.php:1530
 msgid "Export JSON"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1520
-#: includes/trait-ecf-admin-page-sections.php:1520
+#: includes/trait-ecf-admin-page-sections.php:1525
 msgid "Export settings as JSON or import from another installation."
 msgstr ""
 
@@ -1477,7 +1473,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:251
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:688
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:137
-#: elementor-core-framework.php:251
+#: Layrix.php:251
 #: includes/trait-ecf-admin-page-sections.php:688
 #: includes/trait-ecf-asset-loading.php:137
 msgid "General Settings"
@@ -1506,7 +1502,7 @@ msgid "German (matches current WordPress language)"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1558
-#: includes/trait-ecf-admin-page-sections.php:1558
+#: includes/trait-ecf-admin-page-sections.php:1563
 msgid "Getting started"
 msgstr ""
 
@@ -1536,7 +1532,7 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1497
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:994
-#: includes/trait-ecf-admin-page-sections.php:1497
+#: includes/trait-ecf-admin-page-sections.php:1502
 #: includes/trait-ecf-admin-page-sections.php:994
 msgid "Global Classes"
 msgstr ""
@@ -1647,7 +1643,7 @@ msgid "Hides the element visually."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:255
-#: elementor-core-framework.php:255
+#: Layrix.php:255
 msgid "Hilfe"
 msgstr ""
 
@@ -1657,7 +1653,7 @@ msgid "Icon element inside the parent component."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1531
-#: includes/trait-ecf-admin-page-sections.php:1531
+#: includes/trait-ecf-admin-page-sections.php:1536
 msgid "Import"
 msgstr ""
 
@@ -1667,7 +1663,7 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1535
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:159
-#: includes/trait-ecf-admin-page-sections.php:1535
+#: includes/trait-ecf-admin-page-sections.php:1540
 #: includes/trait-ecf-asset-loading.php:159
 msgid "Import preview"
 msgstr ""
@@ -1675,7 +1671,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1057
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1602
 #: includes/trait-ecf-admin-page-sections.php:1057
-#: includes/trait-ecf-admin-page-sections.php:1602
+#: includes/trait-ecf-admin-page-sections.php:1607
 msgid "Import/Export"
 msgstr ""
 
@@ -1700,8 +1696,11 @@ msgid "Improves text wrapping for more pleasant paragraph breaks."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1543
-#: includes/trait-ecf-admin-page-sections.php:1543
 msgid "In the Elementor editor, find the <strong>ECF Framework</strong> section under the <strong>Advanced</strong> tab of any element."
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:1548
+msgid "In the Elementor editor, find the <strong>Layrix</strong> section under the <strong>Advanced</strong> tab of any element."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-framework-config.php:464
@@ -1823,6 +1822,16 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-rest-api.php:123
 #: includes/trait-ecf-rest-api.php:126
 msgid "Layout order updated."
+msgstr ""
+
+#: Layrix.php:232
+#: includes/trait-ecf-editor-preview.php:175
+msgid "Layrix"
+msgstr ""
+
+#: includes/trait-ecf-admin-page-sections.php:161
+#: includes/trait-ecf-asset-loading.php:195
+msgid "Layrix Variablen"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:165
@@ -1986,7 +1995,7 @@ msgstr ""
 #: includes/trait-ecf-admin-page-sections.php:1276
 #: includes/trait-ecf-admin-page-sections.php:1285
 #: includes/trait-ecf-admin-page-sections.php:1409
-#: includes/trait-ecf-admin-page-sections.php:1435
+#: includes/trait-ecf-admin-page-sections.php:1440
 #: includes/trait-ecf-admin-page-sections.php:833
 #: includes/trait-ecf-admin-page-sections.php:857
 #: includes/trait-ecf-admin-page-sections.php:879
@@ -2067,7 +2076,7 @@ msgstr ""
 #: includes/trait-ecf-admin-page-sections.php:1275
 #: includes/trait-ecf-admin-page-sections.php:1281
 #: includes/trait-ecf-admin-page-sections.php:1408
-#: includes/trait-ecf-admin-page-sections.php:1434
+#: includes/trait-ecf-admin-page-sections.php:1439
 #: includes/trait-ecf-admin-page-sections.php:832
 #: includes/trait-ecf-admin-page-sections.php:852
 #: includes/trait-ecf-admin-page-sections.php:874
@@ -2125,7 +2134,7 @@ msgid "Naming Convention"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1459
-#: includes/trait-ecf-admin-page-sections.php:1459
+#: includes/trait-ecf-admin-page-sections.php:1464
 msgid "Native Elementor Sync"
 msgstr ""
 
@@ -2165,7 +2174,7 @@ msgid "No"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1508
-#: includes/trait-ecf-admin-page-sections.php:1508
+#: includes/trait-ecf-admin-page-sections.php:1513
 msgid "No ECF classes found in Elementor."
 msgstr ""
 
@@ -2175,7 +2184,7 @@ msgid "No ECF global classes were found in Elementor."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1513
-#: includes/trait-ecf-admin-page-sections.php:1513
+#: includes/trait-ecf-admin-page-sections.php:1518
 msgid "No ECF variables or classes found in Elementor."
 msgstr ""
 
@@ -2206,14 +2215,14 @@ msgid "No changelog available."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1641
-#: includes/trait-ecf-admin-page-sections.php:1641
+#: includes/trait-ecf-admin-page-sections.php:1646
 msgid "No changelog entries found."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1086
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1619
 #: includes/trait-ecf-admin-page-sections.php:1086
-#: includes/trait-ecf-admin-page-sections.php:1619
+#: includes/trait-ecf-admin-page-sections.php:1624
 msgid "No debug history recorded yet. Entries appear here when WP_DEBUG is enabled and ECF logs an internal event."
 msgstr ""
 
@@ -2268,12 +2277,12 @@ msgid "Open General Settings and define root size, body text size, body font, he
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1588
-#: includes/trait-ecf-admin-page-sections.php:1588
+#: includes/trait-ecf-admin-page-sections.php:1593
 msgid "Open changelog"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1584
-#: includes/trait-ecf-admin-page-sections.php:1584
+#: includes/trait-ecf-admin-page-sections.php:1589
 msgid "Open the changelog modal for the full release history instead of repeating the same entries inside Help."
 msgstr ""
 
@@ -2416,12 +2425,12 @@ msgid "Privacy note: imported library fonts are downloaded into your own media l
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1570
-#: includes/trait-ecf-admin-page-sections.php:1570
+#: includes/trait-ecf-admin-page-sections.php:1575
 msgid "Quick help"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1635
-#: includes/trait-ecf-admin-page-sections.php:1635
+#: includes/trait-ecf-admin-page-sections.php:1640
 msgid "Quick view of the latest documented plugin changes."
 msgstr ""
 
@@ -2476,7 +2485,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1293
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1445
 #: includes/trait-ecf-admin-page-sections.php:1293
-#: includes/trait-ecf-admin-page-sections.php:1445
+#: includes/trait-ecf-admin-page-sections.php:1450
 msgid "Remove largest step"
 msgstr ""
 
@@ -2500,12 +2509,12 @@ msgid "Remove smallest step"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1508
-#: includes/trait-ecf-admin-page-sections.php:1508
+#: includes/trait-ecf-admin-page-sections.php:1513
 msgid "Removes %1$d ECF classes from Elementor without touching variables."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1513
-#: includes/trait-ecf-admin-page-sections.php:1513
+#: includes/trait-ecf-admin-page-sections.php:1518
 msgid "Removes %1$d variables and %2$d classes from Elementor."
 msgstr ""
 
@@ -2564,8 +2573,8 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:279
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:336
-#: elementor-core-framework.php:279
-#: elementor-core-framework.php:336
+#: Layrix.php:279
+#: Layrix.php:336
 msgid "Save settings"
 msgstr ""
 
@@ -2714,9 +2723,9 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:250
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1059
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1604
-#: elementor-core-framework.php:250
+#: Layrix.php:250
 #: includes/trait-ecf-admin-page-sections.php:1059
-#: includes/trait-ecf-admin-page-sections.php:1604
+#: includes/trait-ecf-admin-page-sections.php:1609
 msgid "Settings"
 msgstr ""
 
@@ -2731,7 +2740,7 @@ msgid "Settings saved automatically."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:265
-#: elementor-core-framework.php:265
+#: Layrix.php:265
 msgid "Settings saved."
 msgstr ""
 
@@ -2750,7 +2759,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:243
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:945
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:133
-#: elementor-core-framework.php:243
+#: Layrix.php:243
 #: includes/trait-ecf-admin-page-sections.php:945
 #: includes/trait-ecf-asset-loading.php:133
 msgid "Shadows"
@@ -2865,7 +2874,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:937
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:102
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:132
-#: elementor-core-framework.php:242
+#: Layrix.php:242
 #: includes/trait-ecf-admin-page-sections.php:937
 #: includes/trait-ecf-asset-loading.php:102
 #: includes/trait-ecf-asset-loading.php:132
@@ -2951,13 +2960,13 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1056
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1601
 #: includes/trait-ecf-admin-page-sections.php:1056
-#: includes/trait-ecf-admin-page-sections.php:1601
+#: includes/trait-ecf-admin-page-sections.php:1606
 msgid "Sync"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:248
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:136
-#: elementor-core-framework.php:248
+#: Layrix.php:248
 #: includes/trait-ecf-asset-loading.php:136
 msgid "Sync & Export"
 msgstr ""
@@ -2973,7 +2982,7 @@ msgid "Sync only the utility classes that are currently enabled here."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1503
-#: includes/trait-ecf-admin-page-sections.php:1503
+#: includes/trait-ecf-admin-page-sections.php:1508
 msgid "Sync to Elementor (Merge)"
 msgstr ""
 
@@ -2985,7 +2994,7 @@ msgid "Sync with Elementor"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1495
-#: includes/trait-ecf-admin-page-sections.php:1495
+#: includes/trait-ecf-admin-page-sections.php:1500
 msgid "Synced:"
 msgstr ""
 
@@ -2993,7 +3002,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1605
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:694
 #: includes/trait-ecf-admin-page-sections.php:1060
-#: includes/trait-ecf-admin-page-sections.php:1605
+#: includes/trait-ecf-admin-page-sections.php:1610
 #: includes/trait-ecf-admin-page-sections.php:694
 msgid "System"
 msgstr ""
@@ -3009,7 +3018,7 @@ msgid "System status, updater behavior and Elementor limits live here. Guidance 
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1594
-#: includes/trait-ecf-admin-page-sections.php:1594
+#: includes/trait-ecf-admin-page-sections.php:1599
 msgid "Technical status, updater controls and live Elementor limits are available under Settings > System. The latest debug entries are mirrored here for quick support review."
 msgstr ""
 
@@ -3070,7 +3079,7 @@ msgid "The JSON file is empty or too large."
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1559
-#: includes/trait-ecf-admin-page-sections.php:1559
+#: includes/trait-ecf-admin-page-sections.php:1564
 msgid "The fastest setup path for a fresh project: define the basics first, then sync only the parts you really want in Elementor."
 msgstr ""
 
@@ -3208,7 +3217,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:103
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-asset-loading.php:131
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-framework-config.php:478
-#: elementor-core-framework.php:241
+#: Layrix.php:241
 #: includes/trait-ecf-admin-page-sections.php:1209
 #: includes/trait-ecf-admin-page-sections.php:1230
 #: includes/trait-ecf-admin-page-sections.php:1251
@@ -3265,7 +3274,7 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1058
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1603
 #: includes/trait-ecf-admin-page-sections.php:1058
-#: includes/trait-ecf-admin-page-sections.php:1603
+#: includes/trait-ecf-admin-page-sections.php:1608
 msgid "Updates"
 msgstr ""
 
@@ -3362,8 +3371,8 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:246
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1496
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:998
-#: elementor-core-framework.php:246
-#: includes/trait-ecf-admin-page-sections.php:1496
+#: Layrix.php:246
+#: includes/trait-ecf-admin-page-sections.php:1501
 #: includes/trait-ecf-admin-page-sections.php:998
 msgid "Variables"
 msgstr ""
@@ -3389,8 +3398,8 @@ msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1583
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1634
-#: includes/trait-ecf-admin-page-sections.php:1583
-#: includes/trait-ecf-admin-page-sections.php:1634
+#: includes/trait-ecf-admin-page-sections.php:1588
+#: includes/trait-ecf-admin-page-sections.php:1639
 msgid "Version Changelog"
 msgstr ""
 
@@ -3507,7 +3516,7 @@ msgid "Widths"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1494
-#: includes/trait-ecf-admin-page-sections.php:1494
+#: includes/trait-ecf-admin-page-sections.php:1499
 msgid "Works in <strong>merge mode</strong> — ECF adds to existing Elementor variables and Global Classes without overwriting."
 msgstr ""
 
@@ -3566,7 +3575,7 @@ msgid "block"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:233
-#: elementor-core-framework.php:233
+#: Layrix.php:233
 msgid "by Alexander Kaiser"
 msgstr ""
 
@@ -3575,9 +3584,9 @@ msgstr ""
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1698
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-render-helpers.php:60
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-render-helpers.php:72
-#: includes/trait-ecf-admin-page-sections.php:1673
-#: includes/trait-ecf-admin-page-sections.php:1689
-#: includes/trait-ecf-admin-page-sections.php:1698
+#: includes/trait-ecf-admin-page-sections.php:1678
+#: includes/trait-ecf-admin-page-sections.php:1694
+#: includes/trait-ecf-admin-page-sections.php:1703
 #: includes/trait-ecf-render-helpers.php:60
 #: includes/trait-ecf-render-helpers.php:72
 msgid "class name"
@@ -3678,7 +3687,7 @@ msgid "primary-regular"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1497
-#: includes/trait-ecf-admin-page-sections.php:1497
+#: includes/trait-ecf-admin-page-sections.php:1502
 msgid "selected starter classes and selected utility classes"
 msgstr ""
 
@@ -3690,7 +3699,7 @@ msgid "swap"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/elementor-core-framework.php:251
-#: elementor-core-framework.php:251
+#: Layrix.php:251
 msgid "ungespeichert"
 msgstr ""
 
@@ -3700,6 +3709,6 @@ msgid "variables currently found in Elementor"
 msgstr ""
 
 #: .claude/worktrees/tender-kirch/includes/trait-ecf-admin-page-sections.php:1461
-#: includes/trait-ecf-admin-page-sections.php:1461
+#: includes/trait-ecf-admin-page-sections.php:1466
 msgid "⚠ Sync actions change your Elementor data. Please create a backup first."
 msgstr ""

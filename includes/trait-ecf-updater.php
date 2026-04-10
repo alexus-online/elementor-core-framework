@@ -524,7 +524,7 @@ trait ECF_Framework_Updater_Trait {
         }
 
         return (object) [
-            'name' => 'ECF Elementor v4 Core Framework',
+            'name' => 'Layrix',
             'slug' => $this->canonical_plugin_slug(),
             'version' => $update['version'],
             'author' => '<a href="https://github.com/alexus-online">Alexander Kaiser</a>',

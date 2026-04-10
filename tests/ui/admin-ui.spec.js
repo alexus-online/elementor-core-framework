@@ -64,7 +64,7 @@ test.describe('ECF admin UI', () => {
     await loginToWordPress(page);
     await openPluginPage(page);
 
-    await expect(page.locator('.ecf-logo h1')).toHaveText(/ECF Framework/i);
+    await expect(page.locator('.ecf-logo h1')).toHaveText(/Layrix/i);
     await expect(page.locator('.ecf-logo__byline')).toContainText(/Alexander Kaiser/i);
     await expect(page.locator('.ecf-nav-item[data-panel="help"]')).toHaveCount(0);
     await expect(page.locator('.ecf-sidebar-link[data-panel="help"]')).toBeVisible();

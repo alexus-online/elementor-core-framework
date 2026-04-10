@@ -65,7 +65,7 @@ trait ECF_Framework_Core_Admin_Trait {
     }
 
     public function menu() {
-        add_menu_page('ECF Elementor v4 Core Framework', 'ECF Elementor v4 Core Framework', 'manage_options', 'ecf-framework', [$this, 'settings_page'], 'dashicons-admin-customizer', 58);
+        add_menu_page('Layrix', 'Layrix', 'manage_options', 'ecf-framework', [$this, 'settings_page'], 'dashicons-admin-customizer', 58);
     }
 
     public function register() {

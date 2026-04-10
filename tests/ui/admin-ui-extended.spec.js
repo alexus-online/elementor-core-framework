@@ -145,7 +145,7 @@ test.describe('ECF extended admin UI flows', () => {
 
     expect(payload).toHaveProperty('meta');
     expect(payload).toHaveProperty('settings');
-    expect(payload.meta.plugin).toBe('ECF Framework');
+    expect(payload.meta.plugin).toBe('Layrix');
     expect(typeof payload.meta.plugin_version).toBe('string');
     expect(payload.meta.plugin_version.length).toBeGreaterThan(0);
     expect(typeof payload.settings).toBe('object');
@@ -159,7 +159,7 @@ test.describe('ECF extended admin UI flows', () => {
     const nextRootSize = String(originalSettings.root_font_size || '') === '62.5' ? '100' : '62.5';
     const importPayload = {
       meta: {
-        plugin: 'ECF Framework',
+        plugin: 'Layrix',
         plugin_version: '0.2.10',
         schema_version: 1,
         exported_at: '2026-04-08T12:00:00Z',

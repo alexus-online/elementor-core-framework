@@ -192,7 +192,7 @@ trait ECF_Framework_Asset_Loading_Trait {
                 'search_type_help_string' => __('Text is only meant for real strings, not for text sizes like text-2xl.', 'ecf-framework'),
                 'search_label_invalid' => __('Please use a valid variable label. Spaces are converted to hyphens automatically.', 'ecf-framework'),
                 'search_clamp_number_error' => __('Please enter minimum and maximum as numbers.', 'ecf-framework'),
-                'group_ecf_variables' => __('ECF Variables', 'ecf-framework'),
+                'group_ecf_variables' => __('Layrix Variablen', 'ecf-framework'),
                 'group_foreign_variables' => __('Foreign Variables', 'ecf-framework'),
                 'group_ecf_classes' => __('ECF Classes', 'ecf-framework'),
                 'group_foreign_classes' => __('Foreign Classes', 'ecf-framework'),
