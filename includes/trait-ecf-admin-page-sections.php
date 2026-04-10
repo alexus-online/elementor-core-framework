@@ -1219,6 +1219,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                 <div class="ecf-card ecf-typography-preview-card"
                      data-ecf-layout-item="typography-preview"
                      data-ecf-type-scale-preview
+                     style="--ecf-preview-font: <?php echo esc_attr($type_preview_font); ?>;"
                      data-steps="<?php echo esc_attr(wp_json_encode($settings['typography']['scale']['steps'])); ?>"
                      data-active-step="<?php echo esc_attr($settings['typography']['scale']['base_index']); ?>"
                      data-preview-label-min="<?php echo esc_attr__('Minimum', 'ecf-framework'); ?>"

@@ -1889,7 +1889,7 @@
   color: var(--ecf-text);
 }
 .ecf-typography-preview-card {
-  --ecf-preview-font: Inter, sans-serif;
+  --ecf-preview-font: var(--ecf-base-body-font-family, var(--ecf-base-font-family, sans-serif));
   container-type: inline-size;
   min-height: 100%;
   padding: 0;

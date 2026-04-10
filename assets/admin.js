@@ -1251,13 +1251,15 @@ jQuery(function($){
   }
 
   function getPreviewFont() {
+    var $preview = $('[data-ecf-type-scale-preview]').first();
+    var previewFont = String(($preview.data('preview-font') || '')).trim();
     var $field = getPrimaryFontFamilyField('base_font_family');
     if ($field && $field.length) {
       var presetValue = String($field.find('[data-ecf-font-family-preset-input]').first().val() || '');
       var customValue = String($field.find('[data-ecf-font-family-custom]').first().val() || '').trim();
 
       if (presetValue === '__custom__') {
-        return customValue || 'Inter, sans-serif';
+        return customValue || previewFont || 'var(--ecf-base-body-font-family, var(--ecf-base-font-family, sans-serif))';
       }
 
       if (presetValue) {
@@ -1265,7 +1267,7 @@ jQuery(function($){
       }
     }
 
-    return 'Inter, sans-serif';
+    return previewFont || 'var(--ecf-base-body-font-family, var(--ecf-base-font-family, sans-serif))';
   }
 
   function renderTypePreview() {
