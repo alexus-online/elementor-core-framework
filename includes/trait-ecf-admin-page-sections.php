@@ -1430,14 +1430,12 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     </div>
                     <div class="ecf-spacing-preview-list" data-ecf-spacing-preview-list>
                         <?php
-                        $max_val = max(array_column($spacing_preview, 'max'));
                         foreach ($spacing_preview as $item):
                             $item_min = (float) ($item['min_px'] ?? $item['min'] ?? 0);
                             $item_max = (float) ($item['max_px'] ?? $item['max'] ?? 0);
                             if ($item_min > $item_max) {
                                 [$item_min, $item_max] = [$item_max, $item_min];
                             }
-                            $bar_pct = $max_val > 0 ? round(($item_max / $max_val) * 100, 1) : 0;
                         ?>
                         <div class="ecf-space-row<?php echo $item['is_base'] ? ' is-base' : ''; ?>" data-ecf-space-step="<?php echo esc_attr($item['step']); ?>">
                             <div class="ecf-space-row__token"><span class="ecf-space-row__token-text ecf-spacing-token-name"><?php echo esc_html($item['token']); ?></span><span class="ecf-copy-pill" data-copy="<?php echo esc_attr($item['token']); ?>"><?php echo esc_html__('Copy', 'ecf-framework'); ?></span></div>
@@ -1446,7 +1444,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 <div><span><i class="dashicons dashicons-desktop"></i><?php echo esc_html__('Maximum', 'ecf-framework'); ?></span><strong><?php echo esc_html($this->format_preview_number($item_max, 3)); ?>px</strong></div>
                             </div>
                             <div class="ecf-space-row__bar">
-                                <div class="ecf-space-row__bar-fill" style="width:<?php echo esc_attr($bar_pct); ?>%;height:<?php echo esc_attr(min(40, max(4, round($item_max)))); ?>px;"></div>
+                                <div class="ecf-space-row__bar-fill" style="width:<?php echo esc_attr($this->format_preview_number($item_max, 3)); ?>px;height:<?php echo esc_attr(min(40, max(4, round($item_max)))); ?>px;"></div>
                             </div>
                         </div>
                         <?php endforeach; ?>

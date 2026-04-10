@@ -1354,8 +1354,8 @@ jQuery(function($){
     if (spacingItem) {
       var spacingMinValue = parseFloat(spacingItem.minPx) || 0;
       var spacingMaxPx = parseFloat(spacingItem.maxPx) || spacingMinValue;
-      var minBarWidth = spacingMaxValue > 0 ? Math.max(4, Math.round((spacingMinValue / spacingMaxValue) * 1000) / 10) : 0;
-      var maxBarWidth = spacingMaxValue > 0 ? Math.max(4, Math.round((spacingMaxPx / spacingMaxValue) * 1000) / 10) : 0;
+      var minBarWidth = Math.max(0, spacingMinValue);
+      var maxBarWidth = Math.max(0, spacingMaxPx);
       var minBarHeight = Math.min(32, Math.max(4, Math.round(spacingMinValue)));
       var maxBarHeight = Math.min(32, Math.max(4, Math.round(spacingMaxPx)));
       $box.find('[data-ecf-root-spacing-token]').text('--ecf-' + spacingPrefix + '-' + spacingItem.step);
@@ -1364,8 +1364,8 @@ jQuery(function($){
       $box.find('[data-ecf-root-spacing-max-label]').text(labelMax);
       $box.find('[data-ecf-root-spacing-min]').text(spacingItem.minPx + 'px');
       $box.find('[data-ecf-root-spacing-max]').text(spacingItem.maxPx + 'px');
-      $box.find('[data-ecf-root-spacing-min-bar]').css({ width: minBarWidth + '%', height: minBarHeight + 'px' });
-      $box.find('[data-ecf-root-spacing-max-bar]').css({ width: maxBarWidth + '%', height: maxBarHeight + 'px' });
+      $box.find('[data-ecf-root-spacing-min-bar]').css({ width: minBarWidth + 'px', height: minBarHeight + 'px' });
+      $box.find('[data-ecf-root-spacing-max-bar]').css({ width: maxBarWidth + 'px', height: maxBarHeight + 'px' });
     }
     $box.find('[data-ecf-root-radius-token]').text(radiusToken);
     $box.find('[data-ecf-root-radius-copy]').text(buildRadiusCssValue(radiusMin, radiusMax, rootBasePx)).attr('data-copy', buildRadiusCssValue(radiusMin, radiusMax, rootBasePx));
@@ -5057,15 +5057,13 @@ jQuery(function($){
     var items = buildSpacingItems(steps, cfg);
     var labelMin = $preview.data('preview-label-min') || '';
     var labelMax = $preview.data('preview-label-max') || '';
-    var maxVal = 0;
-    $.each(items, function(_, it) { if (parseFloat(it.max) > maxVal) maxVal = parseFloat(it.max); });
     var html = '';
     $.each(items, function(_, item) {
       var sizeRange = normalizeSizeRange(item.minPx, item.maxPx);
       var minValue = sizeRange ? sizeRange.minPx : 0;
       var maxValue = sizeRange ? sizeRange.maxPx : 0;
-      var minBarPct = maxVal > 0 ? Math.round((minValue / maxVal) * 100 * 10) / 10 : 0;
-      var maxBarPct = maxVal > 0 ? Math.round((maxValue / maxVal) * 100 * 10) / 10 : 0;
+      var minBarWidth = Math.max(0, minValue);
+      var maxBarWidth = Math.max(0, maxValue);
       var minBarH = Math.min(40, Math.max(4, Math.round(minValue)));
       var maxBarH = Math.min(40, Math.max(4, Math.round(maxValue)));
       html += '<div class="ecf-space-row' + (item.isBase ? ' is-base' : '') + '" data-ecf-space-step="' + item.step + '">'
@@ -5074,11 +5072,11 @@ jQuery(function($){
         + '<div class="ecf-space-row__meta">'
         + '<div class="ecf-space-row__metric">'
         + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><div class="ecf-clamp-metric"><strong>' + formatPreviewNumber(minValue) + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div>'
-        + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + minBarPct + '%;height:' + minBarH + 'px;"></div></div>'
+        + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + formatPreviewNumber(minBarWidth) + 'px;height:' + minBarH + 'px;"></div></div>'
         + '</div>'
         + '<div class="ecf-space-row__metric">'
         + '<div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><div class="ecf-clamp-metric"><strong>' + formatPreviewNumber(maxValue) + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div>'
-        + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + maxBarPct + '%;height:' + maxBarH + 'px;"></div></div>'
+        + '<div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + formatPreviewNumber(maxBarWidth) + 'px;height:' + maxBarH + 'px;"></div></div>'
         + '</div>'
         + '</div>'
         + '</div>';
