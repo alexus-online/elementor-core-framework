@@ -140,6 +140,7 @@ trait ECF_Framework_Output_CSS_Trait {
         echo "}";
 
         if ($settings['enabled_components']['layout'] === '1') {
+            echo ".ecf-container-boxed{margin-left:auto!important;margin-right:auto!important;}";
             echo ".ecf-container-boxed,.cf-container-boxed,.elementor .ecf-container-boxed,.elementor .cf-container-boxed{--margin-inline-start:auto!important;--margin-inline-end:auto!important;width:100%!important;max-width:min(calc(100% - 2rem), var(--ecf-container-boxed))!important;margin-inline:auto!important;margin-left:auto!important;margin-right:auto!important;}";
             echo ".elementor .e-con.e-flexbox-base:has(> .ecf-container-boxed),.elementor .e-con.e-flexbox-base:has(> .cf-container-boxed){justify-content:center!important;}";
             echo ".elementor .ecf-container-boxed,.elementor .cf-container-boxed{position:relative!important;left:50%!important;transform:translateX(-50%)!important;}";
