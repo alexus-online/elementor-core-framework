@@ -2960,6 +2960,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
 }
 
 .ecf-color-field-wrap .wp-color-result.button {
@@ -2979,6 +2980,9 @@
 
 .ecf-color-field-wrap .wp-picker-holder {
   position: absolute;
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
   z-index: 120;
 }
 
