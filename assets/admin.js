@@ -253,28 +253,47 @@ jQuery(function($){
     var settings = options || {};
     var fallback = normalizeDisplayColorValue($field.find('.ecf-color-text').attr('data-default-color')) || '#000000';
     var value = normalizeDisplayColorValue(nextValue != null ? nextValue : $field.find('.ecf-color-text').val());
+    var $picker = $field.find('.ecf-color-field--general').first();
 
     if (settings.writeText && value) {
       $field.find('.ecf-color-text').val(value);
     }
 
-    $field.find('[data-ecf-color-native]').val(value || fallback);
-    $field.find('[data-ecf-color-swatch]').css('background', value || fallback);
+    if ($picker.length) {
+      var targetColor = value || fallback;
+      if (String($picker.val() || '').toUpperCase() !== String(targetColor).toUpperCase()) {
+        $picker.val(targetColor);
+        if ($picker.hasClass('wp-color-picker')) {
+          $picker.wpColorPicker('color', targetColor);
+        }
+      }
+    }
   }
 
-  function openGeneralColorPicker($field) {
-    if (!$field || !$field.length) return;
-    var input = $field.find('[data-ecf-color-native]').get(0);
-    if (!input) return;
+  function initGeneralColorPickers(scope) {
+    scope.find('.ecf-color-field--general').each(function() {
+      var $input = $(this);
+      if ($input.data('ecfColorPickerReady')) {
+        return;
+      }
 
-    syncGeneralColorField($field);
+      $input.data('ecfColorPickerReady', true);
+      $input.wpColorPicker({
+        change: function(event, ui) {
+          var $field = $(this).closest('[data-ecf-general-field]');
+          var hex = ui.color.toString();
+          syncGeneralColorField($field, hex, { writeText: true });
+          $field.find('.ecf-color-text').trigger('input').trigger('change');
+        },
+        clear: function() {
+          var $field = $(this).closest('[data-ecf-general-field]');
+          $field.find('.ecf-color-text').val('');
+          scheduleSettingsAutosave({ delay: 250 });
+        }
+      });
 
-    if (typeof input.showPicker === 'function') {
-      input.showPicker();
-      return;
-    }
-
-    input.click();
+      syncGeneralColorField($input.closest('[data-ecf-general-field]'));
+    });
   }
 
   function applyDisplayValueToRow($row) {
@@ -340,6 +359,7 @@ jQuery(function($){
     return ($table && $table.length ? $table : $('[data-local-font-table]').first()).find('.ecf-font-file-row').length;
   }
   initColorPickers($(document));
+  initGeneralColorPickers($(document));
 
   $(document).on('click', '.ecf-add-row', function(){
     var group = $(this).data('group');
@@ -398,22 +418,6 @@ jQuery(function($){
       updateColorRowDisplay($row);
       $(this).removeClass('ecf-input-invalid');
     }
-  });
-
-  $(document).on('click', '[data-ecf-color-swatch]', function() {
-    openGeneralColorPicker($(this).closest('[data-ecf-general-field]'));
-  });
-
-  $(document).on('keydown', '[data-ecf-color-swatch]', function(event) {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    openGeneralColorPicker($(this).closest('[data-ecf-general-field]'));
-  });
-
-  $(document).on('input change', '[data-ecf-color-native]', function() {
-    var $field = $(this).closest('[data-ecf-general-field]');
-    syncGeneralColorField($field, $(this).val(), { writeText: true });
-    $field.find('.ecf-color-text').trigger('input').trigger('change');
   });
 
   $(document).on('input change', '.ecf-color-text', function() {

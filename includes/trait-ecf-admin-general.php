@@ -471,8 +471,7 @@ trait ECF_Framework_Admin_General_Trait {
                 <?php $this->render_general_setting_favorite_toggle($settings, $key); ?>
             </span>
             <div class="ecf-color-field-wrap">
-                <button type="button" class="ecf-color-swatch ecf-color-swatch--interactive" data-ecf-color-swatch style="background:<?php echo esc_attr($value); ?>;" aria-label="<?php echo esc_attr__('Choose color', 'ecf-framework'); ?>"></button>
-                <input type="color" class="ecf-color-native" data-ecf-color-native value="<?php echo esc_attr($value); ?>">
+                <input type="text" class="ecf-color-field ecf-color-field--general" value="<?php echo esc_attr($value); ?>" placeholder="#000000" />
                 <input type="text" class="ecf-color-input ecf-color-text" name="<?php echo esc_attr($this->option_name); ?>[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($value); ?>" data-default-color="<?php echo esc_attr($value); ?>">
             </div>
         </label>

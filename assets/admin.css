@@ -2940,27 +2940,46 @@
   gap: 8px;
 }
 
-.ecf-color-swatch--interactive {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: .5px solid rgba(255,255,255,.2);
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.ecf-color-native {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .ecf-color-text {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.ecf-color-field--general {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  border: 0 !important;
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
+}
+
+.ecf-color-field-wrap .wp-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ecf-color-field-wrap .wp-color-result.button {
+  width: 24px !important;
+  height: 24px !important;
+  min-height: unset !important;
+  border-radius: 4px !important;
+  border: .5px solid rgba(255,255,255,.2) !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  flex-shrink: 0;
+}
+
+.ecf-color-field-wrap .wp-color-result-text {
+  display: none !important;
+}
+
+.ecf-color-field-wrap .wp-picker-holder {
+  position: absolute;
+  z-index: 120;
 }
 
 @media (max-width: 900px) {
