@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Layrix
  * Description: Core-Framework-style tokens, editor panel, and native Elementor variable/class sync.
- * Version: 0.2.11
+ * Version: 0.3.0
  * Author: Alexander Kaiser
  * Update URI: https://github.com/alexus-online/Layrix
  * Text Domain: ecf-framework

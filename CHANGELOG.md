@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.11 (2026-04-10)
+## 0.3.0 (2026-04-10)
 
 ### Fix
 - Bumped the plugin version so WordPress can detect the latest GitHub release after the Layrix repository rename and recent updater metadata changes.
