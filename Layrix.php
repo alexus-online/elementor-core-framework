@@ -61,7 +61,7 @@ class ECF_Framework {
     private $github_repo = 'alexus-online/elementor-core-framework';
     private $github_branch = 'master';
     private $update_cache_key = 'ecf_framework_github_update';
-    private $canonical_plugin_slug = 'Layrix-master';
+    private $canonical_plugin_slug = 'layrix';
 
     public function __construct() {
         $this->register_hooks();
