@@ -144,7 +144,7 @@ trait ECF_Framework_Design_Math_Trait {
             if ($fluid && $max_vw > $min_vw) {
                 $scale[$step] = $this->build_fluid_rem_clamp($min_size, $max_size, $min_vw, $max_vw, $root_base_px);
             } else {
-                $scale[$step] = $this->format_preview_number($this->format_rem_value($max_size, 2, $root_base_px)) . 'rem';
+                $scale[$step] = $this->format_preview_number($max_size, 3) . 'px';
             }
         }
         return $scale;
@@ -185,7 +185,7 @@ trait ECF_Framework_Design_Math_Trait {
             if ($fluid && $max_vw > $min_vw) {
                 $css_value = $this->build_fluid_rem_clamp($min_size, $max_size, $min_vw, $max_vw, $root_base_px);
             } else {
-                $css_value = $this->format_preview_number($this->format_rem_value($max_size, 2, $root_base_px)) . 'rem';
+                $css_value = $this->format_preview_number($max_size, 3) . 'px';
                 $min_size  = $max_size;
             }
             $items[] = [
@@ -255,7 +255,7 @@ trait ECF_Framework_Design_Math_Trait {
             if ($fluid && $max_vw > $min_vw) {
                 $result[$step] = $this->build_fluid_rem_clamp($min_size, $max_size, $min_vw, $max_vw, $root_base_px);
             } else {
-                $result[$step] = $this->format_preview_number($this->format_rem_value($max_size, 2, $root_base_px)) . 'rem';
+                $result[$step] = $this->format_preview_number($max_size, 3) . 'px';
             }
         }
         return $result;

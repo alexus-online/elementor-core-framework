@@ -31,7 +31,7 @@ trait ECF_Framework_Editor_Preview_Trait {
                 $css_value = $this->build_fluid_rem_clamp($min_size, $max_size, $min_vw, $max_vw, $root_base_px);
             } else {
                 $min_size = $max_size;
-                $css_value = $this->format_preview_number($this->format_rem_value($max_size, 2, $root_base_px)) . 'rem';
+                $css_value = $this->format_preview_number($max_size, 3) . 'px';
             }
 
             $result[] = [
