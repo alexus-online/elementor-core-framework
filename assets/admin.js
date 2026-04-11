@@ -3965,8 +3965,11 @@ jQuery(function($){
   }
 
   function buildVarTable(group, items) {
+    var nameColumnLabel = isClassGroup(group)
+      ? (i18n.col_name || '')
+      : (i18n.col_variable_name || i18n.col_name || '');
     var html = '<div class="ecf-var-table">';
-    html += '<div class="ecf-var-head"><span></span><span>'+i18n.col_name+'</span><span>'+i18n.col_type+'</span><span>'+i18n.col_value+'</span></div>';
+    html += '<div class="ecf-var-head"><span></span><span>'+nameColumnLabel+'</span><span>'+i18n.col_type+'</span><span>'+i18n.col_value+'</span></div>';
     $.each(items, function(i, v) {
       var pendingAttr = v.pending ? ' data-ecf-prepared-variable="1"' : '';
       var checkAttr = v.pending ? ' checked disabled' : '';

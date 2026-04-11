@@ -165,6 +165,7 @@ trait ECF_Framework_Asset_Loading_Trait {
                 'type_shadow'    => __('Shadow', 'ecf-framework'),
                 'type_class'     => __('Global Class', 'ecf-framework'),
                 'col_name'       => __('Class Name', 'ecf-framework'),
+                'col_variable_name' => __('Variable name', 'ecf-framework'),
                 'col_type'       => __('Type', 'ecf-framework'),
                 'col_value'      => __('Value', 'ecf-framework'),
                 'choose_font'    => __('Choose font file', 'ecf-framework'),

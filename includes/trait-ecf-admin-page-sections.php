@@ -58,11 +58,11 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                     <span class="ecf-class-limit-card__slash">/</span>
                                     <span id="ecf-limit-variables"><?php echo esc_html((string) $elementor_variable_limit); ?></span>
                                 </span>
-                                <span><?php echo esc_html__('variables currently found in Elementor', 'ecf-framework'); ?></span>
+                                <span class="ecf-class-limit-card__context"><?php echo esc_html__('variables currently found in Elementor', 'ecf-framework'); ?></span>
                             </div>
                             <div class="ecf-class-limit-card__percent">
                                 <strong><?php echo esc_html((string) round((($native_variable_counts['total'] ?? 0) / max(1, $elementor_variable_limit)) * 100)); ?>%</strong>
-                                <span><?php echo esc_html__('of current Elementor limit', 'ecf-framework'); ?></span>
+                                <span class="ecf-class-limit-card__percent-copy"><?php echo esc_html__('of current Elementor limit', 'ecf-framework'); ?></span>
                             </div>
                         </div>
                         <ul class="ecf-class-limit-card__details ecf-class-limit-card__details--variables">
