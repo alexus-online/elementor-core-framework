@@ -91,11 +91,6 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             <h2><?php echo esc_html__('Find and review variables', 'ecf-framework'); ?></h2>
                             <p><?php echo esc_html__('Search across Layrix and foreign Elementor variables, then jump straight into cleanup or direct editing.', 'ecf-framework'); ?></p>
                         </div>
-                        <div class="ecf-global-search-card__tags" aria-hidden="true">
-                            <span><?php echo esc_html__('Search', 'ecf-framework'); ?></span>
-                            <span><?php echo esc_html__('Inspect', 'ecf-framework'); ?></span>
-                            <span><?php echo esc_html__('Edit', 'ecf-framework'); ?></span>
-                        </div>
                     </div>
                     <div class="ecf-global-search">
                         <label class="ecf-global-search__field">

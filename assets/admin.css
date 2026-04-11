@@ -4142,24 +4142,6 @@
   line-height: 1.6;
   max-width: 60ch;
 }
-.ecf-global-search-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-.ecf-global-search-card__tags span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(129,140,248,.18);
-  background: rgba(99,102,241,.08);
-  color: #c7d2fe;
-  font-size: 11px;
-  font-weight: 600;
-}
 .ecf-global-search {
   position: relative;
 }
@@ -4749,9 +4731,6 @@
     flex-direction: column;
     align-items: flex-start;
   }
-  .ecf-global-search-card__tags {
-    justify-content: flex-start;
-  }
   .ecf-class-limit-card__details {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -4835,9 +4814,6 @@
   }
   .ecf-global-search-card__intro {
     flex-direction: column;
-  }
-  .ecf-global-search-card__tags {
-    justify-content: flex-start;
   }
   .ecf-var-value--spacing {
     flex-direction: column;
