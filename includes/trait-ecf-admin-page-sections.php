@@ -173,7 +173,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                 </div>
             </div>
             <p class="ecf-panel-note"><?php echo esc_html__('Changes take effect immediately in Elementor. The cache is cleared automatically; open Elementor tabs should be reloaded once.', 'ecf-framework'); ?></p>
-            <div class="ecf-grid ecf-grid--variables" data-ecf-layout-group="variables-main" data-ecf-masonry-layout="1">
+            <div class="ecf-grid ecf-grid--variables" data-ecf-layout-group="variables-main">
                 <div class="ecf-card" id="ecf-vars-ecf" data-ecf-layout-item="ecf-vars-ecf">
                     <div class="ecf-vargroup-header">
                         <div class="ecf-vargroup-title">
