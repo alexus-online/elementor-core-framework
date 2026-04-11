@@ -415,6 +415,10 @@ trait ECF_Framework_Updater_Trait {
             return false;
         }
 
+        if (empty($update['package'])) {
+            return false;
+        }
+
         if (!version_compare($update['version'], (string) $installed_version, '>')) {
             return false;
         }
@@ -611,13 +615,16 @@ trait ECF_Framework_Updater_Trait {
         }
 
         $package_url = $this->github_release_package_url($remote_version);
-        if ($package_url === '') {
-            $package_url = $this->github_package_url();
-        }
 
         $data = [
             'version' => $remote_version,
             'package' => $package_url,
+            'error' => $package_url === ''
+                ? sprintf(
+                    __('Missing GitHub release zip for version %s. Publish the tagged release asset before offering updates.', 'ecf-framework'),
+                    $remote_version
+                )
+                : '',
             'homepage' => 'https://github.com/' . $this->github_repo,
             'tested' => get_bloginfo('version'),
             'requires' => '6.0',
@@ -912,17 +919,26 @@ trait ECF_Framework_Updater_Trait {
                 $installed_version,
                 (string) $update->new_version
             );
+        } elseif ($probe['ok']) {
+            $update_data = $this->get_github_update_data(true);
+            if (is_array($update_data) && !empty($update_data['error'])) {
+                $message = sprintf(
+                    __('Plugin update check failed. Installed: %1$s. GitHub release error: %2$s.', 'ecf-framework'),
+                    $installed_version,
+                    (string) $update_data['error']
+                );
+            } else {
+                $message = sprintf(
+                    __('Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered.', 'ecf-framework'),
+                    $installed_version,
+                    $probe['version']
+                );
+            }
         } elseif (!$probe['ok']) {
             $message = sprintf(
                 __('Plugin update check failed. Installed: %1$s. GitHub request error: %2$s.', 'ecf-framework'),
                 $installed_version,
                 $probe['error']
-            );
-        } else {
-            $message = sprintf(
-                __('Plugin update check completed. Installed: %1$s. GitHub remote: %2$s. No newer version was registered.', 'ecf-framework'),
-                $installed_version,
-                $probe['version']
             );
         }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.3 (2026-04-11)
+
+### Fix
+- GitHub updates now require the published release ZIP and no longer fall back to GitHub source archives.
+- GitHub-Updates verlangen jetzt das veröffentlichte Release-ZIP und fallen nicht mehr auf GitHub-Quellarchive zurück.
+- Update checks report a clear release-asset error instead of silently offering a risky fallback package.
+- Update-Prüfungen melden jetzt einen klaren Release-Asset-Fehler, statt still ein riskantes Fallback-Paket anzubieten.
+
 ## 0.3.2 (2026-04-11)
 
 ### Fix
