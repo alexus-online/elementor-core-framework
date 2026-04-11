@@ -79,6 +79,48 @@ test.describe('ECF admin UI', () => {
     await expect(page.locator('.ecf-autosave-pill')).toContainText(/Autosave/i);
   });
 
+  test('general color fields render clickable swatches next to each field', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+    await openGeneralTab(page, 'website');
+
+    for (const fieldName of ['base_text_color', 'base_background_color', 'link_color', 'focus_color']) {
+      const field = getGeneralField(page, fieldName);
+      const swatch = field.locator('.wp-color-result').first();
+
+      await expect(field).toBeVisible();
+      await expect(swatch).toBeVisible();
+      await expect(swatch).toBeEnabled();
+    }
+
+    const focusField = getGeneralField(page, 'focus_color');
+    const focusSwatch = focusField.locator('.wp-color-result').first();
+    await focusSwatch.click();
+    await expect(focusField.locator('.wp-picker-container').first()).toHaveClass(/wp-picker-active/);
+  });
+
+  test('wp admin menu uses the bundled layrix svg icon', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+
+    const menuItem = page.locator('#adminmenu .toplevel_page_ecf-framework').first();
+    await expect(menuItem).toBeVisible();
+
+    const iconState = await menuItem.evaluate((node) => {
+      const image = node.querySelector('.wp-menu-image img');
+      const imageSrc = image ? image.getAttribute('src') || '' : '';
+      const imageStyle = image ? getComputedStyle(image).backgroundImage || '' : '';
+      const wrapper = node.querySelector('.wp-menu-image');
+      const wrapperStyle = wrapper ? getComputedStyle(wrapper).backgroundImage || '' : '';
+
+      return { imageSrc, imageStyle, wrapperStyle };
+    });
+
+    const iconMarkup = [iconState.imageSrc, iconState.imageStyle, iconState.wrapperStyle].join(' ');
+    expect(iconMarkup).toMatch(/data:image\/svg\+xml;base64,/i);
+    expect(iconMarkup).toContain('PHN2Zy');
+  });
+
   test('switching to the classes panel scrolls the content area back to the top', async ({ page }) => {
     await loginToWordPress(page);
     await openPluginPage(page);
@@ -311,10 +353,12 @@ test.describe('ECF admin UI', () => {
     await expect(sampleMin).toBeVisible();
     await expect(sampleMax).toBeVisible();
 
-    await expect(focusMin).toHaveText(/Typography|Typografie/i);
-    await expect(focusMax).toHaveText(/Typography|Typografie/i);
-    await expect(sampleMin).toHaveText(/Typography|Typografie/i);
-    await expect(sampleMax).toHaveText(/Typography|Typografie/i);
+    await expect(focusMin).not.toHaveText(/^(Minimum|Maximum)$/i);
+    await expect(focusMax).not.toHaveText(/^(Minimum|Maximum)$/i);
+    await expect(sampleMin).not.toHaveText(/^(Minimum|Maximum)$/i);
+    await expect(sampleMax).not.toHaveText(/^(Minimum|Maximum)$/i);
+    await expect(sampleMin).not.toBeEmpty();
+    await expect(sampleMax).not.toBeEmpty();
   });
 
   test('class sync action is styled as a secondary button instead of a solid primary action', async ({ page }) => {

@@ -1,11 +1,50 @@
 const { expect } = require('@playwright/test');
+const { execFileSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
-const wpUrl = (process.env.ECF_WP_URL || '').replace(/\/$/, '');
-const adminUser = process.env.ECF_WP_ADMIN_USER || process.env.ECF_WP_USER || '';
-const adminPassword = process.env.ECF_WP_ADMIN_PASSWORD || '';
-const loginPath = process.env.ECF_WP_LOGIN_PATH || '/wp-login.php';
-const pluginPath = process.env.ECF_WP_ADMIN_PAGE || '/wp-admin/admin.php?page=ecf-framework';
-const allowMutation = process.env.ECF_UI_ALLOW_MUTATION === '1';
+const repoRoot = path.resolve(__dirname, '..', '..', '..');
+
+function readLocalEnvFile() {
+  const envPath = path.join(repoRoot, '.env');
+  if (!fs.existsSync(envPath)) {
+    return {};
+  }
+
+  const values = {};
+  const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    if (!line || /^\s*#/.test(line) || !line.includes('=')) {
+      continue;
+    }
+
+    const separatorIndex = line.indexOf('=');
+    const key = line.slice(0, separatorIndex).trim();
+    if (!key) {
+      continue;
+    }
+
+    let value = line.slice(separatorIndex + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    values[key] = value;
+  }
+
+  return values;
+}
+
+const localEnv = readLocalEnvFile();
+const wpUrl = (process.env.ECF_WP_URL || localEnv.ECF_WP_URL || '').replace(/\/$/, '');
+const adminUser = process.env.ECF_WP_ADMIN_USER || localEnv.ECF_WP_ADMIN_USER || process.env.ECF_WP_USER || localEnv.ECF_WP_USER || '';
+const adminPassword = process.env.ECF_WP_ADMIN_PASSWORD || localEnv.ECF_WP_ADMIN_PASSWORD || '';
+const loginPath = process.env.ECF_WP_LOGIN_PATH || localEnv.ECF_WP_LOGIN_PATH || '/wp-login.php';
+const pluginPath = process.env.ECF_WP_ADMIN_PAGE || localEnv.ECF_WP_ADMIN_PAGE || '/wp-admin/admin.php?page=ecf-framework';
+const allowMutation = (process.env.ECF_UI_ALLOW_MUTATION || localEnv.ECF_UI_ALLOW_MUTATION || '') === '1';
+const ftpHost = process.env.FTP_HOST || localEnv.FTP_HOST || '';
+const ftpUser = process.env.FTP_USER || localEnv.FTP_USER || '';
+const ftpPass = process.env.FTP_PASS || localEnv.FTP_PASS || '';
+const ftpPluginPath = process.env.FTP_PLUGIN_PATH || localEnv.FTP_PLUGIN_PATH || '';
 
 function requiredEnvMissing() {
   return !wpUrl || !adminUser || !adminPassword;
@@ -13,6 +52,51 @@ function requiredEnvMissing() {
 
 function mutationNotAllowed() {
   return !allowMutation;
+}
+
+function remotePluginCheckMissing() {
+  return !ftpHost || !ftpUser || !ftpPass || !ftpPluginPath;
+}
+
+function ftpList(remotePath) {
+  return execFileSync(
+    'curl',
+    [
+      '-s',
+      '--ftp-ssl',
+      '--insecure',
+      '-u',
+      `${ftpUser}:${ftpPass}`,
+      `ftp://${ftpHost}${remotePath}`,
+    ],
+    {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }
+  );
+}
+
+function parseFtpListingNames(listing) {
+  return String(listing || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.split(/\s+/).pop());
+}
+
+function getRemotePluginFolderState() {
+  const normalizedPluginPath = ftpPluginPath.replace(/\/+$/, '');
+  const pluginParentPath = normalizedPluginPath.replace(/\/[^/]+$/, '') + '/';
+  const pluginFolderName = normalizedPluginPath.split('/').pop();
+  const parentNames = parseFtpListingNames(ftpList(pluginParentPath));
+  const pluginNames = parseFtpListingNames(ftpList(`${normalizedPluginPath}/`));
+
+  return {
+    pluginFolderName,
+    parentNames,
+    pluginNames,
+  };
 }
 
 async function loginToWordPress(page) {
@@ -73,6 +157,26 @@ async function loginToWordPress(page) {
 async function openPluginPage(page) {
   await page.goto(`${wpUrl}${pluginPath}`);
   await expect(page.locator('.ecf-wrap')).toBeVisible();
+}
+
+async function openPluginsPage(page) {
+  await page.goto(`${wpUrl}/wp-admin/plugins.php`, { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveURL(/\/wp-admin\/plugins\.php/i);
+}
+
+function getPluginRow(page, text = 'Layrix') {
+  return page.locator('#the-list tr').filter({ hasText: new RegExp(text, 'i') }).first();
+}
+
+async function triggerPluginUpdateCheck(page, text = 'Layrix') {
+  const row = getPluginRow(page, text);
+  await expect(row).toBeVisible();
+  const updateLink = row.getByRole('link', { name: /Check for updates|Auf Updates prüfen/i }).first();
+  await expect(updateLink).toBeVisible();
+  await Promise.all([
+    page.waitForURL(/\/wp-admin\/plugins\.php/i),
+    updateLink.click(),
+  ]);
 }
 
 async function openPanel(page, panel) {
@@ -234,6 +338,14 @@ async function getFrontendStyles(page) {
     rootBodyFontFamily: getComputedStyle(document.documentElement).getPropertyValue('--ecf-base-body-font-family').trim(),
     bodyFontFamily: getComputedStyle(document.body).fontFamily,
   }));
+}
+
+async function getFrontendStylesheetText(page) {
+  await page.goto(`${wpUrl}/`, { waitUntil: 'domcontentloaded' });
+  return page.evaluate(() => {
+    const styleTag = document.querySelector('#ecf-framework-v010');
+    return styleTag ? styleTag.textContent || '' : '';
+  });
 }
 
 async function getFrontendTypographySnapshot(page) {
@@ -887,8 +999,13 @@ module.exports = {
   expect,
   requiredEnvMissing,
   mutationNotAllowed,
+  remotePluginCheckMissing,
+  getRemotePluginFolderState,
   loginToWordPress,
   openPluginPage,
+  openPluginsPage,
+  getPluginRow,
+  triggerPluginUpdateCheck,
   openPanel,
   openGeneralTab,
   chooseFormat,
@@ -906,6 +1023,7 @@ module.exports = {
   getRootCssVariable,
   getBodyComputedFontFamily,
   getFrontendStyles,
+  getFrontendStylesheetText,
   getFrontendTypographySnapshot,
   getFrontendColorSnapshot,
   toggleGeneralFavorite,

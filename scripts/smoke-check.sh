@@ -77,20 +77,20 @@ required_traits=(
 
 for required_file in "${required_files[@]}"; do
   require_pattern="require_once __DIR__ . '/${required_file#./}'"
-  if ! rg -Fq "$require_pattern" Layrix.php; then
+  if ! rg -Fq "$require_pattern" layrix.php; then
     echo "Missing require_once for: $required_file" >&2
     exit 1
   fi
 done
 
 for required_trait in "${required_traits[@]}"; do
-  if ! rg -Fq "use $required_trait;" Layrix.php; then
+  if ! rg -Fq "use $required_trait;" layrix.php; then
     echo "Missing trait use: $required_trait" >&2
     exit 1
   fi
 done
 
-php -l Layrix.php
+php -l layrix.php
 
 while IFS= read -r php_file; do
   php -l "$php_file"
@@ -118,7 +118,7 @@ if [[ -n "${ECF_WP_URL:-}" && ( -n "${ECF_WP_ADMIN_USER:-}" || -n "${ECF_WP_USER
 fi
 
 duplicate_methods="$(
-  rg -o 'function[[:space:]]+[A-Za-z0-9_]+' Layrix.php includes/*.php \
+  rg -o 'function[[:space:]]+[A-Za-z0-9_]+' layrix.php includes/*.php \
     | sed -E 's/.*function[[:space:]]+//' \
     | sort \
     | uniq -d

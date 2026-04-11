@@ -3,9 +3,14 @@ const {
   expect,
   requiredEnvMissing,
   mutationNotAllowed,
+  remotePluginCheckMissing,
+  getRemotePluginFolderState,
   loginToWordPress,
   openPluginPage,
+  openPluginsPage,
   openPanel,
+  getPluginRow,
+  triggerPluginUpdateCheck,
   openGeneralTab,
   setImportFile,
   getImportPreview,
@@ -36,6 +41,70 @@ function normalizeVariableLabel(label) {
 
 test.describe('ECF open UI flows', () => {
   test.skip(requiredEnvMissing, 'ECF_WP_URL, ECF_WP_ADMIN_USER/ECF_WP_USER and ECF_WP_ADMIN_PASSWORD are required for browser UI checks.');
+
+  test('github update check keeps the live plugin folder on layrix and never creates layrix-master', async ({ page }) => {
+    test.skip(remotePluginCheckMissing(), 'FTP_HOST, FTP_USER, FTP_PASS and FTP_PLUGIN_PATH are required for the remote plugin folder verification.');
+
+    await loginToWordPress(page);
+    await openPluginsPage(page);
+
+    const layrixRowsBefore = page.locator('#the-list tr').filter({ hasText: /Layrix/i });
+    await expect(layrixRowsBefore).toHaveCount(1);
+
+    const pluginRow = getPluginRow(page, 'Layrix');
+    await expect(pluginRow).toBeVisible();
+    await expect(pluginRow).not.toContainText(/layrix-master/i);
+    await expect(pluginRow).toContainText(/Deaktivieren|Deactivate/i);
+
+    await triggerPluginUpdateCheck(page, 'Layrix');
+
+    const notices = page.locator('.notice, .updated, .notice-success');
+    await expect(notices.first()).toBeVisible();
+    await expect(page).not.toHaveURL(/layrix-master/i);
+
+    const layrixRowsAfter = page.locator('#the-list tr').filter({ hasText: /Layrix/i });
+    await expect(layrixRowsAfter).toHaveCount(1);
+
+    const pluginRowAfter = getPluginRow(page, 'Layrix');
+    await expect(pluginRowAfter).toBeVisible();
+    await expect(pluginRowAfter).not.toContainText(/layrix-master/i);
+    await expect(pluginRowAfter).toContainText(/Deaktivieren|Deactivate/i);
+
+    const remoteState = getRemotePluginFolderState();
+    expect(remoteState.pluginFolderName).toBe('layrix');
+    expect(remoteState.parentNames).toContain('layrix');
+    expect(remoteState.parentNames).not.toContain('layrix-master');
+    expect(remoteState.pluginNames.some((name) => name === 'layrix.php' || name === 'Layrix.php')).toBeTruthy();
+  });
+
+  test('plugin path stays stable in WordPress before and after the github update check', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginsPage(page);
+
+    const pluginRow = getPluginRow(page, 'Layrix');
+    await expect(pluginRow).toBeVisible();
+
+    const pluginPathBefore = await pluginRow.locator('th.check-column input[type="checkbox"]').first().getAttribute('value');
+    const rowIdBefore = await pluginRow.getAttribute('id');
+
+    expect(pluginPathBefore).toMatch(/^layrix\/(Layrix|layrix)\.php$/);
+    expect(pluginPathBefore).not.toMatch(/layrix-master/i);
+    expect(rowIdBefore || '').not.toMatch(/layrix-master/i);
+
+    await triggerPluginUpdateCheck(page, 'Layrix');
+
+    const pluginRowAfter = getPluginRow(page, 'Layrix');
+    await expect(pluginRowAfter).toBeVisible();
+
+    const pluginPathAfter = await pluginRowAfter.locator('th.check-column input[type="checkbox"]').first().getAttribute('value');
+    const rowIdAfter = await pluginRowAfter.getAttribute('id');
+
+    expect(pluginPathAfter).toBe(pluginPathBefore);
+    expect(pluginPathAfter).toMatch(/^layrix\/(Layrix|layrix)\.php$/);
+    expect(pluginPathAfter).not.toMatch(/layrix-master/i);
+    expect(rowIdAfter).toBe(rowIdBefore);
+    expect(rowIdAfter || '').not.toMatch(/layrix-master/i);
+  });
 
   test('import preview shows a warning when plugin versions differ', async ({ page }) => {
     await loginToWordPress(page);

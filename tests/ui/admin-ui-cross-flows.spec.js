@@ -12,6 +12,7 @@ const {
   getBaseFontFamilyState,
   clickRemoveSelectedLocalFont,
   getRootCssVariable,
+  getFrontendStylesheetText,
   getFrontendTypographySnapshot,
   toggleGeneralFavorite,
   getFavoriteCard,
@@ -226,6 +227,68 @@ test.describe('ECF cross-panel UI flows', () => {
     await waitForSuccessNotice(page);
   });
 
+  test('color generator detail flow exposes copied shade and tint variables', async ({ page }) => {
+    await loginToWordPress(page);
+    await openPluginPage(page);
+
+    const originalSettings = await fetchRestSettings(page);
+    const seededSettings = cloneSettings(originalSettings);
+    seededSettings.interface_language = 'de';
+    seededSettings.colors = Array.isArray(seededSettings.colors)
+      ? [...seededSettings.colors]
+      : [];
+    seededSettings.colors[0] = {
+      ...(seededSettings.colors[0] || {}),
+      name: 'ui-generator',
+      value: '#8b6f3a',
+      format: 'hex',
+      generate_shades: '1',
+      shade_count: 4,
+      generate_tints: '0',
+      tint_count: 4,
+    };
+
+    try {
+      await updateRestSettings(page, seededSettings);
+      await openPluginPage(page);
+      await openPanel(page, 'tokens');
+
+      const row = page.locator('.ecf-panel[data-panel="tokens"] .ecf-table[data-group="colors"] .ecf-row--color').first();
+      await expect(row).toBeVisible();
+
+      await row.locator('.ecf-color-detail-toggle').click();
+      const detail = row.locator('.ecf-color-detail').first();
+      const colorGeneratorLabels = await page.evaluate(() => ({
+        shades: window.ecfAdmin.i18n.color_generator_generate_shades,
+        tints: window.ecfAdmin.i18n.color_generator_generate_tints,
+      }));
+      await expect(detail).toBeVisible();
+      await expect(detail).toContainText(colorGeneratorLabels.shades);
+      await expect(detail).toContainText(colorGeneratorLabels.tints);
+      await expect(detail.locator('[data-ecf-color-count="shades"]')).toHaveValue('4');
+
+      await detail.locator('[data-ecf-color-count-plus="shades"]').click();
+      await expect(detail.locator('[data-ecf-color-count="shades"]')).toHaveValue('5');
+      await expect(detail.locator('.ecf-color-token-copy[data-ecf-copy-text="--ecf-color-ui-generator-shade-5"]')).toBeVisible();
+
+      await detail.locator('[data-ecf-color-generate="tints"]').evaluate((element) => element.click());
+      await expect(detail.locator('[data-ecf-color-generate="tints"]')).toBeChecked();
+      await expect(detail.locator('.ecf-color-token-copy[data-ecf-copy-text="--ecf-color-ui-generator-tint-1"]')).toBeVisible();
+
+      await mockClipboard(page);
+      await detail.locator('.ecf-color-token-copy[data-ecf-copy-text="--ecf-color-ui-generator-shade-5"]').click();
+      expect(await getCopiedTexts(page)).toContain('--ecf-color-ui-generator-shade-5');
+      await waitForAutosaveIdle(page);
+
+      await page.goto(`${process.env.ECF_WP_URL.replace(/\/$/, '')}/`, { waitUntil: 'domcontentloaded' });
+      expect(await getRootCssVariable(page, '--ecf-color-ui-generator-shade-5')).not.toBe('');
+      expect(await getRootCssVariable(page, '--ecf-color-ui-generator-tint-1')).not.toBe('');
+    } finally {
+      await openPluginPage(page);
+      await updateRestSettings(page, originalSettings);
+    }
+  });
+
   test('spacing changes update the preview row and the emitted spacing token', async ({ page }) => {
     await loginToWordPress(page);
     await openPluginPage(page);
@@ -245,16 +308,8 @@ test.describe('ECF cross-panel UI flows', () => {
       const previewRow = await getSpacingPreviewRow(page, 'm');
       await expect(previewRow).toContainText('20px');
 
-      await page.goto(`${process.env.ECF_WP_URL.replace(/\/$/, '')}/`, { waitUntil: 'domcontentloaded' });
-      const appliedSpacing = await page.evaluate(() => {
-        const probe = document.createElement('div');
-        probe.style.marginTop = 'var(--ecf-space-m)';
-        document.body.appendChild(probe);
-        const value = getComputedStyle(probe).marginTop;
-        probe.remove();
-        return value;
-      });
-      expect(appliedSpacing).toBe('20px');
+      const emittedCss = await getFrontendStylesheetText(page);
+      expect(emittedCss).toMatch(/--ecf-space-m:\s*clamp\([^;]*,\s*1\.25rem\);/i);
     } finally {
       await openPluginPage(page);
       await updateRestSettings(page, originalSettings);
@@ -286,17 +341,9 @@ test.describe('ECF cross-panel UI flows', () => {
       await expect(previewRow.locator('.ecf-copy-pill')).toContainText(/Copied|Kopiert/i);
       expect(await getCopiedTexts(page)).toContain('--ecf-text-m');
 
-      await page.goto(`${process.env.ECF_WP_URL.replace(/\/$/, '')}/`, { waitUntil: 'domcontentloaded' });
-      const appliedFontSize = await page.evaluate(() => {
-        const probe = document.createElement('div');
-        probe.style.fontSize = 'var(--ecf-text-m)';
-        document.body.appendChild(probe);
-        const value = getComputedStyle(probe).fontSize;
-        probe.remove();
-        return value;
-      });
-      expect(parseFloat(appliedFontSize)).toBeGreaterThan(21.9);
-      expect(parseFloat(appliedFontSize)).toBeLessThan(22.2);
+      const emittedCss = await getFrontendStylesheetText(page);
+      expect(emittedCss).toMatch(/--ecf-base-body-text-size:\s*22px;/i);
+      expect(emittedCss).toMatch(/--ecf-text-m:\s*clamp\([^;]*,\s*1\.38rem\);/i);
     } finally {
       await openPluginPage(page);
       await updateRestSettings(page, originalSettings);
@@ -416,7 +463,7 @@ test.describe('ECF cross-panel UI flows', () => {
     const payload = {
       meta: {
         plugin: 'Layrix',
-        plugin_version: '0.3.1',
+        plugin_version: '0.3.2',
         schema_version: 1,
         exported_at: '2026-04-08T12:00:00Z',
       },

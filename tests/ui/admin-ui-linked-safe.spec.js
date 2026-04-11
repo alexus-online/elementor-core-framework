@@ -139,6 +139,21 @@ test.describe('ECF additional linked UI flows', () => {
     await waitForSuccessNotice(page);
   });
 
+  test('ecf-container-boxed centers itself on the frontend with auto margins', async ({ page }) => {
+    await loginToWordPress(page);
+    const siteOrigin = new URL(page.url()).origin;
+    await page.goto(`${siteOrigin}/`, { waitUntil: 'domcontentloaded' });
+
+    const boxedCss = await page.evaluate(() => {
+      const styleTag = document.querySelector('#ecf-framework-v010');
+      return styleTag ? styleTag.textContent || '' : '';
+    });
+
+    expect(boxedCss).toContain('.ecf-container-boxed');
+    expect(boxedCss).toMatch(/\.ecf-container-boxed[^}]*margin-left:auto!important/i);
+    expect(boxedCss).toMatch(/\.ecf-container-boxed[^}]*margin-right:auto!important/i);
+  });
+
   test('show status cards toggle updates the Variables and Sync status cards after reload', async ({ page }) => {
     await loginToWordPress(page);
     await openPluginPage(page);

@@ -1,8 +1,9 @@
 {
   "name": "layrix",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "scripts": {
+    "build:release": "bash scripts/build-release.sh",
     "test": "bash scripts/smoke-check.sh",
     "test:regression": "bash scripts/regression-check.sh",
     "test:e2e:rest": "bash scripts/e2e-rest-check.sh",
