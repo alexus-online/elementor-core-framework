@@ -152,6 +152,7 @@ test.describe('ECF additional linked UI flows', () => {
     expect(boxedCss).toContain('.ecf-container-boxed');
     expect(boxedCss).toMatch(/\.ecf-container-boxed[^}]*margin-left:auto!important/i);
     expect(boxedCss).toMatch(/\.ecf-container-boxed[^}]*margin-right:auto!important/i);
+    expect(boxedCss).toMatch(/\.ecf-container-boxed[^}]*max-width:min\(calc\(100% - 2rem\), var\(--ecf-container-boxed\)\)!important/i);
   });
 
   test('show status cards toggle updates the Variables and Sync status cards after reload', async ({ page }) => {

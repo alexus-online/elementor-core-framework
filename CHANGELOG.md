@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.6 (2026-04-12)
+
+### Fix
+- Boxed container fallback CSS now keeps `.ecf-container-boxed` and `.cf-container-boxed` centered and width-limited even outside the full layout component block.
+- Boxed-Container-Fallback stabilisiert: `.ecf-container-boxed` und `.cf-container-boxed` bleiben zentriert und breitenbegrenzt, auch ausserhalb des vollstaendigen Layout-Komponentenblocks.
+
 ## 0.3.5 (2026-04-11)
 
 ### Fix
