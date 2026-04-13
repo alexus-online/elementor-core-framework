@@ -1612,9 +1612,11 @@ jQuery(function($){
         .replace(/^-+|-+$/g, '') || ('shadow-' + index);
 
       return {
+        index: index,
         name: name,
         slug: slug,
-      token: '--ecf-shadow-' + slug,
+        token: '--ecf-shadow-' + slug,
+        className: 'ecf-shadow-' + slug,
         value: value
       };
     }).get();
@@ -1648,7 +1650,8 @@ jQuery(function($){
     $.each(items, function(_, item) {
       var selectedClass = item.slug === activeShadow ? ' is-active' : '';
       var previewShadowValue = enhanceShadowPreviewValue(item.value);
-      html += '<button type="button" class="ecf-shadow-row' + selectedClass + '" data-ecf-shadow-step="' + item.slug + '">'
+      html += '<button type="button" class="ecf-shadow-row' + selectedClass + '" data-ecf-shadow-step="' + item.slug + '" data-ecf-shadow-index="' + item.index + '">'
+        + '<div class="ecf-shadow-row__class"><code>' + escapeHtml(item.className) + '</code></div>'
         + '<div class="ecf-shadow-row__token">' + escapeHtml(item.token) + '</div>'
         + '<div class="ecf-shadow-row__value"><code>' + escapeHtml(item.value) + '</code></div>'
         + '<div class="ecf-shadow-row__sample ecf-shadow-preview-bg"><div class="ecf-shadow-row__mini" style="box-shadow:' + escapeHtml(previewShadowValue) + ';"></div></div>'
@@ -1660,11 +1663,17 @@ jQuery(function($){
     $preview.attr('data-active-shadow', activeShadow);
     $preview.find('[data-ecf-shadow-preview-list]').html(html);
     $preview.find('[data-ecf-shadow-token]').text(activeItem.token);
+    $preview.find('[data-ecf-shadow-class]').text(activeItem.className);
     $preview.find('[data-ecf-shadow-name]').text(activeItem.name);
     $preview.find('[data-ecf-shadow-css]').text(activeItem.value);
     $preview.find('[data-ecf-shadow-label]').text(activeItem.token);
     $preview.find('[data-ecf-shadow-helper]').text(helperText);
     $preview.find('[data-ecf-shadow-surface]').css('box-shadow', enhanceShadowPreviewValue(activeItem.value));
+    var $tokenPills = $preview.find('.ecf-field-token-row');
+    if ($tokenPills.length) {
+      $tokenPills.find('[data-ecf-token-copy]').eq(0).attr('data-ecf-token-copy', activeItem.token).find('code').text(activeItem.token);
+      $tokenPills.find('[data-ecf-token-copy]').eq(1).attr('data-ecf-token-copy', activeItem.className).find('code').text(activeItem.className);
+    }
   }
 
   // ── Sidebar navigation ─────────────────────────────────────────
@@ -4242,6 +4251,26 @@ jQuery(function($){
   $(document).on('click', '[data-ecf-shadow-step]', function(){
     var $preview = $('[data-ecf-shadow-preview]');
     $preview.attr('data-active-shadow', $(this).data('ecf-shadow-step'));
+    renderShadowPreview();
+    var shadowIndex = $(this).data('ecf-shadow-index');
+    var $row = $('[data-ecf-shadow-edit-row][data-ecf-shadow-row-index="' + shadowIndex + '"]');
+    if ($row.length) {
+      var $valueInput = $row.find('[data-ecf-shadow-value-input]').first();
+      if ($valueInput.length) {
+        $valueInput.trigger('focus').trigger('select');
+      }
+      if ($row.get(0) && $row.get(0).scrollIntoView) {
+        $row.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+
+  $(document).on('focus', '[data-ecf-shadow-name-input], [data-ecf-shadow-value-input]', function() {
+    var $row = $(this).closest('[data-ecf-shadow-edit-row]');
+    if (!$row.length) return;
+    var name = $.trim($row.find('[data-ecf-shadow-name-input]').val() || '');
+    var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'shadow';
+    $('[data-ecf-shadow-preview]').attr('data-active-shadow', slug);
     renderShadowPreview();
   });
 

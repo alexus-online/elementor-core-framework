@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.11 (2026-04-13)
+
+### Fix
+- Shadow tokens now also expose matching utility classes such as `ecf-shadow-xs`, `ecf-shadow-s`, and `ecf-shadow-xl`, including class sync support.
+- Schatten-Tokens liefern jetzt auch passende Utility-Klassen wie `ecf-shadow-xs`, `ecf-shadow-s` und `ecf-shadow-xl`, inklusive Klassen-Sync.
+- The Shadows panel was merged into a single card so the preview rows can jump directly to the editable shadow value.
+- Das Schatten-Panel wurde zu einer einzelnen Karte zusammengefuehrt, damit die Vorschauzeilen direkt zum editierbaren Schattenwert springen koennen.
+- The active shadow preview now shows the matching class more prominently next to the variable reference.
+- Die aktive Schatten-Vorschau zeigt die passende Klasse jetzt prominenter direkt neben dem Variablenbezug.
+
 ## 0.3.10 (2026-04-13)
 
 ### Fix

@@ -38,7 +38,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
                 'type' => 'class',
                 'label' => $utility_label,
                 'sync_to_v3' => false,
-                'variants' => $this->class_variant([]),
+                'variants' => $this->class_variant($this->utility_class_props($utility_label)),
             ];
         }
 

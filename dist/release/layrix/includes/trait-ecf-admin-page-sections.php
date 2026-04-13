@@ -234,30 +234,34 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
         ?>
         <div class="ecf-panel" data-panel="shadows">
             <div class="ecf-shadow-layout" data-ecf-layout-group="shadows-main">
-                <div class="ecf-shadow-sidebar" data-ecf-layout-item="shadows-vars">
-                    <div class="ecf-card">
-        <h2><?php echo esc_html__('Box Shadow - Vars', 'ecf-framework'); ?></h2>
-        <p style="color:#6b7280;font-size:13px;margin:0 0 12px"><?php echo wp_kses(__('Values in CSS box-shadow syntax, e.g. <code>0 4px 16px rgba(0,0,0,0.1)</code>.', 'ecf-framework'), ['code' => []]); ?></p>
-                        <?php $this->render_rows('shadows', $settings['shadows']); ?>
-                    </div>
-                </div>
                 <div class="ecf-card ecf-shadow-preview-card"
-                     data-ecf-layout-item="shadows-preview"
+                     data-ecf-layout-item="shadows-main-card"
                      data-ecf-shadow-preview
                      data-active-shadow="<?php echo esc_attr(sanitize_key($settings['shadows'][0]['name'] ?? 'xs')); ?>"
             data-preview-word="<?php echo esc_attr__('Shadow', 'ecf-framework'); ?>"
-            data-preview-helper="<?php echo esc_attr__('Click a shadow token to inspect it in detail.', 'ecf-framework'); ?>">
+            data-preview-helper="<?php echo esc_attr__('Click a shadow row below to jump directly into the editable value.', 'ecf-framework'); ?>">
                     <div class="ecf-shadow-preview-header">
                         <div>
-          <h2><?php echo esc_html__('Live Box Shadow Preview', 'ecf-framework'); ?></h2>
-          <p><?php echo esc_html__('Preview of your shadow tokens.', 'ecf-framework'); ?></p>
+          <h2><?php echo esc_html__('Box Shadow Variables & Classes', 'ecf-framework'); ?></h2>
+          <p><?php echo esc_html__('Edit your shadow tokens directly here. The matching classes like ecf-shadow-xs or ecf-shadow-l can now be enabled in the Utility classes sync.', 'ecf-framework'); ?></p>
                         </div>
                     </div>
                     <div class="ecf-shadow-focus" data-ecf-shadow-focus>
                         <div class="ecf-shadow-focus__meta">
             <span class="ecf-preview-pill"><?php echo esc_html__('Preview', 'ecf-framework'); ?></span>
                             <strong data-ecf-shadow-token><?php echo esc_html('--ecf-shadow-' . sanitize_key($settings['shadows'][0]['name'] ?? 'xs')); ?></strong>
-            <p data-ecf-shadow-helper><?php echo esc_html__('Click a shadow token to inspect it in detail.', 'ecf-framework'); ?></p>
+                            <div class="ecf-shadow-focus__class">
+                                <span><?php echo esc_html__('Class', 'ecf-framework'); ?></span>
+                                <code data-ecf-shadow-class><?php echo esc_html('ecf-shadow-' . sanitize_key($settings['shadows'][0]['name'] ?? 'xs')); ?></code>
+                            </div>
+            <p data-ecf-shadow-helper><?php echo esc_html__('Click a shadow row below to jump directly into the editable value.', 'ecf-framework'); ?></p>
+            <?php
+            $current_shadow_slug = sanitize_key($settings['shadows'][0]['name'] ?? 'xs');
+            $this->render_field_token_pills([
+                ['type' => __('Variable', 'ecf-framework'), 'value' => '--ecf-shadow-' . $current_shadow_slug],
+                ['type' => __('Class', 'ecf-framework'), 'value' => 'ecf-shadow-' . $current_shadow_slug],
+            ]);
+            ?>
                         </div>
                         <div class="ecf-shadow-focus__sample ecf-shadow-preview-bg">
                             <div class="ecf-shadow-focus__surface ecf-shadow-preview-bg" data-ecf-shadow-surface style="box-shadow:<?php echo esc_attr($settings['shadows'][0]['value'] ?? '0 1px 2px rgba(0,0,0,0.05)'); ?>;">
@@ -270,7 +274,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     <div class="ecf-shadow-preview-list" data-ecf-shadow-preview-list>
                         <?php foreach ($settings['shadows'] as $index => $row): ?>
                             <?php $shadow_name = sanitize_key($row['name']); ?>
-                            <button type="button" class="ecf-shadow-row<?php echo $index === 0 ? ' is-active' : ''; ?>" data-ecf-shadow-step="<?php echo esc_attr($shadow_name); ?>">
+                            <button type="button" class="ecf-shadow-row<?php echo $index === 0 ? ' is-active' : ''; ?>" data-ecf-shadow-step="<?php echo esc_attr($shadow_name); ?>" data-ecf-shadow-index="<?php echo esc_attr((string) $index); ?>">
                                 <div class="ecf-shadow-row__token"><?php echo esc_html('--ecf-shadow-' . $shadow_name); ?></div>
                                 <div class="ecf-shadow-row__value"><code><?php echo esc_html($row['value']); ?></code></div>
                                 <div class="ecf-shadow-row__sample ecf-shadow-preview-bg">
@@ -278,6 +282,13 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 </div>
                             </button>
                         <?php endforeach; ?>
+                    </div>
+                    <div class="ecf-shadow-editor">
+                        <div class="ecf-shadow-editor__header">
+                            <h3><?php echo esc_html__('Edit shadow values', 'ecf-framework'); ?></h3>
+                            <p><?php echo wp_kses(__('Values in CSS box-shadow syntax, e.g. <code>0 4px 16px rgba(0,0,0,0.1)</code>.', 'ecf-framework'), ['code' => []]); ?></p>
+                        </div>
+                        <?php $this->render_rows('shadows', $settings['shadows']); ?>
                     </div>
                 </div>
             </div>
@@ -309,6 +320,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
             'typography' => 'dashicons-editor-textcolor',
             'text' => 'dashicons-editor-paragraph',
             'layout' => 'dashicons-layout',
+            'shadows' => 'dashicons-admin-appearance',
             'accessibility' => 'dashicons-universal-access',
         ];
         $starter_library_features = [

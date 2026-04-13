@@ -151,12 +151,12 @@ trait ECF_Framework_Render_Helpers_Trait {
                 echo '<button type="button" class="ecf-remove-row" title="×">×</button>';
                 echo '</div>';
             } else {
-                echo '<div class="ecf-row">';
+                echo '<div class="ecf-row"' . ($is_shadow ? ' data-ecf-shadow-edit-row data-ecf-shadow-row-index="' . esc_attr((string) $i) . '"' : '') . '>';
                 if ($is_shadow) {
                     echo '<div class="ecf-shadow-preview" style="box-shadow:' . esc_attr($row['value']) . ';"></div>';
                 }
-                echo '<input type="text" data-ecf-slug-field="token" name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
-                echo '<input type="text" name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" placeholder="value" />';
+                echo '<input type="text" data-ecf-slug-field="token" ' . ($is_shadow ? 'data-ecf-shadow-name-input ' : '') . 'name="' . $input_key . '[' . $i . '][name]" value="' . esc_attr($row['name']) . '" placeholder="' . esc_attr__('class name', 'ecf-framework') . '" />';
+                echo '<input type="text" ' . ($is_shadow ? 'data-ecf-shadow-value-input ' : '') . 'name="' . $input_key . '[' . $i . '][value]" value="' . esc_attr($row['value']) . '" placeholder="value" />';
                 echo '<button type="button" class="ecf-remove-row" title="×">×</button>';
                 echo '</div>';
             }

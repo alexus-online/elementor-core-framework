@@ -1,6 +1,54 @@
 <?php
 
 trait ECF_Framework_Output_CSS_Trait {
+    private function class_prop_value_for_output($prop_value) {
+        if (!is_array($prop_value)) {
+            return is_scalar($prop_value) ? (string) $prop_value : '';
+        }
+
+        $type = $prop_value['$$type'] ?? '';
+        $value = $prop_value['value'] ?? null;
+
+        if ($type === 'size' && is_array($value)) {
+            return (string) ($value['size'] ?? '') . (string) ($value['unit'] ?? '');
+        }
+
+        if (($type === 'string' || $type === 'color') && is_scalar($value)) {
+            return (string) $value;
+        }
+
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function build_selected_utility_class_css($settings) {
+        $css = '';
+
+        foreach ($this->get_selected_utility_class_names($settings) as $class_name) {
+            $props = $this->utility_class_props($class_name);
+            if (!is_array($props) || empty($props)) {
+                continue;
+            }
+
+            $declarations = [];
+            foreach ($props as $prop_name => $prop_value) {
+                $value = trim($this->class_prop_value_for_output($prop_value));
+                if ($value === '') {
+                    continue;
+                }
+                $declarations[] = $prop_name . ':' . esc_attr($value);
+            }
+
+            if (empty($declarations)) {
+                continue;
+            }
+
+            $selector = '.' . sanitize_html_class($class_name);
+            $css .= $selector . '{' . implode(';', $declarations) . ';}';
+        }
+
+        return $css;
+    }
+
     private function css_font_value_for_output($value) {
         $value = trim((string) $value);
         if ($value === '') {
@@ -173,6 +221,7 @@ trait ECF_Framework_Output_CSS_Trait {
         if ($settings['enabled_components']['buttons'] === '1') {
             $css .= ".ecf-btn,.cf-btn{display:inline-flex;align-items:center;justify-content:center;padding:var(--ecf-space-s,8px) var(--ecf-space-m,16px);border-radius:var(--ecf-radius-m,12px);text-decoration:none;border:0;cursor:pointer;}.ecf-btn-primary,.cf-btn-primary{background:var(--ecf-color-primary,#3b82f6);color:#fff;}.ecf-btn-secondary,.cf-btn-secondary{background:var(--ecf-color-secondary,#64748b);color:#fff;}";
         }
+        $css .= $this->build_selected_utility_class_css($settings);
         $css .= ".ecf-container-boxed,.cf-container-boxed,.elementor .ecf-container-boxed,.elementor .cf-container-boxed{max-width:min(calc(100% - 2rem), var(--ecf-container-boxed))!important;margin-inline:auto!important;margin-left:auto!important;margin-right:auto!important;width:100%!important;}";
 
         return $pretty ? $this->format_generated_css($css) : $css;

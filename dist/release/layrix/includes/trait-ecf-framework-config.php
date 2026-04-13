@@ -485,6 +485,14 @@ trait ECF_Framework_Config_Trait {
                 ['name' => 'ecf-center-inline', 'label' => __('Center Inline', 'ecf-framework')],
                 ['name' => 'ecf-cluster', 'label' => __('Cluster', 'ecf-framework')],
             ],
+            'shadows' => [
+                ['name' => 'ecf-shadow-xs', 'label' => __('Shadow XS', 'ecf-framework')],
+                ['name' => 'ecf-shadow-s', 'label' => __('Shadow S', 'ecf-framework')],
+                ['name' => 'ecf-shadow-m', 'label' => __('Shadow M', 'ecf-framework')],
+                ['name' => 'ecf-shadow-l', 'label' => __('Shadow L', 'ecf-framework')],
+                ['name' => 'ecf-shadow-xl', 'label' => __('Shadow XL', 'ecf-framework')],
+                ['name' => 'ecf-shadow-inner', 'label' => __('Shadow Inner', 'ecf-framework')],
+            ],
             'accessibility' => [
                 ['name' => 'ecf-visually-hidden', 'label' => __('Visually Hidden', 'ecf-framework')],
             ],
@@ -497,6 +505,7 @@ trait ECF_Framework_Config_Trait {
             'typography' => __('Typography', 'ecf-framework'),
             'text' => __('Text', 'ecf-framework'),
             'layout' => __('Layout', 'ecf-framework'),
+            'shadows' => __('Shadows', 'ecf-framework'),
             'accessibility' => __('Accessibility', 'ecf-framework'),
         ];
     }
@@ -580,6 +589,12 @@ trait ECF_Framework_Config_Trait {
             case 'ecf-hidden': return __('Hides the element visually.', 'ecf-framework');
             case 'ecf-center-inline': return __('Centers inline content inside its available width.', 'ecf-framework');
             case 'ecf-cluster': return __('Groups items in a horizontal cluster with wrapping.', 'ecf-framework');
+            case 'ecf-shadow-xs': return __('Applies the XS shadow token as a reusable box-shadow class.', 'ecf-framework');
+            case 'ecf-shadow-s': return __('Applies the S shadow token as a reusable box-shadow class.', 'ecf-framework');
+            case 'ecf-shadow-m': return __('Applies the M shadow token as a reusable box-shadow class.', 'ecf-framework');
+            case 'ecf-shadow-l': return __('Applies the L shadow token as a reusable box-shadow class.', 'ecf-framework');
+            case 'ecf-shadow-xl': return __('Applies the XL shadow token as a reusable box-shadow class.', 'ecf-framework');
+            case 'ecf-shadow-inner': return __('Applies the Inner shadow token as a reusable box-shadow class.', 'ecf-framework');
             case 'ecf-visually-hidden': return __('Keeps content accessible for screen readers while hiding it visually.', 'ecf-framework');
         }
 
@@ -590,6 +605,8 @@ trait ECF_Framework_Config_Trait {
                 return __('Text utility for alignment or text-flow behavior.', 'ecf-framework');
             case 'layout':
                 return __('Layout helper for simple spacing or positioning patterns.', 'ecf-framework');
+            case 'shadows':
+                return __('Shadow helper class that maps directly to one of your shadow tokens.', 'ecf-framework');
             case 'accessibility':
                 return __('Accessibility helper for screen-reader-friendly behavior.', 'ecf-framework');
             default:
@@ -657,6 +674,7 @@ trait ECF_Framework_Config_Trait {
             'typography' => __('Typography helpers for heading and body text styles that reuse your ECF text tokens.', 'ecf-framework'),
             'text' => __('Text helpers for alignment and text behavior such as balanced or pretty wrapping.', 'ecf-framework'),
             'layout' => __('Small layout helpers for inline, cluster, centering, and visibility behavior.', 'ecf-framework'),
+            'shadows' => __('Shadow helpers that apply your configured shadow tokens as reusable classes like ecf-shadow-s or ecf-shadow-xl.', 'ecf-framework'),
             'accessibility' => __('Accessibility helpers such as visually hidden content for screen-reader-only text.', 'ecf-framework'),
         ];
     }
@@ -769,6 +787,12 @@ trait ECF_Framework_Config_Trait {
                 'gap' => $this->string_prop('var(--ecf-space-s)'),
                 'align-items' => $this->string_prop('center'),
             ],
+            'ecf-shadow-xs' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-xs)')],
+            'ecf-shadow-s' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-s)')],
+            'ecf-shadow-m' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-m)')],
+            'ecf-shadow-l' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-l)')],
+            'ecf-shadow-xl' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-xl)')],
+            'ecf-shadow-inner' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-inner)')],
             'ecf-visually-hidden' => [
                 'position' => $this->string_prop('absolute'),
                 'width' => $this->string_prop('1px'),
