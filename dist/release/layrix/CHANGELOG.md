@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.9 (2026-04-13)
+
+### Fix
+- Class overview now has a dedicated active-classes view with exact counts for basic, extras, utilities, custom, and automatic helper classes.
+- Klassen-Uebersicht hat jetzt eine eigene Ansicht fuer aktive Klassen mit exakten Zaehlern fuer Basis, Extras, Utilities, eigene und automatische Helper-Klassen.
+- The class sync total now explains the automatic `ecf-container-boxed` helper so the plugin count and Elementor count are easier to understand.
+- Die Klassen-Sync-Gesamtzahl erklaert jetzt die automatische `ecf-container-boxed`-Helper-Klasse, damit Plugin-Zaehler und Elementor-Zaehler leichter nachvollziehbar sind.
+- The class-library tabs no longer mix utility totals into the Extras count.
+- Die Klassenbibliothek mischt Utility-Gesamtzahlen nicht mehr in den Extras-Zaehler.
+
 ## 0.3.8 (2026-04-12)
 
 ### Fix

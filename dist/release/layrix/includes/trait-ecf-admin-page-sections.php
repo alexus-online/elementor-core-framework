@@ -287,6 +287,14 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
 
     private function render_utilities_panel($args) {
         extract($args, EXTR_SKIP);
+        $active_class_snapshot = $this->get_active_class_snapshot($settings);
+        $active_basic_classes = $active_class_snapshot['basic'];
+        $active_extra_classes = $active_class_snapshot['extras'];
+        $active_custom_classes = $active_class_snapshot['custom'];
+        $active_utility_classes = $active_class_snapshot['utility'];
+        $active_helper_classes = $active_class_snapshot['helper'];
+        $active_selected_classes = $active_class_snapshot['selected'];
+        $active_sync_payload_classes = $active_class_snapshot['sync_payload'];
         $class_usage_percent = $elementor_class_limit > 0 ? (int) round(($elementor_total_class_count / $elementor_class_limit) * 100) : 0;
         $class_usage_percent = max(0, min(100, $class_usage_percent));
         $starter_tab_icons = [
@@ -425,7 +433,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                             </li>
                             <li>
                                 <span><?php echo esc_html__('Plugin', 'ecf-framework'); ?></span>
-                                <strong><span data-ecf-starter-selected>0</span> <?php echo esc_html__('classes', 'ecf-framework'); ?></strong>
+                                <strong><span data-ecf-starter-selected><?php echo esc_html((string) count($active_sync_payload_classes)); ?></span> <?php echo esc_html__('classes', 'ecf-framework'); ?></strong>
                             </li>
                             <li>
                                 <span><?php echo esc_html__('After sync:', 'ecf-framework'); ?></span>
@@ -451,12 +459,104 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                         </button>
                     </div>
                     <div class="ecf-var-tabs ecf-library-tabs" data-ecf-library-tabs>
-                        <button type="button" class="ecf-var-tab is-active" data-ecf-library-tab="starter" data-ecf-help="<?php echo esc_attr($class_library_help_texts['starter']); ?>" title="<?php echo esc_attr($starter_library_tooltip); ?>"><?php echo esc_html__('Advanced classes', 'ecf-framework'); ?></button>
+                        <button type="button" class="ecf-var-tab is-active" data-ecf-library-tab="active" data-ecf-help="<?php echo esc_attr__('Shows the classes that are currently active right now, including the automatic helper class used for Elementor boxed containers.', 'ecf-framework'); ?>"><?php echo esc_html__('Active classes', 'ecf-framework'); ?></button>
+                        <button type="button" class="ecf-var-tab" data-ecf-library-tab="starter" data-ecf-help="<?php echo esc_attr($class_library_help_texts['starter']); ?>" title="<?php echo esc_attr($starter_library_tooltip); ?>"><?php echo esc_html__('Advanced classes', 'ecf-framework'); ?></button>
                         <button type="button" class="ecf-var-tab" data-ecf-library-tab="utility" data-ecf-help="<?php echo esc_attr($class_library_help_texts['utility']); ?>" title="<?php echo esc_attr($utility_library_tooltip); ?>"><?php echo esc_html__('Utility classes', 'ecf-framework'); ?></button>
                     </div>
-                    <p class="ecf-tab-help" data-ecf-library-help><?php echo esc_html($class_library_help_texts['starter']); ?></p>
+                    <p class="ecf-tab-help" data-ecf-library-help><?php echo esc_html__('Shows the classes that are currently active right now, including the automatic helper class used for Elementor boxed containers.', 'ecf-framework'); ?></p>
                     <?php wp_nonce_field('ecf_class_library_sync', '_ecf_class_library_sync_nonce'); ?>
-                    <div class="ecf-library-section" data-ecf-library-section="starter">
+                    <div class="ecf-library-section" data-ecf-library-section="active">
+                        <div class="ecf-active-class-summary" data-ecf-active-class-summary>
+                            <div class="ecf-active-class-summary__grid">
+                                <div class="ecf-active-class-summary__item">
+                                    <span><?php echo esc_html__('Basic active', 'ecf-framework'); ?></span>
+                                    <strong data-ecf-active-basic-count><?php echo esc_html((string) count($active_basic_classes)); ?></strong>
+                                </div>
+                                <div class="ecf-active-class-summary__item">
+                                    <span><?php echo esc_html__('Extras active', 'ecf-framework'); ?></span>
+                                    <strong data-ecf-active-extras-count><?php echo esc_html((string) count($active_extra_classes)); ?></strong>
+                                </div>
+                                <div class="ecf-active-class-summary__item">
+                                    <span><?php echo esc_html__('Utilities active', 'ecf-framework'); ?></span>
+                                    <strong data-ecf-active-utility-count><?php echo esc_html((string) count($active_utility_classes)); ?></strong>
+                                </div>
+                                <div class="ecf-active-class-summary__item">
+                                    <span><?php echo esc_html__('Own active', 'ecf-framework'); ?></span>
+                                    <strong data-ecf-active-custom-count><?php echo esc_html((string) count($active_custom_classes)); ?></strong>
+                                </div>
+                                <div class="ecf-active-class-summary__item">
+                                    <span><?php echo esc_html__('Auto helper', 'ecf-framework'); ?></span>
+                                    <strong data-ecf-active-helper-count><?php echo esc_html((string) count($active_helper_classes)); ?></strong>
+                                </div>
+                                <div class="ecf-active-class-summary__item">
+                                    <span><?php echo esc_html__('Layrix sync total', 'ecf-framework'); ?></span>
+                                    <strong data-ecf-active-total-count><?php echo esc_html((string) count($active_sync_payload_classes)); ?></strong>
+                                </div>
+                            </div>
+                            <p class="ecf-class-library-actions__hint" data-ecf-active-class-hint>
+                                <?php
+                                echo esc_html(
+                                    !empty($active_helper_classes)
+                                        ? __('The sync total includes the automatic helper class ecf-container-boxed, because a boxed Elementor width is currently active.', 'ecf-framework')
+                                        : __('The sync total matches your currently selected starter, utility and own classes.', 'ecf-framework')
+                                );
+                                ?>
+                            </p>
+                            <div class="ecf-active-class-groups" data-ecf-active-class-groups>
+                                <div class="ecf-active-class-group" data-ecf-active-class-group="basic">
+                                    <div class="ecf-vargroup-header">
+                                        <h3><?php echo esc_html__('Basic active classes', 'ecf-framework'); ?></h3>
+                                    </div>
+                                    <div class="ecf-active-class-list" data-ecf-active-class-list="basic">
+                                        <?php foreach ($active_basic_classes as $class_name): ?>
+                                            <span class="ecf-active-class-chip"><?php echo esc_html($class_name); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <div class="ecf-active-class-group" data-ecf-active-class-group="extras">
+                                    <div class="ecf-vargroup-header">
+                                        <h3><?php echo esc_html__('Extra active classes', 'ecf-framework'); ?></h3>
+                                    </div>
+                                    <div class="ecf-active-class-list" data-ecf-active-class-list="extras">
+                                        <?php foreach ($active_extra_classes as $class_name): ?>
+                                            <span class="ecf-active-class-chip"><?php echo esc_html($class_name); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <div class="ecf-active-class-group" data-ecf-active-class-group="utility">
+                                    <div class="ecf-vargroup-header">
+                                        <h3><?php echo esc_html__('Active utility classes', 'ecf-framework'); ?></h3>
+                                    </div>
+                                    <div class="ecf-active-class-list" data-ecf-active-class-list="utility">
+                                        <?php foreach ($active_utility_classes as $class_name): ?>
+                                            <span class="ecf-active-class-chip"><?php echo esc_html($class_name); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <div class="ecf-active-class-group" data-ecf-active-class-group="custom">
+                                    <div class="ecf-vargroup-header">
+                                        <h3><?php echo esc_html__('Own active classes', 'ecf-framework'); ?></h3>
+                                    </div>
+                                    <div class="ecf-active-class-list" data-ecf-active-class-list="custom">
+                                        <?php foreach ($active_custom_classes as $class_name): ?>
+                                            <span class="ecf-active-class-chip"><?php echo esc_html($class_name); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <div class="ecf-active-class-group" data-ecf-active-class-group="helper">
+                                    <div class="ecf-vargroup-header">
+                                        <h3><?php echo esc_html__('Automatic helper classes', 'ecf-framework'); ?></h3>
+                                    </div>
+                                    <div class="ecf-active-class-list" data-ecf-active-class-list="helper">
+                                        <?php foreach ($active_helper_classes as $class_name): ?>
+                                            <span class="ecf-active-class-chip ecf-active-class-chip--helper"><?php echo esc_html($class_name); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ecf-library-section" data-ecf-library-section="starter" hidden>
                     <div class="ecf-class-filterbar" data-ecf-starter-filterbar>
                         <label class="ecf-class-filterbar__field">
                             <span class="ecf-class-filterbar__label"><?php echo esc_html__('Area', 'ecf-framework'); ?></span>
@@ -1285,8 +1385,8 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 <span>
                                     <strong><?php echo esc_html__('Body Font', 'ecf-framework'); ?></strong>
                                     <span class="ecf-typography-font-card__meta">
-                                        <span><?php echo esc_html__('Current:', 'ecf-framework'); ?> <?php echo esc_html($current_body_font); ?></span>
-                                        <span><?php echo esc_html__('Font size:', 'ecf-framework'); ?> <?php echo esc_html($body_size_parts['value'] . ' ' . $body_size_parts['format']); ?></span>
+                                        <span data-ecf-typography-body-current><?php echo esc_html__('Current:', 'ecf-framework'); ?> <?php echo esc_html($current_body_font); ?></span>
+                                        <span data-ecf-typography-body-size><?php echo esc_html__('Font size:', 'ecf-framework'); ?> <?php echo esc_html($body_size_parts['value'] . ' ' . $body_size_parts['format']); ?></span>
                                     </span>
                                     <small><?php echo esc_html__('Default font for flowing text and normal site copy.', 'ecf-framework'); ?></small>
                                 </span>
@@ -1301,7 +1401,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 <span>
                                     <strong><?php echo esc_html__('Heading Font', 'ecf-framework'); ?></strong>
                                     <span class="ecf-typography-font-card__meta">
-                                        <span><?php echo esc_html__('Current:', 'ecf-framework'); ?> <?php echo esc_html($current_heading_font); ?></span>
+                                        <span data-ecf-typography-heading-current><?php echo esc_html__('Current:', 'ecf-framework'); ?> <?php echo esc_html($current_heading_font); ?></span>
                                     </span>
                                     <small><?php echo esc_html__('Separate font family for h1 to h6 and heading-like elements.', 'ecf-framework'); ?></small>
                                 </span>

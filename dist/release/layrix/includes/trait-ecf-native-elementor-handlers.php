@@ -61,6 +61,11 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
                 );
             }
 
+            $helper_count = count($this->get_active_class_snapshot()['helper'] ?? []);
+            if ($helper_count > 0) {
+                $message .= ' ' . __('The class count includes the automatic helper class ecf-container-boxed.', 'ecf-framework');
+            }
+
             $this->debug_log('native sync redirecting success');
             $this->redirect_with_message(
                 admin_url('admin.php?page=ecf-framework'),
@@ -121,6 +126,11 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
                     $class_result['total'],
                     $class_result['limit']
                 );
+            }
+
+            $helper_count = count($this->get_active_class_snapshot()['helper'] ?? []);
+            if ($helper_count > 0) {
+                $message .= ' ' . __('The class count includes the automatic helper class ecf-container-boxed.', 'ecf-framework');
             }
 
             $this->debug_log('class library redirecting success');

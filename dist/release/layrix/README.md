@@ -53,6 +53,8 @@ WordPress plugin for managing design tokens, typography, spacing, shadows, utili
 bash scripts/e2e-ui-check.sh
 ```
 
+These tests run against a real WordPress admin instance in a real browser. They need valid admin login credentials so Playwright can sign in and open the Layrix backend.
+
 Required environment variables:
 
 ```bash

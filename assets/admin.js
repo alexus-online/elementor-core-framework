@@ -4690,6 +4690,87 @@ jQuery(function($){
     return Array.from(new Set(names));
   }
 
+  function getBoxedHelperName() {
+    var value = $.trim($('[name="ecf_framework_v50[elementor_boxed_width]"]').val() || '');
+    return value ? 'ecf-container-boxed' : '';
+  }
+
+  function getSelectedSyncPayloadNames() {
+    var names = getSelectedStarterNames().concat(getSelectedUtilityNames());
+    var helperName = getBoxedHelperName();
+    if (helperName) names.push(helperName);
+    return Array.from(new Set(names));
+  }
+
+  function renderActiveClassGroup(type, names) {
+    var $group = $('[data-ecf-active-class-group="' + type + '"]');
+    var $list = $('[data-ecf-active-class-list="' + type + '"]');
+    if (!$group.length || !$list.length) return;
+
+    if (!names.length) {
+      $group.prop('hidden', true);
+      $list.empty();
+      return;
+    }
+
+    var chipClass = type === 'helper' ? 'ecf-active-class-chip ecf-active-class-chip--helper' : 'ecf-active-class-chip';
+    $group.prop('hidden', false);
+    $list.html(names.map(function(name) {
+      return '<span class="' + chipClass + '">' + escapeHtml(name) + '</span>';
+    }).join(''));
+  }
+
+  function updateActiveClassSummary(starterNames, utilityNames, syncPayloadNames) {
+    var basicNames = [];
+    var extraNames = [];
+    var customNames = [];
+    var helperNames = [];
+    var knownStarter = {};
+
+    $('.ecf-starter-class-item').each(function() {
+      var $item = $(this);
+      var name = String($item.data('class-name') || '').toLowerCase();
+      var tier = String($item.data('tier') || '');
+      if (!name) return;
+      knownStarter[name] = true;
+      if (starterNames.indexOf(name) === -1) return;
+      if (tier === 'basic') {
+        basicNames.push(name);
+      } else {
+        extraNames.push(name);
+      }
+    });
+
+    $.each(starterNames, function(_, name) {
+      if (knownStarter[name]) return;
+      customNames.push(name);
+    });
+
+    $.each(syncPayloadNames, function(_, name) {
+      if (starterNames.indexOf(name) !== -1 || utilityNames.indexOf(name) !== -1) return;
+      helperNames.push(name);
+    });
+
+    $('[data-ecf-active-basic-count]').text(basicNames.length);
+    $('[data-ecf-active-extras-count]').text(extraNames.length);
+    $('[data-ecf-active-utility-count]').text(utilityNames.length);
+    $('[data-ecf-active-custom-count]').text(customNames.length);
+    $('[data-ecf-active-helper-count]').text(helperNames.length);
+    $('[data-ecf-active-total-count]').text(syncPayloadNames.length);
+
+    $('[data-ecf-active-class-hint]').text(
+      helperNames.length
+        ? 'Die Sync-Gesamtzahl enthält die automatische Helper-Klasse ecf-container-boxed, weil aktuell eine Elementor-Boxed-Breite gesetzt ist.'
+        : 'Die Sync-Gesamtzahl entspricht deinen aktuell aktivierten Basis-, Extra-, Utility- und eigenen Klassen.'
+    );
+
+    renderActiveClassGroup('basic', basicNames);
+    renderActiveClassGroup('extras', extraNames);
+    renderActiveClassGroup('utility', utilityNames);
+    renderActiveClassGroup('custom', customNames);
+    renderActiveClassGroup('helper', helperNames);
+  }
+
   function updateStarterClassesState() {
     var $root = $('[data-ecf-starter-classes]');
     if (!$root.length) return;
@@ -4699,7 +4780,7 @@ jQuery(function($){
     var existing = getStarterExistingLabels();
     var starterNames = getSelectedStarterNames();
     var utilityNames = getSelectedUtilityNames();
-    var selectedNames = Array.from(new Set(starterNames.concat(utilityNames)));
+    var selectedNames = getSelectedSyncPayloadNames();
     var pendingNew = selectedNames.filter(function(name) { return existing.indexOf(name) === -1; }).length;
     var projected = currentTotal + pendingNew;
     var basicCount = $('.ecf-starter-class-item[data-tier="basic"]').length;
@@ -4716,7 +4797,7 @@ jQuery(function($){
     $('[data-ecf-starter-projected]').text(projected);
     $('[data-ecf-starter-projected-inline]').text(projected);
     $('[data-ecf-starter-basic-count]').text(basicCount);
-    $('[data-ecf-starter-extras-count]').text(advancedCount + utilityCount);
+    $('[data-ecf-starter-extras-count]').text(advancedCount);
     $('[data-ecf-starter-custom-count]').text(customCount);
     $('[data-ecf-starter-percent]').text(percent);
     $('[data-ecf-starter-progress]').css('width', percent + '%');
@@ -4724,11 +4805,13 @@ jQuery(function($){
       .removeClass('ecf-class-limit-card--neutral ecf-class-limit-card--success ecf-class-limit-card--warning ecf-class-limit-card--danger')
       .addClass('ecf-class-limit-card--' + status);
 
+    updateActiveClassSummary(starterNames, utilityNames, selectedNames);
     updateClassLibrarySelectAllState();
   }
 
   function applyClassTierFilter(tier) {
     var activeTier = tier || 'all';
+    var currentLibrary = $('[data-ecf-library-tab].is-active').data('ecf-library-tab') || 'active';
     $('[data-ecf-class-tier]').removeClass('is-active')
       .filter('[data-ecf-class-tier="' + activeTier + '"]').addClass('is-active');
 
@@ -4742,7 +4825,11 @@ jQuery(function($){
       return;
     }
 
-    switchClassLibrary('starter');
+    if (activeTier === 'basic') {
+      switchClassLibrary('starter');
+    } else if (currentLibrary !== 'active') {
+      switchClassLibrary('starter');
+    }
 
     if (activeTier === 'custom') {
       applyStarterClassFilter('custom');
@@ -4759,6 +4846,10 @@ jQuery(function($){
     var activeLibrary = $('[data-ecf-library-tab].is-active').data('ecf-library-tab') || 'starter';
     var $section = $('[data-ecf-library-section="' + activeLibrary + '"]');
     if (!$section.length) return $();
+
+    if (activeLibrary === 'active') {
+      return $();
+    }
 
     if (activeLibrary === 'utility') {
       return $section.find('.ecf-utility-class-item:visible .ecf-utility-class-toggle');
@@ -5012,12 +5103,13 @@ jQuery(function($){
   function updateClassLibraryContext() {
     var activeTier = $('[data-ecf-class-tier].is-active').data('ecf-class-tier') || 'all';
     var activeLibrary = $('[data-ecf-library-tab].is-active').data('ecf-library-tab') || 'starter';
-    var showExtrasControls = activeTier === 'extras';
+    var showExtrasControls = true;
     var showStarterFilter = activeLibrary === 'starter' && activeTier !== 'custom';
     var showBemGenerator = activeLibrary === 'starter' && activeTier === 'custom';
 
     $('[data-ecf-library-tabs]').prop('hidden', !showExtrasControls);
-    $('[data-ecf-library-help], [data-ecf-category-help="utility"]').prop('hidden', !showExtrasControls);
+    $('[data-ecf-library-help]').prop('hidden', !showExtrasControls);
+    $('[data-ecf-category-help="utility"]').prop('hidden', activeLibrary !== 'utility');
     $('[data-ecf-starter-filterbar]').prop('hidden', !showStarterFilter);
     $('[data-ecf-bem-generator]').prop('hidden', !showBemGenerator);
   }

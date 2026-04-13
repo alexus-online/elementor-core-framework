@@ -797,6 +797,21 @@ trait ECF_Framework_Config_Trait {
         return array_values(array_unique($selected));
     }
 
+    private function get_selected_custom_class_names($settings = null) {
+        $settings = is_array($settings) ? $settings : $this->get_settings();
+        $selected = [];
+        foreach (($settings['starter_classes']['custom'] ?? []) as $row) {
+            if (empty($row['enabled'])) {
+                continue;
+            }
+            $normalized = $this->normalize_starter_class_name($row['name'] ?? '');
+            if ($normalized !== '') {
+                $selected[] = $normalized;
+            }
+        }
+        return array_values(array_unique($selected));
+    }
+
     private function starter_class_category_labels() {
         return [
             'all' => __('All classes', 'ecf-framework'),
@@ -877,5 +892,72 @@ trait ECF_Framework_Config_Trait {
             }
         }
         return array_values(array_unique($selected));
+    }
+
+    private function get_selected_library_starter_class_names($settings = null) {
+        $settings = is_array($settings) ? $settings : $this->get_settings();
+        $selected = [];
+        $enabled = $settings['starter_classes']['enabled'] ?? [];
+        foreach (array_keys(array_filter((array) $enabled)) as $name) {
+            $normalized = $this->normalize_starter_class_name($name);
+            if ($normalized !== '') {
+                $selected[] = $normalized;
+            }
+        }
+        return array_values(array_unique($selected));
+    }
+
+    private function get_boxed_helper_class_name($settings = null) {
+        $settings = is_array($settings) ? $settings : $this->get_settings();
+        $boxed_width = trim((string) ($settings['elementor_boxed_width'] ?? ''));
+        return $boxed_width !== '' ? 'ecf-container-boxed' : '';
+    }
+
+    private function get_active_class_snapshot($settings = null) {
+        $settings = is_array($settings) ? $settings : $this->get_settings();
+        $starter_library = $this->starter_class_library();
+        $basic_lookup = [];
+        $advanced_lookup = [];
+
+        foreach (($starter_library['basic'] ?? []) as $item) {
+            $basic_lookup[$item['name']] = true;
+        }
+
+        foreach (($starter_library['advanced'] ?? []) as $item) {
+            $advanced_lookup[$item['name']] = true;
+        }
+
+        $starter = $this->get_selected_library_starter_class_names($settings);
+        $custom = $this->get_selected_custom_class_names($settings);
+        $utility = $this->get_selected_utility_class_names($settings);
+        $basic = [];
+        $extras = [];
+
+        foreach ($starter as $class_name) {
+            if (isset($basic_lookup[$class_name])) {
+                $basic[] = $class_name;
+            } elseif (isset($advanced_lookup[$class_name])) {
+                $extras[] = $class_name;
+            }
+        }
+
+        $helper = [];
+        $boxed_helper = $this->get_boxed_helper_class_name($settings);
+        if ($boxed_helper !== '') {
+            $helper[] = $boxed_helper;
+        }
+
+        $selected = array_values(array_unique(array_merge($basic, $extras, $custom, $utility)));
+        $sync_payload = array_values(array_unique(array_merge($selected, $helper)));
+
+        return [
+            'basic' => $basic,
+            'extras' => $extras,
+            'custom' => $custom,
+            'utility' => $utility,
+            'helper' => $helper,
+            'selected' => $selected,
+            'sync_payload' => $sync_payload,
+        ];
     }
 }
