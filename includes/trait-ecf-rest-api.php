@@ -60,6 +60,7 @@ trait ECF_Framework_REST_API_Trait {
             'callback'            => [$this, 'rest_search_font_library_fonts'],
             'permission_callback' => [$this, 'rest_manage_options_permission'],
         ]);
+
     }
 
     public function rest_manage_options_permission() {

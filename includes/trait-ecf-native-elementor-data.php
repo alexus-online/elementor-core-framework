@@ -696,6 +696,25 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         return $deleted;
     }
 
+    private function get_ecf_native_class_labels(array $exclude_labels = []) {
+        if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
+            return [];
+        }
+        $exclude = array_flip(array_map('strtolower', $exclude_labels));
+        $repo    = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $items   = $repo->all()->get()['items'] ?? [];
+        $labels  = [];
+        foreach ($items as $id => $item) {
+            if ($this->is_ecf_native_class($id, is_array($item) ? $item : [])) {
+                $label = trim((string) ($item['label'] ?? $id));
+                if ($label !== '' && !isset($exclude[strtolower($label)])) {
+                    $labels[] = $label;
+                }
+            }
+        }
+        return $labels;
+    }
+
     private function get_native_class_cleanup_count() {
         if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
             return 0;

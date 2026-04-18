@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Layrix\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-18 08:01+0000\n"
+"POT-Creation-Date: 2026-04-18 09:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -490,14 +490,14 @@ msgstr ""
 #: dist/release/layrix/includes/trait-ecf-asset-loading.php:201
 #: dist/release/layrix/layrix.php:290
 #: includes/trait-ecf-asset-loading.php:201
-#: layrix.php:290
+#: layrix.php:295
 msgid "Auto-Sync: off"
 msgstr ""
 
 #: dist/release/layrix/includes/trait-ecf-asset-loading.php:200
 #: dist/release/layrix/layrix.php:290
 #: includes/trait-ecf-asset-loading.php:200
-#: layrix.php:290
+#: layrix.php:295
 msgid "Auto-Sync: on"
 msgstr ""
 
@@ -506,7 +506,7 @@ msgstr ""
 #: dist/release/layrix/layrix.php:302
 #: includes/trait-ecf-admin-general.php:166
 #: includes/trait-ecf-admin-page-sections.php:2311
-#: layrix.php:302
+#: layrix.php:307
 msgid "Auto-sync classes"
 msgstr ""
 
@@ -515,7 +515,7 @@ msgstr ""
 #: dist/release/layrix/layrix.php:298
 #: includes/trait-ecf-admin-general.php:160
 #: includes/trait-ecf-admin-page-sections.php:2307
-#: layrix.php:298
+#: layrix.php:303
 msgid "Auto-sync variables"
 msgstr ""
 
@@ -547,14 +547,14 @@ msgstr ""
 #: dist/release/layrix/includes/trait-ecf-asset-loading.php:199
 #: dist/release/layrix/layrix.php:285
 #: includes/trait-ecf-asset-loading.php:199
-#: layrix.php:285
+#: layrix.php:290
 msgid "Autosave: off"
 msgstr ""
 
 #: dist/release/layrix/includes/trait-ecf-asset-loading.php:198
 #: dist/release/layrix/layrix.php:285
 #: includes/trait-ecf-asset-loading.php:198
-#: layrix.php:285
+#: layrix.php:290
 msgid "Autosave: on"
 msgstr ""
 
@@ -616,7 +616,7 @@ msgstr ""
 #: includes/trait-ecf-admin-page-sections.php:1872
 #: includes/trait-ecf-admin-page-sections.php:2948
 #: includes/trait-ecf-asset-loading.php:222
-#: layrix.php:252
+#: layrix.php:256
 msgid "Base Settings"
 msgstr ""
 
@@ -867,7 +867,7 @@ msgid "Centers text content horizontally."
 msgstr ""
 
 #: dist/release/layrix/layrix.php:257
-#: layrix.php:257
+#: layrix.php:262
 msgid "Changelog"
 msgstr ""
 
@@ -1007,7 +1007,7 @@ msgid "Class usage overview"
 msgstr ""
 
 #: dist/release/layrix/layrix.php:248
-#: layrix.php:248
+#: layrix.php:252
 msgid "Classes"
 msgstr ""
 
@@ -1135,7 +1135,7 @@ msgstr ""
 #: dist/release/layrix/layrix.php:276
 #: includes/trait-ecf-asset-loading.php:215
 #: layrix.php:241
-#: layrix.php:276
+#: layrix.php:281
 msgid "Colors & Radius"
 msgstr ""
 
@@ -1633,7 +1633,7 @@ msgid "Element-based unit. Rarely needed, but possible for content wrappers."
 msgstr ""
 
 #: dist/release/layrix/layrix.php:246
-#: layrix.php:246
+#: layrix.php:250
 msgid "Elementor"
 msgstr ""
 
@@ -2373,7 +2373,7 @@ msgstr ""
 #: dist/release/layrix/includes/trait-ecf-admin-page-sections.php:3202
 #: dist/release/layrix/layrix.php:256
 #: includes/trait-ecf-admin-page-sections.php:3202
-#: layrix.php:256
+#: layrix.php:261
 msgid "Help"
 msgstr ""
 
@@ -3636,7 +3636,7 @@ msgid "Reset browser text margins"
 msgstr ""
 
 #: dist/release/layrix/layrix.php:281
-#: layrix.php:281
+#: layrix.php:286
 msgid "Reset layout"
 msgstr ""
 
@@ -3756,8 +3756,8 @@ msgstr ""
 
 #: dist/release/layrix/layrix.php:307
 #: dist/release/layrix/layrix.php:365
-#: layrix.php:307
-#: layrix.php:365
+#: layrix.php:312
+#: layrix.php:370
 msgid "Save settings"
 msgstr ""
 
@@ -3948,7 +3948,7 @@ msgstr ""
 #: dist/release/layrix/layrix.php:251
 #: includes/trait-ecf-admin-page-sections.php:2419
 #: includes/trait-ecf-admin-page-sections.php:3253
-#: layrix.php:251
+#: layrix.php:255
 msgid "Settings"
 msgstr ""
 
@@ -3963,7 +3963,7 @@ msgid "Settings saved automatically."
 msgstr ""
 
 #: dist/release/layrix/layrix.php:266
-#: layrix.php:266
+#: layrix.php:271
 msgid "Settings saved."
 msgstr ""
 
@@ -4042,7 +4042,7 @@ msgstr ""
 #: includes/trait-ecf-admin-page-sections.php:963
 #: includes/trait-ecf-asset-loading.php:218
 #: includes/trait-ecf-framework-config.php:508
-#: layrix.php:244
+#: layrix.php:247
 msgid "Shadows"
 msgstr ""
 
@@ -4226,7 +4226,7 @@ msgstr ""
 #: includes/trait-ecf-admin-page-sections.php:485
 #: includes/trait-ecf-asset-loading.php:171
 #: includes/trait-ecf-asset-loading.php:217
-#: layrix.php:243
+#: layrix.php:245
 msgid "Spacing"
 msgstr ""
 
@@ -4370,7 +4370,7 @@ msgstr ""
 #: dist/release/layrix/layrix.php:249
 #: includes/trait-ecf-admin-page-sections.php:3065
 #: includes/trait-ecf-asset-loading.php:221
-#: layrix.php:249
+#: layrix.php:253
 msgid "Sync & Export"
 msgstr ""
 
@@ -4824,7 +4824,7 @@ msgstr ""
 #: includes/trait-ecf-asset-loading.php:172
 #: includes/trait-ecf-asset-loading.php:216
 #: includes/trait-ecf-framework-config.php:505
-#: layrix.php:242
+#: layrix.php:243
 msgid "Typography"
 msgstr ""
 
@@ -4853,7 +4853,7 @@ msgid "UI Skin"
 msgstr ""
 
 #: dist/release/layrix/layrix.php:252
-#: layrix.php:252
+#: layrix.php:256
 msgid "Unsaved"
 msgstr ""
 
@@ -5106,7 +5106,7 @@ msgstr ""
 #: dist/release/layrix/layrix.php:247
 #: includes/trait-ecf-admin-page-sections.php:2358
 #: includes/trait-ecf-admin-page-sections.php:3117
-#: layrix.php:247
+#: layrix.php:251
 msgid "Variables"
 msgstr ""
 

@@ -385,15 +385,33 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
         }
 
         $active_class_snapshot = $this->get_active_class_snapshot($settings);
-        $sync_payload_count = count((array) ($active_class_snapshot['sync_payload'] ?? []));
-        $elementor_class_total = (int) $this->get_native_global_class_total_count();
-        $only_in_elementor = max(0, $elementor_class_total - $sync_payload_count);
+        $sync_payload          = $active_class_snapshot['sync_payload'] ?? [];
+        $orphaned_labels       = $this->get_ecf_native_class_labels($sync_payload);
+        $only_in_elementor     = count($orphaned_labels);
         if ($only_in_elementor > 0) {
+            $class_list = implode(', ', array_map(fn($l) => '.' . $l, $orphaned_labels));
+            $fix_confirm = sprintf(
+                _n(
+                    "Diese Klasse aus Elementor entfernen?\n\n%s\n\nSie kann danach neu synchronisiert werden.",
+                    "Diese Klassen aus Elementor entfernen?\n\n%s\n\nSie können danach neu synchronisiert werden.",
+                    $only_in_elementor,
+                    'ecf-framework'
+                ),
+                $class_list
+            );
             $checks[] = [
-                'status' => 'notice',
-                'title' => __('Class cleanup', 'ecf-framework'),
-                'message' => __('Some classes already exist only in Elementor and are not part of your current Layrix selection. Review them before they become stale.', 'ecf-framework'),
-                'value' => sprintf(__('%d only in Elementor', 'ecf-framework'), $only_in_elementor),
+                'status'       => 'notice',
+                'title'        => __('Class cleanup', 'ecf-framework'),
+                'message'      => $only_in_elementor === 1
+                    ? __('Eine Klasse existiert bereits nur in Elementor und gehört nicht zu deiner aktuellen Layrix-Auswahl. Prüfe sie, bevor sie veraltet.', 'ecf-framework')
+                    : sprintf(__('%d Klassen existieren bereits nur in Elementor und gehören nicht zu deiner aktuellen Layrix-Auswahl. Prüfe sie, bevor sie veralten.', 'ecf-framework'), $only_in_elementor),
+                'value'        => $only_in_elementor === 1
+                    ? __('1 nur in Elementor', 'ecf-framework')
+                    : sprintf(__('%d nur in Elementor', 'ecf-framework'), $only_in_elementor),
+                'fix_action'   => 'ecf_class_cleanup',
+                'fix_nonce'    => wp_create_nonce('ecf_class_cleanup'),
+                'fix_label'    => __('Bereinigen', 'ecf-framework'),
+                'fix_confirm'  => $fix_confirm,
             ];
         } else {
             $checks[] = [
@@ -1908,6 +1926,7 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                     <p><?php echo esc_html__('Apply one complete visual direction when you want a faster start for type, colors, radii, shadows and website basics.', 'ecf-framework'); ?></p>
                                 </div>
                             </div>
+
                             <div class="ecf-style-presets-grid">
                                 <?php foreach ($style_presets as $preset): ?>
                                     <article class="ecf-style-preset">
@@ -3051,6 +3070,127 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                     </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    private function render_starthilfe_panel($settings) {
+        $design_health_snapshot = $this->website_design_health_checks($settings);
+        $design_health_checks   = $design_health_snapshot['checks'] ?? [];
+        $design_health_counts   = $design_health_snapshot['counts'] ?? ['good' => 0, 'notice' => 0, 'warn' => 0];
+        $smart_recommendations  = $this->website_smart_recommendations($settings, $design_health_snapshot);
+        $style_presets = [
+            ['slug'=>'glass-product','tone'=>__('Modern','ecf-framework'),'title'=>__('Glass Product','ecf-framework'),'description'=>__('A crisp product look with cool indigo accents, airy neutrals and soft rounded surfaces.','ecf-framework'),'heading_sample'=>__('Product pages that feel clear','ecf-framework'),'body_sample'=>__('Great for SaaS, product marketing and clean interface-driven brands.','ecf-framework'),'heading_font_stack'=>'Avenir Next, Avenir, "Helvetica Neue", Arial, sans-serif','body_font_stack'=>'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif','preview'=>['background'=>'#f8fafc','surface'=>'#ffffff','primary'=>'#4f46e5','accent'=>'#14b8a6','text'=>'#0f172a'],'preset'=>['general'=>['root_font_size'=>'62.5','base_body_text_size'=>'16px','base_body_font_weight'=>'400','base_font_family'=>'var(--ecf-font-primary)','heading_font_family'=>'var(--ecf-font-secondary)','content_max_width'=>['value'=>'72','format'=>'ch'],'elementor_boxed_width'=>['value'=>'1240','format'=>'px'],'base_text_color'=>'#0f172a','base_background_color'=>'#f8fafc','link_color'=>'#4f46e5','focus_color'=>'#0ea5e9'],'colors'=>['primary'=>'#4f46e5','secondary'=>'#64748b','accent'=>'#14b8a6','surface'=>'#ffffff','text'=>'#0f172a'],'radius'=>['xs'=>['min'=>'6px','max'=>'6px'],'s'=>['min'=>'10px','max'=>'12px'],'m'=>['min'=>'14px','max'=>'16px'],'l'=>['min'=>'20px','max'=>'24px'],'xl'=>['min'=>'30px','max'=>'36px'],'full'=>['min'=>'999px','max'=>'999px']],'shadows'=>['xs'=>'0 1px 2px rgba(15,23,42,0.06)','s'=>'0 10px 24px rgba(15,23,42,0.08)','m'=>'0 20px 44px rgba(15,23,42,0.10)','l'=>'0 30px 70px rgba(15,23,42,0.12)','xl'=>'0 44px 96px rgba(15,23,42,0.14)','inner'=>'inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(15,23,42,0.05)'],'spacing'=>['min_base'=>'16','max_base'=>'28','min_ratio'=>'1.25','max_ratio'=>'1.414','base_index'=>'m','fluid'=>true,'min_vw'=>'375','max_vw'=>'1280'],'fonts'=>['primary'=>'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif','secondary'=>'Avenir Next, Avenir, "Helvetica Neue", Arial, sans-serif']]],
+            ['slug'=>'warm-editorial','tone'=>__('Editorial','ecf-framework'),'title'=>__('Warm Editorial','ecf-framework'),'description'=>__('Creamy surfaces, elegant serif headlines and softer shadows for storytelling and premium content.','ecf-framework'),'heading_sample'=>__('Stories with more atmosphere','ecf-framework'),'body_sample'=>__('A gentler direction for brands, magazines and long-form reading experiences.','ecf-framework'),'heading_font_stack'=>'Iowan Old Style, "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif','body_font_stack'=>'Avenir Next, Avenir, "Helvetica Neue", Arial, sans-serif','preview'=>['background'=>'#f5efe7','surface'=>'#fffaf3','primary'=>'#7c3aed','accent'=>'#c2410c','text'=>'#1f2937'],'preset'=>['general'=>['root_font_size'=>'62.5','base_body_text_size'=>'17px','base_body_font_weight'=>'400','base_font_family'=>'var(--ecf-font-primary)','heading_font_family'=>'var(--ecf-font-secondary)','content_max_width'=>['value'=>'68','format'=>'ch'],'elementor_boxed_width'=>['value'=>'1180','format'=>'px'],'base_text_color'=>'#1f2937','base_background_color'=>'#f5efe7','link_color'=>'#7c3aed','focus_color'=>'#c2410c'],'colors'=>['primary'=>'#7c3aed','secondary'=>'#6b7280','accent'=>'#c2410c','surface'=>'#fffaf3','text'=>'#1f2937'],'radius'=>['xs'=>['min'=>'4px','max'=>'4px'],'s'=>['min'=>'8px','max'=>'10px'],'m'=>['min'=>'12px','max'=>'14px'],'l'=>['min'=>'18px','max'=>'22px'],'xl'=>['min'=>'28px','max'=>'34px'],'full'=>['min'=>'999px','max'=>'999px']],'shadows'=>['xs'=>'0 1px 2px rgba(31,41,55,0.05)','s'=>'0 6px 16px rgba(31,41,55,0.08)','m'=>'0 12px 28px rgba(31,41,55,0.10)','l'=>'0 20px 46px rgba(31,41,55,0.12)','xl'=>'0 32px 72px rgba(31,41,55,0.14)','inner'=>'inset 0 2px 8px rgba(31,41,55,0.07)'],'spacing'=>['min_base'=>'17','max_base'=>'30','min_ratio'=>'1.2','max_ratio'=>'1.333','base_index'=>'m','fluid'=>true,'min_vw'=>'375','max_vw'=>'1280'],'fonts'=>['primary'=>'Avenir Next, Avenir, "Helvetica Neue", Arial, sans-serif','secondary'=>'Iowan Old Style, "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif']]],
+            ['slug'=>'quiet-luxury','tone'=>__('Premium','ecf-framework'),'title'=>__('Quiet Luxury','ecf-framework'),'description'=>__('Dark graphite text, rich plum accents and balanced rounding for a polished premium foundation.','ecf-framework'),'heading_sample'=>__('Refined without feeling loud','ecf-framework'),'body_sample'=>__('A calm premium base when you want elegance, contrast and a little more depth.','ecf-framework'),'heading_font_stack'=>'Georgia, "Times New Roman", serif','body_font_stack'=>'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif','preview'=>['background'=>'#faf7fb','surface'=>'#ffffff','primary'=>'#6d28d9','accent'=>'#0f766e','text'=>'#111827'],'preset'=>['general'=>['root_font_size'=>'62.5','base_body_text_size'=>'16px','base_body_font_weight'=>'500','base_font_family'=>'var(--ecf-font-primary)','heading_font_family'=>'var(--ecf-font-secondary)','content_max_width'=>['value'=>'70','format'=>'ch'],'elementor_boxed_width'=>['value'=>'1200','format'=>'px'],'base_text_color'=>'#111827','base_background_color'=>'#faf7fb','link_color'=>'#6d28d9','focus_color'=>'#0f766e'],'colors'=>['primary'=>'#6d28d9','secondary'=>'#475569','accent'=>'#0f766e','surface'=>'#ffffff','text'=>'#111827'],'radius'=>['xs'=>['min'=>'5px','max'=>'5px'],'s'=>['min'=>'9px','max'=>'11px'],'m'=>['min'=>'13px','max'=>'16px'],'l'=>['min'=>'20px','max'=>'24px'],'xl'=>['min'=>'32px','max'=>'38px'],'full'=>['min'=>'999px','max'=>'999px']],'shadows'=>['xs'=>'0 1px 2px rgba(17,24,39,0.05)','s'=>'0 8px 18px rgba(17,24,39,0.07)','m'=>'0 18px 38px rgba(17,24,39,0.10)','l'=>'0 28px 62px rgba(17,24,39,0.12)','xl'=>'0 40px 86px rgba(17,24,39,0.14)','inner'=>'inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(17,24,39,0.04)'],'spacing'=>['min_base'=>'16','max_base'=>'26','min_ratio'=>'1.2','max_ratio'=>'1.333','base_index'=>'m','fluid'=>true,'min_vw'=>'375','max_vw'=>'1280'],'fonts'=>['primary'=>'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif','secondary'=>'Georgia, "Times New Roman", serif']]],
+        ];
+        ?>
+        <div class="ecf-panel" data-panel="starthilfe">
+            <div class="ecf-card ecf-panel-shell">
+                <div class="ecf-vargroup-header">
+                    <h2><?php echo esc_html__('Starthilfe', 'ecf-framework'); ?></h2>
+                    <button type="button" class="ecf-btn ecf-btn--ghost ecf-btn--sm" data-ecf-wizard-start>
+                        <span class="dashicons dashicons-superhero-alt" style="font-size:14px;width:14px;height:14px;margin-right:4px;vertical-align:middle"></span>
+                        <?php echo esc_html__('Wizard starten', 'ecf-framework'); ?>
+                    </button>
+                </div>
+                <p class="ecf-muted-copy ecf-class-library-intro"><?php echo esc_html__('Wähle ein Stil-Preset als Ausgangspunkt, prüfe die Design-Gesundheit und hole dir schnelle Verbesserungsvorschläge.', 'ecf-framework'); ?></p>
+
+                <div class="ecf-starthilfe-section" id="starthilfe-presets">
+                    <h3 class="ecf-starthilfe-section__label"><?php echo esc_html__('Stil-Presets', 'ecf-framework'); ?></h3>
+                    <p class="ecf-starthilfe-section__desc"><?php echo esc_html__('Ein Klick setzt Farben, Schriften, Radien, Schatten und Website-Basics auf einmal.', 'ecf-framework'); ?></p>
+
+                    <div class="ecf-style-presets-grid">
+                        <?php foreach ($style_presets as $preset): ?>
+                        <article class="ecf-style-preset">
+                            <div class="ecf-style-preset__meta">
+                                <span class="ecf-preview-pill"><?php echo esc_html($preset['tone']); ?></span>
+                                <h3><?php echo esc_html($preset['title']); ?></h3>
+                                <p><?php echo esc_html($preset['description']); ?></p>
+                            </div>
+                            <div class="ecf-style-preset__preview" style="<?php echo esc_attr('--ecf-style-preset-bg:'.$preset['preview']['background'].';--ecf-style-preset-surface:'.$preset['preview']['surface'].';--ecf-style-preset-primary:'.$preset['preview']['primary'].';--ecf-style-preset-accent:'.$preset['preview']['accent'].';--ecf-style-preset-text:'.$preset['preview']['text'].';'); ?>">
+                                <div class="ecf-style-preset__swatches" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                                <div class="ecf-style-preset__surface">
+                                    <strong style="font-family: <?php echo esc_attr($preset['heading_font_stack']); ?>;"><?php echo esc_html($preset['heading_sample']); ?></strong>
+                                    <p style="font-family: <?php echo esc_attr($preset['body_font_stack']); ?>;"><?php echo esc_html($preset['body_sample']); ?></p>
+                                    <div class="ecf-style-preset__actions" aria-hidden="true"><span></span><span></span></div>
+                                </div>
+                            </div>
+                            <button type="button" class="ecf-btn ecf-btn--secondary ecf-style-preset__apply" data-ecf-style-preset-apply data-ecf-style-preset="<?php echo esc_attr(wp_json_encode($preset['preset'])); ?>">
+                                <?php echo esc_html__('Preset anwenden', 'ecf-framework'); ?>
+                            </button>
+                        </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="ecf-starthilfe-section" id="starthilfe-health">
+                    <div class="ecf-design-health-card__header">
+                        <div>
+                            <h3 class="ecf-starthilfe-section__label"><?php echo esc_html__('Design-Gesundheit', 'ecf-framework'); ?></h3>
+                        </div>
+                        <div class="ecf-design-health-card__summary">
+                            <?php if (!empty($design_health_counts['warn'])): ?>
+                                <span class="ecf-design-health-badge ecf-design-health-badge--warn"><?php echo esc_html(sprintf(__('%d zu beheben', 'ecf-framework'), (int) $design_health_counts['warn'])); ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($design_health_counts['notice'])): ?>
+                                <span class="ecf-design-health-badge ecf-design-health-badge--notice"><?php echo esc_html(sprintf(__('%d prüfen', 'ecf-framework'), (int) $design_health_counts['notice'])); ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($design_health_counts['good'])): ?>
+                                <span class="ecf-design-health-badge ecf-design-health-badge--good"><?php echo esc_html(sprintf(__('%d in Ordnung', 'ecf-framework'), (int) $design_health_counts['good'])); ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="ecf-design-health-list">
+                        <?php foreach ($design_health_checks as $check): ?>
+                        <article class="ecf-design-health-item ecf-design-health-item--<?php echo esc_attr($check['status'] ?? 'notice'); ?>">
+                            <div class="ecf-design-health-item__status" aria-hidden="true"></div>
+                            <div class="ecf-design-health-item__copy">
+                                <div class="ecf-design-health-item__topline">
+                                    <strong><?php echo esc_html($check['title'] ?? ''); ?></strong>
+                                    <?php if (!empty($check['value'])): ?><span><?php echo esc_html($check['value']); ?></span><?php endif; ?>
+                                </div>
+                                <p><?php echo esc_html($check['message'] ?? ''); ?></p>
+                                <?php if (!empty($check['fix_action'])): ?>
+                                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="ecf-health-fix-form"
+                                    data-ecf-confirm-title="<?php echo esc_attr($check['fix_label'] ?? __('Beheben', 'ecf-framework')); ?>"
+                                    data-ecf-confirm-classes="<?php echo esc_attr(wp_json_encode($orphaned_labels ?? [])); ?>">
+                                    <input type="hidden" name="action" value="<?php echo esc_attr($check['fix_action']); ?>">
+                                    <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($check['fix_nonce'] ?? ''); ?>">
+                                    <button type="submit" class="ecf-btn ecf-btn--ghost ecf-btn--sm ecf-health-fix-btn">
+                                        <span class="dashicons dashicons-trash" style="font-size:13px;width:13px;height:13px;margin-right:3px;vertical-align:middle" aria-hidden="true"></span>
+                                        <?php echo esc_html($check['fix_label'] ?? __('Beheben', 'ecf-framework')); ?>
+                                    </button>
+                                </form>
+                                <?php endif; ?>
+                            </div>
+                        </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <?php if (!empty($smart_recommendations)): ?>
+                <div class="ecf-starthilfe-section" id="starthilfe-empfehlungen">
+                    <h3 class="ecf-starthilfe-section__label"><?php echo esc_html__('Empfehlungen', 'ecf-framework'); ?></h3>
+                    <div class="ecf-smart-recommendations-grid">
+                        <?php foreach ($smart_recommendations as $recommendation): ?>
+                        <article class="ecf-smart-recommendation">
+                            <div class="ecf-smart-recommendation__meta">
+                                <span class="ecf-preview-pill"><?php echo esc_html($recommendation['tone'] ?? ''); ?></span>
+                                <h3><?php echo esc_html($recommendation['title'] ?? ''); ?></h3>
+                                <p><?php echo esc_html($recommendation['description'] ?? ''); ?></p>
+                            </div>
+                            <?php if (!empty($recommendation['payload']) && !empty($recommendation['apply_label'])): ?>
+                            <button type="button" class="ecf-btn ecf-btn--secondary ecf-smart-recommendation__apply" data-ecf-smart-recommendation-apply data-ecf-smart-recommendation="<?php echo esc_attr(wp_json_encode($recommendation['payload'])); ?>">
+                                <?php echo esc_html($recommendation['apply_label']); ?>
+                            </button>
+                            <?php endif; ?>
+                        </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php

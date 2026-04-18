@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Layrix
  * Description: Core-Framework-style tokens, editor panel, and native Elementor variable/class sync.
- * Version: 0.3.13
+ * Version: 0.4.0
  * Author: Alexander Kaiser
  * Update URI: https://github.com/alexus-online/layrix
  * Text Domain: ecf-framework
@@ -238,18 +238,38 @@ class ECF_Framework {
                 </div>
                 <nav class="ecf-nav">
                     <div class="ecf-nav-section"><?php echo esc_html__('Design', 'ecf-framework'); ?></div>
-                    <button class="ecf-nav-item is-active" data-panel="tokens"><span class="dashicons dashicons-art"></span><?php echo esc_html__('Colors & Radius', 'ecf-framework'); ?></button>
-                    <button class="ecf-nav-item" data-panel="typography"><span class="dashicons dashicons-editor-textcolor"></span><?php echo esc_html__('Typography', 'ecf-framework'); ?></button>
-                    <button class="ecf-nav-item" data-panel="spacing"><span class="dashicons dashicons-editor-table"></span><?php echo esc_html__('Spacing', 'ecf-framework'); ?></button>
-                    <button class="ecf-nav-item" data-panel="shadows"><span class="dashicons dashicons-admin-appearance"></span><?php echo esc_html__('Shadows', 'ecf-framework'); ?></button>
+                    <button class="ecf-nav-item is-active" data-panel="tokens" data-ecf-has-subnav="tokens"><span class="dashicons dashicons-art"></span><?php echo esc_html__('Colors & Radius', 'ecf-framework'); ?></button>
+                    <div class="ecf-nav-subnav" data-ecf-subnav="tokens" hidden></div>
+                    <button class="ecf-nav-item" data-panel="typography" data-ecf-has-subnav="typography"><span class="dashicons dashicons-editor-textcolor"></span><?php echo esc_html__('Typography', 'ecf-framework'); ?></button>
+                    <div class="ecf-nav-subnav" data-ecf-subnav="typography" hidden></div>
+                    <button class="ecf-nav-item" data-panel="spacing" data-ecf-has-subnav="spacing"><span class="dashicons dashicons-editor-table"></span><?php echo esc_html__('Spacing', 'ecf-framework'); ?></button>
+                    <div class="ecf-nav-subnav" data-ecf-subnav="spacing" hidden></div>
+                    <button class="ecf-nav-item" data-panel="shadows" data-ecf-has-subnav="shadows"><span class="dashicons dashicons-admin-appearance"></span><?php echo esc_html__('Shadows', 'ecf-framework'); ?></button>
+                    <div class="ecf-nav-subnav" data-ecf-subnav="shadows" hidden></div>
 
                     <div class="ecf-nav-section"><?php echo esc_html__('Elementor', 'ecf-framework'); ?></div>
                     <button class="ecf-nav-item" data-panel="variables"><span class="dashicons dashicons-list-view"></span><?php echo esc_html__('Variables', 'ecf-framework'); ?></button>
                     <button class="ecf-nav-item" data-panel="utilities"><span class="dashicons dashicons-code-standards"></span><?php echo esc_html__('Classes', 'ecf-framework'); ?></button>
-                    <button class="ecf-nav-item" data-panel="sync"><span class="dashicons dashicons-update"></span><?php echo esc_html__('Sync & Export', 'ecf-framework'); ?></button>
+                    <button class="ecf-nav-item" data-panel="sync"><span class="dashicons dashicons-update"></span><?php echo esc_html__('Sync & Export', 'ecf-framework'); ?><span class="ecf-sync-dot" data-ecf-sync-dot="unknown" aria-hidden="true"></span></button>
 
                     <div class="ecf-nav-section"><?php echo esc_html__('Settings', 'ecf-framework'); ?></div>
-                    <button class="ecf-nav-item" data-panel="components" data-ecf-new-key="general-settings"><span class="dashicons dashicons-layout"></span><?php echo esc_html__('Base Settings', 'ecf-framework'); ?><span class="ecf-unsaved-badge" data-ecf-unsaved-badge hidden><?php echo esc_html__('Unsaved', 'ecf-framework'); ?></span></button>
+                    <button class="ecf-nav-item" data-panel="starthilfe" data-ecf-has-subnav="starthilfe"><span class="dashicons dashicons-superhero-alt"></span><?php echo esc_html__('Starthilfe', 'ecf-framework'); ?></button>
+                    <div class="ecf-nav-subnav" data-ecf-subnav="starthilfe" hidden>
+                        <button type="button" class="ecf-nav-subnav__item" data-ecf-starthilfe-jump="presets">
+                            <span class="ecf-nav-subnav__dot"></span>
+                            <span class="ecf-nav-subnav__label"><?php echo esc_html__('Stil-Presets', 'ecf-framework'); ?></span>
+                        </button>
+                        <button type="button" class="ecf-nav-subnav__item" data-ecf-starthilfe-jump="health">
+                            <span class="ecf-nav-subnav__dot"></span>
+                            <span class="ecf-nav-subnav__label"><?php echo esc_html__('Design-Gesundheit', 'ecf-framework'); ?></span>
+                        </button>
+                        <button type="button" class="ecf-nav-subnav__item" data-ecf-starthilfe-jump="empfehlungen">
+                            <span class="ecf-nav-subnav__dot"></span>
+                            <span class="ecf-nav-subnav__label"><?php echo esc_html__('Empfehlungen', 'ecf-framework'); ?></span>
+                        </button>
+                    </div>
+                    <button class="ecf-nav-item" data-panel="components" data-ecf-new-key="general-settings" data-ecf-has-subnav="components"><span class="dashicons dashicons-layout"></span><?php echo esc_html__('Einstellungen', 'ecf-framework'); ?><span class="ecf-unsaved-badge" data-ecf-unsaved-badge hidden><?php echo esc_html__('Unsaved', 'ecf-framework'); ?></span></button>
+                    <div class="ecf-nav-subnav" data-ecf-subnav="components" hidden></div>
                 </nav>
                 <div class="ecf-sidebar-footer">
                     <div class="ecf-sidebar-footer__links">
@@ -280,31 +300,39 @@ class ECF_Framework {
                             <span class="dashicons dashicons-image-rotate" aria-hidden="true"></span>
                             <span><?php echo esc_html__('Reset layout', 'ecf-framework'); ?></span>
                         </button>
-                        <div class="ecf-sticky-topbar__autosave" data-ecf-autosave-control>
-                            <button type="button" class="ecf-autosave-pill ecf-sticky-topbar__autosave-toggle" data-ecf-autosave-toggle aria-pressed="<?php echo !empty($settings['autosave_enabled']) ? 'true' : 'false'; ?>">
-                                <span data-ecf-autosave-pill><?php echo esc_html(!empty($settings['autosave_enabled']) ? __('Autosave: on', 'ecf-framework') : __('Autosave: off', 'ecf-framework')); ?></span>
-                            </button>
-                        </div>
                         <div class="ecf-sticky-topbar__autosave ecf-sticky-topbar__autosync" data-ecf-autosync-control>
                             <button type="button" class="ecf-autosave-pill ecf-sticky-topbar__autosave-toggle ecf-sticky-topbar__autosync-toggle" data-ecf-autosync-toggle aria-haspopup="true" aria-expanded="false">
-                                <span data-ecf-autosync-pill><?php echo esc_html(!empty($settings['elementor_auto_sync_enabled']) ? __('Auto-Sync: on', 'ecf-framework') : __('Auto-Sync: off', 'ecf-framework')); ?></span>
+                                <span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
+                                <span class="ecf-topbar-sync-label"><?php echo esc_html__('Sync', 'ecf-framework'); ?></span>
+                                <span data-ecf-autosave-pill hidden><?php echo esc_html(!empty($settings['autosave_enabled']) ? __('Autosave: on', 'ecf-framework') : __('Autosave: off', 'ecf-framework')); ?></span>
+                                <span data-ecf-autosync-pill hidden><?php echo esc_html(!empty($settings['elementor_auto_sync_enabled']) ? __('Auto-Sync: on', 'ecf-framework') : __('Auto-Sync: off', 'ecf-framework')); ?></span>
                                 <span class="ecf-sticky-topbar__autosave-arrow-hit" data-ecf-autosync-arrow-hit>
                                     <span class="dashicons dashicons-arrow-down-alt2 ecf-sticky-topbar__autosave-arrow" aria-hidden="true"></span>
                                 </span>
                             </button>
                             <div class="ecf-sticky-topbar__autosave-menu" data-ecf-autosync-menu hidden>
+                                <div class="ecf-topbar-menu__section"><?php echo esc_html__('Auto-save', 'ecf-framework'); ?></div>
+                                <label class="ecf-sticky-topbar__autosave-option">
+                                    <input type="checkbox" data-ecf-topbar-setting="autosave_enabled" <?php checked(!empty($settings['autosave_enabled'])); ?>>
+                                    <span><?php echo esc_html__('Autosave', 'ecf-framework'); ?></span>
+                                </label>
+                                <div class="ecf-topbar-menu__section"><?php echo esc_html__('Elementor sync', 'ecf-framework'); ?></div>
+                                <label class="ecf-sticky-topbar__autosave-option">
+                                    <input type="checkbox" data-ecf-topbar-setting="elementor_auto_sync_enabled" <?php checked(!empty($settings['elementor_auto_sync_enabled'])); ?>>
+                                    <span><?php echo esc_html__('Auto-Sync active', 'ecf-framework'); ?></span>
+                                </label>
                                 <label class="ecf-sticky-topbar__autosave-option">
                                     <input type="checkbox" data-ecf-topbar-setting="elementor_auto_sync_variables" <?php checked(!empty($settings['elementor_auto_sync_variables'])); ?>>
-                                    <span><?php echo esc_html__('Auto-sync variables', 'ecf-framework'); ?></span>
+                                    <span><?php echo esc_html__('Variables', 'ecf-framework'); ?></span>
                                 </label>
                                 <label class="ecf-sticky-topbar__autosave-option">
                                     <input type="checkbox" data-ecf-topbar-setting="elementor_auto_sync_classes" <?php checked(!empty($settings['elementor_auto_sync_classes'])); ?>>
-                                    <span><?php echo esc_html__('Auto-sync classes', 'ecf-framework'); ?></span>
+                                    <span><?php echo esc_html__('Classes', 'ecf-framework'); ?></span>
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" name="submit" class="ecf-btn ecf-btn--primary ecf-sticky-topbar__save">
-                            <?php echo esc_html__('Save settings', 'ecf-framework'); ?>
+                        <button type="submit" name="submit" class="ecf-btn ecf-btn--primary ecf-sticky-topbar__save" data-ecf-save-btn>
+                            <span data-ecf-save-label><?php echo esc_html__('Save', 'ecf-framework'); ?></span>
                         </button>
                     </div>
                 </div>
@@ -369,6 +397,8 @@ class ECF_Framework {
                 <?php wp_nonce_field('ecf_clear_debug_history'); ?>
                 <input type="hidden" name="action" value="ecf_clear_debug_history">
             </form>
+
+                <?php $this->render_starthilfe_panel($settings); ?>
 
                 <?php
                 $this->render_sync_panel([
