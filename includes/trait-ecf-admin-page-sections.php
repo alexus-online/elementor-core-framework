@@ -44,80 +44,68 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
     }
 
     private function utility_class_preview_text($class_name) {
-        switch ((string) $class_name) {
-            case 'ecf-heading-1':
-            case 'ecf-heading-2':
-            case 'ecf-heading-3':
-            case 'ecf-heading-4':
-            case 'ecf-heading-5':
-                return __('The quick fox jumps over the fence', 'ecf-framework');
-            case 'ecf-caption':
-                return __('Compact meta note for small hints', 'ecf-framework');
-            case 'ecf-overline':
-                return __('Section label', 'ecf-framework');
-            case 'ecf-text-left':
-                return __('Left aligned sample text in the preview.', 'ecf-framework');
-            case 'ecf-text-center':
-                return __('Centered sample text in the preview.', 'ecf-framework');
-            case 'ecf-text-right':
-                return __('Right aligned sample text in the preview.', 'ecf-framework');
-            case 'ecf-text-balance':
-                return __('Balanced line breaks make longer headings feel calmer.', 'ecf-framework');
-            case 'ecf-text-pretty':
-                return __('Pretty wrapping keeps paragraph breaks more natural.', 'ecf-framework');
-            case 'ecf-inline':
-                return __('Items stay inline with flexible spacing.', 'ecf-framework');
-            case 'ecf-inline-block':
-                return __('This element keeps its own box but stays inline.', 'ecf-framework');
-            case 'ecf-hidden':
-                return __('This helper hides the element visually.', 'ecf-framework');
-            case 'ecf-center-inline':
-                return __('Inline content is centered inside the available width.', 'ecf-framework');
-            case 'ecf-cluster':
-                return __('Small items group into a compact wrapping cluster.', 'ecf-framework');
-            case 'ecf-shadow-xs':
-            case 'ecf-shadow-s':
-            case 'ecf-shadow-m':
-            case 'ecf-shadow-l':
-            case 'ecf-shadow-xl':
-            case 'ecf-shadow-inner':
-                return __('Shadow token preview for this utility class.', 'ecf-framework');
-            case 'ecf-visually-hidden':
-                return __('Hidden visually, still readable for assistive tech.', 'ecf-framework');
-            case 'ecf-body-l':
-            case 'ecf-body-m':
-            case 'ecf-body-s':
-            default:
-                return __('Reading text for the live preview directly in the class list.', 'ecf-framework');
+        static $map = null;
+        if ($map === null) {
+            $heading_text = __('The quick fox jumps over the fence', 'ecf-framework');
+            $shadow_text  = __('Shadow token preview for this utility class.', 'ecf-framework');
+            $default_text = __('Reading text for the live preview directly in the class list.', 'ecf-framework');
+            $map = [
+                'ecf-heading-1'      => $heading_text,
+                'ecf-heading-2'      => $heading_text,
+                'ecf-heading-3'      => $heading_text,
+                'ecf-heading-4'      => $heading_text,
+                'ecf-heading-5'      => $heading_text,
+                'ecf-caption'        => __('Compact meta note for small hints', 'ecf-framework'),
+                'ecf-overline'       => __('Section label', 'ecf-framework'),
+                'ecf-text-left'      => __('Left aligned sample text in the preview.', 'ecf-framework'),
+                'ecf-text-center'    => __('Centered sample text in the preview.', 'ecf-framework'),
+                'ecf-text-right'     => __('Right aligned sample text in the preview.', 'ecf-framework'),
+                'ecf-text-balance'   => __('Balanced line breaks make longer headings feel calmer.', 'ecf-framework'),
+                'ecf-text-pretty'    => __('Pretty wrapping keeps paragraph breaks more natural.', 'ecf-framework'),
+                'ecf-inline'         => __('Items stay inline with flexible spacing.', 'ecf-framework'),
+                'ecf-inline-block'   => __('This element keeps its own box but stays inline.', 'ecf-framework'),
+                'ecf-hidden'         => __('This helper hides the element visually.', 'ecf-framework'),
+                'ecf-center-inline'  => __('Inline content is centered inside the available width.', 'ecf-framework'),
+                'ecf-cluster'        => __('Small items group into a compact wrapping cluster.', 'ecf-framework'),
+                'ecf-shadow-xs'      => $shadow_text,
+                'ecf-shadow-s'       => $shadow_text,
+                'ecf-shadow-m'       => $shadow_text,
+                'ecf-shadow-l'       => $shadow_text,
+                'ecf-shadow-xl'      => $shadow_text,
+                'ecf-shadow-inner'   => $shadow_text,
+                'ecf-visually-hidden'=> __('Hidden visually, still readable for assistive tech.', 'ecf-framework'),
+                'ecf-body-l'         => $default_text,
+                'ecf-body-m'         => $default_text,
+                'ecf-body-s'         => $default_text,
+            ];
         }
+        return $map[(string) $class_name] ?? __('Reading text for the live preview directly in the class list.', 'ecf-framework');
     }
 
     private function utility_class_preview_kind($class_name, $category) {
-        switch ((string) $class_name) {
-            case 'ecf-text-left':
-            case 'ecf-text-center':
-            case 'ecf-text-right':
-            case 'ecf-text-balance':
-            case 'ecf-text-pretty':
-                return 'text';
-            case 'ecf-inline':
-            case 'ecf-inline-block':
-            case 'ecf-hidden':
-            case 'ecf-center-inline':
-            case 'ecf-cluster':
-                return 'layout';
-            case 'ecf-shadow-xs':
-            case 'ecf-shadow-s':
-            case 'ecf-shadow-m':
-            case 'ecf-shadow-l':
-            case 'ecf-shadow-xl':
-            case 'ecf-shadow-inner':
-                return 'shadow';
-            case 'ecf-visually-hidden':
-                return 'accessibility';
-            default:
-                return $category === 'typography' ? 'typography' : 'text';
+        static $map = null;
+        if ($map === null) {
+            $map = [
+                'ecf-text-left'      => 'text',
+                'ecf-text-center'    => 'text',
+                'ecf-text-right'     => 'text',
+                'ecf-text-balance'   => 'text',
+                'ecf-text-pretty'    => 'text',
+                'ecf-inline'         => 'layout',
+                'ecf-inline-block'   => 'layout',
+                'ecf-hidden'         => 'layout',
+                'ecf-center-inline'  => 'layout',
+                'ecf-cluster'        => 'layout',
+                'ecf-shadow-xs'      => 'shadow',
+                'ecf-shadow-s'       => 'shadow',
+                'ecf-shadow-m'       => 'shadow',
+                'ecf-shadow-l'       => 'shadow',
+                'ecf-shadow-xl'      => 'shadow',
+                'ecf-shadow-inner'   => 'shadow',
+                'ecf-visually-hidden'=> 'accessibility',
+            ];
         }
+        return $map[(string) $class_name] ?? ($category === 'typography' ? 'typography' : 'text');
     }
 
     private function utility_class_size_label($class_name, $settings = null) {

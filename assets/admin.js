@@ -317,6 +317,9 @@
 
   // src/js/index.js
   jQuery(function($) {
+    var trim = function(s) {
+      return String(s == null ? "" : s).trim();
+    };
     var i18n = typeof ecfAdmin !== "undefined" && ecfAdmin.i18n ? ecfAdmin.i18n : {};
     var spacingPreviewMap = typeof ecfAdmin !== "undefined" && ecfAdmin.spacingPreview ? ecfAdmin.spacingPreview : {};
     var typePreviewMap = typeof ecfAdmin !== "undefined" && ecfAdmin.typePreview ? ecfAdmin.typePreview : {};
@@ -336,7 +339,22 @@
     var fontLibrary = typeof ecfAdmin !== "undefined" && Array.isArray(ecfAdmin.fontLibrary) ? ecfAdmin.fontLibrary : [];
     var fontSearchTimers = {};
     var fontSearchRequests = {};
-    var suppressSettingsAutosave = false;
+    var autosave = {
+      suppress: false,
+      timer: null,
+      inFlight: false,
+      queued: false,
+      reloadRequested: false,
+      skipValidation: false,
+      ready: false,
+      recoveryNoticePending: false,
+      lastPayload: "",
+      lastVarHash: "",
+      lastClassHash: "",
+      inFlightPayload: "",
+      queuedPayload: "",
+      dismissedSyncHash: ""
+    };
     i18n.copy = String(i18n.copy || "");
     i18n.copied = String(i18n.copied || "");
     function clamp(value, min, max) {
@@ -569,7 +587,7 @@
     function updateColorDetail($row, displayValue) {
       var $detail = $row.find(".ecf-color-detail").first();
       if (!$detail.length) return;
-      var name = $.trim($row.find('[data-ecf-slug-field="token"]').first().val() || "name");
+      var name = trim($row.find('[data-ecf-slug-field="token"]').first().val() || "name");
       var value = displayValue || $row.find(".ecf-color-value-input").val() || $row.find(".ecf-color-field").val() || "#000000";
       var parsed = parseDisplayColor(value, $row.find(".ecf-color-format-select").val() || "hex") || parseHexValue(value) || parseRgbValue(value);
       var hex = parsed ? rgbToHex(parsed).toUpperCase() : "#000000";
@@ -606,7 +624,7 @@
       $detail.find(".ecf-color-detail__shades").html(chipHtml);
     }
     function normalizeDisplayColorValue(value) {
-      var normalized = $.trim(String(value || ""));
+      var normalized = trim(String(value || ""));
       return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(normalized) ? normalized : "";
     }
     function syncGeneralColorField($field, nextValue, options) {
@@ -656,7 +674,7 @@
       var format = $row.find(".ecf-color-format-select").val() || "hex";
       var rgb = parseDisplayColor($display.val(), format);
       if (!rgb) {
-        $display.toggleClass("ecf-input-invalid", $.trim($display.val()) !== "");
+        $display.toggleClass("ecf-input-invalid", trim($display.val()) !== "");
         return false;
       }
       var hex = rgbToHex(rgb).toUpperCase();
@@ -867,6 +885,20 @@
     function escapeHtml(value) {
       return $("<div>").text(value == null ? "" : String(value)).html();
     }
+    function copyToClipboard($el, text, successText, originalContent, restoreHtml, duration) {
+      if (!text || !navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function() {
+        $el.addClass("is-copied").text(successText || i18n.copied || "");
+        setTimeout(function() {
+          $el.removeClass("is-copied");
+          if (restoreHtml) {
+            $el.html(originalContent);
+          } else {
+            $el.text(originalContent);
+          }
+        }, duration || 1200);
+      });
+    }
     function getFontFamilyOptionsFromSettings(settings) {
       var fontRows = ((settings || {}).typography || {}).fonts || [];
       var options = [
@@ -880,7 +912,7 @@
         }
       ];
       (((settings || {}).typography || {}).local_fonts || []).forEach(function(row) {
-        var family = $.trim(row && row.family || "");
+        var family = trim(row && row.family || "");
         if (!family) {
           return;
         }
@@ -895,7 +927,7 @@
       var groups = [];
       var localOptions = [];
       (((settings || {}).typography || {}).local_fonts || []).forEach(function(row) {
-        var family = $.trim(row && row.family || "");
+        var family = trim(row && row.family || "");
         if (!family) {
           return;
         }
@@ -914,11 +946,11 @@
       groups.push({
         label: i18n.font_group_core || "",
         options: getFontFamilyOptionsFromSettings(settings).slice(0, 2).map(function(option) {
-          return $.extend({}, option, { source: "core" });
+          return Object.assign({}, option, { source: "core" });
         })
       });
       var libraryOptions = ((window.ecfAdmin || {}).fontLibrary || []).map(function(entry) {
-        var family = $.trim(entry && entry.family || "");
+        var family = trim(entry && entry.family || "");
         if (!family) {
           return null;
         }
@@ -967,9 +999,9 @@
       var $selected = $select.find("option:selected");
       var $custom = $field.find("[data-ecf-font-family-custom]").first();
       if ($selected.length && $selected.val() !== "__custom__") {
-        return $.trim($selected.text() || "");
+        return trim($selected.text() || "");
       }
-      return $.trim($custom.val() || "") || $.trim($selected.text() || "");
+      return trim($custom.val() || "") || trim($selected.text() || "");
     }
     function syncFontFamilyCurrentLabel($field) {
       if (!$field || !$field.length) return;
@@ -1012,8 +1044,8 @@
       });
     }
     function syncTypographyFontCardSummaries() {
-      var currentPrefix = $.trim(String(i18n.current_prefix || ""));
-      var fontSizePrefix = $.trim(String(i18n.font_size_prefix || ""));
+      var currentPrefix = trim(String(i18n.current_prefix || ""));
+      var fontSizePrefix = trim(String(i18n.font_size_prefix || ""));
       var $bodyField = getPrimaryFontFamilyField("base_font_family");
       if ($bodyField.length) {
         $("[data-ecf-typography-body-current]").text(currentPrefix + " " + currentFontFamilyLabel($bodyField));
@@ -1024,15 +1056,15 @@
       }
       var $bodySizeField = $("[data-ecf-body-size-field]").first();
       if ($bodySizeField.length) {
-        var sizeValue = $.trim(String($bodySizeField.find("[data-ecf-size-value-input]").val() || ""));
-        var sizeFormat = $.trim(String($bodySizeField.find("[data-ecf-size-format-input], [data-ecf-format-input]").first().val() || ""));
+        var sizeValue = trim(String($bodySizeField.find("[data-ecf-size-value-input]").val() || ""));
+        var sizeFormat = trim(String($bodySizeField.find("[data-ecf-size-format-input], [data-ecf-format-input]").first().val() || ""));
         if (sizeValue && sizeFormat) {
           $("[data-ecf-typography-body-size]").text(fontSizePrefix + " " + sizeValue + " " + sizeFormat);
         }
       }
     }
     function parseCssSizeParts(value) {
-      var normalized = $.trim(String(value || ""));
+      var normalized = trim(String(value || ""));
       var match = normalized.match(/^(-?\d+(?:[.,]\d+)?)(px|rem|em|ch|%|vw|vh)$/i);
       if (match) {
         return {
@@ -1116,7 +1148,7 @@
       var normalized = String(current || "").trim();
       var localRows = ((settings || {}).typography || {}).local_fonts || [];
       localRows.forEach(function(row) {
-        var family = $.trim(row && row.family || "");
+        var family = trim(row && row.family || "");
         if (!family) {
           return;
         }
@@ -1234,8 +1266,8 @@
       };
       $("[data-ecf-body-size-field]").each(function() {
         var $field = $(this);
-        var currentValue = $.trim(String($field.find("[data-ecf-size-value-input]").val() || ""));
-        var currentFormat = $.trim(String($field.find("[data-ecf-size-format-input], [data-ecf-format-input]").first().val() || "")).toLowerCase();
+        var currentValue = trim(String($field.find("[data-ecf-size-value-input]").val() || ""));
+        var currentFormat = trim(String($field.find("[data-ecf-size-format-input], [data-ecf-format-input]").first().val() || "")).toLowerCase();
         var isLinked = currentFormat === derived.format && currentValue === derived.value;
         $field.attr("data-ecf-body-size-linked", isLinked ? "1" : "0");
       });
@@ -1248,8 +1280,8 @@
       var previousDerived = lastDerivedBodySize;
       $("[data-ecf-body-size-field]").each(function() {
         var $field = $(this);
-        var currentValue = $.trim(String($field.find("[data-ecf-size-value-input]").val() || ""));
-        var currentFormat = $.trim(String($field.find("[data-ecf-size-format-input], [data-ecf-format-input]").first().val() || "")).toLowerCase();
+        var currentValue = trim(String($field.find("[data-ecf-size-value-input]").val() || ""));
+        var currentFormat = trim(String($field.find("[data-ecf-size-format-input], [data-ecf-format-input]").first().val() || "")).toLowerCase();
         var matchesPreviousDerived = previousDerived && currentFormat === previousDerived.format && currentValue === previousDerived.value;
         var isLinked = force || $field.attr("data-ecf-body-size-linked") === "1" || matchesPreviousDerived;
         if (!isLinked) {
@@ -1296,7 +1328,7 @@
       refreshGeneralFavoritesState();
     }
     function buildFilteredLocalFontGroups(groups, query) {
-      var normalized = $.trim(String(query || "")).toLowerCase();
+      var normalized = trim(String(query || "")).toLowerCase();
       if (!normalized) {
         return Array.isArray(groups) ? groups : [];
       }
@@ -1451,7 +1483,7 @@
       });
     }
     function findExistingFontValue(fieldName, family) {
-      var normalizedFamily = $.trim(String(family || "")).toLowerCase();
+      var normalizedFamily = trim(String(family || "")).toLowerCase();
       var $field = getPrimaryFontFamilyField(fieldName);
       if (!$field.length || !normalizedFamily) {
         return "";
@@ -1459,7 +1491,7 @@
       var match = "";
       $field.find("[data-ecf-font-family-preset] option").each(function() {
         var value = String($(this).attr("value") || "");
-        var label = $.trim(String($(this).text() || ""));
+        var label = trim(String($(this).text() || ""));
         if (!value || value.indexOf("__library__|") === 0) {
           return;
         }
@@ -1468,7 +1500,7 @@
           return false;
         }
         var parts = label.split(":");
-        if (parts.length > 1 && $.trim(parts.slice(1).join(":")).toLowerCase() === normalizedFamily) {
+        if (parts.length > 1 && trim(parts.slice(1).join(":")).toLowerCase() === normalizedFamily) {
           match = value;
           return false;
         }
@@ -1488,8 +1520,8 @@
       scheduleSettingsAutosave({ delay: 250 });
     }
     function applyFontPairingSelection(pairing, $button) {
-      var bodyFamily = $.trim(String(pairing && pairing.bodyFamily || ""));
-      var headingFamily = $.trim(String(pairing && pairing.headingFamily || ""));
+      var bodyFamily = trim(String(pairing && pairing.bodyFamily || ""));
+      var headingFamily = trim(String(pairing && pairing.headingFamily || ""));
       var tasks = [];
       function queueField(fieldName, target, family) {
         if (!family) {
@@ -1535,8 +1567,8 @@
       if (!$card || !$card.length || !pairing) {
         return;
       }
-      var headingFamily = $.trim(String(pairing.heading_family || pairing.headingFamily || ""));
-      var bodyFamily = $.trim(String(pairing.body_family || pairing.bodyFamily || ""));
+      var headingFamily = trim(String(pairing.heading_family || pairing.headingFamily || ""));
+      var bodyFamily = trim(String(pairing.body_family || pairing.bodyFamily || ""));
       var title = String(pairing.title || "");
       var description = String(pairing.description || "");
       var headingSample = String(pairing.heading_sample || pairing.headingSample || "");
@@ -1587,8 +1619,8 @@
       if (!$fields.length || !payload) {
         return;
       }
-      var value = $.trim(String(payload.value || ""));
-      var format = $.trim(String(payload.format || "px")).toLowerCase();
+      var value = trim(String(payload.value || ""));
+      var format = trim(String(payload.format || "px")).toLowerCase();
       $fields.each(function() {
         var $field = $(this);
         $field.find('input[type="text"]').first().val(value);
@@ -1615,7 +1647,7 @@
     }
     function findTokenRow(groupName, tokenName) {
       return $('.ecf-table[data-group="' + groupName + '"] .ecf-row').filter(function() {
-        return $.trim(String($(this).find('[data-ecf-slug-field="token"]').first().val() || "")) === tokenName;
+        return trim(String($(this).find('[data-ecf-slug-field="token"]').first().val() || "")) === tokenName;
       }).first();
     }
     function applyColorTokenPreset(presetMap) {
@@ -1688,7 +1720,7 @@
       if ($button && $button.length) {
         $button.prop("disabled", true).addClass("is-busy");
       }
-      suppressSettingsAutosave = true;
+      autosave.suppress = true;
       try {
         applyGeneralFieldValue("root_font_size", general.root_font_size);
         applyGeneralFieldValue("base_body_font_weight", general.base_body_font_weight);
@@ -1721,14 +1753,14 @@
         }
         updateUnsavedBadge();
       } catch (error) {
-        suppressSettingsAutosave = false;
+        autosave.suppress = false;
         if ($button && $button.length) {
           $button.prop("disabled", false).removeClass("is-busy");
         }
         showAutosaveNotice(error && error.message ? error.message : failedMessage, "error");
         return Promise.reject(error);
       }
-      suppressSettingsAutosave = false;
+      autosave.suppress = false;
       scheduleSettingsAutosave({ delay: 250, reloadAfterSave: true });
       return Promise.resolve().then(function() {
         showAutosaveNotice(successMessage || "", "success");
@@ -1895,7 +1927,7 @@
         if (viewMode === "max") return '<i class="dashicons dashicons-desktop"></i>' + labelMax;
         return config.fluid ? labelFluid : labelFixed;
       }
-      $.each(items, function(_, item) {
+      items.forEach(function(item) {
         var selectedClass = item.step === activeStep ? " is-active" : "";
         var previewText = getTypePreviewText(item.token || item.step, $preview);
         html += '<div class="ecf-type-row' + selectedClass + '" data-ecf-step="' + item.step + '" data-ecf-step-row tabindex="0" role="button" aria-pressed="' + (item.step === activeStep ? "true" : "false") + '" style="--ecf-preview-size:' + sizeForView(item) + ';"><div class="ecf-type-row__token"><div class="ecf-type-row__token-line"><span class="ecf-type-row__token-label">' + item.token + '</span><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button><span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div><div class="ecf-type-row__meta"><div><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><div class="ecf-clamp-metric"><strong>' + item.minPx + 'px</strong></div></div><div><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><div class="ecf-clamp-metric"><strong>' + item.maxPx + 'px</strong></div></div></div><div class="ecf-type-row__sample"><div class="ecf-type-row__sample-line"><strong style="font-size:' + item.minPx + 'px;">' + escapeHtml(previewText) + '</strong><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span></div><div class="ecf-type-row__sample-line ecf-type-row__sample-line--max"><strong style="font-size:' + item.maxPx + 'px;">' + escapeHtml(previewText) + '</strong><span><i class="dashicons dashicons-desktop"></i>' + labelMax + "</span></div></div></div>";
@@ -1956,7 +1988,7 @@
         return item.step === spacingStep;
       }) || spacingItems[0];
       var $radiusRow = $('.ecf-table[data-group="radius"] .ecf-row').filter(function() {
-        return $.trim($(this).find("input").eq(0).val()) === radiusName;
+        return trim($(this).find("input").eq(0).val()) === radiusName;
       }).first();
       if (!$radiusRow.length) {
         $radiusRow = $('.ecf-table[data-group="radius"] .ecf-row').first();
@@ -2009,8 +2041,8 @@
     function buildShadowPreviewItems() {
       return $('.ecf-table[data-group="shadows"] .ecf-row').map(function(index) {
         var $row = $(this);
-        var name = $.trim($row.find("input").eq(0).val()) || "shadow-" + index;
-        var value = $.trim($row.find("input").eq(1).val()) || "0 1px 2px rgba(0,0,0,0.05)";
+        var name = trim($row.find("input").eq(0).val()) || "shadow-" + index;
+        var value = trim($row.find("input").eq(1).val()) || "0 1px 2px rgba(0,0,0,0.05)";
         var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "shadow-" + index;
         return {
           index,
@@ -2045,7 +2077,7 @@
       })) {
         activeShadow = items[0].slug;
       }
-      $.each(items, function(_, item) {
+      items.forEach(function(item) {
         var selectedClass = item.slug === activeShadow ? " is-active" : "";
         var previewShadowValue = enhanceShadowPreviewValue(item.value);
         html += '<div class="ecf-shadow-row' + selectedClass + '" data-ecf-shadow-step="' + item.slug + '" data-ecf-shadow-index="' + item.index + '"><div class="ecf-shadow-row__class"><code>' + escapeHtml(item.className) + '</code></div><div class="ecf-shadow-row__token">' + escapeHtml(item.token) + '</div><div class="ecf-shadow-row__value"><input type="text" class="ecf-shadow-row__value-input" data-ecf-shadow-inline-value data-ecf-shadow-index="' + item.index + '" value="' + escapeHtml(item.value) + '" spellcheck="false" autocomplete="off"></div><div class="ecf-shadow-row__sample ecf-shadow-preview-bg"><div class="ecf-shadow-row__mini" style="box-shadow:' + escapeHtml(previewShadowValue) + ';"></div></div></div>';
@@ -2077,7 +2109,7 @@
       var rowSelector = type === "color" ? ".ecf-row--color" : ".ecf-row--minmax";
       $panel.find(rowSelector).removeClass("ecf-row--focused");
       var $focused = $panel.find(rowSelector).filter(function() {
-        var name = $.trim($(this).find('[data-ecf-slug-field="token"]').val() || "");
+        var name = trim($(this).find('[data-ecf-slug-field="token"]').val() || "");
         return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") === slug;
       }).first();
       $focused.addClass("ecf-row--focused");
@@ -2206,6 +2238,31 @@
     $(document).on("click", "[data-ecf-spacing-focus-back]", function() {
       exitSpacingFocus();
     });
+    function buildSubnavSection(group, label, isOpen) {
+      return '<button type="button" class="ecf-nav-subnav__section ecf-nav-subnav__section--toggle' + (isOpen ? " is-open" : "") + '" data-ecf-subnav-group="' + group + '">' + label + '</button><div class="ecf-nav-subnav__group' + (isOpen ? " is-open" : "") + '" data-ecf-subnav-group-items="' + group + '">';
+    }
+    function buildColorSubnavItems($rows) {
+      var html = "";
+      $rows.each(function() {
+        var $row = $(this);
+        var name = trim($row.find('[data-ecf-slug-field="token"]').val() || "");
+        var hex = $row.find(".ecf-color-value-input").val() || $row.find(".ecf-color-field").val() || "#888";
+        if (!name) return;
+        var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        html += '<button type="button" class="ecf-nav-subnav__item" data-ecf-subnav-token="color" data-ecf-subnav-slug="' + slug + '"><span class="ecf-nav-subnav__swatch" style="background:' + escapeHtml(hex) + ';"></span><span class="ecf-nav-subnav__label">' + escapeHtml(name) + "</span></button>";
+      });
+      return html;
+    }
+    function buildRadiusSubnavItems($rows) {
+      var html = "";
+      $rows.each(function() {
+        var name = trim($(this).find('[data-ecf-slug-field="token"]').val() || "");
+        if (!name) return;
+        var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        html += '<button type="button" class="ecf-nav-subnav__item" data-ecf-subnav-token="radius" data-ecf-subnav-slug="' + slug + '"><span class="ecf-nav-subnav__dot"></span><span class="ecf-nav-subnav__label">' + escapeHtml(name) + '</span><span class="ecf-nav-subnav__token">--ecf-radius-' + escapeHtml(slug) + "</span></button>";
+      });
+      return html;
+    }
     function buildTokensSubnav() {
       var $subnav = $('[data-ecf-subnav="tokens"]');
       if (!$subnav.length) return;
@@ -2219,29 +2276,11 @@
       var $colorRows = $('[data-group="colors"] .ecf-row--color');
       if ($colorRows.length) {
         var colorLabel = ecfAdmin.i18n.topbar_colors_radius ? "Farben" : "Colors";
-        html += '<button type="button" class="ecf-nav-subnav__section ecf-nav-subnav__section--toggle' + (colorsOpen ? " is-open" : "") + '" data-ecf-subnav-group="colors">' + colorLabel + "</button>";
-        html += '<div class="ecf-nav-subnav__group' + (colorsOpen ? " is-open" : "") + '" data-ecf-subnav-group-items="colors">';
-        $colorRows.each(function() {
-          var $row = $(this);
-          var name = $.trim($row.find('[data-ecf-slug-field="token"]').val() || "");
-          var hex = $row.find(".ecf-color-value-input").val() || $row.find(".ecf-color-field").val() || "#888";
-          if (!name) return;
-          var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-          html += '<button type="button" class="ecf-nav-subnav__item" data-ecf-subnav-token="color" data-ecf-subnav-slug="' + slug + '"><span class="ecf-nav-subnav__swatch" style="background:' + escapeHtml(hex) + ';"></span><span class="ecf-nav-subnav__label">' + escapeHtml(name) + "</span></button>";
-        });
-        html += "</div>";
+        html += buildSubnavSection("colors", colorLabel, colorsOpen) + buildColorSubnavItems($colorRows) + "</div>";
       }
       var $radiusRows = $('[data-group="radius"] .ecf-row--minmax');
       if ($radiusRows.length) {
-        html += '<button type="button" class="ecf-nav-subnav__section ecf-nav-subnav__section--toggle' + (radiusOpen ? " is-open" : "") + '" data-ecf-subnav-group="radius">Radius</button>';
-        html += '<div class="ecf-nav-subnav__group' + (radiusOpen ? " is-open" : "") + '" data-ecf-subnav-group-items="radius">';
-        $radiusRows.each(function() {
-          var name = $.trim($(this).find('[data-ecf-slug-field="token"]').val() || "");
-          if (!name) return;
-          var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-          html += '<button type="button" class="ecf-nav-subnav__item" data-ecf-subnav-token="radius" data-ecf-subnav-slug="' + slug + '"><span class="ecf-nav-subnav__dot"></span><span class="ecf-nav-subnav__label">' + escapeHtml(name) + '</span><span class="ecf-nav-subnav__token">--ecf-radius-' + escapeHtml(slug) + "</span></button>";
-        });
-        html += "</div>";
+        html += buildSubnavSection("radius", "Radius", radiusOpen) + buildRadiusSubnavItems($radiusRows) + "</div>";
       }
       $subnav.html(html);
     }
@@ -2266,34 +2305,23 @@
       buildTokensSubnav();
     });
     var $noSavePanel = ["variables", "sync", "help", "changelog", "starthilfe"];
-    var panelStorageKey = "ecfActivePanel";
-    var generalTabStorageKey = "ecfGeneralTab";
-    var websiteTabStorageKey = "ecfWebsiteTab";
-    var typographyTabStorageKey = "ecfTypographyTab";
-    var startBannerStorageKey = typeof i18n.start_banner_storage_key === "string" && i18n.start_banner_storage_key ? i18n.start_banner_storage_key : "ecfStartBannerDismissed";
-    var pageScrollStorageKey = "ecfPageScrollTop";
-    var pageFocusStorageKey = "ecfPageFocusTarget";
-    var whatsNewStorageKey = "ecfWhatsNewState";
-    var whatsNewMaxImpressions = 5;
+    var storageKeys = {
+      panel: "ecfActivePanel",
+      generalTab: "ecfGeneralTab",
+      websiteTab: "ecfWebsiteTab",
+      typographyTab: "ecfTypographyTab",
+      startBanner: typeof i18n.start_banner_storage_key === "string" && i18n.start_banner_storage_key ? i18n.start_banner_storage_key : "ecfStartBannerDismissed",
+      pageScroll: "ecfPageScrollTop",
+      pageFocus: "ecfPageFocusTarget",
+      whatsNew: "ecfWhatsNewState",
+      whatsNewMax: 5
+    };
     var $settingsForm = $('form[action="options.php"]').first();
     var $autosaveNotice = $();
-    var autosaveTimer = null;
-    var autosaveInFlight = false;
-    var autosaveQueued = false;
-    var autosaveReloadRequested = false;
-    var autosaveSkipValidation = false;
-    var autosaveReady = false;
-    var autosaveRecoveryNoticePending = false;
     var elementorAutoSyncInFlight = false;
     var elementorAutoSyncQueuedSettings = null;
     var lastElementorAutoSyncPayload = "";
     var pendingFontAutolinkField = "";
-    var lastSavedSettingsPayload = "";
-    var lastSavedVariableSyncHash = "";
-    var lastSavedClassSelectionHash = "";
-    var inFlightSettingsPayload = "";
-    var queuedSettingsPayload = "";
-    var dismissedElementorSyncPromptHash = "";
     function parseFormFieldPath(name) {
       return String(name || "").replace(/\]/g, "").split("[");
     }
@@ -2422,14 +2450,14 @@
       return payload;
     }
     function asSettingsRows(value) {
-      if ($.isArray(value)) return value;
+      if (Array.isArray(value)) return value;
       if (!value || typeof value !== "object") return [];
       return Object.keys(value).map(function(key) {
         return value[key];
       });
     }
     function rowHasToken(row) {
-      return row && $.trim(String(row.name || "")) !== "";
+      return row && trim(String(row.name || "")) !== "";
     }
     function countGeneratedColorVariants(row) {
       var total = 0;
@@ -2452,12 +2480,12 @@
       count += asSettingsRows(current.radius).filter(rowHasToken).length;
       count += asSettingsRows(current.shadows).filter(rowHasToken).length;
       count += asSettingsRows(current.spacing && current.spacing.steps).filter(function(step) {
-        return $.trim(String(step || "")) !== "";
+        return trim(String(step || "")) !== "";
       }).length;
       count += asSettingsRows(current.typography && current.typography.scale && current.typography.scale.steps).filter(function(step) {
-        return $.trim(String(step || "")) !== "";
+        return trim(String(step || "")) !== "";
       }).length;
-      if ($.trim(String(current.elementor_boxed_width || "")) !== "") {
+      if (trim(String(current.elementor_boxed_width || "")) !== "") {
         count += 1;
       }
       return count;
@@ -2466,9 +2494,9 @@
       var items = [];
       asSettingsRows((settings || {}).colors).forEach(function(row) {
         if (!rowHasToken(row)) return;
-        var name = $.trim(String(row.name || ""));
-        var value = $.trim(String(row.value || ""));
-        var format = $.trim(String(row.format || "hex")) || "hex";
+        var name = trim(String(row.name || ""));
+        var value = trim(String(row.value || ""));
+        var format = trim(String(row.format || "hex")) || "hex";
         var parsed = parseDisplayColor(value, format) || parseHexValue(value) || parseRgbValue(value);
         var baseValue = parsed ? rgbToHex(parsed).toUpperCase() : value;
         var baseLabel = "ecf-color-" + name;
@@ -2710,7 +2738,7 @@
       var panel = getCurrentPanel();
       var isNoSavePanel = $noSavePanel.indexOf(panel) !== -1;
       var currentPayload = stableStringify(buildSettingsPayloadFromForm());
-      var isDirty = !!lastSavedSettingsPayload && currentPayload !== lastSavedSettingsPayload;
+      var isDirty = !!autosave.lastPayload && currentPayload !== autosave.lastPayload;
       var $save = $(".ecf-sticky-topbar__save");
       var $topbar = $("[data-ecf-sticky-topbar]");
       if (isNoSavePanel || !isDirty) {
@@ -2728,15 +2756,15 @@
     }
     function updateUnsavedBadge() {
       var currentPayload = stableStringify(buildSettingsPayloadFromForm());
-      var hasChanges = !!lastSavedSettingsPayload && currentPayload !== lastSavedSettingsPayload;
+      var hasChanges = !!autosave.lastPayload && currentPayload !== autosave.lastPayload;
       $("[data-ecf-unsaved-badge]").prop("hidden", !hasChanges);
       updateSaveButtonVisibility();
     }
     function markCurrentStateAsSaved() {
       flashSaveConfirmation();
-      lastSavedSettingsPayload = stableStringify(buildSettingsPayloadFromForm());
-      lastSavedVariableSyncHash = buildVariableSyncHash();
-      lastSavedClassSelectionHash = buildClassSelectionHash();
+      autosave.lastPayload = stableStringify(buildSettingsPayloadFromForm());
+      autosave.lastVarHash = buildVariableSyncHash();
+      autosave.lastClassHash = buildClassSelectionHash();
       updateUnsavedBadge();
     }
     function closeClassSyncPromptModal() {
@@ -2785,7 +2813,7 @@
     function maybePromptForElementorSync(savedSettings, previousVariableHash, currentVariableHash, previousClassHash, currentClassHash) {
       var promptPayload = buildElementorSyncPromptPayload(savedSettings, previousVariableHash, currentVariableHash, previousClassHash, currentClassHash);
       if (!promptPayload) return;
-      if (promptPayload.hash === dismissedElementorSyncPromptHash) return;
+      if (promptPayload.hash === autosave.dismissedSyncHash) return;
       openClassSyncPromptModal(promptPayload);
     }
     function runElementorSyncNow(options) {
@@ -2826,7 +2854,7 @@
       }
       var $clone = $source.clone();
       $clone.find(".dashicons, .ecf-new-dot, .ecf-unsaved-badge").remove();
-      return $.trim($clone.text());
+      return trim($clone.text());
     }
     function getStickyTopbarTitle(panel) {
       var titleMap = {
@@ -2861,7 +2889,7 @@
       var panelTitle = getStickyTopbarTitle(panel);
       var $panel = $('.ecf-panel[data-panel="' + panel + '"]').first();
       if (!panelTitle && $panel.length) {
-        panelTitle = $.trim($panel.find("h2").first().text());
+        panelTitle = trim($panel.find("h2").first().text());
       }
       if (!panelTitle) {
         panelTitle = getPanelButtonLabel(panel);
@@ -2875,8 +2903,8 @@
       var $warning = $field.siblings("[data-ecf-inline-size-warning]").first();
       var $bodyField = $field.closest("[data-ecf-body-size-field]");
       var $bodyWarning = $bodyField.find("[data-ecf-body-size-warning]").first();
-      var rawValue = $.trim($input.val() || "");
-      var format = $.trim($format.val() || "").toLowerCase();
+      var rawValue = trim($input.val() || "");
+      var format = trim($format.val() || "").toLowerCase();
       var numeric = parseFloat(String(rawValue).replace(",", "."));
       var message = "";
       if (!rawValue) {
@@ -2929,7 +2957,7 @@
         if (invalid[0] && invalid[0].length) {
           invalid[0].find("[data-ecf-size-value-input]").trigger("focus");
         }
-        autosaveRecoveryNoticePending = true;
+        autosave.recoveryNoticePending = true;
         showAutosaveNotice(i18n.autosave_invalid || "", "error");
         return false;
       }
@@ -3553,33 +3581,36 @@
     function submitSettingsAutosave() {
       if (!$settingsForm.length || !restUrl || !restNonce) return;
       updateAutosavePill();
-      if (!autosaveSkipValidation && !validateSettingsForSave()) return;
+      if (!autosave.skipValidation && !validateSettingsForSave()) return;
       var payload = buildSettingsPayloadFromForm();
       var payloadHash = stableStringify(payload);
-      var previousVariableSyncHash = lastSavedVariableSyncHash;
-      var previousClassSelectionHash = lastSavedClassSelectionHash;
+      var previousVariableSyncHash = autosave.lastVarHash;
+      var previousClassSelectionHash = autosave.lastClassHash;
       var currentVariableSyncHash = buildVariableSyncHash(payload);
       var currentClassSelectionHash = buildClassSelectionHash(payload);
-      if (lastSavedSettingsPayload && payloadHash === lastSavedSettingsPayload) {
-        autosaveRecoveryNoticePending = false;
+      if (autosave.lastPayload && payloadHash === autosave.lastPayload) {
+        autosave.recoveryNoticePending = false;
         showAutosaveNotice(i18n.autosave_saved || "", "success");
-        autosaveQueued = false;
-        queuedSettingsPayload = "";
+        autosave.queued = false;
+        autosave.queuedPayload = "";
         return;
       }
-      if (autosaveInFlight) {
-        if (payloadHash !== inFlightSettingsPayload) {
-          autosaveQueued = true;
-          queuedSettingsPayload = payloadHash;
+      if (autosave.inFlight) {
+        if (payloadHash !== autosave.inFlightPayload) {
+          autosave.queued = true;
+          autosave.queuedPayload = payloadHash;
         }
         return;
       }
-      autosaveInFlight = true;
-      inFlightSettingsPayload = payloadHash;
-      autosaveQueued = false;
-      queuedSettingsPayload = "";
+      autosave.inFlight = true;
+      autosave.inFlightPayload = payloadHash;
+      autosave.queued = false;
+      autosave.queuedPayload = "";
       persistAdminPageState($settingsForm);
       showAutosaveNotice(i18n.autosave_saving || "", "saving");
+      var $saveBtn = $(".ecf-sticky-topbar__save");
+      $saveBtn.addClass("is-saving");
+      $("[data-ecf-save-label]").text(i18n.autosave_saving || "Saving\u2026");
       window.fetch(restUrl, {
         method: "POST",
         credentials: "same-origin",
@@ -3594,8 +3625,8 @@
         }
         return response.json();
       }).then(function(responseData) {
-        autosaveInFlight = false;
-        inFlightSettingsPayload = "";
+        autosave.inFlight = false;
+        autosave.inFlightPayload = "";
         var responseSettings = responseData && responseData.settings ? responseData.settings : payload;
         updateSystemInfoCards(responseData && responseData.meta ? responseData.meta : null, responseSettings);
         syncLocalFontRowsFromSettings(responseSettings);
@@ -3620,19 +3651,19 @@
         }
         refreshAdminDesignChooser();
         markCurrentStateAsSaved();
-        autosaveRecoveryNoticePending = false;
-        if (autosaveQueued) {
-          if (queuedSettingsPayload && queuedSettingsPayload === lastSavedSettingsPayload) {
-            autosaveQueued = false;
-            queuedSettingsPayload = "";
+        autosave.recoveryNoticePending = false;
+        if (autosave.queued) {
+          if (autosave.queuedPayload && autosave.queuedPayload === autosave.lastPayload) {
+            autosave.queued = false;
+            autosave.queuedPayload = "";
           } else {
-            autosaveQueued = false;
+            autosave.queued = false;
             submitSettingsAutosave();
             return;
           }
         }
-        if (autosaveReloadRequested) {
-          autosaveReloadRequested = false;
+        if (autosave.reloadRequested) {
+          autosave.reloadRequested = false;
           window.location.reload();
           return;
         }
@@ -3640,21 +3671,22 @@
         maybeRunElementorAutoSync(responseSettings);
         maybePromptForElementorSync(responseSettings, previousVariableSyncHash, currentVariableSyncHash, previousClassSelectionHash, currentClassSelectionHash);
       }).catch(function() {
-        autosaveInFlight = false;
-        inFlightSettingsPayload = "";
-        if (autosaveQueued) {
-          autosaveQueued = false;
-          queuedSettingsPayload = "";
+        autosave.inFlight = false;
+        autosave.inFlightPayload = "";
+        if (autosave.queued) {
+          autosave.queued = false;
+          autosave.queuedPayload = "";
         }
         showAutosaveNotice(i18n.autosave_failed || "", "error");
       }).finally(function() {
-        autosaveSkipValidation = false;
+        autosave.skipValidation = false;
+        $(".ecf-sticky-topbar__save").removeClass("is-saving");
       });
     }
     function scheduleSettingsAutosave(options) {
-      if (!$settingsForm.length || !autosaveReady) return;
+      if (!$settingsForm.length || !autosave.ready) return;
       var opts = options || {};
-      if (suppressSettingsAutosave) {
+      if (autosave.suppress) {
         updateLayrixVariableCount();
         updateUnsavedBadge();
         return;
@@ -3670,13 +3702,13 @@
       updateLayrixVariableCount();
       updateUnsavedBadge();
       if (opts.reloadAfterSave) {
-        autosaveReloadRequested = true;
+        autosave.reloadRequested = true;
       }
       if (opts.skipValidation) {
-        autosaveSkipValidation = true;
+        autosave.skipValidation = true;
       }
-      window.clearTimeout(autosaveTimer);
-      autosaveTimer = window.setTimeout(function() {
+      window.clearTimeout(autosave.timer);
+      autosave.timer = window.setTimeout(function() {
         submitSettingsAutosave();
       }, delay);
     }
@@ -3808,16 +3840,16 @@
     });
     function storePageScrollPosition() {
       try {
-        window.sessionStorage.setItem(pageScrollStorageKey, String(window.scrollY || window.pageYOffset || 0));
+        window.sessionStorage.setItem(storageKeys.pageScroll, String(window.scrollY || window.pageYOffset || 0));
       } catch (err) {
       }
     }
     function storePageFocusTarget(targetId) {
       try {
         if (targetId) {
-          window.sessionStorage.setItem(pageFocusStorageKey, String(targetId));
+          window.sessionStorage.setItem(storageKeys.pageFocus, String(targetId));
         } else {
-          window.sessionStorage.removeItem(pageFocusStorageKey);
+          window.sessionStorage.removeItem(storageKeys.pageFocus);
         }
       } catch (err) {
       }
@@ -3842,10 +3874,10 @@
       var storedTop = null;
       var storedFocus = null;
       try {
-        storedTop = window.sessionStorage.getItem(pageScrollStorageKey);
-        storedFocus = window.sessionStorage.getItem(pageFocusStorageKey);
-        window.sessionStorage.removeItem(pageScrollStorageKey);
-        window.sessionStorage.removeItem(pageFocusStorageKey);
+        storedTop = window.sessionStorage.getItem(storageKeys.pageScroll);
+        storedFocus = window.sessionStorage.getItem(storageKeys.pageFocus);
+        window.sessionStorage.removeItem(storageKeys.pageScroll);
+        window.sessionStorage.removeItem(storageKeys.pageFocus);
       } catch (err) {
         storedTop = null;
         storedFocus = null;
@@ -3876,7 +3908,7 @@
     }
     function getWhatsNewState() {
       try {
-        var raw = window.localStorage.getItem(whatsNewStorageKey);
+        var raw = window.localStorage.getItem(storageKeys.whatsNew);
         return raw ? JSON.parse(raw) : {};
       } catch (err) {
         return {};
@@ -3884,20 +3916,20 @@
     }
     function saveWhatsNewState(state) {
       try {
-        window.localStorage.setItem(whatsNewStorageKey, JSON.stringify(state || {}));
+        window.localStorage.setItem(storageKeys.whatsNew, JSON.stringify(state || {}));
       } catch (err) {
       }
     }
     function isStartBannerDismissed() {
       try {
-        return window.localStorage.getItem(startBannerStorageKey) === "1";
+        return window.localStorage.getItem(storageKeys.startBanner) === "1";
       } catch (err) {
         return false;
       }
     }
     function setStartBannerDismissed() {
       try {
-        window.localStorage.setItem(startBannerStorageKey, "1");
+        window.localStorage.setItem(storageKeys.startBanner, "1");
       } catch (err) {
       }
     }
@@ -3918,7 +3950,7 @@
     }
     function shouldShowWhatsNewBadge(state, key) {
       var entry = ensureWhatsNewEntry(state, key);
-      return !!(entry && !entry.seen && entry.impressions < whatsNewMaxImpressions);
+      return !!(entry && !entry.seen && entry.impressions < storageKeys.whatsNewMax);
     }
     function refreshWhatsNewBadges() {
       var state = getWhatsNewState();
@@ -3948,7 +3980,7 @@
       });
       Object.keys(keys).forEach(function(key) {
         var entry = ensureWhatsNewEntry(state, key);
-        if (!entry.seen && entry.impressions < whatsNewMaxImpressions) {
+        if (!entry.seen && entry.impressions < storageKeys.whatsNewMax) {
           entry.impressions += 1;
           changed = true;
         }
@@ -3965,7 +3997,7 @@
       $(".ecf-panel").removeClass("is-active");
       $('.ecf-panel[data-panel="' + panel + '"]').addClass("is-active");
       try {
-        window.sessionStorage.setItem(panelStorageKey, panel);
+        window.sessionStorage.setItem(storageKeys.panel, panel);
       } catch (err) {
       }
       updateStickyTopbar(panel);
@@ -4037,7 +4069,7 @@
       $("[data-ecf-website-tab]").removeClass("is-active").attr("aria-pressed", "false").filter('[data-ecf-website-tab="' + activeTab + '"]').addClass("is-active").attr("aria-pressed", "true");
       $("[data-ecf-website-section]").removeClass("is-active").prop("hidden", true).filter('[data-ecf-website-section="' + activeTab + '"]').addClass("is-active").prop("hidden", false);
       try {
-        window.sessionStorage.setItem(websiteTabStorageKey, activeTab);
+        window.sessionStorage.setItem(storageKeys.websiteTab, activeTab);
       } catch (err) {
       }
       closeFontPicker($("[data-ecf-website-section]").not(".is-active").find("[data-ecf-font-picker]"));
@@ -4048,7 +4080,7 @@
       $("[data-ecf-general-tab]").removeClass("is-active").filter('[data-ecf-general-tab="' + activeTab + '"]').addClass("is-active");
       $("[data-ecf-general-section]").removeClass("is-active").prop("hidden", true).filter('[data-ecf-general-section="' + activeTab + '"]').addClass("is-active").prop("hidden", false);
       try {
-        window.sessionStorage.setItem(generalTabStorageKey, activeTab);
+        window.sessionStorage.setItem(storageKeys.generalTab, activeTab);
       } catch (err) {
       }
       closeFontPicker($('[data-ecf-general-section="' + activeTab + '"] [data-ecf-font-picker]'));
@@ -4062,7 +4094,7 @@
       $("[data-ecf-typography-tab]").removeClass("is-active").attr("aria-pressed", "false").filter('[data-ecf-typography-tab="' + activeTab + '"]').addClass("is-active").attr("aria-pressed", "true");
       $("[data-ecf-typography-section]").removeClass("is-active").prop("hidden", true).filter('[data-ecf-typography-section="' + activeTab + '"]').addClass("is-active").prop("hidden", false);
       try {
-        window.sessionStorage.setItem(typographyTabStorageKey, activeTab);
+        window.sessionStorage.setItem(storageKeys.typographyTab, activeTab);
       } catch (err) {
       }
       closeFontPicker($("[data-ecf-typography-section]").not(".is-active").find("[data-ecf-font-picker]"));
@@ -4298,7 +4330,7 @@
     }
     function showFloatingNewTooltip(el) {
       var $el = $(el);
-      var tip = $.trim($el.attr("data-tip") || "");
+      var tip = trim($el.attr("data-tip") || "");
       if (!tip) {
         return;
       }
@@ -4453,7 +4485,7 @@
         var family = selectedValue.split("|").slice(1).join("|");
         var previousValue = String($select.data("ecf-prev-value") || "var(--ecf-font-primary)");
         var target = String($select.data("ecf-font-library-target") || "body");
-        window.clearTimeout(autosaveTimer);
+        window.clearTimeout(autosave.timer);
         $select.val(previousValue);
         $custom.val("").prop("hidden", true);
         importLibraryFontIntoField(fieldName, target, family, $select);
@@ -4559,7 +4591,7 @@
     });
     $(document).on("input change", '[data-ecf-local-fonts-section] .ecf-font-file-row input[name$="[family]"]', function() {
       if (!pendingFontAutolinkField) return;
-      var family = $.trim($(this).val() || "");
+      var family = trim($(this).val() || "");
       if (!family) return;
       var $field = getPrimaryFontFamilyField(pendingFontAutolinkField);
       $field.find("[data-ecf-font-family-preset]").first().val("__custom__").trigger("change");
@@ -4568,7 +4600,7 @@
     });
     $(document).on("click", "[data-ecf-local-font-remove]", function(e) {
       e.preventDefault();
-      var family = $.trim($(this).data("ecf-local-font-remove") || "");
+      var family = trim($(this).data("ecf-local-font-remove") || "");
       var fieldName = String($(this).data("ecf-font-family-field") || "base_font_family");
       if (!family) return;
       getFontFamilyFields(fieldName).each(function() {
@@ -4582,7 +4614,7 @@
         var removed = false;
         $section.find(".ecf-font-file-row").each(function() {
           var $row = $(this);
-          var rowFamily = $.trim($row.find('input[name$="[family]"]').val() || "");
+          var rowFamily = trim($row.find('input[name$="[family]"]').val() || "");
           if (rowFamily === family) {
             $row.find(".ecf-remove-row").trigger("click");
             removed = true;
@@ -4600,7 +4632,7 @@
       var target = String($button.data("ecf-font-library-target") || "body");
       var fieldName = String($button.data("ecf-font-family-field") || "base_font_family");
       var $controls = $button.closest("[data-ecf-font-library-controls]");
-      var family = $.trim($controls.find("[data-ecf-font-library-search]").first().val() || "");
+      var family = trim($controls.find("[data-ecf-font-library-search]").first().val() || "");
       importLibraryFontIntoField(fieldName, target, family, $button);
     });
     $(document).on("click", "[data-ecf-font-pairing-apply]", function(e) {
@@ -4699,7 +4731,7 @@
     });
     var initialPanel = "tokens";
     try {
-      var storedPanel = window.sessionStorage.getItem(panelStorageKey);
+      var storedPanel = window.sessionStorage.getItem(storageKeys.panel);
       if (storedPanel && $('[data-panel="' + storedPanel + '"]').filter(".ecf-nav-item, .ecf-sidebar-link").length) {
         initialPanel = storedPanel;
       }
@@ -4715,7 +4747,7 @@
     }
     var initialGeneralTab = "website";
     try {
-      var storedGeneralTab = window.sessionStorage.getItem(generalTabStorageKey);
+      var storedGeneralTab = window.sessionStorage.getItem(storageKeys.generalTab);
       if (storedGeneralTab) {
         initialGeneralTab = normalizeGeneralTab(storedGeneralTab);
       }
@@ -4728,7 +4760,7 @@
     }
     var initialWebsiteTab = "type";
     try {
-      var storedWebsiteTab = window.sessionStorage.getItem(websiteTabStorageKey);
+      var storedWebsiteTab = window.sessionStorage.getItem(storageKeys.websiteTab);
       if (storedWebsiteTab) {
         initialWebsiteTab = normalizeWebsiteTab(storedWebsiteTab);
       }
@@ -4741,7 +4773,7 @@
     }
     var initialTypographyTab = "fonts";
     try {
-      var storedTypographyTab = window.sessionStorage.getItem(typographyTabStorageKey);
+      var storedTypographyTab = window.sessionStorage.getItem(storageKeys.typographyTab);
       if (storedTypographyTab) {
         initialTypographyTab = normalizeTypographyTab(storedTypographyTab);
       }
@@ -4757,7 +4789,7 @@
     updateAutosavePill();
     lastElementorAutoSyncPayload = stableStringify(buildElementorAutoSyncPayload());
     markCurrentStateAsSaved();
-    autosaveReady = true;
+    autosave.ready = true;
     refreshGeneralFavoritesState();
     safeInitStep("mark active whats-new items", function() {
       markWhatsNewSeen($(".ecf-nav-item.is-active").data("ecf-new-key"));
@@ -4797,7 +4829,7 @@
       scheduleMasonryLayouts();
     });
     $(document).on("submit", ".ecf-wrap form", function() {
-      window.clearTimeout(autosaveTimer);
+      window.clearTimeout(autosave.timer);
       persistAdminPageState($(this));
     });
     $(document).on("submit", 'form[action="options.php"]', function() {
@@ -4806,9 +4838,9 @@
       }
       var activePanel = $(".ecf-nav-item.is-active").attr("data-panel") || "tokens";
       try {
-        window.sessionStorage.setItem(panelStorageKey, activePanel);
+        window.sessionStorage.setItem(storageKeys.panel, activePanel);
         var activeGeneralTab = $("[data-ecf-general-tab].is-active").data("ecf-general-tab") || "system";
-        window.sessionStorage.setItem(generalTabStorageKey, activeGeneralTab);
+        window.sessionStorage.setItem(storageKeys.generalTab, activeGeneralTab);
       } catch (err) {
       }
     });
@@ -4976,7 +5008,7 @@
     $(document).on("focus", "[data-ecf-shadow-name-input], [data-ecf-shadow-value-input]", function() {
       var $row = $(this).closest("[data-ecf-shadow-edit-row]");
       if (!$row.length) return;
-      var name = $.trim($row.find("[data-ecf-shadow-name-input]").val() || "");
+      var name = trim($row.find("[data-ecf-shadow-name-input]").val() || "");
       var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "shadow";
       $("[data-ecf-shadow-preview]").attr("data-active-shadow", slug);
       renderShadowPreview();
@@ -5350,7 +5382,7 @@
       return Array.from(new Set(names));
     }
     function getBoxedHelperName() {
-      var value = $.trim($('[name="ecf_framework_v50[elementor_boxed_width]"]').val() || "");
+      var value = trim($('[name="ecf_framework_v50[elementor_boxed_width]"]').val() || "");
       return value ? "ecf-container-boxed" : "";
     }
     function getSelectedSyncPayloadNames() {
@@ -5421,7 +5453,7 @@
         var $group = $(this);
         var groupTier = String($group.data("ecf-active-class-group") || "");
         var $list = $group.find("[data-ecf-active-class-list]").first();
-        var hasItems = $group.find(".ecf-active-class-item").length > 0 || $list.find(".ecf-active-class-empty").length > 0 || $.trim($list.text()).length > 0;
+        var hasItems = $group.find(".ecf-active-class-item").length > 0 || $list.find(".ecf-active-class-empty").length > 0 || trim($list.text()).length > 0;
         var show = tier === "all" ? hasItems : groupTier === tier && hasItems;
         $group.prop("hidden", !show);
         if (show && tier !== "all") {
@@ -5538,10 +5570,10 @@
       var activeBasicCount = $('.ecf-starter-class-item[data-tier="basic"]').find(".ecf-starter-class-toggle:checked").length;
       var activeAdvancedCount = $('.ecf-starter-class-item[data-tier="advanced"]').find(".ecf-starter-class-toggle:checked").length;
       var customCount = $(".ecf-starter-custom-row").filter(function() {
-        return $.trim($(this).find(".ecf-custom-starter-name").val() || "") !== "";
+        return trim($(this).find(".ecf-custom-starter-name").val() || "") !== "";
       }).length;
       var activeCustomCount = $(".ecf-starter-custom-row").filter(function() {
-        return $(this).find(".ecf-custom-starter-enabled").is(":checked") && $.trim($(this).find(".ecf-custom-starter-name").val() || "") !== "";
+        return $(this).find(".ecf-custom-starter-enabled").is(":checked") && trim($(this).find(".ecf-custom-starter-name").val() || "") !== "";
       }).length;
       var utilityCount = $(".ecf-utility-class-item").length;
       var activeUtilityCount = $(".ecf-utility-class-item").find(".ecf-utility-class-toggle:checked").length;
@@ -5587,7 +5619,7 @@
         loadClasses();
         showClassLibrarySection("active");
         $existingForeignGroup.prop("hidden", false).prop("open", true).attr("open", "open");
-        if (expectedExistingForeign > 0 && !$.trim($existingForeignList.text()).length) {
+        if (expectedExistingForeign > 0 && !trim($existingForeignList.text()).length) {
           $existingForeignList.html('<p class="ecf-active-class-empty">' + escapeHtml(i18n.loading_elementor_classes || i18n.loading || "") + "</p>");
         }
         updateActiveClassTierVisibility("existing-foreign");
@@ -5829,9 +5861,9 @@
       var showBemGenerator = activeLibrary === "starter" && activeTier === "custom";
       var showActiveSummary = activeTier === "all";
       var $activeTierButton = $('[data-ecf-class-tier="' + activeTier + '"]');
-      var tierLabel = $.trim($activeTierButton.clone().children().remove().end().text());
-      var tierTitle = $.trim($activeTierButton.attr("data-ecf-tier-title") || tierLabel || "");
-      var tierCopy = $.trim($activeTierButton.attr("data-ecf-tier-copy") || $(".ecf-class-library-intro").first().text() || "");
+      var tierLabel = trim($activeTierButton.clone().children().remove().end().text());
+      var tierTitle = trim($activeTierButton.attr("data-ecf-tier-title") || tierLabel || "");
+      var tierCopy = trim($activeTierButton.attr("data-ecf-tier-copy") || $(".ecf-class-library-intro").first().text() || "");
       showClassLibrarySection(activeLibrary);
       $("[data-ecf-active-class-summary__grid]").prop("hidden", !showActiveSummary);
       $("[data-ecf-active-class-hint]").prop("hidden", !showActiveSummary);
@@ -5850,7 +5882,7 @@
     function getActiveClassSearchQuery() {
       var activeTier = $("[data-ecf-class-tier].is-active").data("ecf-class-tier") || "all";
       var activeLibrary = getClassLibrarySectionForTier(activeTier);
-      return $.trim($('[data-ecf-library-section="' + activeLibrary + '"] [data-ecf-class-search]').val() || "").toLowerCase();
+      return trim($('[data-ecf-library-section="' + activeLibrary + '"] [data-ecf-class-search]').val() || "").toLowerCase();
     }
     function matchesClassSearch(parts, query) {
       if (!query) return true;
@@ -6046,7 +6078,7 @@
       }
       if (!actionUrl) return;
       try {
-        window.sessionStorage.setItem(panelStorageKey, "utilities");
+        window.sessionStorage.setItem(storageKeys.panel, "utilities");
       } catch (err) {
       }
       var $tempForm = $("<form>", {
@@ -6108,7 +6140,7 @@
         return;
       }
       var $target = $rows.find(".ecf-starter-custom-row").filter(function() {
-        return !$.trim($(this).find(".ecf-custom-starter-name").val() || "");
+        return !trim($(this).find(".ecf-custom-starter-name").val() || "");
       }).first();
       if (!$target.length) {
         $target = appendCustomStarterRow({ enabled: true, category: "custom" });
@@ -6549,12 +6581,12 @@
     });
     $(document).on("click", "[data-ecf-class-sync-prompt-no]", function() {
       var payload = $("[data-ecf-class-sync-prompt-modal]").data("ecfSyncPromptPayload") || null;
-      dismissedElementorSyncPromptHash = payload && payload.hash ? String(payload.hash) : "";
+      autosave.dismissedSyncHash = payload && payload.hash ? String(payload.hash) : "";
       closeClassSyncPromptModal();
     });
     $(document).on("click", "[data-ecf-class-sync-prompt-yes]", function() {
       var payload = $("[data-ecf-class-sync-prompt-modal]").data("ecfSyncPromptPayload") || null;
-      dismissedElementorSyncPromptHash = "";
+      autosave.dismissedSyncHash = "";
       closeClassSyncPromptModal();
       if (!payload) return;
       runElementorSyncNow({
@@ -6610,11 +6642,11 @@
       var id = String($button.data("id"));
       var item = findSearchItem(group, id);
       if (!item) return;
-      if (!canEditSearchItem($.extend({}, item, { group }))) {
+      if (!canEditSearchItem(Object.assign({}, item, { group }))) {
         alert(isClassGroup(group) ? i18n.search_edit_class : i18n.search_edit_generated);
         return;
       }
-      openSearchEditModal($.extend({}, item, { group }));
+      openSearchEditModal(Object.assign({}, item, { group }));
     });
     $(document).on("click", "[data-ecf-search-delete]", function(e) {
       e.preventDefault();
@@ -6778,24 +6810,28 @@
         return { step, token: "--ecf-" + cfg.prefix + "-" + step, min: formatPreviewNumber(pxToRem(minSize)), max: formatPreviewNumber(pxToRem(maxSize)), minPx: formatPreviewNumber(minSize), maxPx: formatPreviewNumber(maxSize), cssValue, isBase: i === baseIdx };
       });
     }
+    function buildSpacingMetricHtml(icon, label, value, barWidth, barH, cssValue) {
+      var copyLabel = escapeHtml(i18n.copy);
+      var cssEscaped = escapeHtml(cssValue);
+      return '<div class="ecf-space-row__metric"><div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-' + icon + '"></i>' + label + '</span><div class="ecf-clamp-metric"><strong>' + formatPreviewNumber(value) + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + copyLabel + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + cssEscaped + '">' + cssEscaped + '</button></div><div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + formatPreviewNumber(barWidth) + "px;height:" + barH + 'px;"></div></div></div>';
+    }
+    function buildSpacingRowHtml(item, labelMin, labelMax) {
+      var sizeRange = normalizeSizeRange(item.minPx, item.maxPx);
+      var minValue = sizeRange ? sizeRange.minPx : 0;
+      var maxValue = sizeRange ? sizeRange.maxPx : 0;
+      var minBarH = Math.min(40, Math.max(4, Math.round(minValue)));
+      var maxBarH = Math.min(40, Math.max(4, Math.round(maxValue)));
+      return '<div class="ecf-space-row' + (item.isBase ? " is-base" : "") + '" data-ecf-space-step="' + item.step + '"><div class="ecf-space-row__token"><span class="ecf-space-row__token-text ecf-spacing-token-name">' + item.token + '</span><span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div><div class="ecf-space-row__meta">' + buildSpacingMetricHtml("smartphone", labelMin, minValue, Math.max(0, minValue), minBarH, item.cssValue) + buildSpacingMetricHtml("desktop", labelMax, maxValue, Math.max(0, maxValue), maxBarH, item.cssValue) + "</div></div>";
+    }
     function renderSpacingPreview() {
       var $preview = $("[data-ecf-spacing-preview]");
       if (!$preview.length) return;
-      var steps = getSpacingSteps();
-      var cfg = getSpacingConfig();
-      var items = buildSpacingItems(steps, cfg);
+      var items = buildSpacingItems(getSpacingSteps(), getSpacingConfig());
       var labelMin = $preview.data("preview-label-min") || "";
       var labelMax = $preview.data("preview-label-max") || "";
       var html = "";
-      $.each(items, function(_, item) {
-        var sizeRange = normalizeSizeRange(item.minPx, item.maxPx);
-        var minValue = sizeRange ? sizeRange.minPx : 0;
-        var maxValue = sizeRange ? sizeRange.maxPx : 0;
-        var minBarWidth = Math.max(0, minValue);
-        var maxBarWidth = Math.max(0, maxValue);
-        var minBarH = Math.min(40, Math.max(4, Math.round(minValue)));
-        var maxBarH = Math.min(40, Math.max(4, Math.round(maxValue)));
-        html += '<div class="ecf-space-row' + (item.isBase ? " is-base" : "") + '" data-ecf-space-step="' + item.step + '"><div class="ecf-space-row__token"><span class="ecf-space-row__token-text ecf-spacing-token-name">' + item.token + '</span><span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div><div class="ecf-space-row__meta"><div class="ecf-space-row__metric"><div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-smartphone"></i>' + labelMin + '</span><div class="ecf-clamp-metric"><strong>' + formatPreviewNumber(minValue) + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div><div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + formatPreviewNumber(minBarWidth) + "px;height:" + minBarH + 'px;"></div></div></div><div class="ecf-space-row__metric"><div class="ecf-space-row__metric-meta"><span><i class="dashicons dashicons-desktop"></i>' + labelMax + '</span><div class="ecf-clamp-metric"><strong>' + formatPreviewNumber(maxValue) + 'px</strong><button type="button" class="ecf-clamp-toggle" data-ecf-clamp-toggle="' + escapeHtml(i18n.copy) + '"><span class="dashicons dashicons-editor-code"></span></button></div><button type="button" class="ecf-clamp-popover" data-copy="' + escapeHtml(item.cssValue) + '">' + escapeHtml(item.cssValue) + '</button></div><div class="ecf-space-row__bar"><div class="ecf-space-row__bar-fill" style="width:' + formatPreviewNumber(maxBarWidth) + "px;height:" + maxBarH + 'px;"></div></div></div></div></div>';
+      items.forEach(function(item) {
+        html += buildSpacingRowHtml(item, labelMin, labelMax);
       });
       $preview.find("[data-ecf-spacing-preview-list]").html(html);
     }
@@ -6908,41 +6944,18 @@
     $(document).on("click", ".ecf-copy-pill", function(e) {
       e.stopPropagation();
       var $pill = $(this);
-      var text = $pill.data("copy");
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function() {
-        $pill.text(i18n.copied).addClass("is-copied");
-        setTimeout(function() {
-          $pill.text(i18n.copy).removeClass("is-copied");
-        }, 1500);
-      });
+      copyToClipboard($pill, $pill.data("copy"), i18n.copied, i18n.copy, false, 1500);
     });
     $(document).on("click", "[data-ecf-token-copy]", function(e) {
       e.preventDefault();
       e.stopPropagation();
       var $pill = $(this);
-      var text = String($pill.attr("data-ecf-token-copy") || "").trim();
-      if (!text || !navigator.clipboard) return;
-      var originalHtml = $pill.html();
-      navigator.clipboard.writeText(text).then(function() {
-        $pill.addClass("is-copied").text(i18n.copied || "");
-        setTimeout(function() {
-          $pill.removeClass("is-copied").html(originalHtml);
-        }, 1200);
-      });
+      copyToClipboard($pill, String($pill.attr("data-ecf-token-copy") || "").trim(), i18n.copied || "", $pill.html(), true);
     });
     $(document).on("click", ".ecf-debug-copy", function(e) {
       e.preventDefault();
       var $button = $(this);
-      var text = $button.attr("data-ecf-copy-text") || "";
-      if (!text || !navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function() {
-        var original = $button.text();
-        $button.text(i18n.copied).addClass("is-copied");
-        setTimeout(function() {
-          $button.text(original).removeClass("is-copied");
-        }, 1200);
-      });
+      copyToClipboard($button, $button.attr("data-ecf-copy-text") || "", i18n.copied, $button.text());
     });
     $(document).on("click", ".ecf-clamp-toggle", function(e) {
       e.preventDefault();
@@ -6955,45 +6968,22 @@
     $(document).on("click", "[data-ecf-copy-target]", function(e) {
       e.preventDefault();
       var $button = $(this);
-      var targetId = String($button.attr("data-ecf-copy-target") || "");
-      var $target = targetId ? $("#" + targetId) : $();
+      var $target = $("#" + String($button.attr("data-ecf-copy-target") || ""));
       var text = $target.length ? String($target.val() || "") : "";
-      if (!text || !navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function() {
-        var original = $button.text();
-        $button.text(i18n.copied || "");
-        setTimeout(function() {
-          $button.text(original);
-        }, 1200);
-      });
+      copyToClipboard($button, text, i18n.copied || "", $button.text());
     });
     $(document).on("click", ".ecf-color-token-copy", function(e) {
       e.preventDefault();
       e.stopPropagation();
       var $button = $(this);
-      var text = $button.attr("data-ecf-copy-text") || "";
-      if (!text || !navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function() {
-        var original = $button.text();
-        $button.text(i18n.color_generator_copied || "").addClass("is-copied");
-        setTimeout(function() {
-          $button.text(original).removeClass("is-copied");
-        }, 1200);
-      });
+      copyToClipboard($button, $button.attr("data-ecf-copy-text") || "", i18n.color_generator_copied || "", $button.text());
     });
     $(document).on("click", ".ecf-clamp-popover", function(e) {
       e.preventDefault();
       e.stopPropagation();
       var $pop = $(this);
       var text = $pop.attr("data-copy") || $pop.text();
-      if (!text || !navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function() {
-        var original = $pop.attr("data-copy") || text;
-        $pop.addClass("is-copied").text(i18n.copied);
-        setTimeout(function() {
-          $pop.removeClass("is-copied").text(original);
-        }, 1200);
-      });
+      copyToClipboard($pop, text, i18n.copied, $pop.attr("data-copy") || text);
     });
     $(document).on("click", "[data-ecf-root-copy-toggle]", function(e) {
       e.preventDefault();
@@ -7007,14 +6997,7 @@
       e.preventDefault();
       var $pop = $(this);
       var text = $pop.attr("data-copy") || $pop.text();
-      if (!text || !navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function() {
-        var original = $pop.text();
-        $pop.addClass("is-copied").text(i18n.copied);
-        setTimeout(function() {
-          $pop.removeClass("is-copied").text(text);
-        }, 1200);
-      });
+      copyToClipboard($pop, text, i18n.copied, text);
     });
     $(document).on("click", "[data-ecf-reload-page]", function(e) {
       e.preventDefault();
@@ -7072,8 +7055,8 @@
       var rootBasePx = $('[name="ecf_framework_v50[root_font_size]"]').val() === "62.5" ? 10 : 16;
       $("[data-ecf-body-size-field]").each(function() {
         var $field = $(this);
-        var value = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || "");
-        var format = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || "").toLowerCase();
+        var value = trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || "");
+        var format = trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || "").toLowerCase();
         var $warning = $field.find("[data-ecf-body-size-warning]");
         var numeric = parseFloat(String(value).replace(",", "."));
         var message = "";
