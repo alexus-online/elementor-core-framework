@@ -1,3 +1,13 @@
+/* ── Schmaler Laptop / Tablet Landscape (769px–1200px) ─────────── */
+@media (min-width: 769px) and (max-width: 1200px) {
+  :root {
+    --ecf-sidebar: 190px;
+  }
+  .ecf-main {
+    padding: 20px 24px;
+  }
+}
+
 /* ── Mobile Admin-UI Verbesserungen ───────────────────────────── */
 @media (max-width: 768px) {
   .ecf-wrap {
@@ -26,8 +36,22 @@
     margin: 6px 0 2px;
     padding: 0 8px;
   }
+  /* Subnav: horizontale Scrollleiste unter den Nav-Items */
   .ecf-nav-subnav {
+    display: flex !important;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 0 8px 8px;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ecf-nav-subnav[hidden] {
     display: none !important;
+  }
+  .ecf-nav-subnav__item {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   .ecf-main {
     padding: 14px 12px;

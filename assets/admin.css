@@ -350,7 +350,7 @@
   padding: 12px 14px 5px;
   font-size: 10px;
   font-weight: 650;
-  color: rgba(204, 213, 235, 0.32);
+  color: rgba(204, 213, 235, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.09em;
 }
@@ -359,6 +359,7 @@
   align-items: center;
   gap: 9px;
   padding: 11px 12px;
+  min-height: 40px;
   font-size: var(--ecf-admin-menu-font-size, 13px);
   font-weight: 540;
   color: rgba(214, 221, 243, 0.62);
@@ -587,6 +588,7 @@
   gap: 7px;
   width: 100%;
   padding: 7px 8px;
+  min-height: 34px;
   font-size: 12px;
   font-weight: 500;
   color: rgba(214, 221, 243, 0.5);
@@ -628,9 +630,9 @@
   text-overflow: ellipsis;
 }
 .ecf-nav-subnav__token {
-  font-size: 9.5px;
+  font-size: 10px;
   font-family: monospace;
-  color: rgba(214, 221, 243, 0.22);
+  color: rgba(214, 221, 243, 0.45);
   flex-shrink: 0;
   opacity: 0;
   transition: opacity .15s ease;
@@ -946,6 +948,22 @@
 }
 .ecf-topbar-menu__section:first-child {
   padding-top: 4px;
+}
+
+/* Save button saving state */
+.ecf-sticky-topbar__save.is-saving,
+.ecf-sticky-topbar__save.is-saving.button.button-primary {
+  background: rgba(99, 102, 241, 0.18) !important;
+  border-color: rgba(129, 140, 248, 0.35) !important;
+  color: #a5b4fc !important;
+  box-shadow: none !important;
+  animation: ecf-saving-pulse 1.2s ease-in-out infinite;
+  cursor: wait !important;
+}
+
+@keyframes ecf-saving-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
 }
 
 /* Save button saved/flash state */
@@ -1806,7 +1824,7 @@
   border-color: color-mix(in srgb, var(--ecf-accent) 55%, var(--ecf-border));
 }
 .ecf-card h2, .ecf-card h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 680;
   color: var(--ecf-text);
   margin: 0 0 14px;
@@ -3696,7 +3714,7 @@
 }
 .ecf-muted-copy {
   margin: 4px 0 0;
-  color: var(--ecf-muted);
+  color: var(--ecf-muted-2);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -9325,6 +9343,16 @@ body.ecf-modal-open {
   line-height: 1.5;
 }
 
+/* ── Schmaler Laptop / Tablet Landscape (769px–1200px) ─────────── */
+@media (min-width: 769px) and (max-width: 1200px) {
+  :root {
+    --ecf-sidebar: 190px;
+  }
+  .ecf-main {
+    padding: 20px 24px;
+  }
+}
+
 /* ── Mobile Admin-UI Verbesserungen ───────────────────────────── */
 @media (max-width: 768px) {
   .ecf-wrap {
@@ -9353,8 +9381,22 @@ body.ecf-modal-open {
     margin: 6px 0 2px;
     padding: 0 8px;
   }
+  /* Subnav: horizontale Scrollleiste unter den Nav-Items */
   .ecf-nav-subnav {
+    display: flex !important;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 0 8px 8px;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ecf-nav-subnav[hidden] {
     display: none !important;
+  }
+  .ecf-nav-subnav__item {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   .ecf-main {
     padding: 14px 12px;

@@ -3894,6 +3894,9 @@ jQuery(function($){
     queuedSettingsPayload = '';
     persistAdminPageState($settingsForm);
     showAutosaveNotice(i18n.autosave_saving || '', 'saving');
+    var $saveBtn = $('.ecf-sticky-topbar__save');
+    $saveBtn.addClass('is-saving');
+    $('[data-ecf-save-label]').text(i18n.autosave_saving || 'Saving…');
 
     window.fetch(restUrl, {
       method: 'POST',
@@ -3969,6 +3972,7 @@ jQuery(function($){
       showAutosaveNotice(i18n.autosave_failed || '', 'error');
     }).finally(function() {
       autosaveSkipValidation = false;
+      $('.ecf-sticky-topbar__save').removeClass('is-saving');
     });
   }
 

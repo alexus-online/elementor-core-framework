@@ -78,7 +78,8 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 9px 12px;
+  padding: 11px 12px;
+  min-height: 40px;
   font-size: var(--ecf-admin-menu-font-size, 13px);
   font-weight: 540;
   color: rgba(214, 221, 243, 0.62);
@@ -306,8 +307,9 @@
   align-items: center;
   gap: 7px;
   width: 100%;
-  padding: 5px 8px;
-  font-size: 11.5px;
+  padding: 7px 8px;
+  min-height: 34px;
+  font-size: 12px;
   font-weight: 500;
   color: rgba(214, 221, 243, 0.5);
   background: none;
@@ -666,6 +668,22 @@
 }
 .ecf-topbar-menu__section:first-child {
   padding-top: 4px;
+}
+
+/* Save button saving state */
+.ecf-sticky-topbar__save.is-saving,
+.ecf-sticky-topbar__save.is-saving.button.button-primary {
+  background: rgba(99, 102, 241, 0.18) !important;
+  border-color: rgba(129, 140, 248, 0.35) !important;
+  color: #a5b4fc !important;
+  box-shadow: none !important;
+  animation: ecf-saving-pulse 1.2s ease-in-out infinite;
+  cursor: wait !important;
+}
+
+@keyframes ecf-saving-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
 }
 
 /* Save button saved/flash state */

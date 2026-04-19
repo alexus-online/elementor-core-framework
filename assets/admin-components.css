@@ -696,7 +696,7 @@
   border-color: color-mix(in srgb, var(--ecf-accent) 55%, var(--ecf-border));
 }
 .ecf-card h2, .ecf-card h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 680;
   color: var(--ecf-text);
   margin: 0 0 14px;
