@@ -205,7 +205,7 @@ test.describe('ECF admin UI', () => {
     const tabs = page.locator('.ecf-general-tabs [data-ecf-general-tab]');
     await expect(tabs).toHaveCount(4);
     await expect(tabs.nth(0)).toContainText(/Website|Webseite/i);
-    await expect(tabs.nth(1)).toContainText(/Interface/i);
+    await expect(tabs.nth(1)).toContainText(/Interface|Oberfläche/i);
     await expect(tabs.nth(2)).toContainText(/System/i);
     await expect(tabs.nth(3)).toContainText(/Favorites|Favoriten/i);
     await expect(tabs.nth(3).locator('.ecf-new-dot')).toHaveCount(0);

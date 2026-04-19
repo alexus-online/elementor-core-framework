@@ -1050,7 +1050,7 @@ async function setTopbarAutosaveEnabled(page, enabled) {
       y: Math.max(8, Math.round(box.height / 2)),
     },
   });
-  await expect(pill).toContainText(enabled ? /Autosave active|Autosave aktiv/i : /Autosave off|Autosave aus/i);
+  await expect(pill).toContainText(enabled ? /Autosave: on|Autosave: an/i : /Autosave: off|Autosave: aus/i);
   return true;
 }
 
