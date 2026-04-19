@@ -1,6 +1,7 @@
 import { initUiWidgets } from './modules/ui-widgets.js';
 
 jQuery(function($){
+  var trim = function(s) { return String(s == null ? '' : s).trim(); };
   var i18n = (typeof ecfAdmin !== 'undefined' && ecfAdmin.i18n) ? ecfAdmin.i18n : {};
   var spacingPreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.spacingPreview) ? ecfAdmin.spacingPreview : {};
   var typePreviewMap = (typeof ecfAdmin !== 'undefined' && ecfAdmin.typePreview) ? ecfAdmin.typePreview : {};
@@ -282,7 +283,7 @@ jQuery(function($){
   function updateColorDetail($row, displayValue) {
     var $detail = $row.find('.ecf-color-detail').first();
     if (!$detail.length) return;
-    var name = $.trim($row.find('[data-ecf-slug-field="token"]').first().val() || 'name');
+    var name = trim($row.find('[data-ecf-slug-field="token"]').first().val() || 'name');
     var value = displayValue || $row.find('.ecf-color-value-input').val() || $row.find('.ecf-color-field').val() || '#000000';
     var parsed = parseDisplayColor(value, $row.find('.ecf-color-format-select').val() || 'hex') || parseHexValue(value) || parseRgbValue(value);
     var hex = parsed ? rgbToHex(parsed).toUpperCase() : '#000000';
@@ -326,7 +327,7 @@ jQuery(function($){
   }
 
   function normalizeDisplayColorValue(value) {
-    var normalized = $.trim(String(value || ''));
+    var normalized = trim(String(value || ''));
     return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(normalized) ? normalized : '';
   }
 
@@ -383,7 +384,7 @@ jQuery(function($){
     var format = $row.find('.ecf-color-format-select').val() || 'hex';
     var rgb = parseDisplayColor($display.val(), format);
     if (!rgb) {
-      $display.toggleClass('ecf-input-invalid', $.trim($display.val()) !== '');
+      $display.toggleClass('ecf-input-invalid', trim($display.val()) !== '');
       return false;
     }
     var hex = rgbToHex(rgb).toUpperCase();
@@ -635,6 +636,17 @@ jQuery(function($){
     return $('<div>').text(value == null ? '' : String(value)).html();
   }
 
+  function copyToClipboard($el, text, successText, originalContent, restoreHtml, duration) {
+    if (!text || !navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(function() {
+      $el.addClass('is-copied').text(successText || i18n.copied || '');
+      setTimeout(function() {
+        $el.removeClass('is-copied');
+        if (restoreHtml) { $el.html(originalContent); } else { $el.text(originalContent); }
+      }, duration || 1200);
+    });
+  }
+
   function getFontFamilyOptionsFromSettings(settings) {
     var fontRows = (((settings || {}).typography || {}).fonts) || [];
     var options = [
@@ -649,7 +661,7 @@ jQuery(function($){
     ];
 
     ((((settings || {}).typography || {}).local_fonts) || []).forEach(function(row) {
-      var family = $.trim((row && row.family) || '');
+      var family = trim((row && row.family) || '');
       if (!family) {
         return;
       }
@@ -667,7 +679,7 @@ jQuery(function($){
     var localOptions = [];
 
     ((((settings || {}).typography || {}).local_fonts) || []).forEach(function(row) {
-      var family = $.trim((row && row.family) || '');
+      var family = trim((row && row.family) || '');
       if (!family) {
         return;
       }
@@ -688,12 +700,12 @@ jQuery(function($){
     groups.push({
       label: i18n.font_group_core || '',
       options: getFontFamilyOptionsFromSettings(settings).slice(0, 2).map(function(option) {
-        return $.extend({}, option, { source: 'core' });
+        return Object.assign({}, option, { source: 'core' });
       })
     });
 
     var libraryOptions = (((window.ecfAdmin || {}).fontLibrary) || []).map(function(entry) {
-      var family = $.trim((entry && entry.family) || '');
+      var family = trim((entry && entry.family) || '');
       if (!family) {
         return null;
       }
@@ -756,10 +768,10 @@ jQuery(function($){
     var $custom = $field.find('[data-ecf-font-family-custom]').first();
 
     if ($selected.length && $selected.val() !== '__custom__') {
-      return $.trim($selected.text() || '');
+      return trim($selected.text() || '');
     }
 
-    return $.trim($custom.val() || '') || $.trim($selected.text() || '');
+    return trim($custom.val() || '') || trim($selected.text() || '');
   }
 
   function syncFontFamilyCurrentLabel($field) {
@@ -808,8 +820,8 @@ jQuery(function($){
   }
 
   function syncTypographyFontCardSummaries() {
-    var currentPrefix = $.trim(String(i18n.current_prefix || ''));
-    var fontSizePrefix = $.trim(String(i18n.font_size_prefix || ''));
+    var currentPrefix = trim(String(i18n.current_prefix || ''));
+    var fontSizePrefix = trim(String(i18n.font_size_prefix || ''));
 
     var $bodyField = getPrimaryFontFamilyField('base_font_family');
     if ($bodyField.length) {
@@ -823,8 +835,8 @@ jQuery(function($){
 
     var $bodySizeField = $('[data-ecf-body-size-field]').first();
     if ($bodySizeField.length) {
-      var sizeValue = $.trim(String($bodySizeField.find('[data-ecf-size-value-input]').val() || ''));
-      var sizeFormat = $.trim(String($bodySizeField.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || ''));
+      var sizeValue = trim(String($bodySizeField.find('[data-ecf-size-value-input]').val() || ''));
+      var sizeFormat = trim(String($bodySizeField.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || ''));
       if (sizeValue && sizeFormat) {
         $('[data-ecf-typography-body-size]').text(fontSizePrefix + ' ' + sizeValue + ' ' + sizeFormat);
       }
@@ -832,7 +844,7 @@ jQuery(function($){
   }
 
   function parseCssSizeParts(value) {
-    var normalized = $.trim(String(value || ''));
+    var normalized = trim(String(value || ''));
     var match = normalized.match(/^(-?\d+(?:[.,]\d+)?)(px|rem|em|ch|%|vw|vh)$/i);
 
     if (match) {
@@ -933,7 +945,7 @@ jQuery(function($){
     var localRows = ((((settings || {}).typography || {}).local_fonts) || []);
 
     localRows.forEach(function(row) {
-      var family = $.trim((row && row.family) || '');
+      var family = trim((row && row.family) || '');
       if (!family) {
         return;
       }
@@ -1080,8 +1092,8 @@ jQuery(function($){
 
     $('[data-ecf-body-size-field]').each(function() {
       var $field = $(this);
-      var currentValue = $.trim(String($field.find('[data-ecf-size-value-input]').val() || ''));
-      var currentFormat = $.trim(String($field.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || '')).toLowerCase();
+      var currentValue = trim(String($field.find('[data-ecf-size-value-input]').val() || ''));
+      var currentFormat = trim(String($field.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || '')).toLowerCase();
       var isLinked = currentFormat === derived.format && currentValue === derived.value;
       $field.attr('data-ecf-body-size-linked', isLinked ? '1' : '0');
     });
@@ -1096,8 +1108,8 @@ jQuery(function($){
 
     $('[data-ecf-body-size-field]').each(function() {
       var $field = $(this);
-      var currentValue = $.trim(String($field.find('[data-ecf-size-value-input]').val() || ''));
-      var currentFormat = $.trim(String($field.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || '')).toLowerCase();
+      var currentValue = trim(String($field.find('[data-ecf-size-value-input]').val() || ''));
+      var currentFormat = trim(String($field.find('[data-ecf-size-format-input], [data-ecf-format-input]').first().val() || '')).toLowerCase();
       var matchesPreviousDerived = previousDerived
         && currentFormat === previousDerived.format
         && currentValue === previousDerived.value;
@@ -1157,7 +1169,7 @@ jQuery(function($){
   }
 
   function buildFilteredLocalFontGroups(groups, query) {
-    var normalized = $.trim(String(query || '')).toLowerCase();
+    var normalized = trim(String(query || '')).toLowerCase();
     if (!normalized) {
       return Array.isArray(groups) ? groups : [];
     }
@@ -1332,7 +1344,7 @@ jQuery(function($){
   }
 
   function findExistingFontValue(fieldName, family) {
-    var normalizedFamily = $.trim(String(family || '')).toLowerCase();
+    var normalizedFamily = trim(String(family || '')).toLowerCase();
     var $field = getPrimaryFontFamilyField(fieldName);
     if (!$field.length || !normalizedFamily) {
       return '';
@@ -1341,7 +1353,7 @@ jQuery(function($){
     var match = '';
     $field.find('[data-ecf-font-family-preset] option').each(function() {
       var value = String($(this).attr('value') || '');
-      var label = $.trim(String($(this).text() || ''));
+      var label = trim(String($(this).text() || ''));
       if (!value || value.indexOf('__library__|') === 0) {
         return;
       }
@@ -1350,7 +1362,7 @@ jQuery(function($){
         return false;
       }
       var parts = label.split(':');
-      if (parts.length > 1 && $.trim(parts.slice(1).join(':')).toLowerCase() === normalizedFamily) {
+      if (parts.length > 1 && trim(parts.slice(1).join(':')).toLowerCase() === normalizedFamily) {
         match = value;
         return false;
       }
@@ -1374,8 +1386,8 @@ jQuery(function($){
   }
 
   function applyFontPairingSelection(pairing, $button) {
-    var bodyFamily = $.trim(String((pairing && pairing.bodyFamily) || ''));
-    var headingFamily = $.trim(String((pairing && pairing.headingFamily) || ''));
+    var bodyFamily = trim(String((pairing && pairing.bodyFamily) || ''));
+    var headingFamily = trim(String((pairing && pairing.headingFamily) || ''));
     var tasks = [];
 
     function queueField(fieldName, target, family) {
@@ -1427,8 +1439,8 @@ jQuery(function($){
     if (!$card || !$card.length || !pairing) {
       return;
     }
-    var headingFamily = $.trim(String(pairing.heading_family || pairing.headingFamily || ''));
-    var bodyFamily = $.trim(String(pairing.body_family || pairing.bodyFamily || ''));
+    var headingFamily = trim(String(pairing.heading_family || pairing.headingFamily || ''));
+    var bodyFamily = trim(String(pairing.body_family || pairing.bodyFamily || ''));
     var title = String(pairing.title || '');
     var description = String(pairing.description || '');
     var headingSample = String(pairing.heading_sample || pairing.headingSample || '');
@@ -1491,8 +1503,8 @@ jQuery(function($){
     if (!$fields.length || !payload) {
       return;
     }
-    var value = $.trim(String(payload.value || ''));
-    var format = $.trim(String(payload.format || 'px')).toLowerCase();
+    var value = trim(String(payload.value || ''));
+    var format = trim(String(payload.format || 'px')).toLowerCase();
     $fields.each(function() {
       var $field = $(this);
       $field.find('input[type="text"]').first().val(value);
@@ -1521,7 +1533,7 @@ jQuery(function($){
 
   function findTokenRow(groupName, tokenName) {
     return $('.ecf-table[data-group="' + groupName + '"] .ecf-row').filter(function() {
-      return $.trim(String($(this).find('[data-ecf-slug-field="token"]').first().val() || '')) === tokenName;
+      return trim(String($(this).find('[data-ecf-slug-field="token"]').first().val() || '')) === tokenName;
     }).first();
   }
 
@@ -1841,7 +1853,7 @@ jQuery(function($){
       return config.fluid ? labelFluid : labelFixed;
     }
 
-    $.each(items, function(_, item) {
+    items.forEach(function(item) {
       var selectedClass = item.step === activeStep ? ' is-active' : '';
       var previewText = getTypePreviewText(item.token || item.step, $preview);
       html += '<div class="ecf-type-row' + selectedClass + '" data-ecf-step="' + item.step + '" data-ecf-step-row tabindex="0" role="button" aria-pressed="' + (item.step === activeStep ? 'true' : 'false') + '" style="--ecf-preview-size:' + sizeForView(item) + ';">'
@@ -1933,7 +1945,7 @@ jQuery(function($){
     var typeItem = typeItems.find(function(item){ return item.step === typeStep; }) || typeItems[0];
     var spacingItem = spacingItems.find(function(item){ return item.step === spacingStep; }) || spacingItems[0];
     var $radiusRow = $('.ecf-table[data-group="radius"] .ecf-row').filter(function() {
-      return $.trim($(this).find('input').eq(0).val()) === radiusName;
+      return trim($(this).find('input').eq(0).val()) === radiusName;
     }).first();
 
     if (!$radiusRow.length) {
@@ -1990,8 +2002,8 @@ jQuery(function($){
   function buildShadowPreviewItems() {
     return $('.ecf-table[data-group="shadows"] .ecf-row').map(function(index) {
       var $row = $(this);
-      var name = $.trim($row.find('input').eq(0).val()) || ('shadow-' + index);
-      var value = $.trim($row.find('input').eq(1).val()) || '0 1px 2px rgba(0,0,0,0.05)';
+      var name = trim($row.find('input').eq(0).val()) || ('shadow-' + index);
+      var value = trim($row.find('input').eq(1).val()) || '0 1px 2px rgba(0,0,0,0.05)';
       var slug = name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '') || ('shadow-' + index);
@@ -2032,7 +2044,7 @@ jQuery(function($){
       activeShadow = items[0].slug;
     }
 
-    $.each(items, function(_, item) {
+    items.forEach(function(item) {
       var selectedClass = item.slug === activeShadow ? ' is-active' : '';
       var previewShadowValue = enhanceShadowPreviewValue(item.value);
       html += '<div class="ecf-shadow-row' + selectedClass + '" data-ecf-shadow-step="' + item.slug + '" data-ecf-shadow-index="' + item.index + '">'
@@ -2076,7 +2088,7 @@ jQuery(function($){
     var rowSelector = type === 'color' ? '.ecf-row--color' : '.ecf-row--minmax';
     $panel.find(rowSelector).removeClass('ecf-row--focused');
     var $focused = $panel.find(rowSelector).filter(function() {
-      var name = $.trim($(this).find('[data-ecf-slug-field="token"]').val() || '');
+      var name = trim($(this).find('[data-ecf-slug-field="token"]').val() || '');
       return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') === slug;
     }).first();
     $focused.addClass('ecf-row--focused');
@@ -2296,7 +2308,7 @@ jQuery(function($){
       html += '<div class="ecf-nav-subnav__group' + (colorsOpen ? ' is-open' : '') + '" data-ecf-subnav-group-items="colors">';
       $colorRows.each(function() {
         var $row = $(this);
-        var name = $.trim($row.find('[data-ecf-slug-field="token"]').val() || '');
+        var name = trim($row.find('[data-ecf-slug-field="token"]').val() || '');
         var hex  = $row.find('.ecf-color-value-input').val() || $row.find('.ecf-color-field').val() || '#888';
         if (!name) return;
         var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -2316,7 +2328,7 @@ jQuery(function($){
         + '</button>';
       html += '<div class="ecf-nav-subnav__group' + (radiusOpen ? ' is-open' : '') + '" data-ecf-subnav-group-items="radius">';
       $radiusRows.each(function() {
-        var name = $.trim($(this).find('[data-ecf-slug-field="token"]').val() || '');
+        var name = trim($(this).find('[data-ecf-slug-field="token"]').val() || '');
         if (!name) return;
         var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         html += '<button type="button" class="ecf-nav-subnav__item" data-ecf-subnav-token="radius" data-ecf-subnav-slug="' + slug + '">'
@@ -2542,7 +2554,7 @@ jQuery(function($){
   }
 
   function asSettingsRows(value) {
-    if ($.isArray(value)) return value;
+    if (Array.isArray(value)) return value;
     if (!value || typeof value !== 'object') return [];
     return Object.keys(value).map(function(key) {
       return value[key];
@@ -2550,7 +2562,7 @@ jQuery(function($){
   }
 
   function rowHasToken(row) {
-    return row && $.trim(String(row.name || '')) !== '';
+    return row && trim(String(row.name || '')) !== '';
   }
 
   function countGeneratedColorVariants(row) {
@@ -2578,14 +2590,14 @@ jQuery(function($){
     count += asSettingsRows(current.shadows).filter(rowHasToken).length;
 
     count += asSettingsRows(current.spacing && current.spacing.steps).filter(function(step) {
-      return $.trim(String(step || '')) !== '';
+      return trim(String(step || '')) !== '';
     }).length;
 
     count += asSettingsRows(current.typography && current.typography.scale && current.typography.scale.steps).filter(function(step) {
-      return $.trim(String(step || '')) !== '';
+      return trim(String(step || '')) !== '';
     }).length;
 
-    if ($.trim(String(current.elementor_boxed_width || '')) !== '') {
+    if (trim(String(current.elementor_boxed_width || '')) !== '') {
       count += 1;
     }
 
@@ -2597,9 +2609,9 @@ jQuery(function($){
     asSettingsRows((settings || {}).colors).forEach(function(row) {
       if (!rowHasToken(row)) return;
 
-      var name = $.trim(String(row.name || ''));
-      var value = $.trim(String(row.value || ''));
-      var format = $.trim(String(row.format || 'hex')) || 'hex';
+      var name = trim(String(row.name || ''));
+      var value = trim(String(row.value || ''));
+      var format = trim(String(row.format || 'hex')) || 'hex';
       var parsed = parseDisplayColor(value, format) || parseHexValue(value) || parseRgbValue(value);
       var baseValue = parsed ? rgbToHex(parsed).toUpperCase() : value;
       var baseLabel = 'ecf-color-' + name;
@@ -2999,7 +3011,7 @@ jQuery(function($){
     }
     var $clone = $source.clone();
     $clone.find('.dashicons, .ecf-new-dot, .ecf-unsaved-badge').remove();
-    return $.trim($clone.text());
+    return trim($clone.text());
   }
 
   function getStickyTopbarTitle(panel) {
@@ -3039,7 +3051,7 @@ jQuery(function($){
     var panelTitle = getStickyTopbarTitle(panel);
     var $panel = $('.ecf-panel[data-panel="' + panel + '"]').first();
     if (!panelTitle && $panel.length) {
-      panelTitle = $.trim($panel.find('h2').first().text());
+      panelTitle = trim($panel.find('h2').first().text());
     }
     if (!panelTitle) {
       panelTitle = getPanelButtonLabel(panel);
@@ -3054,8 +3066,8 @@ jQuery(function($){
     var $warning = $field.siblings('[data-ecf-inline-size-warning]').first();
     var $bodyField = $field.closest('[data-ecf-body-size-field]');
     var $bodyWarning = $bodyField.find('[data-ecf-body-size-warning]').first();
-    var rawValue = $.trim($input.val() || '');
-    var format = $.trim($format.val() || '').toLowerCase();
+    var rawValue = trim($input.val() || '');
+    var format = trim($format.val() || '').toLowerCase();
     var numeric = parseFloat(String(rawValue).replace(',', '.'));
     var message = '';
 
@@ -4754,7 +4766,7 @@ jQuery(function($){
 
   function showFloatingNewTooltip(el) {
     var $el = $(el);
-    var tip = $.trim($el.attr('data-tip') || '');
+    var tip = trim($el.attr('data-tip') || '');
     if (!tip) {
       return;
     }
@@ -5055,7 +5067,7 @@ jQuery(function($){
   $(document).on('input change', '[data-ecf-local-fonts-section] .ecf-font-file-row input[name$="[family]"]', function() {
     if (!pendingFontAutolinkField) return;
 
-    var family = $.trim($(this).val() || '');
+    var family = trim($(this).val() || '');
     if (!family) return;
 
     var $field = getPrimaryFontFamilyField(pendingFontAutolinkField);
@@ -5066,7 +5078,7 @@ jQuery(function($){
 
   $(document).on('click', '[data-ecf-local-font-remove]', function(e) {
     e.preventDefault();
-    var family = $.trim($(this).data('ecf-local-font-remove') || '');
+    var family = trim($(this).data('ecf-local-font-remove') || '');
     var fieldName = String($(this).data('ecf-font-family-field') || 'base_font_family');
     if (!family) return;
     getFontFamilyFields(fieldName).each(function() {
@@ -5080,7 +5092,7 @@ jQuery(function($){
       var removed = false;
       $section.find('.ecf-font-file-row').each(function() {
         var $row = $(this);
-        var rowFamily = $.trim($row.find('input[name$="[family]"]').val() || '');
+        var rowFamily = trim($row.find('input[name$="[family]"]').val() || '');
         if (rowFamily === family) {
           $row.find('.ecf-remove-row').trigger('click');
           removed = true;
@@ -5099,7 +5111,7 @@ jQuery(function($){
     var target = String($button.data('ecf-font-library-target') || 'body');
     var fieldName = String($button.data('ecf-font-family-field') || 'base_font_family');
     var $controls = $button.closest('[data-ecf-font-library-controls]');
-    var family = $.trim($controls.find('[data-ecf-font-library-search]').first().val() || '');
+    var family = trim($controls.find('[data-ecf-font-library-search]').first().val() || '');
 
     importLibraryFontIntoField(fieldName, target, family, $button);
   });
@@ -5523,7 +5535,7 @@ jQuery(function($){
   $(document).on('focus', '[data-ecf-shadow-name-input], [data-ecf-shadow-value-input]', function() {
     var $row = $(this).closest('[data-ecf-shadow-edit-row]');
     if (!$row.length) return;
-    var name = $.trim($row.find('[data-ecf-shadow-name-input]').val() || '');
+    var name = trim($row.find('[data-ecf-shadow-name-input]').val() || '');
     var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'shadow';
     $('[data-ecf-shadow-preview]').attr('data-active-shadow', slug);
     renderShadowPreview();
@@ -5981,7 +5993,7 @@ jQuery(function($){
   }
 
   function getBoxedHelperName() {
-    var value = $.trim($('[name="ecf_framework_v50[elementor_boxed_width]"]').val() || '');
+    var value = trim($('[name="ecf_framework_v50[elementor_boxed_width]"]').val() || '');
     return value ? 'ecf-container-boxed' : '';
   }
 
@@ -6076,7 +6088,7 @@ jQuery(function($){
       var $list = $group.find('[data-ecf-active-class-list]').first();
       var hasItems = $group.find('.ecf-active-class-item').length > 0
         || $list.find('.ecf-active-class-empty').length > 0
-        || $.trim($list.text()).length > 0;
+        || trim($list.text()).length > 0;
       var show = tier === 'all' ? hasItems : (groupTier === tier && hasItems);
       $group.prop('hidden', !show);
       if (show && tier !== 'all') {
@@ -6204,10 +6216,10 @@ jQuery(function($){
     var activeBasicCount = $('.ecf-starter-class-item[data-tier="basic"]').find('.ecf-starter-class-toggle:checked').length;
     var activeAdvancedCount = $('.ecf-starter-class-item[data-tier="advanced"]').find('.ecf-starter-class-toggle:checked').length;
     var customCount = $('.ecf-starter-custom-row').filter(function() {
-      return $.trim($(this).find('.ecf-custom-starter-name').val() || '') !== '';
+      return trim($(this).find('.ecf-custom-starter-name').val() || '') !== '';
     }).length;
     var activeCustomCount = $('.ecf-starter-custom-row').filter(function() {
-      return $(this).find('.ecf-custom-starter-enabled').is(':checked') && $.trim($(this).find('.ecf-custom-starter-name').val() || '') !== '';
+      return $(this).find('.ecf-custom-starter-enabled').is(':checked') && trim($(this).find('.ecf-custom-starter-name').val() || '') !== '';
     }).length;
     var utilityCount = $('.ecf-utility-class-item').length;
     var activeUtilityCount = $('.ecf-utility-class-item').find('.ecf-utility-class-toggle:checked').length;
@@ -6263,7 +6275,7 @@ jQuery(function($){
       loadClasses();
       showClassLibrarySection('active');
       $existingForeignGroup.prop('hidden', false).prop('open', true).attr('open', 'open');
-      if (expectedExistingForeign > 0 && !$.trim($existingForeignList.text()).length) {
+      if (expectedExistingForeign > 0 && !trim($existingForeignList.text()).length) {
         $existingForeignList.html('<p class="ecf-active-class-empty">' + escapeHtml(i18n.loading_elementor_classes || i18n.loading || '') + '</p>');
       }
       updateActiveClassTierVisibility('existing-foreign');
@@ -6574,9 +6586,9 @@ jQuery(function($){
     var showBemGenerator = activeLibrary === 'starter' && activeTier === 'custom';
     var showActiveSummary = activeTier === 'all';
     var $activeTierButton = $('[data-ecf-class-tier="' + activeTier + '"]');
-    var tierLabel = $.trim($activeTierButton.clone().children().remove().end().text());
-    var tierTitle = $.trim($activeTierButton.attr('data-ecf-tier-title') || tierLabel || '');
-    var tierCopy = $.trim($activeTierButton.attr('data-ecf-tier-copy') || $('.ecf-class-library-intro').first().text() || '');
+    var tierLabel = trim($activeTierButton.clone().children().remove().end().text());
+    var tierTitle = trim($activeTierButton.attr('data-ecf-tier-title') || tierLabel || '');
+    var tierCopy = trim($activeTierButton.attr('data-ecf-tier-copy') || $('.ecf-class-library-intro').first().text() || '');
 
     showClassLibrarySection(activeLibrary);
     $('[data-ecf-active-class-summary__grid]').prop('hidden', !showActiveSummary);
@@ -6599,7 +6611,7 @@ jQuery(function($){
   function getActiveClassSearchQuery() {
     var activeTier = $('[data-ecf-class-tier].is-active').data('ecf-class-tier') || 'all';
     var activeLibrary = getClassLibrarySectionForTier(activeTier);
-    return $.trim($('[data-ecf-library-section="' + activeLibrary + '"] [data-ecf-class-search]').val() || '').toLowerCase();
+    return trim($('[data-ecf-library-section="' + activeLibrary + '"] [data-ecf-class-search]').val() || '').toLowerCase();
   }
 
   function matchesClassSearch(parts, query) {
@@ -6911,7 +6923,7 @@ jQuery(function($){
     }
 
     var $target = $rows.find('.ecf-starter-custom-row').filter(function() {
-      return !$.trim($(this).find('.ecf-custom-starter-name').val() || '');
+      return !trim($(this).find('.ecf-custom-starter-name').val() || '');
     }).first();
 
     if (!$target.length) {
@@ -7508,12 +7520,12 @@ jQuery(function($){
     var item = findSearchItem(group, id);
     if (!item) return;
 
-    if (!canEditSearchItem($.extend({}, item, { group: group }))) {
+    if (!canEditSearchItem(Object.assign({}, item, { group: group }))) {
       alert(isClassGroup(group) ? i18n.search_edit_class : i18n.search_edit_generated);
       return;
     }
 
-    openSearchEditModal($.extend({}, item, { group: group }));
+    openSearchEditModal(Object.assign({}, item, { group: group }));
   });
 
   $(document).on('click', '[data-ecf-search-delete]', function(e){
@@ -7846,43 +7858,20 @@ jQuery(function($){
   $(document).on('click', '.ecf-copy-pill', function(e) {
     e.stopPropagation();
     var $pill = $(this);
-    var text = $pill.data('copy');
-    if (!navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(function() {
-      $pill.text(i18n.copied).addClass('is-copied');
-      setTimeout(function() {
-        $pill.text(i18n.copy).removeClass('is-copied');
-      }, 1500);
-    });
+    copyToClipboard($pill, $pill.data('copy'), i18n.copied, i18n.copy, false, 1500);
   });
 
   $(document).on('click', '[data-ecf-token-copy]', function(e) {
     e.preventDefault();
     e.stopPropagation();
     var $pill = $(this);
-    var text = String($pill.attr('data-ecf-token-copy') || '').trim();
-    if (!text || !navigator.clipboard) return;
-    var originalHtml = $pill.html();
-    navigator.clipboard.writeText(text).then(function() {
-      $pill.addClass('is-copied').text(i18n.copied || '');
-      setTimeout(function() {
-        $pill.removeClass('is-copied').html(originalHtml);
-      }, 1200);
-    });
+    copyToClipboard($pill, String($pill.attr('data-ecf-token-copy') || '').trim(), i18n.copied || '', $pill.html(), true);
   });
 
   $(document).on('click', '.ecf-debug-copy', function(e) {
     e.preventDefault();
     var $button = $(this);
-    var text = $button.attr('data-ecf-copy-text') || '';
-    if (!text || !navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(function() {
-      var original = $button.text();
-      $button.text(i18n.copied).addClass('is-copied');
-      setTimeout(function() {
-        $button.text(original).removeClass('is-copied');
-      }, 1200);
-    });
+    copyToClipboard($button, $button.attr('data-ecf-copy-text') || '', i18n.copied, $button.text());
   });
 
   $(document).on('click', '.ecf-clamp-toggle', function(e) {
@@ -7897,32 +7886,16 @@ jQuery(function($){
   $(document).on('click', '[data-ecf-copy-target]', function(e) {
     e.preventDefault();
     var $button = $(this);
-    var targetId = String($button.attr('data-ecf-copy-target') || '');
-    var $target = targetId ? $('#' + targetId) : $();
+    var $target = $('#' + String($button.attr('data-ecf-copy-target') || ''));
     var text = $target.length ? String($target.val() || '') : '';
-    if (!text || !navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(function() {
-      var original = $button.text();
-      $button.text(i18n.copied || '');
-      setTimeout(function() {
-        $button.text(original);
-      }, 1200);
-    });
+    copyToClipboard($button, text, i18n.copied || '', $button.text());
   });
 
   $(document).on('click', '.ecf-color-token-copy', function(e) {
     e.preventDefault();
     e.stopPropagation();
     var $button = $(this);
-    var text = $button.attr('data-ecf-copy-text') || '';
-    if (!text || !navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(function() {
-      var original = $button.text();
-      $button.text(i18n.color_generator_copied || '').addClass('is-copied');
-      setTimeout(function() {
-        $button.text(original).removeClass('is-copied');
-      }, 1200);
-    });
+    copyToClipboard($button, $button.attr('data-ecf-copy-text') || '', i18n.color_generator_copied || '', $button.text());
   });
 
   $(document).on('click', '.ecf-clamp-popover', function(e) {
@@ -7930,14 +7903,7 @@ jQuery(function($){
     e.stopPropagation();
     var $pop = $(this);
     var text = $pop.attr('data-copy') || $pop.text();
-    if (!text || !navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(function() {
-      var original = $pop.attr('data-copy') || text;
-      $pop.addClass('is-copied').text(i18n.copied);
-      setTimeout(function() {
-        $pop.removeClass('is-copied').text(original);
-      }, 1200);
-    });
+    copyToClipboard($pop, text, i18n.copied, $pop.attr('data-copy') || text);
   });
 
   $(document).on('click', '[data-ecf-root-copy-toggle]', function(e) {
@@ -7953,14 +7919,7 @@ jQuery(function($){
     e.preventDefault();
     var $pop = $(this);
     var text = $pop.attr('data-copy') || $pop.text();
-    if (!text || !navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(function() {
-      var original = $pop.text();
-      $pop.addClass('is-copied').text(i18n.copied);
-      setTimeout(function() {
-        $pop.removeClass('is-copied').text(text);
-      }, 1200);
-    });
+    copyToClipboard($pop, text, i18n.copied, text);
   });
 
   $(document).on('click', '[data-ecf-reload-page]', function(e) {
@@ -8028,8 +7987,8 @@ jQuery(function($){
 
     $('[data-ecf-body-size-field]').each(function() {
       var $field = $(this);
-      var value = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || '');
-      var format = $.trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || '').toLowerCase();
+      var value = trim($field.find('[name="ecf_framework_v50[base_body_text_size_value]"]').val() || '');
+      var format = trim($field.find('[name="ecf_framework_v50[base_body_text_size_format]"]').val() || '').toLowerCase();
       var $warning = $field.find('[data-ecf-body-size-warning]');
       var numeric = parseFloat(String(value).replace(',', '.'));
       var message = '';
