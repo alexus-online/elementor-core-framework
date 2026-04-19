@@ -1031,25 +1031,14 @@ async function closeTopbarAutosaveMenu(page) {
 }
 
 async function setTopbarAutosaveEnabled(page, enabled) {
-  const toggle = getTopbarAutosaveToggle(page);
-  await expect(toggle).toBeVisible();
   const pill = page.locator('[data-ecf-autosave-pill]').first();
   const currentText = String((await pill.textContent()) || '').toLowerCase();
   const currentlyEnabled = !currentText.includes('off') && !currentText.includes('aus');
   if (currentlyEnabled === Boolean(enabled)) {
     return false;
   }
-
-  const box = await toggle.boundingBox();
-  if (!box) {
-    throw new Error('Autosave toggle has no bounding box.');
-  }
-  await toggle.click({
-    position: {
-      x: Math.min(Math.round(box.width * 0.4), Math.round(box.width - 56)),
-      y: Math.max(8, Math.round(box.height / 2)),
-    },
-  });
+  await setTopbarAutosaveSetting(page, 'autosave_enabled', enabled);
+  await closeTopbarAutosaveMenu(page);
   await expect(pill).toContainText(enabled ? /Autosave: on|Autosave: an/i : /Autosave: off|Autosave: aus/i);
   return true;
 }
