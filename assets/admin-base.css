@@ -23,6 +23,8 @@
   --ecf-muted-2:   #a0b0c8;
   --font-mono:     var(--ecf-font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
   --ecf-radius:    10px;
+  --ecf-radius-sm: 8px;
+  --ecf-radius-pill: 999px;
   --ecf-sidebar:   220px;
 
   /* Spacing scale */

@@ -84,7 +84,7 @@
   font-weight: 540;
   color: rgba(214, 221, 243, 0.62);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--ecf-radius-sm);
   margin: 2px 8px;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
   border: 1px solid transparent;
@@ -101,7 +101,7 @@
   font-size: var(--ecf-fs-2xs);
   line-height: 1;
   background: rgba(245,158,11,.15);
-  color: #f59e0b;
+  color: var(--ecf-warn);
   border: .5px solid rgba(245,158,11,.4);
   border-radius: 20px;
   padding: 1px 6px;
@@ -116,7 +116,7 @@
   width: 8px;
   height: 8px;
   margin-left: 8px;
-  border-radius: 999px;
+  border-radius: var(--ecf-radius-pill);
   background: #60a5fa;
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.14);
   flex: 0 0 auto;
@@ -151,7 +151,7 @@
   top: 10px;
   bottom: 10px;
   width: 3px;
-  border-radius: 999px;
+  border-radius: var(--ecf-radius-pill);
   background: linear-gradient(180deg, #9aa8ff 0%, #79d8c4 100%);
   opacity: 0.95;
 }
@@ -249,7 +249,7 @@
 /* Focused row slight highlight */
 .ecf-row--focused {
   background: rgba(109, 124, 255, 0.04);
-  border-radius: 8px;
+  border-radius: var(--ecf-radius-sm);
 }
 
 /* Add/remove controls hidden in focus mode */
@@ -428,7 +428,7 @@
   animation: ecf-subnav-flash 1.4s ease;
 }
 @keyframes ecf-subnav-flash {
-  0%   { background: rgba(109, 124, 255, 0.22); border-radius: 8px; }
+  0%   { background: rgba(109, 124, 255, 0.22); border-radius: var(--ecf-radius-sm); }
   100% { background: transparent; }
 }
 
@@ -594,7 +594,7 @@
   min-width: 30px;
   min-height: 30px;
   margin-right: -8px;
-  border-radius: 999px;
+  border-radius: var(--ecf-radius-pill);
 }
 .ecf-sticky-topbar__autosave-arrow-hit:hover {
   background: rgba(255, 255, 255, .08);
@@ -842,7 +842,7 @@
   border-radius: 6px;
   padding: 8px 12px;
   font-size: var(--ecf-fs-sm);
-  color: #f59e0b;
+  color: var(--ecf-warn);
   margin-bottom: 14px;
 }
 
