@@ -5125,6 +5125,18 @@ jQuery(function($){
     importLibraryFontIntoField(fieldName, target, family, $button);
   });
 
+  $(document).on('click', '[data-ecf-pairing-filter]', function() {
+    var filter = String($(this).data('ecf-pairing-filter') || 'all');
+    var $bar = $(this).closest('[data-ecf-pairing-filterbar]');
+    $bar.find('.ecf-font-pairing-filter').removeClass('is-active');
+    $(this).addClass('is-active');
+    var $grid = $bar.closest('.ecf-font-pairings-card').find('[data-ecf-pairing-grid]');
+    $grid.find('[data-ecf-pairing-tone]').each(function() {
+      var tone = String($(this).attr('data-ecf-pairing-tone') || '');
+      $(this).toggleClass('is-hidden', filter !== 'all' && tone !== filter);
+    });
+  });
+
   $(document).on('click', '[data-ecf-font-pairing-apply]', function(e) {
     e.preventDefault();
     var $button = $(this);

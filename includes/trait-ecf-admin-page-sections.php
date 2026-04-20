@@ -2712,16 +2712,12 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                 'body_sample'     => __('The extreme contrast between a heavy display font and a refined thin body creates a dramatic, memorable layout.', 'ecf-framework'),
             ],
         ];
-        $font_pairing_groups = [];
-        foreach ($font_pairings as $pairing) {
-            $tone_key = (string) ($pairing['tone_key'] ?? 'default');
-            if (!isset($font_pairing_groups[$tone_key])) {
-                $font_pairing_groups[$tone_key] = [
-                    'tone' => $pairing['tone'],
-                    'items' => [],
-                ];
+        $font_pairing_tones = [];
+        foreach ($font_pairings as $p) {
+            $tk = (string) ($p['tone_key'] ?? '');
+            if ($tk !== '' && !isset($font_pairing_tones[$tk])) {
+                $font_pairing_tones[$tk] = (string) ($p['tone'] ?? $tk);
             }
-            $font_pairing_groups[$tone_key]['items'][] = $pairing;
         }
         ?>
         <div class="ecf-panel" data-panel="typography">
@@ -2742,61 +2738,49 @@ trait ECF_Framework_Admin_Page_Sections_Trait {
                                 <p><?php echo esc_html__('Choose a ready-made headline and body combination when you want a faster, more confident typography start.', 'ecf-framework'); ?></p>
                             </div>
                         </div>
-                        <div class="ecf-font-pairings-grid">
-                            <?php foreach ($font_pairing_groups as $group_key => $group): ?>
-                                <?php $pairing = $group['items'][0]; ?>
-                                <article class="ecf-font-pairing" data-ecf-font-pairing-card data-ecf-font-pairing-current="<?php echo esc_attr($pairing['slug']); ?>">
-                                    <div class="ecf-font-pairing__meta">
-                                        <div class="ecf-font-pairing__topline">
-                                            <span class="ecf-preview-pill" data-ecf-font-pairing-tone><?php echo esc_html($pairing['tone']); ?></span>
-                                            <div class="ecf-font-pairing__actions">
-                                                <button type="button"
-                                                        class="ecf-btn ecf-btn--ghost ecf-btn--sm ecf-font-pairing__icon"
-                                                        data-ecf-font-pairing-reset
-                                                        data-ecf-font-pairing-default="<?php echo esc_attr(wp_json_encode($group['items'][0])); ?>"
-                                                        aria-label="<?php echo esc_attr__('Reset to the default pairing', 'ecf-framework'); ?>"
-                                                        title="<?php echo esc_attr__('Reset to the default pairing', 'ecf-framework'); ?>">
-                                                    <span class="dashicons dashicons-image-rotate" aria-hidden="true"></span>
-                                                </button>
-                                            <button type="button"
-                                                    class="ecf-btn ecf-btn--ghost ecf-btn--sm ecf-font-pairing__random"
-                                                    data-ecf-font-pairing-random
-                                                    data-ecf-font-pairing-options="<?php echo esc_attr(wp_json_encode($group['items'])); ?>">
-                                                <?php echo esc_html__('Random in this category', 'ecf-framework'); ?>
-                                            </button>
-                                            </div>
-                                        </div>
-                                        <h3 data-ecf-font-pairing-title><?php echo esc_html($pairing['title']); ?></h3>
-                                        <p data-ecf-font-pairing-description><?php echo esc_html($pairing['description']); ?></p>
-                                    </div>
+                        <div class="ecf-font-pairing-filters" data-ecf-pairing-filterbar>
+                            <button type="button" class="ecf-font-pairing-filter is-active" data-ecf-pairing-filter="all">
+                                <?php echo esc_html__('All', 'ecf-framework'); ?>
+                            </button>
+                            <?php foreach ($font_pairing_tones as $tone_key => $tone_label): ?>
+                            <button type="button" class="ecf-font-pairing-filter" data-ecf-pairing-filter="<?php echo esc_attr($tone_key); ?>">
+                                <?php echo esc_html($tone_label); ?>
+                            </button>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="ecf-font-pairings-grid" data-ecf-pairing-grid>
+                            <?php foreach ($font_pairings as $pairing): ?>
+                                <article class="ecf-font-pairing"
+                                         data-ecf-font-pairing-card
+                                         data-ecf-pairing-tone="<?php echo esc_attr($pairing['tone_key']); ?>">
                                     <div class="ecf-font-pairing__preview">
-                                        <div class="ecf-font-pairing__preview-head" data-ecf-font-pairing-preview-head style="font-family: '<?php echo esc_attr($pairing['heading_family']); ?>', serif; font-size: <?php echo esc_attr($font_pairing_heading_max); ?>px;">
+                                        <div class="ecf-font-pairing__preview-head"
+                                             style="font-family: '<?php echo esc_attr($pairing['heading_family']); ?>', serif;">
                                             <?php echo esc_html($pairing['heading_sample']); ?>
                                         </div>
-                                        <div class="ecf-font-pairing__preview-body" data-ecf-font-pairing-preview-body style="font-family: '<?php echo esc_attr($pairing['body_family']); ?>', sans-serif; font-size: <?php echo esc_attr($font_pairing_body_max); ?>px;">
+                                        <div class="ecf-font-pairing__preview-body"
+                                             style="font-family: '<?php echo esc_attr($pairing['body_family']); ?>', sans-serif;">
                                             <?php echo esc_html($pairing['body_sample']); ?>
                                         </div>
                                     </div>
-                                    <dl class="ecf-font-pairing__families">
-                                        <div>
-                                            <dt><?php echo esc_html__('Headings', 'ecf-framework'); ?></dt>
-                                            <dd data-ecf-font-pairing-heading-family><?php echo esc_html($pairing['heading_family']); ?></dd>
-                                            <small class="ecf-font-pairing__token"><?php echo esc_html($font_pairing_heading_label); ?></small>
+                                    <div class="ecf-font-pairing__footer">
+                                        <div class="ecf-font-pairing__names">
+                                            <span class="ecf-font-pairing__name-head"><?php echo esc_html($pairing['heading_family']); ?></span>
+                                            <span class="ecf-font-pairing__sep" aria-hidden="true">·</span>
+                                            <span class="ecf-font-pairing__name-body"><?php echo esc_html($pairing['body_family']); ?></span>
                                         </div>
-                                        <div>
-                                            <dt><?php echo esc_html__('Body', 'ecf-framework'); ?></dt>
-                                            <dd data-ecf-font-pairing-body-family><?php echo esc_html($pairing['body_family']); ?></dd>
-                                            <small class="ecf-font-pairing__token"><?php echo esc_html($font_pairing_body_label); ?></small>
+                                        <div class="ecf-font-pairing__footer-row">
+                                            <span class="ecf-preview-pill ecf-font-pairing__tone-pill"><?php echo esc_html($pairing['tone']); ?></span>
+                                            <button type="button"
+                                                    class="ecf-btn ecf-btn--secondary ecf-btn--sm ecf-font-pairing__apply"
+                                                    data-ecf-font-pairing-apply
+                                                    data-ecf-font-pairing-slug="<?php echo esc_attr($pairing['slug']); ?>"
+                                                    data-ecf-font-pairing-heading="<?php echo esc_attr($pairing['heading_family']); ?>"
+                                                    data-ecf-font-pairing-body="<?php echo esc_attr($pairing['body_family']); ?>">
+                                                <?php echo esc_html__('Use this pairing', 'ecf-framework'); ?>
+                                            </button>
                                         </div>
-                                    </dl>
-                                    <button type="button"
-                                            class="ecf-btn ecf-btn--secondary ecf-font-pairing__apply"
-                                            data-ecf-font-pairing-apply
-                                            data-ecf-font-pairing-slug="<?php echo esc_attr($pairing['slug']); ?>"
-                                            data-ecf-font-pairing-heading="<?php echo esc_attr($pairing['heading_family']); ?>"
-                                            data-ecf-font-pairing-body="<?php echo esc_attr($pairing['body_family']); ?>">
-                                        <?php echo esc_html__('Use this pairing', 'ecf-framework'); ?>
-                                    </button>
+                                    </div>
                                 </article>
                             <?php endforeach; ?>
                         </div>
