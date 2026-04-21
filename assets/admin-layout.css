@@ -35,7 +35,7 @@
   font-weight: 680;
   color: var(--ecf-text);
   margin: 0;
-  line-height: 1.3;
+  line-height: var(--ecf-lh-xs);
   letter-spacing: -0.01em;
 }
 .ecf-logo__byline {
@@ -55,7 +55,7 @@
   font-weight: 500;
   cursor: pointer;
   text-align: left;
-  transition: color .18s ease, transform .18s ease;
+  transition: color var(--ecf-dur-lg) ease, transform var(--ecf-dur-lg) ease;
 }
 .ecf-version-link:hover {
   color: rgba(238, 242, 255, 0.88);
@@ -86,7 +86,7 @@
   cursor: pointer;
   border-radius: var(--ecf-radius-sm);
   margin: 2px 8px;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
+  transition: background var(--ecf-dur-base) ease, color var(--ecf-dur-base) ease, border-color var(--ecf-dur-base) ease;
   border: 1px solid transparent;
   background: none;
   width: calc(100% - 16px);
@@ -128,7 +128,7 @@
   height: 15px;
   flex-shrink: 0;
   color: rgba(192, 201, 225, 0.42);
-  transition: color .15s ease;
+  transition: color var(--ecf-dur-base) ease;
 }
 .ecf-nav-item:hover {
   background: rgba(255, 255, 255, 0.05);
@@ -177,8 +177,8 @@
   font-weight: 560;
   color: rgba(214, 221, 243, 0.48);
   cursor: pointer;
-  border-radius: 12px;
-  transition: background .18s ease, border-color .18s ease, color .18s ease;
+  border-radius: var(--ecf-radius-md);
+  transition: background var(--ecf-dur-lg) ease, border-color var(--ecf-dur-lg) ease, color var(--ecf-dur-lg) ease;
 }
 .ecf-sidebar-link:hover {
   color: rgba(243, 246, 255, 0.82);
@@ -210,7 +210,7 @@
   border: 1px solid rgba(130, 145, 255, 0.2);
   border-radius: 20px;
   cursor: pointer;
-  transition: background .15s ease, color .15s ease;
+  transition: background var(--ecf-dur-base) ease, color var(--ecf-dur-base) ease;
 }
 .ecf-token-focus-back:hover {
   background: rgba(109, 124, 255, 0.16);
@@ -317,7 +317,7 @@
   border-radius: 6px;
   cursor: pointer;
   text-align: left;
-  transition: background .12s ease, color .12s ease, border-color .12s ease;
+  transition: background var(--ecf-dur-fast) ease, color var(--ecf-dur-fast) ease, border-color var(--ecf-dur-fast) ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -338,7 +338,7 @@
   height: 8px;
   border-radius: 50%;
   background: rgba(130, 145, 255, 0.3);
-  transition: background .15s ease;
+  transition: background var(--ecf-dur-base) ease;
 }
 .ecf-nav-subnav__item.is-active .ecf-nav-subnav__dot {
   background: linear-gradient(135deg, #9aa8ff 0%, #79d8c4 100%);
@@ -355,7 +355,7 @@
   color: rgba(214, 221, 243, 0.22);
   flex-shrink: 0;
   opacity: 0;
-  transition: opacity .15s ease;
+  transition: opacity var(--ecf-dur-base) ease;
 }
 .ecf-nav-subnav__item:hover .ecf-nav-subnav__token,
 .ecf-nav-subnav__item.is-active .ecf-nav-subnav__token {
@@ -381,7 +381,7 @@
   padding: 5px 8px 5px 8px;
   border-radius: 6px;
   margin-bottom: 2px;
-  transition: color .15s ease, background .15s ease, border-color .15s ease;
+  transition: color var(--ecf-dur-base) ease, background var(--ecf-dur-base) ease, border-color var(--ecf-dur-base) ease;
   color: rgba(204, 213, 235, 0.5);
 }
 .ecf-nav-subnav__section--toggle:hover {
@@ -411,7 +411,7 @@
 .ecf-nav-subnav__group {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .25s ease;
+  transition: max-height var(--ecf-dur-slow) ease;
 }
 .ecf-nav-subnav__group.is-open {
   max-height: 600px;
@@ -495,7 +495,7 @@
   border-radius: 18px !important;
   font-size: var(--ecf-fs-base);
   font-weight: 700;
-  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease, color .18s ease;
+  transition: background var(--ecf-dur-lg) ease, border-color var(--ecf-dur-lg) ease, box-shadow var(--ecf-dur-lg) ease, transform var(--ecf-dur-lg) ease, color var(--ecf-dur-lg) ease;
 }
 .ecf-sticky-topbar__reset-layout {
   justify-content: center;
@@ -538,7 +538,7 @@
   justify-content: center;
   min-height: 42px;
   padding: 0 18px;
-  border-radius: 16px;
+  border-radius: var(--ecf-radius-lg);
   font-size: var(--ecf-fs-sm);
   font-weight: 700;
   white-space: nowrap;
@@ -546,14 +546,14 @@
   border: 1px solid rgba(130, 145, 255, 0.22);
   color: rgba(196, 204, 255, 0.9);
   box-shadow: none;
-  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease, color .18s ease;
+  transition: background var(--ecf-dur-lg) ease, border-color var(--ecf-dur-lg) ease, box-shadow var(--ecf-dur-lg) ease, transform var(--ecf-dur-lg) ease, color var(--ecf-dur-lg) ease;
 }
 .ecf-sticky-topbar__autosave-toggle {
   min-width: 152px;
   cursor: pointer;
   gap: var(--ecf-space-3);
   justify-content: space-between;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  transition: background var(--ecf-dur-base) ease, border-color var(--ecf-dur-base) ease, color var(--ecf-dur-base) ease;
 }
 .ecf-sticky-topbar__autosave:not(.ecf-sticky-topbar__autosync) .ecf-sticky-topbar__autosave-toggle {
   justify-content: center;
@@ -585,7 +585,7 @@
   font-size: var(--ecf-fs-2xl);
   line-height: 18px;
   flex-shrink: 0;
-  transition: transform .15s ease;
+  transition: transform var(--ecf-dur-base) ease;
 }
 .ecf-sticky-topbar__autosave-arrow-hit {
   display: inline-flex;
@@ -715,7 +715,7 @@
   appearance: none;
   -webkit-appearance: none;
   border: 1px solid rgba(129, 140, 248, .22);
-  line-height: 1.2;
+  line-height: var(--ecf-lh-2xs);
   background: linear-gradient(180deg, #7f8fe6 0%, #6a78ca 100%) !important;
   color: #fff !important;
   box-shadow: 0 12px 24px rgba(80, 91, 170, .18) !important;

@@ -423,7 +423,7 @@ trait ECF_Framework_REST_API_Trait {
     }
 
     public function rest_search_font_library_fonts(\WP_REST_Request $request) {
-        $query = sanitize_text_field((string) $request->get_param('q'));
+        $query = substr(sanitize_text_field((string) $request->get_param('q')), 0, 200);
         $limit = max(10, min(80, (int) $request->get_param('limit')));
         $settings = $this->get_settings();
 

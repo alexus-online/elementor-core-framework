@@ -721,7 +721,7 @@ return [
     'Traditional literary headlines with a restrained body font for trusted, reading-heavy websites.' => 'Traditionelle literarische Überschriften mit zurückhaltender Textschrift für vertrauenswürdige, leselastige Websites.',
     'A timeless reading rhythm for thoughtful content' => 'Ein zeitloser Leserhythmus für durchdachte Inhalte',
     'It feels familiar, trustworthy and calm, especially on editorial pages or structured long reads.' => 'Es wirkt vertraut, vertrauenswürdig und ruhig, besonders auf redaktionellen Seiten oder strukturierten Longreads.',
-    'Use this pairing' => 'Dieses Schriftpaar verwenden',
+    'Apply pairing' => 'Schriftpaar verwenden',
     'The old manual upload flow is intentionally hidden here to keep the typography workflow focused and consistent.' => 'Der alte manuelle Upload-Flow ist hier bewusst ausgeblendet, damit der Typografie-Workflow fokussiert und konsistent bleibt.',
     'Named width sizes for wrappers and layout containers.' => 'Benannte Breitenstufen für Wrapper und Layout-Container.',
     'Named weight tokens for text styles and component typography.' => 'Benannte Gewichtungs-Token für Textstile und Komponenten-Typografie.',

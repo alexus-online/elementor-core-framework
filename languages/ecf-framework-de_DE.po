@@ -2872,8 +2872,8 @@ msgstr "Diese Fließtextgröße verwenden"
 msgid "Use this file"
 msgstr "Diese Datei verwenden"
 
-msgid "Use this pairing"
-msgstr "Dieses Schriftpaar verwenden"
+msgid "Apply pairing"
+msgstr "Schriftpaar verwenden"
 
 msgid "Use this style preset"
 msgstr "Dieses Stil-Preset verwenden"

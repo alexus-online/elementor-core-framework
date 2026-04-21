@@ -315,6 +315,237 @@
     });
   }
 
+  // src/js/modules/utils.js
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  function round(value, precision) {
+    var factor = Math.pow(10, precision || 0);
+    return Math.round(value * factor) / factor;
+  }
+  function formatNumber(value, precision) {
+    var rounded = round(value, precision || 0);
+    return String(rounded).replace(/\.0+$|(\.\d*[1-9])0+$/, "$1");
+  }
+  function formatPreviewNumber(value) {
+    var rounded = Math.round(value * 100) / 100;
+    return String(rounded).replace(/\.0+$|(\.\d*[1-9])0+$/, "$1");
+  }
+  function escapeHtml(value) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(value == null ? "" : String(value)));
+    return d.innerHTML;
+  }
+  function formatTemplate(template, value) {
+    return String(template || "").replace("%s", value == null ? "" : String(value));
+  }
+  function formatFileSize(bytes) {
+    var size = Number(bytes || 0);
+    if (!size) return "0 B";
+    if (size < 1024) return size + " B";
+    if (size < 1024 * 1024) return formatNumber(size / 1024, 1) + " KB";
+    return formatNumber(size / (1024 * 1024), 1) + " MB";
+  }
+  function parseCssSizeParts(value) {
+    var normalized = String(value == null ? "" : value).trim();
+    var match = normalized.match(/^(-?\d+(?:[.,]\d+)?)(px|rem|em|ch|%|vw|vh)$/i);
+    if (match) {
+      return { value: String(match[1]).replace(",", "."), format: String(match[2]).toLowerCase() };
+    }
+    return { value: normalized, format: "custom" };
+  }
+  function normalizeSizeRange(minPx, maxPx) {
+    var normalizedMin = parseFloat(minPx);
+    var normalizedMax = parseFloat(maxPx);
+    if (!isFinite(normalizedMin) && !isFinite(normalizedMax)) return null;
+    if (!isFinite(normalizedMin)) normalizedMin = normalizedMax;
+    if (!isFinite(normalizedMax)) normalizedMax = normalizedMin;
+    if (normalizedMin > normalizedMax) {
+      var swap = normalizedMin;
+      normalizedMin = normalizedMax;
+      normalizedMax = swap;
+    }
+    return { minPx: normalizedMin, maxPx: normalizedMax };
+  }
+
+  // src/js/modules/color-utils.js
+  function hexToRgb(hex) {
+    var value = String(hex || "").trim().replace(/^#/, "");
+    if (value.length === 3) value = value.replace(/(.)/g, "$1$1");
+    if (value.length === 4) value = value.replace(/(.)/g, "$1$1");
+    if (value.length === 8) value = value.slice(0, 6);
+    if (!/^[0-9a-f]{6}$/i.test(value)) return null;
+    return {
+      r: parseInt(value.slice(0, 2), 16),
+      g: parseInt(value.slice(2, 4), 16),
+      b: parseInt(value.slice(4, 6), 16)
+    };
+  }
+  function parseAlphaFromHex(value) {
+    var hex = String(value || "").trim().replace(/^#/, "");
+    if (hex.length === 4) return parseInt(hex.charAt(3) + hex.charAt(3), 16) / 255;
+    if (hex.length === 8) return parseInt(hex.slice(6, 8), 16) / 255;
+    return 1;
+  }
+  function componentToHex(value) {
+    return clamp(Math.round(value), 0, 255).toString(16).padStart(2, "0");
+  }
+  function rgbToHex(rgb) {
+    if (!rgb) return "";
+    return "#" + componentToHex(rgb.r) + componentToHex(rgb.g) + componentToHex(rgb.b);
+  }
+  function alphaToHex(alpha) {
+    return componentToHex(clamp((alpha == null ? 1 : alpha) * 255, 0, 255));
+  }
+  function rgbToHsl(rgb) {
+    if (!rgb) return null;
+    var r = clamp(rgb.r, 0, 255) / 255;
+    var g = clamp(rgb.g, 0, 255) / 255;
+    var b = clamp(rgb.b, 0, 255) / 255;
+    var max = Math.max(r, g, b);
+    var min = Math.min(r, g, b);
+    var h, s;
+    var l = (max + min) / 2;
+    var d = max - min;
+    if (d === 0) {
+      h = 0;
+      s = 0;
+    } else {
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        default:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h = h * 60;
+    }
+    return { h: round(h, 1), s: round(s * 100, 1), l: round(l * 100, 1) };
+  }
+  function hueToRgb(p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  }
+  function hslToRgb(hsl) {
+    if (!hsl) return null;
+    var h = (hsl.h % 360 + 360) % 360 / 360;
+    var s = clamp(hsl.s, 0, 100) / 100;
+    var l = clamp(hsl.l, 0, 100) / 100;
+    var r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      var p = 2 * l - q;
+      r = hueToRgb(p, q, h + 1 / 3);
+      g = hueToRgb(p, q, h);
+      b = hueToRgb(p, q, h - 1 / 3);
+    }
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+  }
+  function parseRgbValue(value) {
+    var match = String(value || "").trim().match(/^rgba?\s*\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)(?:\s*,\s*([+-]?\d*(?:\.\d+)?))?\s*\)$/i);
+    if (!match) return null;
+    return {
+      r: clamp(parseFloat(match[1]), 0, 255),
+      g: clamp(parseFloat(match[2]), 0, 255),
+      b: clamp(parseFloat(match[3]), 0, 255),
+      a: match[4] === void 0 || match[4] === "" ? 1 : clamp(parseFloat(match[4]), 0, 1)
+    };
+  }
+  function parseHslValue(value) {
+    var match = String(value || "").trim().match(/^hsla?\s*\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)%\s*,\s*([+-]?\d+(?:\.\d+)?)%(?:\s*,\s*([+-]?\d*(?:\.\d+)?))?\s*\)$/i);
+    if (!match) return null;
+    return {
+      h: parseFloat(match[1]),
+      s: clamp(parseFloat(match[2]), 0, 100),
+      l: clamp(parseFloat(match[3]), 0, 100),
+      a: match[4] === void 0 || match[4] === "" ? 1 : clamp(parseFloat(match[4]), 0, 1)
+    };
+  }
+  function parseHexValue(value) {
+    var match = String(value || "").trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+    if (!match) return null;
+    var rgb = hexToRgb(match[1]);
+    if (!rgb) return null;
+    rgb.a = parseAlphaFromHex(match[1]);
+    return rgb;
+  }
+  function parseDisplayColor(value, format) {
+    if (format === "rgb" || format === "rgba") return parseRgbValue(value);
+    if (format === "hsl" || format === "hsla") {
+      var hsl = parseHslValue(value);
+      if (!hsl) return null;
+      var rgb = hslToRgb(hsl);
+      rgb.a = hsl.a == null ? 1 : hsl.a;
+      return rgb;
+    }
+    return parseHexValue(value);
+  }
+  function detectStoredFormat(value) {
+    var normalized = String(value || "").trim().toLowerCase();
+    if (/^#[0-9a-f]{8}$/.test(normalized)) return "hexa";
+    if (/^#[0-9a-f]{6}$/.test(normalized)) return "hex";
+    if (/^rgba\(/.test(normalized)) return "rgba";
+    if (/^rgb\(/.test(normalized)) return "rgb";
+    if (/^hsla\(/.test(normalized)) return "hsla";
+    if (/^hsl\(/.test(normalized)) return "hsl";
+    return "hex";
+  }
+  function formatColorValue(hex, format) {
+    var parsed = null;
+    if (hex && typeof hex === "object") {
+      parsed = { r: hex.r, g: hex.g, b: hex.b, a: hex.a == null ? 1 : hex.a };
+    } else {
+      parsed = parseHexValue(hex) || parseRgbValue(hex);
+      if (!parsed && /^hsl/i.test(String(hex || "").trim())) {
+        parsed = parseDisplayColor(hex, "hsla");
+      }
+    }
+    var rgb = parsed;
+    if (!rgb) return "";
+    var alpha = rgb.a == null ? 1 : clamp(rgb.a, 0, 1);
+    if (format === "rgb") return "rgb(" + formatNumber(rgb.r, 0) + ", " + formatNumber(rgb.g, 0) + ", " + formatNumber(rgb.b, 0) + ")";
+    if (format === "rgba") return "rgba(" + formatNumber(rgb.r, 0) + ", " + formatNumber(rgb.g, 0) + ", " + formatNumber(rgb.b, 0) + ", " + formatNumber(alpha, 3) + ")";
+    if (format === "hsl") {
+      var hsl = rgbToHsl(rgb);
+      return "hsl(" + formatNumber(hsl.h, 1) + ", " + formatNumber(hsl.s, 1) + "%, " + formatNumber(hsl.l, 1) + "%)";
+    }
+    if (format === "hsla") {
+      var hsla = rgbToHsl(rgb);
+      return "hsla(" + formatNumber(hsla.h, 1) + ", " + formatNumber(hsla.s, 1) + "%, " + formatNumber(hsla.l, 1) + "%, " + formatNumber(alpha, 3) + ")";
+    }
+    if (format === "hexa") return rgbToHex(rgb).toUpperCase() + alphaToHex(alpha).toUpperCase();
+    return rgbToHex(rgb).toUpperCase();
+  }
+  function mixRgb(a, b, amount) {
+    return {
+      r: Math.round(a.r + (b.r - a.r) * amount),
+      g: Math.round(a.g + (b.g - a.g) * amount),
+      b: Math.round(a.b + (b.b - a.b) * amount),
+      a: a.a == null ? 1 : a.a
+    };
+  }
+  function colorGeneratorItems(baseRgb, type, count) {
+    var items = [];
+    var target = type === "tints" ? { r: 255, g: 255, b: 255, a: baseRgb.a == null ? 1 : baseRgb.a } : { r: 0, g: 0, b: 0, a: baseRgb.a == null ? 1 : baseRgb.a };
+    var safeCount = clamp(parseInt(count, 10) || 6, 4, 10);
+    for (var i = 1; i <= safeCount; i++) {
+      var rgb = mixRgb(baseRgb, target, i / (safeCount + 1));
+      items.push({ label: (type === "tints" ? "tint-" : "shade-") + i, value: rgbToHex(rgb).toUpperCase() });
+    }
+    return items;
+  }
+
   // src/js/index.js
   jQuery(function($) {
     var trim = function(s) {
@@ -357,225 +588,39 @@
     };
     i18n.copy = String(i18n.copy || "");
     i18n.copied = String(i18n.copied || "");
-    function clamp(value, min, max) {
-      return Math.min(Math.max(value, min), max);
-    }
-    function round(value, precision) {
-      var factor = Math.pow(10, precision || 0);
-      return Math.round(value * factor) / factor;
-    }
-    function formatNumber(value, precision) {
-      var rounded = round(value, precision || 0);
-      return String(rounded).replace(/\.0+$|(\.\d*[1-9])0+$/, "$1");
-    }
-    function hexToRgb(hex) {
-      var value = String(hex || "").trim().replace(/^#/, "");
-      if (value.length === 3) {
-        value = value.replace(/(.)/g, "$1$1");
+    function apiFetch(url, options) {
+      var method = options && options.method || "GET";
+      var body = options && options.body || void 0;
+      var signal = options && options.signal || void 0;
+      var headers = { "X-WP-Nonce": restNonce };
+      if (body !== void 0) {
+        headers["Content-Type"] = "application/json";
       }
-      if (value.length === 4) {
-        value = value.replace(/(.)/g, "$1$1");
-      }
-      if (value.length === 8) {
-        value = value.slice(0, 6);
-      }
-      if (!/^[0-9a-f]{6}$/i.test(value)) return null;
-      return {
-        r: parseInt(value.slice(0, 2), 16),
-        g: parseInt(value.slice(2, 4), 16),
-        b: parseInt(value.slice(4, 6), 16)
-      };
-    }
-    function parseAlphaFromHex(value) {
-      var hex = String(value || "").trim().replace(/^#/, "");
-      if (hex.length === 4) {
-        return parseInt(hex.charAt(3) + hex.charAt(3), 16) / 255;
-      }
-      if (hex.length === 8) {
-        return parseInt(hex.slice(6, 8), 16) / 255;
-      }
-      return 1;
-    }
-    function componentToHex(value) {
-      return clamp(Math.round(value), 0, 255).toString(16).padStart(2, "0");
-    }
-    function rgbToHex(rgb) {
-      if (!rgb) return "";
-      return "#" + componentToHex(rgb.r) + componentToHex(rgb.g) + componentToHex(rgb.b);
-    }
-    function alphaToHex(alpha) {
-      return componentToHex(clamp((alpha == null ? 1 : alpha) * 255, 0, 255));
-    }
-    function rgbToHsl(rgb) {
-      if (!rgb) return null;
-      var r = clamp(rgb.r, 0, 255) / 255;
-      var g = clamp(rgb.g, 0, 255) / 255;
-      var b = clamp(rgb.b, 0, 255) / 255;
-      var max = Math.max(r, g, b);
-      var min = Math.min(r, g, b);
-      var h, s;
-      var l = (max + min) / 2;
-      var d = max - min;
-      if (d === 0) {
-        h = 0;
-        s = 0;
-      } else {
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-          case r:
-            h = (g - b) / d + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = (b - r) / d + 2;
-            break;
-          default:
-            h = (r - g) / d + 4;
-            break;
-        }
-        h = h * 60;
-      }
-      return {
-        h: round(h, 1),
-        s: round(s * 100, 1),
-        l: round(l * 100, 1)
-      };
-    }
-    function hueToRgb(p, q, t) {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1 / 6) return p + (q - p) * 6 * t;
-      if (t < 1 / 2) return q;
-      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-      return p;
-    }
-    function hslToRgb(hsl) {
-      if (!hsl) return null;
-      var h = (hsl.h % 360 + 360) % 360 / 360;
-      var s = clamp(hsl.s, 0, 100) / 100;
-      var l = clamp(hsl.l, 0, 100) / 100;
-      var r, g, b;
-      if (s === 0) {
-        r = g = b = l;
-      } else {
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hueToRgb(p, q, h + 1 / 3);
-        g = hueToRgb(p, q, h);
-        b = hueToRgb(p, q, h - 1 / 3);
-      }
-      return {
-        r: Math.round(r * 255),
-        g: Math.round(g * 255),
-        b: Math.round(b * 255)
-      };
-    }
-    function parseRgbValue(value) {
-      var match = String(value || "").trim().match(/^rgba?\s*\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)(?:\s*,\s*([+-]?\d*(?:\.\d+)?))?\s*\)$/i);
-      if (!match) return null;
-      return {
-        r: clamp(parseFloat(match[1]), 0, 255),
-        g: clamp(parseFloat(match[2]), 0, 255),
-        b: clamp(parseFloat(match[3]), 0, 255),
-        a: match[4] === void 0 || match[4] === "" ? 1 : clamp(parseFloat(match[4]), 0, 1)
-      };
-    }
-    function parseHslValue(value) {
-      var match = String(value || "").trim().match(/^hsla?\s*\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)%\s*,\s*([+-]?\d+(?:\.\d+)?)%(?:\s*,\s*([+-]?\d*(?:\.\d+)?))?\s*\)$/i);
-      if (!match) return null;
-      return {
-        h: parseFloat(match[1]),
-        s: clamp(parseFloat(match[2]), 0, 100),
-        l: clamp(parseFloat(match[3]), 0, 100),
-        a: match[4] === void 0 || match[4] === "" ? 1 : clamp(parseFloat(match[4]), 0, 1)
-      };
-    }
-    function parseHexValue(value) {
-      var match = String(value || "").trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
-      if (!match) return null;
-      var rgb = hexToRgb(match[1]);
-      if (!rgb) return null;
-      rgb.a = parseAlphaFromHex(match[1]);
-      return rgb;
-    }
-    function parseDisplayColor(value, format) {
-      if (format === "rgb" || format === "rgba") return parseRgbValue(value);
-      if (format === "hsl" || format === "hsla") {
-        var hsl = parseHslValue(value);
-        if (!hsl) return null;
-        var rgb = hslToRgb(hsl);
-        rgb.a = hsl.a == null ? 1 : hsl.a;
-        return rgb;
-      }
-      return parseHexValue(value);
-    }
-    function detectStoredFormat(value) {
-      var normalized = String(value || "").trim().toLowerCase();
-      if (/^#[0-9a-f]{8}$/.test(normalized)) return "hexa";
-      if (/^#[0-9a-f]{6}$/.test(normalized)) return "hex";
-      if (/^rgba\(/.test(normalized)) return "rgba";
-      if (/^rgb\(/.test(normalized)) return "rgb";
-      if (/^hsla\(/.test(normalized)) return "hsla";
-      if (/^hsl\(/.test(normalized)) return "hsl";
-      return "hex";
-    }
-    function formatColorValue(hex, format) {
-      var parsed = null;
-      if (hex && typeof hex === "object") {
-        parsed = {
-          r: hex.r,
-          g: hex.g,
-          b: hex.b,
-          a: hex.a == null ? 1 : hex.a
-        };
-      } else {
-        parsed = parseHexValue(hex) || parseRgbValue(hex);
-        if (!parsed && /^hsl/i.test(String(hex || "").trim())) {
-          parsed = parseDisplayColor(hex, "hsla");
-        }
-      }
-      var rgb = parsed;
-      if (!rgb) return "";
-      var alpha = rgb.a == null ? 1 : clamp(rgb.a, 0, 1);
-      if (format === "rgb") {
-        return "rgb(" + formatNumber(rgb.r, 0) + ", " + formatNumber(rgb.g, 0) + ", " + formatNumber(rgb.b, 0) + ")";
-      }
-      if (format === "rgba") {
-        return "rgba(" + formatNumber(rgb.r, 0) + ", " + formatNumber(rgb.g, 0) + ", " + formatNumber(rgb.b, 0) + ", " + formatNumber(alpha, 3) + ")";
-      }
-      if (format === "hsl") {
-        var hsl = rgbToHsl(rgb);
-        return "hsl(" + formatNumber(hsl.h, 1) + ", " + formatNumber(hsl.s, 1) + "%, " + formatNumber(hsl.l, 1) + "%)";
-      }
-      if (format === "hsla") {
-        var hsla = rgbToHsl(rgb);
-        return "hsla(" + formatNumber(hsla.h, 1) + ", " + formatNumber(hsla.s, 1) + "%, " + formatNumber(hsla.l, 1) + "%, " + formatNumber(alpha, 3) + ")";
-      }
-      if (format === "hexa") {
-        return rgbToHex(rgb).toUpperCase() + alphaToHex(alpha).toUpperCase();
-      }
-      return rgbToHex(rgb).toUpperCase();
-    }
-    function mixRgb(a, b, amount) {
-      return {
-        r: Math.round(a.r + (b.r - a.r) * amount),
-        g: Math.round(a.g + (b.g - a.g) * amount),
-        b: Math.round(a.b + (b.b - a.b) * amount),
-        a: a.a == null ? 1 : a.a
-      };
-    }
-    function colorGeneratorItems(baseRgb, type, count) {
-      var items = [];
-      var target = type === "tints" ? { r: 255, g: 255, b: 255, a: baseRgb.a == null ? 1 : baseRgb.a } : { r: 0, g: 0, b: 0, a: baseRgb.a == null ? 1 : baseRgb.a };
-      var safeCount = clamp(parseInt(count, 10) || 6, 4, 10);
-      for (var i = 1; i <= safeCount; i++) {
-        var amount = i / (safeCount + 1);
-        var rgb = mixRgb(baseRgb, target, amount);
-        items.push({
-          label: (type === "tints" ? "tint-" : "shade-") + i,
-          value: rgbToHex(rgb).toUpperCase()
+      return window.fetch(url, {
+        method,
+        credentials: "same-origin",
+        headers,
+        body: body !== void 0 ? JSON.stringify(body) : void 0,
+        signal
+      }).then(function(response) {
+        return response.json().then(function(data) {
+          if (!response.ok) {
+            throw new Error(data && data.message || data && data.code || "api_error");
+          }
+          return data;
         });
-      }
-      return items;
+      });
+    }
+    function debounce(fn, delay) {
+      var timer = null;
+      return function() {
+        var ctx = this;
+        var args = arguments;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(function() {
+          fn.apply(ctx, args);
+        }, delay);
+      };
     }
     function updateColorRowDisplay($row) {
       var hex = $row.find(".ecf-color-value-input").val() || $row.find(".ecf-color-field").val();
@@ -856,10 +901,6 @@
       });
       frame.open();
     });
-    function formatPreviewNumber(value) {
-      var rounded = Math.round(value * 100) / 100;
-      return String(rounded).replace(/\.0+$|(\.\d*[1-9])0+$/, "$1");
-    }
     function syncRootFontSizeControls(value, source) {
       var normalized = String(value) === "100" ? "100" : "62.5";
       $("[data-ecf-root-font-source], [data-ecf-root-font-mirror]").each(function() {
@@ -881,9 +922,6 @@
     }
     function setFormatTooltipVisibility($picker, visible) {
       $picker.closest(".ecf-card").find("[data-ecf-format-tooltip]").first().prop("hidden", !visible);
-    }
-    function escapeHtml(value) {
-      return $("<div>").text(value == null ? "" : String(value)).html();
     }
     function copyToClipboard($el, text, successText, originalContent, restoreHtml, duration) {
       if (!text || !navigator.clipboard) return;
@@ -1063,20 +1101,6 @@
         }
       }
     }
-    function parseCssSizeParts(value) {
-      var normalized = trim(String(value || ""));
-      var match = normalized.match(/^(-?\d+(?:[.,]\d+)?)(px|rem|em|ch|%|vw|vh)$/i);
-      if (match) {
-        return {
-          value: String(match[1]).replace(",", "."),
-          format: String(match[2]).toLowerCase()
-        };
-      }
-      return {
-        value: normalized,
-        format: "custom"
-      };
-    }
     var lastDerivedBodySize = null;
     function closeFontPicker($field) {
       if (!$field || !$field.length) return;
@@ -1087,28 +1111,6 @@
       if (!$field || !$field.length) return;
       $field.addClass("is-open");
       $field.find("[data-ecf-font-picker-panel]").prop("hidden", false);
-    }
-    function normalizeSizeRange(minPx, maxPx) {
-      var normalizedMin = parseFloat(minPx);
-      var normalizedMax = parseFloat(maxPx);
-      if (!isFinite(normalizedMin) && !isFinite(normalizedMax)) {
-        return null;
-      }
-      if (!isFinite(normalizedMin)) {
-        normalizedMin = normalizedMax;
-      }
-      if (!isFinite(normalizedMax)) {
-        normalizedMax = normalizedMin;
-      }
-      if (normalizedMin > normalizedMax) {
-        var swap = normalizedMin;
-        normalizedMin = normalizedMax;
-        normalizedMax = swap;
-      }
-      return {
-        minPx: normalizedMin,
-        maxPx: normalizedMax
-      };
     }
     function enhanceShadowPreviewValue(value) {
       var shadowValue = String(value || "");
@@ -1231,7 +1233,7 @@
       $('[data-ecf-general-field="interface_language"]').find("select").val(String(settings.interface_language));
     }
     function getDerivedBodySizeFromTypeScale() {
-      var $preview = $("[data-ecf-type-scale-preview]").first();
+      var $preview = $dom.typePreview.first();
       if (!$preview.length) {
         return null;
       }
@@ -1351,19 +1353,11 @@
       var params = new URLSearchParams();
       params.set("q", String(query || ""));
       params.set("limit", "50");
-      return window.fetch(fontSearchRestUrl + "?" + params.toString(), {
-        method: "GET",
-        credentials: "same-origin",
-        headers: {
-          "X-WP-Nonce": restNonce
+      return apiFetch(fontSearchRestUrl + "?" + params.toString()).then(function(data) {
+        if (!data || data.success === false) {
+          throw new Error(data && data.message || "font_search_failed");
         }
-      }).then(function(response) {
-        return response.json().then(function(data) {
-          if (!response.ok || !data || data.success === false) {
-            throw new Error(data && data.message || "font_search_failed");
-          }
-          return Array.isArray(data.groups) ? data.groups : [];
-        });
+        return Array.isArray(data.groups) ? data.groups : [];
       });
     }
     function refreshFontFamilyList($field, query) {
@@ -1390,20 +1384,13 @@
         var params = new URLSearchParams();
         params.set("q", String(query || ""));
         params.set("limit", "50");
-        window.fetch(fontSearchRestUrl + "?" + params.toString(), {
-          method: "GET",
-          credentials: "same-origin",
-          headers: {
-            "X-WP-Nonce": restNonce
-          },
+        apiFetch(fontSearchRestUrl + "?" + params.toString(), {
           signal: controller ? controller.signal : void 0
-        }).then(function(response) {
-          return response.json().then(function(data) {
-            if (!response.ok || !data || data.success === false) {
-              throw new Error(data && data.message || "font_search_failed");
-            }
-            return Array.isArray(data.groups) ? data.groups : [];
-          });
+        }).then(function(data) {
+          if (!data || data.success === false) {
+            throw new Error(data && data.message || "font_search_failed");
+          }
+          return Array.isArray(data.groups) ? data.groups : [];
         }).then(function(groups) {
           renderFontFamilyGroupsIntoSelect($select, groups, current);
           syncFontFamilyCurrentLabel($field);
@@ -1428,25 +1415,7 @@
       if ($trigger && $trigger.length) {
         $trigger.prop("disabled", true);
       }
-      return window.fetch(fontImportRestUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-WP-Nonce": restNonce
-        },
-        body: JSON.stringify({
-          family,
-          target
-        })
-      }).then(function(response) {
-        return response.json().then(function(data) {
-          if (!response.ok || !data || data.success === false) {
-            throw new Error(data && data.message || "font_import_failed");
-          }
-          return data;
-        });
-      }).then(function(responseData) {
+      return apiFetch(fontImportRestUrl, { method: "POST", body: { family, target } }).then(function(responseData) {
         var settings = responseData && responseData.settings ? responseData.settings : null;
         if (settings) {
           syncLocalFontRowsFromSettings(settings);
@@ -1871,7 +1840,7 @@
       return fallback;
     }
     function getPreviewFont() {
-      var $preview = $("[data-ecf-type-scale-preview]").first();
+      var $preview = $dom.typePreview.first();
       var previewFont = String($preview.data("preview-font") || "").trim();
       var $field = getPrimaryFontFamilyField("base_font_family");
       if ($field && $field.length) {
@@ -1897,7 +1866,7 @@
       return "400";
     }
     function renderTypePreview() {
-      var $preview = $("[data-ecf-type-scale-preview]");
+      var $preview = $dom.typePreview;
       if (!$preview.length) return;
       var config = getTypePreviewConfig($preview);
       var items = buildTypePreviewItems(config);
@@ -1973,7 +1942,7 @@
       var $box = $("[data-ecf-root-font-impact]");
       if (!$box.length) return;
       var rootBasePx = $('[name="ecf_framework_v50[root_font_size]"]').val() === "62.5" ? 10 : 16;
-      var typeConfig = getTypePreviewConfig($("[data-ecf-type-scale-preview]"));
+      var typeConfig = getTypePreviewConfig($dom.typePreview);
       var typeItems = buildTypePreviewItems(typeConfig);
       var typeStep = $box.attr("data-type-step") || typeConfig.baseIndex || "m";
       var spacingConfig = getSpacingConfig();
@@ -2055,7 +2024,7 @@
       }).get();
     }
     function renderShadowPreview() {
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       if (!$preview.length) return;
       var items = buildShadowPreviewItems();
       var helperText = $preview.data("preview-helper") || "";
@@ -2150,7 +2119,7 @@
         $subnav.prop("hidden", true);
         return;
       }
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       var activeShadow = $preview.attr("data-active-shadow") || (items[0] ? items[0].slug : "");
       var html = "";
       items.forEach(function(item) {
@@ -2160,14 +2129,14 @@
       $subnav.html(html);
     }
     function syncShadowSubnavActive() {
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       var activeShadow = $preview.attr("data-active-shadow") || "";
       $('[data-ecf-subnav="shadows"] .ecf-nav-subnav__item').each(function() {
         $(this).toggleClass("is-active", $(this).data("ecf-subnav-shadow") === activeShadow);
       });
     }
     function enterShadowFocus(slug) {
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       $preview.attr("data-active-shadow", slug);
       renderShadowPreview();
       $preview.attr("data-ecf-shadow-focus-mode", slug);
@@ -2193,7 +2162,7 @@
       syncShadowSubnavActive();
     }
     function exitShadowFocus() {
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       $preview.removeAttr("data-ecf-shadow-focus-mode");
       $("[data-ecf-shadow-edit-row]").removeClass("ecf-shadow-focused-editor");
       $preview.find(".ecf-shadow-focus-bar").prop("hidden", true);
@@ -2205,7 +2174,7 @@
     $(document).on("click", "[data-ecf-subnav-shadow]", function() {
       var slug = String($(this).data("ecf-subnav-shadow") || "");
       if (!slug) return;
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       if ($preview.attr("data-ecf-shadow-focus-mode") === slug) {
         exitShadowFocus();
         return;
@@ -2213,7 +2182,7 @@
       enterShadowFocus(slug);
     });
     function enterSpacingFocus(step) {
-      var $preview = $("[data-ecf-spacing-preview]");
+      var $preview = $dom.spacingPreview;
       $preview.find("[data-ecf-spacing-preview-list] .ecf-space-row").removeClass("ecf-space-row--focused");
       $preview.find('[data-ecf-spacing-preview-list] .ecf-space-row[data-ecf-space-step="' + step + '"]').addClass("ecf-space-row--focused");
       $preview.attr("data-ecf-spacing-focus-mode", step);
@@ -2229,7 +2198,7 @@
       $('[data-ecf-subnav="spacing"] [data-ecf-subnav-spacing="' + step + '"]').addClass("is-active");
     }
     function exitSpacingFocus() {
-      var $preview = $("[data-ecf-spacing-preview]");
+      var $preview = $dom.spacingPreview;
       $preview.removeAttr("data-ecf-spacing-focus-mode");
       $preview.find("[data-ecf-spacing-preview-list] .ecf-space-row").removeClass("ecf-space-row--focused");
       $preview.find(".ecf-spacing-focus-bar").prop("hidden", true);
@@ -2301,8 +2270,9 @@
       }
       enterTokenFocus(type, slug);
     });
+    var debouncedBuildTokensSubnav = debounce(buildTokensSubnav, 250);
     $(document).on("input", '[data-group="colors"] [data-ecf-slug-field="token"], [data-group="radius"] [data-ecf-slug-field="token"]', function() {
-      buildTokensSubnav();
+      debouncedBuildTokensSubnav();
     });
     var $noSavePanel = ["variables", "sync", "help", "changelog", "starthilfe"];
     var storageKeys = {
@@ -2318,6 +2288,16 @@
     };
     var $settingsForm = $('form[action="options.php"]').first();
     var $autosaveNotice = $();
+    var $dom = {
+      body: $("body"),
+      topbar: $("[data-ecf-sticky-topbar]"),
+      saveBtn: $(".ecf-sticky-topbar__save"),
+      saveLabel: $("[data-ecf-save-label]"),
+      shadowPreview: $("[data-ecf-shadow-preview]"),
+      typePreview: $("[data-ecf-type-scale-preview]"),
+      spacingPreview: $("[data-ecf-spacing-preview]"),
+      rootFontInput: $('[name="ecf_framework_v50[root_font_size]"]')
+    };
     var elementorAutoSyncInFlight = false;
     var elementorAutoSyncQueuedSettings = null;
     var lastElementorAutoSyncPayload = "";
@@ -2682,23 +2662,7 @@
       }
       elementorAutoSyncInFlight = true;
       showAutosaveNotice(i18n.elementor_syncing || "", "saving");
-      window.fetch(syncRestUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-WP-Nonce": restNonce
-        },
-        body: JSON.stringify({
-          variables: !!payload.variables,
-          classes: !!payload.classes
-        })
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("elementor_sync_failed");
-        }
-        return response.json();
-      }).then(function(responseData) {
+      apiFetch(syncRestUrl, { method: "POST", body: { variables: !!payload.variables, classes: !!payload.classes } }).then(function(responseData) {
         lastElementorAutoSyncPayload = payloadHash;
         if (responseData && responseData.meta) {
           updateSystemInfoCards(responseData.meta, settings || buildSettingsPayloadFromForm());
@@ -2720,16 +2684,16 @@
     }
     var saveFlashActive = false;
     function flashSaveConfirmation() {
-      var $save = $(".ecf-sticky-topbar__save");
+      var $save = $dom.saveBtn;
       if ($save.prop("hidden") || saveFlashActive) return;
       saveFlashActive = true;
       $save.addClass("is-saved");
-      $("[data-ecf-save-label]").text("\u2713 " + (i18n.autosave_saved || "Saved"));
-      $("[data-ecf-sticky-topbar]").removeClass("is-dirty");
+      $dom.saveLabel.text("\u2713 " + (i18n.autosave_saved || "Saved"));
+      $dom.topbar.removeClass("is-dirty");
       window.setTimeout(function() {
         saveFlashActive = false;
         $save.removeClass("is-saved");
-        $("[data-ecf-save-label]").text(i18n.save_label || "Save");
+        $dom.saveLabel.text(i18n.save_label || "Save");
         updateSaveButtonVisibility();
       }, 1400);
     }
@@ -2739,8 +2703,8 @@
       var isNoSavePanel = $noSavePanel.indexOf(panel) !== -1;
       var currentPayload = stableStringify(buildSettingsPayloadFromForm());
       var isDirty = !!autosave.lastPayload && currentPayload !== autosave.lastPayload;
-      var $save = $(".ecf-sticky-topbar__save");
-      var $topbar = $("[data-ecf-sticky-topbar]");
+      var $save = $dom.saveBtn;
+      var $topbar = $dom.topbar;
       if (isNoSavePanel || !isDirty) {
         $save.prop("hidden", true);
         $topbar.removeClass("is-dirty");
@@ -2769,7 +2733,7 @@
     }
     function closeClassSyncPromptModal() {
       $("[data-ecf-class-sync-prompt-modal]").removeData("ecfSyncPromptPayload").prop("hidden", true).removeClass("is-open");
-      $("body").removeClass("ecf-modal-open");
+      $dom.body.removeClass("ecf-modal-open");
     }
     function buildElementorSyncPromptPayload(savedSettings, previousVariableHash, currentVariableHash, previousClassHash, currentClassHash) {
       var autoSyncPayload = buildElementorAutoSyncPayload(savedSettings);
@@ -2808,7 +2772,7 @@
       $("[data-ecf-class-sync-prompt-yes] span:last-child").text(i18n.class_sync_prompt_yes || "");
       $("[data-ecf-class-sync-prompt-no] span:last-child").text(i18n.class_sync_prompt_no || "");
       $modal.data("ecfSyncPromptPayload", promptPayload).prop("hidden", false).addClass("is-open");
-      $("body").addClass("ecf-modal-open");
+      $dom.body.addClass("ecf-modal-open");
     }
     function maybePromptForElementorSync(savedSettings, previousVariableHash, currentVariableHash, previousClassHash, currentClassHash) {
       var promptPayload = buildElementorSyncPromptPayload(savedSettings, previousVariableHash, currentVariableHash, previousClassHash, currentClassHash);
@@ -2822,23 +2786,7 @@
         return;
       }
       showAutosaveNotice(i18n.elementor_syncing || "", "saving");
-      window.fetch(syncRestUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-WP-Nonce": restNonce
-        },
-        body: JSON.stringify({
-          variables: !!payload.variables,
-          classes: !!payload.classes
-        })
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("elementor_sync_failed");
-        }
-        return response.json();
-      }).then(function(responseData) {
+      apiFetch(syncRestUrl, { method: "POST", body: { variables: !!payload.variables, classes: !!payload.classes } }).then(function(responseData) {
         if (responseData && responseData.meta) {
           updateSystemInfoCards(responseData.meta, buildSettingsPayloadFromForm());
         }
@@ -3387,20 +3335,7 @@
       var columns = collectAllLayoutColumns();
       layoutOrders = orders;
       layoutColumns = columns;
-      window.fetch(layoutRestUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-WP-Nonce": restNonce
-        },
-        body: JSON.stringify({ orders, columns })
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("layout_save_failed");
-        }
-        return response.json();
-      }).then(function(responseData) {
+      apiFetch(layoutRestUrl, { method: "POST", body: { orders, columns } }).then(function(responseData) {
         if (responseData && responseData.orders) {
           layoutOrders = normalizeLayoutOrders(responseData.orders);
         }
@@ -3427,20 +3362,7 @@
       }
       $button.data("ecfResetting", true);
       updateResetLayoutButtonState();
-      window.fetch(layoutRestUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-WP-Nonce": restNonce
-        },
-        body: JSON.stringify({ orders: {}, columns: {} })
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("layout_reset_failed");
-        }
-        return response.json();
-      }).then(function(responseData) {
+      apiFetch(layoutRestUrl, { method: "POST", body: { orders: {}, columns: {} } }).then(function(responseData) {
         layoutOrders = normalizeLayoutOrders(responseData && responseData.orders ? responseData.orders : {});
         layoutColumns = normalizeLayoutColumns(responseData && responseData.columns ? responseData.columns : {});
         restoreDefaultLayoutState();
@@ -3608,23 +3530,10 @@
       autosave.queuedPayload = "";
       persistAdminPageState($settingsForm);
       showAutosaveNotice(i18n.autosave_saving || "", "saving");
-      var $saveBtn = $(".ecf-sticky-topbar__save");
+      var $saveBtn = $dom.saveBtn;
       $saveBtn.addClass("is-saving");
-      $("[data-ecf-save-label]").text(i18n.autosave_saving || "Saving\u2026");
-      window.fetch(restUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-WP-Nonce": restNonce
-        },
-        body: JSON.stringify({ settings: payload })
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("rest_save_failed");
-        }
-        return response.json();
-      }).then(function(responseData) {
+      $dom.saveLabel.text(i18n.autosave_saving || "Saving\u2026");
+      apiFetch(restUrl, { method: "POST", body: { settings: payload } }).then(function(responseData) {
         autosave.inFlight = false;
         autosave.inFlightPayload = "";
         var responseSettings = responseData && responseData.settings ? responseData.settings : payload;
@@ -3680,7 +3589,7 @@
         showAutosaveNotice(i18n.autosave_failed || "", "error");
       }).finally(function() {
         autosave.skipValidation = false;
-        $(".ecf-sticky-topbar__save").removeClass("is-saving");
+        $dom.saveBtn.removeClass("is-saving");
       });
     }
     function scheduleSettingsAutosave(options) {
@@ -3746,16 +3655,6 @@
         }, 180);
       }, 1800);
       $notice.data("hideTimer", hideTimer);
-    }
-    function formatTemplate(template, value) {
-      return String(template || "").replace("%s", value == null ? "" : String(value));
-    }
-    function formatFileSize(bytes) {
-      var size = Number(bytes || 0);
-      if (!size) return "0 B";
-      if (size < 1024) return size + " B";
-      if (size < 1024 * 1024) return formatNumber(size / 1024, 1) + " KB";
-      return formatNumber(size / (1024 * 1024), 1) + " MB";
     }
     function safeInitStep(label, callback) {
       try {
@@ -4142,7 +4041,7 @@
     $(document).on("click", "[data-ecf-subnav-spacing]", function() {
       var step = String($(this).data("ecf-subnav-spacing") || "");
       if (!step) return;
-      var $preview = $("[data-ecf-spacing-preview]");
+      var $preview = $dom.spacingPreview;
       if ($preview.attr("data-ecf-spacing-focus-mode") === step) {
         exitSpacingFocus();
         return;
@@ -4722,11 +4621,11 @@
     });
     function openChangelogModal() {
       $("[data-ecf-changelog-modal]").prop("hidden", false).addClass("is-open");
-      $("body").addClass("ecf-modal-open");
+      $dom.body.addClass("ecf-modal-open");
     }
     function closeChangelogModal() {
       $("[data-ecf-changelog-modal]").removeClass("is-open").prop("hidden", true);
-      $("body").removeClass("ecf-modal-open");
+      $dom.body.removeClass("ecf-modal-open");
     }
     $(document).on("click", "[data-ecf-open-changelog-modal]", function() {
       openChangelogModal();
@@ -4963,7 +4862,7 @@
       renderShadowPreview();
     });
     $(document).on("click", "[data-ecf-step]", function() {
-      var $preview = $("[data-ecf-type-scale-preview]");
+      var $preview = $dom.typePreview;
       $preview.attr("data-active-step", $(this).data("ecf-step"));
       renderTypePreview();
     });
@@ -4976,7 +4875,7 @@
       if ($(event.target).is("[data-ecf-shadow-inline-value]")) {
         return;
       }
-      var $preview = $("[data-ecf-shadow-preview]");
+      var $preview = $dom.shadowPreview;
       $preview.attr("data-active-shadow", $(this).data("ecf-shadow-step"));
       renderShadowPreview();
     });
@@ -4984,7 +4883,7 @@
       event.stopPropagation();
       var $input = $(this);
       var $row = $input.closest("[data-ecf-shadow-step]");
-      $("[data-ecf-shadow-preview]").attr("data-active-shadow", $row.data("ecf-shadow-step"));
+      $dom.shadowPreview.attr("data-active-shadow", $row.data("ecf-shadow-step"));
       $("[data-ecf-shadow-step]").removeClass("is-active");
       $row.addClass("is-active");
       $input.trigger("select");
@@ -5002,7 +4901,7 @@
       var shadowSlug = String($previewRow.data("ecf-shadow-step") || "");
       var previewShadowValue = enhanceShadowPreviewValue(value);
       $previewRow.find(".ecf-shadow-row__mini").css("box-shadow", previewShadowValue);
-      $("[data-ecf-shadow-preview]").attr("data-active-shadow", shadowSlug);
+      $dom.shadowPreview.attr("data-active-shadow", shadowSlug);
       $("[data-ecf-shadow-css]").text(value);
       $("[data-ecf-shadow-surface]").css("box-shadow", previewShadowValue);
     });
@@ -5021,11 +4920,11 @@
       if (!$row.length) return;
       var name = trim($row.find("[data-ecf-shadow-name-input]").val() || "");
       var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "shadow";
-      $("[data-ecf-shadow-preview]").attr("data-active-shadow", slug);
+      $dom.shadowPreview.attr("data-active-shadow", slug);
       renderShadowPreview();
     });
     $(document).on("click", "[data-ecf-preview-view]", function() {
-      var $preview = $("[data-ecf-type-scale-preview]");
+      var $preview = $dom.typePreview;
       $preview.attr("data-preview-view", $(this).data("ecf-preview-view"));
       renderTypePreview();
     });
@@ -5188,7 +5087,7 @@
           var usageTip = escapeHtml((i18n.class_usage_count || "").replace("%d", String(v.usage_count || 0)));
           usageHtml = '<span class="ecf-var-usage-badge" data-tip="' + usageTip + '">' + usageLabel + "</span>";
         }
-        html += '<div class="ecf-var-row' + (v.pending ? " is-prepared" : "") + '" data-id="' + v.id + '" data-group="' + group + '"' + pendingAttr + '><input type="checkbox" class="ecf-var-check" value="' + v.id + '"' + checkAttr + '><span class="ecf-var-label">' + originBadge(group) + "<span>" + v.label + "</span>" + usageHtml + '</span><span class="ecf-var-type">' + typeLabel(v.type) + "</span>" + renderVariableValue(v) + "</div>";
+        html += '<div class="ecf-var-row' + (v.pending ? " is-prepared" : "") + '" data-id="' + escapeHtml(String(v.id)) + '" data-group="' + escapeHtml(String(group)) + '"' + pendingAttr + '><input type="checkbox" class="ecf-var-check" value="' + escapeHtml(String(v.id)) + '"' + checkAttr + '><span class="ecf-var-label">' + originBadge(group) + "<span>" + escapeHtml(String(v.label || "")) + "</span>" + usageHtml + '</span><span class="ecf-var-type">' + typeLabel(v.type) + "</span>" + renderVariableValue(v) + "</div>";
       });
       html += "</div>";
       return html;
@@ -6026,7 +5925,7 @@
         nonce: ecfAdmin.nonce
       }, function(res) {
         if (!res.success) {
-          $("#ecf-varlist-ecf, #ecf-varlist-foreign").html('<p style="color:#ef4444;">' + res.data + "</p>");
+          $("#ecf-varlist-ecf, #ecf-varlist-foreign").html('<p style="color:#ef4444;">' + escapeHtml(String(res.data && res.data.message ? res.data.message : res.data || "")) + "</p>");
           return;
         }
         varStore.ecf = res.data.ecf || [];
@@ -6045,7 +5944,7 @@
         nonce: ecfAdmin.nonce
       }, function(res) {
         if (!res.success) {
-          $("#ecf-varlist-ecf-classes, #ecf-varlist-foreign-classes").html('<p style="color:#ef4444;">' + res.data + "</p>");
+          $("#ecf-varlist-ecf-classes, #ecf-varlist-foreign-classes").html('<p style="color:#ef4444;">' + escapeHtml(String(res.data && res.data.message ? res.data.message : res.data || "")) + "</p>");
           return;
         }
         varStore["ecf-classes"] = res.data.ecf || [];
@@ -6109,7 +6008,7 @@
         name: "action",
         value: "ecf_class_library_sync"
       }).appendTo($tempForm);
-      $("body").append($tempForm);
+      $dom.body.append($tempForm);
       persistAdminPageState($button);
       $tempForm.trigger("submit");
     }
@@ -6270,7 +6169,7 @@
     }
     function closeSearchEditModal() {
       $("[data-ecf-search-edit-modal]").prop("hidden", true).removeClass("is-open");
-      $("body").removeClass("ecf-modal-open");
+      $dom.body.removeClass("ecf-modal-open");
     }
     function parseSearchEditSizeValue(rawValue) {
       var value = String(rawValue || "").trim();
@@ -6433,11 +6332,11 @@
       updateSearchEditClampInfo(clampData);
       $("[data-ecf-search-edit-modal]").data("ecfClampData", clampData || null);
       $("[data-ecf-search-edit-modal]").prop("hidden", false).addClass("is-open");
-      $("body").addClass("ecf-modal-open");
+      $dom.body.addClass("ecf-modal-open");
     }
     function closeClassDeleteModal() {
       $("[data-ecf-class-delete-modal]").removeData("ecfDeletePayload").prop("hidden", true).removeClass("is-open");
-      $("body").removeClass("ecf-modal-open");
+      $dom.body.removeClass("ecf-modal-open");
     }
     function executeClassDelete(group, ids, forceDelete, $button) {
       var request = {
@@ -6479,7 +6378,7 @@
       $("[data-ecf-class-delete-all] span:last-child").text(i18n.class_delete_all_anyway || "");
       $("[data-ecf-class-delete-unused]").prop("disabled", unusedItems.length === 0);
       $modal.data("ecfDeletePayload", payload).prop("hidden", false).addClass("is-open");
-      $("body").addClass("ecf-modal-open");
+      $dom.body.addClass("ecf-modal-open");
     }
     function deleteSearchItem(group, id, label) {
       var isClass = isClassGroup(group);
@@ -6721,19 +6620,20 @@
           }
         }
       }
-      $.ajax({
-        url: ecfAdmin.ajaxurl,
+      var formData = new URLSearchParams();
+      formData.set("action", "ecf_update_variable");
+      formData.set("nonce", ecfAdmin.nonce);
+      formData.set("id", id);
+      formData.set("label", label);
+      formData.set("type", type);
+      formData.set("value", value);
+      window.fetch(ecfAdmin.ajaxurl, {
         method: "POST",
-        dataType: "json",
-        data: {
-          action: "ecf_update_variable",
-          nonce: ecfAdmin.nonce,
-          id,
-          label,
-          type,
-          value
-        }
-      }).done(function(res) {
+        credentials: "same-origin",
+        body: formData
+      }).then(function(response) {
+        return response.json();
+      }).then(function(res) {
         if (!res.success) {
           var message = res && res.data && res.data.message ? res.data.message : res.data;
           $("[data-ecf-search-edit-note]").prop("hidden", false).text((i18n.error || "") + message);
@@ -6742,15 +6642,8 @@
         closeSearchEditModal();
         varsLoaded = false;
         loadVariables();
-      }).fail(function(xhr) {
-        var message = "";
-        if (xhr && xhr.responseJSON && xhr.responseJSON.data) {
-          message = xhr.responseJSON.data.message || xhr.responseJSON.data;
-        }
-        if (!message && xhr && xhr.responseText) {
-          message = xhr.responseText;
-        }
-        $("[data-ecf-search-edit-note]").prop("hidden", false).text((i18n.error || "") + (message || (i18n.autosave_failed || "")));
+      }).catch(function() {
+        $("[data-ecf-search-edit-note]").prop("hidden", false).text((i18n.error || "") + (i18n.autosave_failed || ""));
       });
     });
     var ALL_SPACE_STEPS = ["6xs", "5xs", "4xs", "3xs", "2xs", "xs", "s", "m", "l", "xl", "2xl", "3xl", "4xl", "5xl", "6xl"];
@@ -6775,7 +6668,7 @@
         if (v) steps.push(v);
       });
       if (steps.length >= 2) return steps;
-      var $preview = $("[data-ecf-spacing-preview]");
+      var $preview = $dom.spacingPreview;
       try {
         steps = JSON.parse($preview.attr("data-steps"));
       } catch (e) {
@@ -6835,7 +6728,7 @@
       return '<div class="ecf-space-row' + (item.isBase ? " is-base" : "") + '" data-ecf-space-step="' + item.step + '"><div class="ecf-space-row__token"><span class="ecf-space-row__token-text ecf-spacing-token-name">' + item.token + '</span><span class="ecf-copy-pill" data-copy="' + item.token + '">' + i18n.copy + '</span></div><div class="ecf-space-row__meta">' + buildSpacingMetricHtml("smartphone", labelMin, minValue, Math.max(0, minValue), minBarH, item.cssValue) + buildSpacingMetricHtml("desktop", labelMax, maxValue, Math.max(0, maxValue), maxBarH, item.cssValue) + "</div></div>";
     }
     function renderSpacingPreview() {
-      var $preview = $("[data-ecf-spacing-preview]");
+      var $preview = $dom.spacingPreview;
       if (!$preview.length) return;
       var items = buildSpacingItems(getSpacingSteps(), getSpacingConfig());
       var labelMin = $preview.data("preview-label-min") || "";
@@ -6858,7 +6751,7 @@
     });
     function applySpacingSteps(steps) {
       if (!Array.isArray(steps) || steps.length < 2) return;
-      var $preview = $("[data-ecf-spacing-preview]");
+      var $preview = $dom.spacingPreview;
       $preview.attr("data-steps", JSON.stringify(steps));
       var $container = $("#ecf-spacing-steps-container");
       $container.empty();
@@ -6898,7 +6791,7 @@
         if (v) steps.push(v);
       });
       if (steps.length >= 2) return steps;
-      var $preview = $("[data-ecf-type-scale-preview]");
+      var $preview = $dom.typePreview;
       var raw = $preview.attr("data-steps");
       try {
         steps = JSON.parse(raw);
@@ -6908,7 +6801,7 @@
     }
     function applySteps(steps) {
       if (!Array.isArray(steps) || steps.length < 2) return;
-      var $preview = $("[data-ecf-type-scale-preview]");
+      var $preview = $dom.typePreview;
       if (!$preview.length) {
         console.warn("ECF: preview element not found");
         return;
@@ -7021,18 +6914,7 @@
       var $button = $(this);
       if ($button.prop("disabled")) return;
       $button.prop("disabled", true).addClass("is-loading");
-      window.fetch(restUrl, {
-        method: "GET",
-        credentials: "same-origin",
-        headers: {
-          "X-WP-Nonce": restNonce
-        }
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("rest_refresh_failed");
-        }
-        return response.json();
-      }).then(function(responseData) {
+      apiFetch(restUrl).then(function(responseData) {
         updateSystemInfoCards(responseData && responseData.meta ? responseData.meta : null, responseData && responseData.settings ? responseData.settings : null);
         showAutosaveNotice(i18n.system_refreshed || "", "success");
       }).catch(function() {
