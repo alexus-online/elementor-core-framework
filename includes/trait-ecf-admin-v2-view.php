@@ -166,6 +166,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
 
         /* ── Export URL / nonce ──────────────────────────────────────── */
         $export_url = admin_url( 'admin-post.php' );
+        $generated_css          = $this->build_generated_css( $settings, true );
+        $generated_css_download = 'data:text/css;charset=utf-8,' . rawurlencode( $generated_css );
 
         /* ── Style presets ───────────────────────────────────────────── */
         $sp_shadows = ['xs'=>'0 1px 2px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04)','s'=>'0 2px 4px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06)','m'=>'0 4px 8px rgba(0,0,0,.09), 0 8px 24px rgba(0,0,0,.08)','l'=>'0 8px 16px rgba(0,0,0,.10), 0 16px 40px rgba(0,0,0,.10)','xl'=>'0 16px 32px rgba(0,0,0,.12), 0 32px 64px rgba(0,0,0,.14)','inner'=>'inset 0 2px 4px rgba(0,0,0,.06)'];
@@ -1450,7 +1452,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
                 <div class="v2-sh-css"><?php echo esc_html( $sval ); ?></div>
               </div>
               <div class="v2-tr-meta" style="margin-left:auto">
-                <span class="v2-chip v2-chip--hi">--ecf-shadow-<?php echo esc_html( $sname ); ?></span>
+                <button type="button" class="v2-chip v2-chip--hi v2-chip--copy" onclick="event.stopPropagation();ecfV2CopyText('--ecf-shadow-<?php echo esc_js( $sname ); ?>')" title="<?php esc_attr_e( 'Variablenname kopieren', 'ecf-framework' ); ?>">--ecf-shadow-<?php echo esc_html( $sname ); ?></button>
                 <button type="button" class="v2-edit-btn" onclick="event.stopPropagation();ecfV2ToggleEdit('sh-<?php echo esc_js( $sname ); ?>')" title="<?php esc_attr_e( 'Token bearbeiten', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Token bearbeiten', 'ecf-framework' ); ?>">
                   <svg width="11" height="11" viewBox="0 0 13 13" fill="none"><path d="M8.5 2L11 4.5 5 10.5H2.5V8L8.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -2127,7 +2129,10 @@ trait ECF_Framework_Admin_V2_View_Trait {
           <!-- CSS Export -->
           <div class="v2-export-row">
             <div><div class="v2-exp-name"><?php esc_html_e( 'CSS-Variablen', 'ecf-framework' ); ?></div><div class="v2-exp-desc">:root { --ecf-… } <?php esc_html_e( 'Block für externe Projekte.', 'ecf-framework' ); ?></div></div>
-            <button type="button" class="v2-btn v2-btn--ghost" data-v2-export-css>↓ <?php esc_html_e( 'CSS kopieren', 'ecf-framework' ); ?></button>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button type="button" class="v2-btn v2-btn--ghost" data-v2-export-css>↓ <?php esc_html_e( 'Kopieren', 'ecf-framework' ); ?></button>
+              <a class="v2-btn v2-btn--ghost" href="<?php echo esc_attr( $generated_css_download ); ?>" download="layrix-generated.css">↓ <?php esc_html_e( 'Herunterladen', 'ecf-framework' ); ?></a>
+            </div>
           </div>
           <!-- Import -->
           <div class="v2-export-row">
@@ -2529,6 +2534,29 @@ trait ECF_Framework_Admin_V2_View_Trait {
         </div>
       </div>
 
+      <!-- Base Colors -->
+      <div class="v2-sec">
+        <div class="v2-sh"><?php esc_html_e( 'Basisfarben', 'ecf-framework' ); ?></div>
+        <div class="v2-sg">
+          <div class="v2-sr">
+            <div><div class="v2-sl"><?php esc_html_e( 'Textfarbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-base-text</div></div>
+            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[base_text_color]" value="<?php echo esc_attr( $settings['base_text_color'] ?? '#0f172a' ); ?>">
+          </div>
+          <div class="v2-sr">
+            <div><div class="v2-sl"><?php esc_html_e( 'Hintergrundfarbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-base-bg</div></div>
+            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[base_background_color]" value="<?php echo esc_attr( $settings['base_background_color'] ?? '#f8fafc' ); ?>">
+          </div>
+          <div class="v2-sr">
+            <div><div class="v2-sl"><?php esc_html_e( 'Link-Farbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-link-color</div></div>
+            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[link_color]" value="<?php echo esc_attr( $settings['link_color'] ?? '#4f46e5' ); ?>">
+          </div>
+          <div class="v2-sr">
+            <div><div class="v2-sl"><?php esc_html_e( 'Fokus-Farbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-focus-color</div></div>
+            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[focus_color]" value="<?php echo esc_attr( $settings['focus_color'] ?? '#0ea5e9' ); ?>">
+          </div>
+        </div>
+      </div>
+
       <!-- Layout & Container -->
       <div class="v2-sec">
         <div class="v2-sh"><?php esc_html_e( 'Layout & Container', 'ecf-framework' ); ?></div>
@@ -2541,6 +2569,56 @@ trait ECF_Framework_Admin_V2_View_Trait {
             <div><div class="v2-sl"><?php esc_html_e( 'Max Text Width', 'ecf-framework' ); ?></div><div class="v2-sh2"><?php esc_html_e( 'Optimal reading width for body text', 'ecf-framework' ); ?></div></div>
             <input type="text" class="v2-si" name="<?php echo esc_attr( $opt ); ?>[content_max_width]" value="<?php echo esc_attr( $text_max_w ); ?>" style="max-width:110px">
           </div>
+        </div>
+      </div>
+
+      <!-- Root Font Impact -->
+      <?php
+        $rfi = $this->root_font_impact_preview_data( $settings );
+        $rfi_base_px   = $rfi['root_base_px'] ?? 16;
+        $rfi_type      = $rfi['type'] ?? [];
+        $rfi_spacing   = $rfi['spacing'] ?? [];
+        $rfi_radius    = $rfi['radius'] ?? [];
+        $rfi_type_step = $rfi_type['step'] ?? 'm';
+        $rfi_sp_step   = $rfi_spacing['step'] ?? 'm';
+        $rfi_r_name    = sanitize_key( $rfi_radius['name'] ?? 'm' );
+      ?>
+      <div class="v2-sec">
+        <div class="v2-sh"><?php esc_html_e( 'Root Font Auswirkung', 'ecf-framework' ); ?></div>
+        <p style="font-size:11.5px;color:var(--v2-text3);margin:0 0 10px;line-height:1.5"><?php printf( esc_html__( 'Aktuell: %spx = 1rem. Alle rem-basierten Token skalieren mit der Root-Schriftgröße.', 'ecf-framework' ), esc_html( $rfi_base_px ) ); ?></p>
+        <div class="v2-sg v2-sg--compact2">
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><code style="font-family:var(--v2-mono);font-size:10px">--ecf-text-<?php echo esc_html( $rfi_type_step ); ?></code></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Typografie-Basistoken', 'ecf-framework' ); ?></div>
+            </div>
+            <div style="display:flex;gap:10px;font-size:11px;color:var(--v2-text2)">
+              <span><?php echo esc_html( ( $rfi_type['min_px'] ?? $rfi_type['minPx'] ?? '?' ) . 'px' ); ?> <span style="color:var(--v2-text3);font-size:10px">min</span></span>
+              <span><?php echo esc_html( ( $rfi_type['max_px'] ?? $rfi_type['maxPx'] ?? '?' ) . 'px' ); ?> <span style="color:var(--v2-text3);font-size:10px">max</span></span>
+            </div>
+          </div>
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><code style="font-family:var(--v2-mono);font-size:10px">--ecf-space-<?php echo esc_html( $rfi_sp_step ); ?></code></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Spacing-Basistoken', 'ecf-framework' ); ?></div>
+            </div>
+            <div style="display:flex;gap:10px;font-size:11px;color:var(--v2-text2)">
+              <span><?php echo esc_html( ( $rfi_spacing['min_px'] ?? $rfi_spacing['minPx'] ?? '?' ) . 'px' ); ?> <span style="color:var(--v2-text3);font-size:10px">min</span></span>
+              <span><?php echo esc_html( ( $rfi_spacing['max_px'] ?? $rfi_spacing['maxPx'] ?? '?' ) . 'px' ); ?> <span style="color:var(--v2-text3);font-size:10px">max</span></span>
+            </div>
+          </div>
+          <?php if ( ! empty( $rfi_r_name ) ) : ?>
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><code style="font-family:var(--v2-mono);font-size:10px">--ecf-radius-<?php echo esc_html( $rfi_r_name ); ?></code></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Radius-Basistoken', 'ecf-framework' ); ?></div>
+            </div>
+            <div style="display:flex;gap:10px;font-size:11px;color:var(--v2-text2)">
+              <span><?php echo esc_html( $rfi_radius['min'] ?? '?' ); ?> <span style="color:var(--v2-text3);font-size:10px">min</span></span>
+              <span><?php echo esc_html( $rfi_radius['max'] ?? $rfi_radius['min'] ?? '?' ); ?> <span style="color:var(--v2-text3);font-size:10px">max</span></span>
+            </div>
+          </div>
+          <?php endif; ?>
         </div>
       </div>
 

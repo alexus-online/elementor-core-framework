@@ -438,10 +438,12 @@
   border-color: var(--v2-border2);
   background: rgba(255,255,255,.06);
 }
-.ecf-v2-wrapper .v2-chip--clickable {
-  cursor: pointer; transition: background .12s, color .12s;
+.ecf-v2-wrapper .v2-chip--clickable,
+.ecf-v2-wrapper .v2-chip--copy {
+  cursor: pointer; transition: background .12s, color .12s; border: none; font: inherit;
 }
-.ecf-v2-wrapper .v2-chip--clickable:hover {
+.ecf-v2-wrapper .v2-chip--clickable:hover,
+.ecf-v2-wrapper .v2-chip--copy:hover {
   background: rgba(255,255,255,.12); color: var(--v2-text);
 }
 .ecf-v2-wrapper .v2-chip--green {
@@ -1094,6 +1096,13 @@
   width: auto;
   padding: 4px 7px;
   font-size: 11px;
+}
+.ecf-v2-wrapper .v2-si--color {
+  width: 44px;
+  height: 32px;
+  padding: 2px;
+  cursor: pointer;
+  border-radius: var(--ecf-radius-sm, 8px);
 }
 
 /* ── Shadow edit panel ──────────────────────────────────────────── */
