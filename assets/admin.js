@@ -545,6 +545,27 @@
     }
     return items;
   }
+  function relativeLuminance(rgb) {
+    if (!rgb) return 0;
+    var r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
+    var lin = function(c) {
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  }
+  function contrastRatio(rgb1, rgb2) {
+    var l1 = relativeLuminance(rgb1);
+    var l2 = relativeLuminance(rgb2);
+    var lighter = Math.max(l1, l2);
+    var darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+  function wcagRating(ratio) {
+    if (ratio >= 7) return "AAA";
+    if (ratio >= 4.5) return "AA";
+    if (ratio >= 3) return "AA Large";
+    return "Fail";
+  }
 
   // src/js/index.js
   jQuery(function($) {
@@ -640,6 +661,7 @@
       $detail.find(".ecf-color-detail__preview").css("--ecf-color-detail-base", hex);
       $detail.find(".ecf-color-detail__meta strong").text(token);
       $detail.find(".ecf-color-detail__meta code").text(value || hex);
+      $row.find(".ecf-color-varname span").text(name);
       renderColorGeneratedPalette($detail, parsed || { r: 0, g: 0, b: 0, a: 1 });
     }
     function renderColorGeneratedPalette($detail, baseRgb) {
@@ -767,7 +789,16 @@
       });
     }
     function nextIndex(group) {
-      return $('.ecf-table[data-group="' + group + '"] .ecf-row').length;
+      var max = -1;
+      $('.ecf-table[data-group="' + group + '"] .ecf-row').each(function() {
+        var nameAttr = $(this).find("[name]").first().attr("name") || "";
+        var m = nameAttr.match(/\[(\d+)\]/);
+        if (m) {
+          var n = parseInt(m[1], 10);
+          if (n > max) max = n;
+        }
+      });
+      return max + 1;
     }
     function inputKey(group) {
       return $('.ecf-table[data-group="' + group + '"]').data("input-key") || "ecf_framework_v50[" + group + "]";
@@ -887,6 +918,10 @@
     });
     $(document).on("click", ".ecf-font-file-select", function(e) {
       e.preventDefault();
+      if (typeof wp === "undefined" || !wp.media) {
+        console.warn("ECF: wp.media not available");
+        return;
+      }
       var $button = $(this);
       var frame = wp.media({
         title: ecfAdmin.i18n.choose_font,
@@ -935,6 +970,7 @@
             $el.text(originalContent);
           }
         }, duration || 1200);
+      }).catch(function() {
       });
     }
     function getFontFamilyOptionsFromSettings(settings) {
@@ -1619,36 +1655,111 @@
         return trim(String($(this).find('[data-ecf-slug-field="token"]').first().val() || "")) === tokenName;
       }).first();
     }
+    function _addTokenRow(group, callback) {
+      var index = nextIndex(group);
+      var key = inputKey(group);
+      var isColor = group === "colors";
+      var isMinMax = $('.ecf-table[data-group="' + group + '"]').data("minmax") === 1;
+      var templateId = isColor ? "#ecf-row-template-color" : isMinMax ? "#ecf-row-template-minmax" : "#ecf-row-template-default";
+      var html = $(templateId).html().replace(/__NAME__/g, key + "[" + index + "][name]").replace(/__NAME_BASE__/g, key + "[" + index + "]").replace(/__VALUE__/g, key + "[" + index + "][value]").replace(/__FORMAT__/g, key + "[" + index + "][format]").replace(/__MIN__/g, key + "[" + index + "][min]").replace(/__MAX__/g, key + "[" + index + "][max]");
+      var $row = $(html);
+      $('.ecf-table[data-group="' + group + '"]').append($row);
+      if (isColor) initColorPickers($row);
+      if (typeof callback === "function") callback($row);
+    }
     function applyColorTokenPreset(presetMap) {
-      $.each(presetMap || {}, function(tokenName, tokenValue) {
-        var $row = findTokenRow("colors", tokenName);
-        if (!$row.length) {
-          return;
+      var list = [];
+      if (Array.isArray(presetMap)) {
+        presetMap.forEach(function(r) {
+          if (r.name && r.value) list.push({ name: r.name, hex: r.value });
+        });
+      } else {
+        $.each(presetMap || {}, function(n, v) {
+          if (v) list.push({ name: n, hex: v });
+        });
+      }
+      var existingColorNames = /* @__PURE__ */ new Set();
+      $('.ecf-table[data-group="colors"] .ecf-row [data-ecf-slug-field="token"]').each(function() {
+        existingColorNames.add(trim($(this).val()));
+      });
+      list.forEach(function(c) {
+        var $row = findTokenRow("colors", c.name);
+        if ($row.length) {
+          $row.find(".ecf-color-value-input").val(c.hex);
+          $row.find(".ecf-color-value-display").val(c.hex);
+          $row.find(".ecf-color-format-select").val("hex");
+          $row.find(".ecf-color-field").val(c.hex);
+          updateColorRowDisplay($row);
+        } else {
+          if (existingColorNames.has(c.name)) return;
+          _addTokenRow("colors", function($r) {
+            $r.find('[data-ecf-slug-field="token"]').val(c.name);
+            $r.find(".ecf-color-value-input").val(c.hex);
+            $r.find(".ecf-color-value-display").val(c.hex);
+            $r.find(".ecf-color-format-select").val("hex");
+            $r.find(".ecf-color-field").val(c.hex);
+            updateColorRowDisplay($r);
+          });
         }
-        $row.find(".ecf-color-value-input").val(tokenValue);
-        $row.find(".ecf-color-value-display").val(tokenValue);
-        $row.find(".ecf-color-format-select").val("hex");
-        $row.find(".ecf-color-field").val(tokenValue);
-        updateColorRowDisplay($row);
       });
     }
     function applyRadiusPreset(presetMap) {
-      $.each(presetMap || {}, function(tokenName, valueMap) {
-        var $row = findTokenRow("radius", tokenName);
-        if (!$row.length) {
-          return;
+      var list = [];
+      if (Array.isArray(presetMap)) {
+        presetMap.forEach(function(r) {
+          if (r.name) list.push(r);
+        });
+      } else {
+        $.each(presetMap || {}, function(n, v) {
+          if (typeof v === "object") list.push({ name: n, min: v.min || "", max: v.max || "" });
+          else list.push({ name: n, min: v, max: v });
+        });
+      }
+      var existingRadiusNames = /* @__PURE__ */ new Set();
+      $('.ecf-table[data-group="radius"] .ecf-row [data-ecf-slug-field="token"]').each(function() {
+        existingRadiusNames.add(trim($(this).val()));
+      });
+      list.forEach(function(r) {
+        var $row = findTokenRow("radius", r.name);
+        if ($row.length) {
+          $row.find("input").eq(1).val(String(r.min || ""));
+          $row.find("input").eq(2).val(String(r.max || ""));
+        } else {
+          if (existingRadiusNames.has(r.name)) return;
+          _addTokenRow("radius", function($newRow) {
+            $newRow.find("input").eq(0).val(r.name);
+            $newRow.find("input").eq(1).val(String(r.min || ""));
+            $newRow.find("input").eq(2).val(String(r.max || ""));
+          });
         }
-        $row.find("input").eq(1).val(String((valueMap || {}).min || ""));
-        $row.find("input").eq(2).val(String((valueMap || {}).max || ""));
       });
     }
     function applyValueTokenPreset(groupName, presetMap) {
-      $.each(presetMap || {}, function(tokenName, tokenValue) {
-        var $row = findTokenRow(groupName, tokenName);
-        if (!$row.length) {
-          return;
+      var list = [];
+      if (Array.isArray(presetMap)) {
+        presetMap.forEach(function(r) {
+          if (r.name) list.push({ name: r.name, value: r.value || "" });
+        });
+      } else {
+        $.each(presetMap || {}, function(n, v) {
+          list.push({ name: n, value: String(v || "") });
+        });
+      }
+      var existingValueNames = /* @__PURE__ */ new Set();
+      $('.ecf-table[data-group="' + groupName + '"] .ecf-row [data-ecf-slug-field="token"]').each(function() {
+        existingValueNames.add(trim($(this).val()));
+      });
+      list.forEach(function(item) {
+        var $row = findTokenRow(groupName, item.name);
+        if ($row.length) {
+          $row.find("input").eq(1).val(item.value);
+        } else {
+          if (existingValueNames.has(item.name)) return;
+          _addTokenRow(groupName, function($newRow) {
+            $newRow.find("input").eq(0).val(item.name);
+            $newRow.find("input").eq(1).val(item.value);
+          });
         }
-        $row.find("input").eq(1).val(String(tokenValue || ""));
       });
     }
     function applySpacingPreset(presetMap) {
@@ -1671,9 +1782,118 @@
         $('[name$="[spacing][fluid]"]').first().prop("checked", !!presetMap.fluid);
       }
     }
-    function applySettingsPayload(preset, $button, messages) {
+    function ecfPresetModal(opts) {
+      var payload = opts.payload || {};
+      var onApply = opts.onApply;
+      var g = payload.general || {};
+      var colors = payload.colors || {};
+      var radius = payload.radius || {};
+      var shadows = payload.shadows || {};
+      var spacing = payload.spacing || {};
+      var fonts = payload.fonts || {};
+      var colorList = [];
+      if (Array.isArray(colors)) {
+        colors.forEach(function(r) {
+          if (r.name && r.value) colorList.push({ name: r.name, hex: r.value });
+        });
+      } else {
+        $.each(colors, function(n, v) {
+          if (v) colorList.push({ name: n, hex: v });
+        });
+      }
+      var headingFont = fonts.secondary || "";
+      var bodyFont = fonts.primary || "";
+      var sections = [];
+      if (colorList.length) {
+        var sw = colorList.slice(0, 10).map(function(c) {
+          return '<span class="ecf-pm-swatch" style="background:' + c.hex + '" title="' + c.name + '"></span>';
+        }).join("");
+        sections.push({
+          key: "colors",
+          label: i18n.pm_colors || "Farben",
+          detail: colorList.length + " " + (i18n.pm_tokens || "Token"),
+          extra: '<div class="ecf-pm-swatches">' + sw + "</div>"
+        });
+      }
+      if (headingFont) sections.push({
+        key: "headingFont",
+        label: i18n.pm_heading_font || "\xDCberschrift-Schrift",
+        detail: headingFont.split(",")[0].replace(/['"]/g, "").trim()
+      });
+      if (bodyFont) sections.push({
+        key: "bodyFont",
+        label: i18n.pm_body_font || "Flie\xDFtext-Schrift",
+        detail: bodyFont.split(",")[0].replace(/['"]/g, "").trim()
+      });
+      if (g.base_body_text_size) sections.push({
+        key: "textSize",
+        label: i18n.pm_text_size || "Flie\xDFtext-Gr\xF6\xDFe",
+        detail: g.base_body_text_size
+      });
+      if (g.base_text_color || g.base_background_color || g.link_color) {
+        var bsw = [g.base_background_color, g.base_text_color, g.link_color].filter(Boolean).map(function(c) {
+          return '<span class="ecf-pm-swatch" style="background:' + c + '"></span>';
+        }).join("");
+        sections.push({
+          key: "baseColors",
+          label: i18n.pm_base_colors || "Basis-Farben",
+          detail: i18n.pm_base_colors_detail || "Hintergrund, Text, Links",
+          extra: '<div class="ecf-pm-swatches">' + bsw + "</div>"
+        });
+      }
+      var cwRaw = g.content_max_width;
+      if (cwRaw) {
+        var cwVal = typeof cwRaw === "object" ? cwRaw.value + (cwRaw.format || "") : cwRaw;
+        sections.push({ key: "siteWidth", label: i18n.pm_site_width || "Website-Breite", detail: cwVal });
+      }
+      var rKeys = Array.isArray(radius) ? radius.length : Object.keys(radius).length;
+      if (rKeys) sections.push({
+        key: "radius",
+        label: i18n.pm_radius || "Eckenradien",
+        detail: rKeys + " " + (i18n.pm_tokens || "Token")
+      });
+      var shKeys = Array.isArray(shadows) ? shadows.length : Object.keys(shadows).length;
+      if (shKeys) sections.push({
+        key: "shadows",
+        label: i18n.pm_shadows || "Schatten",
+        detail: shKeys + " " + (i18n.pm_tokens || "Token")
+      });
+      if (Object.keys(spacing).length) sections.push({
+        key: "spacing",
+        label: i18n.pm_spacing || "Abst\xE4nde",
+        detail: i18n.pm_spacing_detail || "Fluid-Abstands-Skala"
+      });
+      var rows = sections.map(function(s) {
+        return '<label class="ecf-pm-section"><input type="checkbox" class="ecf-pm-chk" data-key="' + s.key + '" checked><div class="ecf-pm-section__info"><strong>' + s.label + "</strong><span>" + s.detail + "</span>" + (s.extra || "") + "</div></label>";
+      }).join("");
+      var title = opts.title || "";
+      var desc = opts.description || "";
+      var el = document.createElement("div");
+      el.innerHTML = '<div class="ecf-pm-backdrop"><div class="ecf-pm" role="dialog" aria-modal="true"><div class="ecf-pm-header"><div><h2>' + (i18n.pm_title || "Preset anwenden") + "</h2>" + (title ? '<p class="ecf-pm-subtitle">' + title + (desc ? " \u2014 " + desc : "") + "</p>" : "") + '</div><button type="button" class="ecf-pm-close" aria-label="Schlie\xDFen">\xD7</button></div><div class="ecf-pm-body"><p class="ecf-pm-hint">' + (i18n.pm_hint || "W\xE4hle aus, was du \xFCbernehmen m\xF6chtest:") + "</p>" + rows + '</div><div class="ecf-pm-footer"><button type="button" class="ecf-pm-btn--ghost ecf-pm-cancel">' + (i18n.pm_cancel || "Abbrechen") + '</button><button type="button" class="ecf-pm-btn--primary ecf-pm-apply">' + (i18n.pm_apply || "Anwenden") + "</button></div></div></div>";
+      var modal = el.firstChild;
+      document.body.appendChild(modal);
+      function close() {
+        if (modal.parentNode) modal.parentNode.removeChild(modal);
+      }
+      modal.querySelector(".ecf-pm-close").addEventListener("click", close);
+      modal.querySelector(".ecf-pm-cancel").addEventListener("click", close);
+      modal.addEventListener("click", function(e) {
+        if (e.target === modal) close();
+      });
+      modal.querySelector(".ecf-pm-apply").addEventListener("click", function() {
+        var filter = {};
+        modal.querySelectorAll(".ecf-pm-chk").forEach(function(chk) {
+          filter[chk.dataset.key] = chk.checked;
+        });
+        close();
+        if (typeof onApply === "function") onApply(filter);
+      });
+      modal.querySelector(".ecf-pm-apply").focus();
+    }
+    function applySettingsPayload(preset, $button, messages, filter) {
       var general = preset && preset.general || {};
       var fonts = preset && preset.fonts || {};
+      var f = filter || {};
       var runningMessage = i18n[messages && messages.running || ""] || "";
       var successMessage = i18n[messages && messages.success || ""] || "";
       var failedMessage = i18n[messages && messages.failed || ""] || "";
@@ -1684,6 +1904,7 @@
         var undoSnapshot = JSON.stringify(buildSettingsPayloadFromForm());
         window.sessionStorage.setItem("ecfPresetUndo", undoSnapshot);
       } catch (e) {
+        console.warn("ECF preset undo snapshot failed:", e);
       }
       showAutosaveNotice(runningMessage || "", "saving");
       if ($button && $button.length) {
@@ -1691,30 +1912,41 @@
       }
       autosave.suppress = true;
       try {
-        applyGeneralFieldValue("root_font_size", general.root_font_size);
-        applyGeneralFieldValue("base_body_font_weight", general.base_body_font_weight);
-        syncBodyTextSizeFieldFromSettings({ base_body_text_size: general.base_body_text_size });
-        applyWebsiteSizeField("content_max_width", general.content_max_width);
-        applyWebsiteSizeField("elementor_boxed_width", general.elementor_boxed_width);
-        $('[data-ecf-general-field="base_text_color"]').each(function() {
-          syncGeneralColorField($(this), general.base_text_color, { writeText: true });
-        });
-        $('[data-ecf-general-field="base_background_color"]').each(function() {
-          syncGeneralColorField($(this), general.base_background_color, { writeText: true });
-        });
-        $('[data-ecf-general-field="link_color"]').each(function() {
-          syncGeneralColorField($(this), general.link_color, { writeText: true });
-        });
-        $('[data-ecf-general-field="focus_color"]').each(function() {
-          syncGeneralColorField($(this), general.focus_color, { writeText: true });
-        });
-        applyColorTokenPreset(preset && preset.colors || {});
-        applyRadiusPreset(preset && preset.radius || {});
-        applyValueTokenPreset("shadows", preset && preset.shadows || {});
-        applyValueTokenPreset("typography_fonts", fonts);
-        applySpacingPreset(preset && preset.spacing || {});
-        applyFontValueToField("base_font_family", general.base_font_family || "var(--ecf-font-primary)");
-        applyFontValueToField("heading_font_family", general.heading_font_family || "var(--ecf-font-secondary)");
+        if (f.textSize !== false) {
+          applyGeneralFieldValue("root_font_size", general.root_font_size);
+          applyGeneralFieldValue("base_body_font_weight", general.base_body_font_weight);
+          syncBodyTextSizeFieldFromSettings({ base_body_text_size: general.base_body_text_size });
+        }
+        if (f.siteWidth !== false) {
+          applyWebsiteSizeField("content_max_width", general.content_max_width);
+          applyWebsiteSizeField("elementor_boxed_width", general.elementor_boxed_width);
+        }
+        if (f.baseColors !== false) {
+          $('[data-ecf-general-field="base_text_color"]').each(function() {
+            syncGeneralColorField($(this), general.base_text_color, { writeText: true });
+          });
+          $('[data-ecf-general-field="base_background_color"]').each(function() {
+            syncGeneralColorField($(this), general.base_background_color, { writeText: true });
+          });
+          $('[data-ecf-general-field="link_color"]').each(function() {
+            syncGeneralColorField($(this), general.link_color, { writeText: true });
+          });
+          $('[data-ecf-general-field="focus_color"]').each(function() {
+            syncGeneralColorField($(this), general.focus_color, { writeText: true });
+          });
+        }
+        if (f.colors !== false) applyColorTokenPreset(preset && preset.colors || {});
+        if (f.radius !== false) applyRadiusPreset(preset && preset.radius || {});
+        if (f.shadows !== false) applyValueTokenPreset("shadows", preset && preset.shadows || {});
+        if (f.headingFont !== false || f.bodyFont !== false) {
+          var fontsToApply = {};
+          if (f.headingFont !== false) fontsToApply.secondary = fonts.secondary;
+          if (f.bodyFont !== false) fontsToApply.primary = fonts.primary;
+          applyValueTokenPreset("typography_fonts", fontsToApply);
+        }
+        if (f.spacing !== false) applySpacingPreset(preset && preset.spacing || {});
+        if (f.bodyFont !== false) applyFontValueToField("base_font_family", general.base_font_family || "var(--ecf-font-primary)");
+        if (f.headingFont !== false) applyFontValueToField("heading_font_family", general.heading_font_family || "var(--ecf-font-secondary)");
         renderTypePreview();
         renderShadowPreview();
         if (typeof renderRootFontImpact === "function") {
@@ -2668,7 +2900,8 @@
           updateSystemInfoCards(responseData.meta, settings || buildSettingsPayloadFromForm());
         }
         showAutosaveNotice(i18n.elementor_synced || "", "success");
-      }).catch(function() {
+      }).catch(function(err) {
+        console.error("ECF elementor auto-sync failed:", err);
         showAutosaveNotice(i18n.elementor_sync_failed || "", "error");
       }).finally(function() {
         elementorAutoSyncInFlight = false;
@@ -2791,7 +3024,8 @@
           updateSystemInfoCards(responseData.meta, buildSettingsPayloadFromForm());
         }
         showAutosaveNotice(i18n.elementor_synced || "", "success");
-      }).catch(function() {
+      }).catch(function(err) {
+        console.error("ECF elementor sync failed:", err);
         showAutosaveNotice(i18n.elementor_sync_failed || "", "error");
       });
     }
@@ -2911,6 +3145,24 @@
       }
       return true;
     }
+    function showClassLimitWarning(total, limit) {
+      if ($("#ecf-class-limit-warning").length) return;
+      var title = escapeHtml(i18n.class_limit_warn_title || "Elementor class limit reached");
+      var body = escapeHtml(
+        (i18n.class_limit_warn_body || "You are using %1$s of %2$s Global Classes.").replace("%1$s", String(total)).replace("%2$s", String(limit))
+      );
+      var btnLabel = escapeHtml(i18n.class_limit_warn_ok || "OK");
+      var $overlay = $('<div id="ecf-class-limit-warning" class="ecf-modal is-open" role="dialog" aria-modal="true"><div class="ecf-modal__backdrop ecf-limit-warn__backdrop"></div><div class="ecf-modal__dialog ecf-limit-warn__dialog"><div class="ecf-modal__header"><div><span class="ecf-limit-warn__icon">\u26A0</span> <h2 style="display:inline">' + title + '</h2></div></div><div class="ecf-modal__body ecf-limit-warn__body"><p>' + body + '</p></div><div class="ecf-modal__footer ecf-limit-warn__footer"><button type="button" class="ecf-limit-warn__ok button button-primary">' + btnLabel + "</button></div></div></div>");
+      $dom.body.append($overlay).addClass("ecf-modal-open");
+      function closeWarn() {
+        $overlay.remove();
+        $dom.body.removeClass("ecf-modal-open");
+      }
+      $overlay.find(".ecf-limit-warn__ok, .ecf-limit-warn__backdrop").on("click", closeWarn);
+      $(document).one("keydown.ecfLimitWarn", function(e) {
+        if (e.key === "Escape") closeWarn();
+      });
+    }
     function updateSystemInfoCards(meta, settings) {
       var snapshot = meta && meta.elementor_limit_snapshot ? meta.elementor_limit_snapshot : null;
       var debug = meta && meta.elementor_debug_snapshot ? meta.elementor_debug_snapshot : null;
@@ -2920,6 +3172,12 @@
         $("[data-ecf-classes-limit]").text(snapshot.classes_limit == null ? "0" : String(snapshot.classes_limit));
         $("[data-ecf-variables-total]").text(snapshot.variables_total == null ? "0" : String(snapshot.variables_total));
         $("[data-ecf-variables-limit]").text(snapshot.variables_limit == null ? "0" : String(snapshot.variables_limit));
+        var cTotal = parseInt(snapshot.classes_total, 10);
+        var cLimit = parseInt(snapshot.classes_limit, 10);
+        if (cLimit > 0 && cTotal >= cLimit && !autosave.classLimitWarnShown) {
+          autosave.classLimitWarnShown = true;
+          showClassLimitWarning(cTotal, cLimit);
+        }
       }
       updateLayrixVariableCount(currentSettings, meta);
       if (typeof currentSettings.github_update_checks_enabled !== "undefined") {
@@ -3222,13 +3480,8 @@
       var gap = parseFloat(computedGroupStyle.rowGap || computedGroupStyle.gap || "20") || 20;
       $group.children("[data-ecf-layout-item]").each(function() {
         var $item = $(this);
-        $item.css("--ecf-masonry-span", "1");
         $item.css("grid-column", "");
         $item.css("grid-row", "");
-        $item.data("ecfMasonrySpan", 1);
-        if (columns < 2) {
-          return;
-        }
         var itemHeight = Math.ceil($item.outerHeight());
         var span = Math.max(1, Math.ceil((itemHeight + gap) / (rowUnit + gap)));
         $item.css("--ecf-masonry-span", String(span));
@@ -3500,6 +3753,28 @@
     $(document).on("click", "[data-ecf-reset-layout]", function() {
       resetSavedLayout();
     });
+    (function() {
+      var $wrap = $(".ecf-wrap").first();
+      var STORAGE_KEY = "ecf_ui_v2";
+      var i18nNew = ecfAdmin && ecfAdmin.i18n && ecfAdmin.i18n.ui_toggle_new || "New design";
+      var i18nOld = ecfAdmin && ecfAdmin.i18n && ecfAdmin.i18n.ui_toggle_old || "Classic design";
+      function applyV2(active) {
+        if (active) {
+          $wrap.attr("data-ecf-ui-v2", "");
+          $("[data-ecf-ui-toggle-label]").text(i18nOld);
+          $(document).trigger("ecf:v2:show");
+        } else {
+          $wrap.removeAttr("data-ecf-ui-v2");
+          $("[data-ecf-ui-toggle-label]").text(i18nNew);
+        }
+      }
+      applyV2(window.localStorage.getItem(STORAGE_KEY) === "1");
+      $(document).on("click", "[data-ecf-ui-toggle]", function() {
+        var isV2 = $wrap.is("[data-ecf-ui-v2]");
+        window.localStorage.setItem(STORAGE_KEY, isV2 ? "0" : "1");
+        applyV2(!isV2);
+      });
+    })();
     function submitSettingsAutosave() {
       if (!$settingsForm.length || !restUrl || !restNonce) return;
       updateAutosavePill();
@@ -3579,7 +3854,8 @@
         showAutosaveNotice(i18n.autosave_saved || "", "success");
         maybeRunElementorAutoSync(responseSettings);
         maybePromptForElementorSync(responseSettings, previousVariableSyncHash, currentVariableSyncHash, previousClassSelectionHash, currentClassSelectionHash);
-      }).catch(function() {
+      }).catch(function(err) {
+        console.error("ECF autosave failed:", err);
         autosave.inFlight = false;
         autosave.inFlightPayload = "";
         if (autosave.queued) {
@@ -3817,6 +4093,7 @@
       try {
         window.localStorage.setItem(storageKeys.whatsNew, JSON.stringify(state || {}));
       } catch (err) {
+        console.warn("ECF localStorage write failed:", err);
       }
     }
     function isStartBannerDismissed() {
@@ -4601,7 +4878,20 @@
         showAutosaveNotice(i18n.style_preset_failed || "", "error");
         return;
       }
-      applyStylePresetSelection(preset, $button);
+      var title = $button.attr("data-ecf-preset-title") || "";
+      var desc = $button.attr("data-ecf-preset-description") || "";
+      ecfPresetModal({
+        payload: preset,
+        title,
+        description: desc,
+        onApply: function(filter) {
+          applySettingsPayload(preset, $button, {
+            running: "style_preset_running",
+            success: "style_preset_success",
+            failed: "style_preset_failed"
+          }, filter);
+        }
+      });
     });
     $(document).on("click", "[data-ecf-smart-recommendation-apply]", function(e) {
       e.preventDefault();
@@ -5082,12 +5372,24 @@
         var pendingAttr = v.pending ? ' data-ecf-prepared-variable="1"' : "";
         var checkAttr = v.pending ? " checked disabled" : "";
         var usageHtml = "";
-        if (isClassGroup(group) && v.in_use) {
-          var usageLabel = escapeHtml(i18n.class_in_use || "");
-          var usageTip = escapeHtml((i18n.class_usage_count || "").replace("%d", String(v.usage_count || 0)));
-          usageHtml = '<span class="ecf-var-usage-badge" data-tip="' + usageTip + '">' + usageLabel + "</span>";
+        if (isClassGroup(group)) {
+          if (v.in_use) {
+            var usageLabel = escapeHtml(i18n.class_in_use || "");
+            var usageTip = escapeHtml((i18n.class_usage_count || "").replace("%d", String(v.usage_count || 0)));
+            usageHtml = '<span class="ecf-var-usage-badge ecf-var-usage-badge--used" data-tip="' + usageTip + '">' + usageLabel + "</span>";
+          } else if (!v.pending) {
+            usageHtml = '<span class="ecf-var-usage-badge ecf-var-usage-badge--unused">' + escapeHtml(i18n.class_not_in_use || "") + "</span>";
+          }
         }
-        html += '<div class="ecf-var-row' + (v.pending ? " is-prepared" : "") + '" data-id="' + escapeHtml(String(v.id)) + '" data-group="' + escapeHtml(String(group)) + '"' + pendingAttr + '><input type="checkbox" class="ecf-var-check" value="' + escapeHtml(String(v.id)) + '"' + checkAttr + '><span class="ecf-var-label">' + originBadge(group) + "<span>" + escapeHtml(String(v.label || "")) + "</span>" + usageHtml + '</span><span class="ecf-var-type">' + typeLabel(v.type) + "</span>" + renderVariableValue(v) + "</div>";
+        var depHtml = "";
+        if (!isClassGroup(group) && v.value) {
+          var depMatch = String(v.value).match(/^var\(--([^,)]+)/);
+          if (depMatch) {
+            var depName = "--" + depMatch[1].trim();
+            depHtml = '<span class="ecf-var-dep-badge" data-tip="' + escapeHtml("Referenziert: " + depName) + '">\u2192 ' + escapeHtml(depName) + "</span>";
+          }
+        }
+        html += '<div class="ecf-var-row' + (v.pending ? " is-prepared" : "") + '" data-id="' + escapeHtml(String(v.id)) + '" data-group="' + escapeHtml(String(group)) + '"' + pendingAttr + '><input type="checkbox" class="ecf-var-check" value="' + escapeHtml(String(v.id)) + '"' + checkAttr + '><span class="ecf-var-label">' + originBadge(group) + "<span>" + escapeHtml(String(v.label || "")) + "</span>" + usageHtml + depHtml + '</span><span class="ecf-var-type">' + typeLabel(v.type) + "</span>" + renderVariableValue(v) + "</div>";
       });
       html += "</div>";
       return html;
@@ -5547,6 +5849,12 @@
         updateClassLibrarySelectAllState();
         return;
       }
+      if (activeTier === "generator") {
+        showClassLibrarySection("generator");
+        updateClassLibraryContext();
+        updateClassLibrarySelectAllState();
+        return;
+      }
       if (activeTier === "all") {
         showClassLibrarySection("active");
         updateActiveClassTierVisibility("all");
@@ -5757,6 +6065,7 @@
     }
     function getClassLibrarySectionForTier(activeTier) {
       if (activeTier === "utility") return "utility";
+      if (activeTier === "generator") return "generator";
       if (activeTier === "all" || activeTier === "existing-foreign") return "active";
       return "starter";
     }
@@ -5768,7 +6077,7 @@
       var activeTier = $("[data-ecf-class-tier].is-active").data("ecf-class-tier") || "all";
       var activeLibrary = getClassLibrarySectionForTier(activeTier);
       var showStarterFilter = activeLibrary === "starter" && activeTier !== "custom";
-      var showBemGenerator = activeLibrary === "starter" && activeTier === "custom";
+      var showBemGenerator = false;
       var showActiveSummary = activeTier === "all";
       var $activeTierButton = $('[data-ecf-class-tier="' + activeTier + '"]');
       var tierLabel = trim($activeTierButton.clone().children().remove().end().text());
@@ -7001,6 +7310,77 @@
     updateClassLibraryContext();
     updateStarterClassesState();
     updateBaseBodyTextSizeWarning();
+    (function() {
+      var $fg = $("[data-ecf-cc-fg]");
+      var $bg = $("[data-ecf-cc-bg]");
+      var $fgC = $("[data-ecf-cc-fg-custom]");
+      var $bgC = $("[data-ecf-cc-bg-custom]");
+      var $res = $("#ecf-cc-result");
+      var $prev = $("#ecf-cc-preview");
+      var $rat = $("#ecf-cc-ratio");
+      var $bad = $("#ecf-cc-badge");
+      if (!$fg.length) return;
+      function populateSelect($sel) {
+        $sel.find("option:not(:first)").remove();
+        $("[data-ecf-color-row]").each(function() {
+          var name = $(this).find('[name$="[name]"]').val() || "";
+          var hex = $(this).find("[data-ecf-color-input]").val() || "";
+          if (name && hex) $sel.append('<option value="' + escapeHtml(hex) + '">' + escapeHtml(name) + "</option>");
+        });
+      }
+      function runCheck() {
+        var fgHex = $fg.val() || $fgC.val() || "";
+        var bgHex = $bg.val() || $bgC.val() || "";
+        var fgRgb = hexToRgb(fgHex);
+        var bgRgb = hexToRgb(bgHex);
+        if (!fgRgb || !bgRgb) {
+          $res.prop("hidden", true);
+          return;
+        }
+        var ratio = contrastRatio(fgRgb, bgRgb);
+        var rating = wcagRating(ratio);
+        var isPass = rating !== "Fail";
+        $prev.css({ color: fgHex, background: bgHex });
+        $rat.text(ratio.toFixed(2) + ":1");
+        $bad.text(rating).attr("class", "ecf-cc-badge ecf-cc-badge--" + (isPass ? "pass" : "fail"));
+        $res.prop("hidden", false);
+      }
+      $fg.on("change", function() {
+        $fgC.val($fg.val() || $fgC.val());
+        runCheck();
+      });
+      $bg.on("change", function() {
+        $bgC.val($bg.val() || $bgC.val());
+        runCheck();
+      });
+      $fgC.on("input", function() {
+        $fg.val("");
+        runCheck();
+      });
+      $bgC.on("input", function() {
+        $bg.val("");
+        runCheck();
+      });
+      populateSelect($fg);
+      populateSelect($bg);
+      $fg.val($fg.find("option:eq(1)").val() || "");
+      $bg.val($bg.find("option:eq(2)").val() || $bg.find("option:eq(1)").val() || "");
+      runCheck();
+      $(document).on("ecf:colorsUpdated change", "[data-ecf-color-input]", function() {
+        populateSelect($fg);
+        populateSelect($bg);
+        runCheck();
+      });
+    })();
+    (function() {
+      if (typeof ecfAdmin === "undefined") return;
+      var cTotal = parseInt(ecfAdmin.classesTotal, 10);
+      var cLimit = parseInt(ecfAdmin.classesLimit, 10);
+      if (cLimit > 0 && cTotal >= cLimit) {
+        autosave.classLimitWarnShown = true;
+        showClassLimitWarning(cTotal, cLimit);
+      }
+    })();
   });
 })();
 //# sourceMappingURL=admin.js.map
