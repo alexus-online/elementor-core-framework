@@ -389,6 +389,10 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <svg viewBox="0 0 13 13" fill="currentColor"><rect x="1" y="1" width="4.5" height="4.5" rx=".7" opacity=".5"/><rect x="7.5" y="1" width="4.5" height="4.5" rx=".7" opacity=".5"/><rect x="1" y="7.5" width="4.5" height="4.5" rx=".7" opacity=".5"/><rect x="7.5" y="7.5" width="4.5" height="4.5" rx=".7" opacity=".5"/></svg>
       <?php esc_html_e( 'Klassen-Auswahl', 'ecf-framework' ); ?>
     </button>
+    <button type="button" class="v2-ni" data-v2-page="cookbook">
+      <svg viewBox="0 0 13 13" fill="none"><path d="M2 2.5C2 2.22 2.22 2 2.5 2h6c.83 0 1.5.67 1.5 1.5v7c0 .28-.22.5-.5.5h-6A1.5 1.5 0 0 1 2 9.5v-7z" stroke="currentColor" stroke-width="1.1" opacity=".7"/><path d="M4.5 4.5h3M4.5 6.5h3M4.5 8.5h2" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity=".55"/></svg>
+      <?php esc_html_e( 'Anwendung', 'ecf-framework' ); ?>
+    </button>
     <div class="v2-sb-group" style="margin-top:2px"><?php esc_html_e( 'Workflow', 'ecf-framework' ); ?></div>
     <button type="button" class="v2-ni" data-v2-page="sync">
       <svg viewBox="0 0 13 13" fill="none"><path d="M6.5 2v7M4 7l2.5 2.5L9 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M1.5 10.5h10" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".35"/></svg>
@@ -2094,6 +2098,332 @@ trait ECF_Framework_Admin_V2_View_Trait {
   </div>
 </div><!-- /classes page -->
 
+<!-- ═══ PAGE: REZEPTE (COOKBOOK) ═══════════════════════════════════ -->
+<div id="ecf-v2-page-cookbook" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Anwendung', 'ecf-framework' ); ?></span></div>
+  </div>
+  <div class="v2-page-body">
+    <div class="v2-content">
+      <div class="v2-ph">
+        <h1><?php esc_html_e( 'Anwendung', 'ecf-framework' ); ?></h1>
+        <p><?php esc_html_e( 'Zum Kopieren: typische Zuordnungen von Layrix-Klassen und -Variablen zu Überschriften, Sections und Komponenten.', 'ecf-framework' ); ?></p>
+      </div>
+
+      <div class="v2-tabs">
+        <button type="button" class="v2-tab v2-tab--on" data-v2-tab-group="cb" data-v2-tab="headings"><?php esc_html_e( 'Überschriften', 'ecf-framework' ); ?></button>
+        <button type="button" class="v2-tab" data-v2-tab-group="cb" data-v2-tab="sections"><?php esc_html_e( 'Sections', 'ecf-framework' ); ?></button>
+        <button type="button" class="v2-tab" data-v2-tab-group="cb" data-v2-tab="components"><?php esc_html_e( 'Komponenten', 'ecf-framework' ); ?></button>
+        <button type="button" class="v2-tab" data-v2-tab-group="cb" data-v2-tab="layout"><?php esc_html_e( 'Layout', 'ecf-framework' ); ?></button>
+      </div>
+
+      <?php
+      // Helper: Render an Elementor recipe as a clickable card.
+      // The whole card copies the class string when clicked.
+      $render_ele = function( $title, $desc, $widget, $classes ) {
+          unset( $widget );
+          $cls = esc_attr( $classes );
+          ?>
+          <button type="button" class="v2-recipe v2-recipe--ele" data-v2-copy="<?php echo $cls; ?>">
+            <span class="v2-recipe-title"><?php echo esc_html( $title ); ?></span>
+            <?php if ( $desc ) : ?><span class="v2-recipe-desc"><?php echo esc_html( $desc ); ?></span><?php endif; ?>
+            <span class="v2-recipe-chip">
+              <code><?php echo esc_html( $classes ); ?></code>
+              <svg class="v2-recipe-chip-i" width="12" height="12" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="3" y="3" width="7.5" height="8" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M5 3V2h5v6.5h-1" stroke="currentColor" stroke-width="1.1"/></svg>
+            </span>
+          </button>
+          <?php
+      };
+
+      // Helper: Per-tab hint banner explaining the Elementor workflow as 2 steps.
+      $render_hint = function( $intro = '' ) {
+          ?>
+          <div class="v2-recipe-hint">
+            <svg width="14" height="14" viewBox="0 0 13 13" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.1" opacity=".5"/><path d="M6.5 5.5v3M6.5 4.2v.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <div>
+              <?php if ( $intro ) : ?><div style="margin-bottom:6px"><?php echo esc_html( $intro ); ?></div><?php endif; ?>
+              <ol class="v2-recipe-steps">
+                <li><?php esc_html_e( 'Hier auf eine Karte klicken — die Klasse wird automatisch in die Zwischenablage kopiert.', 'ecf-framework' ); ?></li>
+                <li>
+                  <?php
+                  printf(
+                      /* translators: %s: name of the CSS classes field */
+                      esc_html__( 'In Elementor das Widget anklicken und das Feld %s suchen — dort einfügen (Strg+V / ⌘+V).', 'ecf-framework' ),
+                      '<strong>' . esc_html__( 'CSS-Klassen', 'ecf-framework' ) . '</strong>'
+                  );
+                  ?>
+                </li>
+              </ol>
+            </div>
+          </div>
+          <?php
+      };
+
+      ?>
+
+      <!-- ── Überschriften ────────────────────────────────────── -->
+      <div id="v2-cb-headings" class="v2-tp v2-tp--on">
+
+        <?php $render_hint(); ?>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Überschriften & Text-Stile', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'H1 Hero', 'ecf-framework' ),       __( 'Größte Überschrift, einmal pro Seite', 'ecf-framework' ), __( 'Heading-Widget', 'ecf-framework' ), 'ecf-heading-1' ); ?>
+            <?php $render_ele( __( 'H2 Abschnitt', 'ecf-framework' ),  __( 'Hauptüberschrift einer Section', 'ecf-framework' ),       __( 'Heading-Widget', 'ecf-framework' ), 'ecf-heading-2' ); ?>
+            <?php $render_ele( __( 'H3 Unterabschnitt', 'ecf-framework' ), __( 'Untergeordnete Überschrift', 'ecf-framework' ),       __( 'Heading-Widget', 'ecf-framework' ), 'ecf-heading-3' ); ?>
+            <?php $render_ele( __( 'H4 Detail', 'ecf-framework' ),     __( 'Kleinere Überschrift, z. B. in Cards', 'ecf-framework' ), __( 'Heading-Widget', 'ecf-framework' ), 'ecf-heading-4' ); ?>
+            <?php $render_ele( __( 'H5 Klein', 'ecf-framework' ),      __( 'Kleinste Überschrift', 'ecf-framework' ),                  __( 'Heading-Widget', 'ecf-framework' ), 'ecf-heading-5' ); ?>
+            <?php $render_ele( __( 'Eyebrow / Overline', 'ecf-framework' ), __( 'Kleiner Label-Text über einer Überschrift', 'ecf-framework' ), __( 'Text-Widget', 'ecf-framework' ), 'ecf-overline' ); ?>
+            <?php $render_ele( __( 'Großer Fließtext', 'ecf-framework' ), __( 'Lead-Absatz, etwas größer als normaler Text', 'ecf-framework' ), __( 'Text-Editor-Widget', 'ecf-framework' ), 'ecf-body-l' ); ?>
+            <?php $render_ele( __( 'Caption / Bildunterschrift', 'ecf-framework' ), __( 'Klein und unauffällig', 'ecf-framework' ), __( 'Text-Widget', 'ecf-framework' ), 'ecf-caption' ); ?>
+          </div>
+        </div>
+
+
+      </div><!-- /headings -->
+
+      <!-- ── Sections ────────────────────────────────────────── -->
+      <div id="v2-cb-sections" class="v2-tp">
+
+        <?php $render_hint( __( 'Eine Section heißt in Elementor Container oder Section.', 'ecf-framework' ) ); ?>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Section-Stile', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'Standard-Section', 'ecf-framework' ),  __( 'Padding und Container automatisch', 'ecf-framework' ),  __( 'Container / Section', 'ecf-framework' ), 'ecf-section' ); ?>
+            <?php $render_ele( __( 'Innerer Wrapper', 'ecf-framework' ),   __( 'Auf max. Container-Breite zentriert', 'ecf-framework' ), __( 'Inneres Container-Widget', 'ecf-framework' ), 'ecf-section__inner' ); ?>
+            <?php $render_ele( __( 'Hero-Section', 'ecf-framework' ),      __( 'Höhere, prominente Eingangs-Section', 'ecf-framework' ), __( 'Container / Section', 'ecf-framework' ), 'ecf-hero' ); ?>
+            <?php $render_ele( __( 'Hero-Inhalt', 'ecf-framework' ),       __( 'Inhaltsbox innerhalb der Hero', 'ecf-framework' ),       __( 'Inneres Container-Widget', 'ecf-framework' ), 'ecf-hero__content' ); ?>
+            <?php $render_ele( __( 'Dunkle Section', 'ecf-framework' ),    __( 'Variante mit dunklem Hintergrund', 'ecf-framework' ),     __( 'Container / Section', 'ecf-framework' ), 'ecf-section ecf-section--dark' ); ?>
+            <?php $render_ele( __( 'Akzent-Section', 'ecf-framework' ),    __( 'Hintergrund in Akzentfarbe', 'ecf-framework' ),           __( 'Container / Section', 'ecf-framework' ), 'ecf-section ecf-section--accent' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Beispiele — so sehen die Section-Varianten aus', 'ecf-framework' ); ?></div>
+
+          <div class="v2-cb-demo">
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-section</div>
+              <div class="v2-cb-section">
+                <div class="v2-cb-section__inner">
+                  <div class="v2-cb-line v2-cb-line--head"></div>
+                  <div class="v2-cb-line"></div>
+                  <div class="v2-cb-line" style="width:70%"></div>
+                </div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Standard-Padding oben/unten, Inhalt zentriert.', 'ecf-framework' ); ?></div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-section__inner</div>
+              <div class="v2-cb-section v2-cb-section--show-inner">
+                <div class="v2-cb-section__inner v2-cb-section__inner--highlight">
+                  <div class="v2-cb-line v2-cb-line--head"></div>
+                  <div class="v2-cb-line"></div>
+                </div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Innere Box, auf Container-Breite zentriert (markiert).', 'ecf-framework' ); ?></div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-hero</div>
+              <div class="v2-cb-section v2-cb-section--hero">
+                <div class="v2-cb-section__inner">
+                  <div class="v2-cb-eyebrow">●&nbsp;<?php esc_html_e( 'Eyebrow', 'ecf-framework' ); ?></div>
+                  <div class="v2-cb-line v2-cb-line--hero"></div>
+                  <div class="v2-cb-line" style="width:80%"></div>
+                  <div class="v2-cb-actions">
+                    <span class="v2-cb-btn v2-cb-btn--primary"></span>
+                    <span class="v2-cb-btn v2-cb-btn--ghost"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Höher und prominenter — typisch oben auf der Seite.', 'ecf-framework' ); ?></div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-section.ecf-section--dark</div>
+              <div class="v2-cb-section v2-cb-section--dark">
+                <div class="v2-cb-section__inner">
+                  <div class="v2-cb-line v2-cb-line--head v2-cb-line--light"></div>
+                  <div class="v2-cb-line v2-cb-line--light"></div>
+                </div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Variante mit dunklem Hintergrund — z. B. für Footer-Bereiche.', 'ecf-framework' ); ?></div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-section.ecf-section--accent</div>
+              <div class="v2-cb-section v2-cb-section--accent">
+                <div class="v2-cb-section__inner">
+                  <div class="v2-cb-line v2-cb-line--head v2-cb-line--light"></div>
+                  <div class="v2-cb-line v2-cb-line--light"></div>
+                </div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Hintergrund in Akzentfarbe — für Call-to-Action-Bereiche.', 'ecf-framework' ); ?></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sections -->
+
+      <!-- ── Komponenten ─────────────────────────────────────── -->
+      <div id="v2-cb-components" class="v2-tp">
+
+        <?php $render_hint( __( 'Mehrere Klassen kannst Du mit Leerzeichen kombinieren.', 'ecf-framework' ) ); ?>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Buttons', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'Primärer Button', 'ecf-framework' ),  __( 'Hauptaktion — eine pro Section', 'ecf-framework' ),    __( 'Button-Widget', 'ecf-framework' ), 'ecf-button ecf-button--primary' ); ?>
+            <?php $render_ele( __( 'Sekundärer Button', 'ecf-framework' ),__( 'Nebenaktion', 'ecf-framework' ),                       __( 'Button-Widget', 'ecf-framework' ), 'ecf-button ecf-button--secondary' ); ?>
+            <?php $render_ele( __( 'Ghost Button', 'ecf-framework' ),     __( 'Dezent, nur Border', 'ecf-framework' ),                __( 'Button-Widget', 'ecf-framework' ), 'ecf-button ecf-button--ghost' ); ?>
+            <?php $render_ele( __( 'Großer Button', 'ecf-framework' ),    __( 'Mehr Padding und Schrift', 'ecf-framework' ),          __( 'Button-Widget', 'ecf-framework' ), 'ecf-button ecf-button--primary ecf-button--large' ); ?>
+            <?php $render_ele( __( 'Link-Button', 'ecf-framework' ),      __( 'Sieht aus wie ein Text-Link', 'ecf-framework' ),       __( 'Button-Widget', 'ecf-framework' ), 'ecf-button ecf-button--link' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Cards', 'ecf-framework' ); ?></div>
+          <div class="v2-sh2" style="margin-bottom:12px"><?php esc_html_e( 'Eine Card baust Du aus einem Container mit Bild, Heading, Text und Button — Klasse am jeweils passenden Element.', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'Card-Wrapper', 'ecf-framework' ),  __( 'Padding, Hintergrund, Schatten', 'ecf-framework' ), __( 'Container / Element', 'ecf-framework' ), 'ecf-card' ); ?>
+            <?php $render_ele( __( 'Card-Body', 'ecf-framework' ),     __( 'Inhaltsbereich innerhalb der Card', 'ecf-framework' ), __( 'Inneres Container-Widget', 'ecf-framework' ), 'ecf-card__body' ); ?>
+            <?php $render_ele( __( 'Card-Titel', 'ecf-framework' ),    __( 'Mit Heading-Größe kombinieren', 'ecf-framework' ),  __( 'Heading-Widget in der Card', 'ecf-framework' ), 'ecf-card__title ecf-heading-4' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Badges', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'Badge primär', 'ecf-framework' ),   '', __( 'Text-Widget', 'ecf-framework' ), 'ecf-badge ecf-badge--primary' ); ?>
+            <?php $render_ele( __( 'Badge sekundär', 'ecf-framework' ), '', __( 'Text-Widget', 'ecf-framework' ), 'ecf-badge ecf-badge--secondary' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Beispiele', 'ecf-framework' ); ?></div>
+          <div class="v2-cb-demo">
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label"><?php esc_html_e( 'Buttons', 'ecf-framework' ); ?></div>
+              <div class="v2-cb-demo-stage" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                <span class="v2-cb-btn-real v2-cb-btn-real--primary"><?php esc_html_e( 'Primär', 'ecf-framework' ); ?></span>
+                <span class="v2-cb-btn-real v2-cb-btn-real--secondary"><?php esc_html_e( 'Sekundär', 'ecf-framework' ); ?></span>
+                <span class="v2-cb-btn-real v2-cb-btn-real--ghost"><?php esc_html_e( 'Ghost', 'ecf-framework' ); ?></span>
+                <span class="v2-cb-btn-real v2-cb-btn-real--primary v2-cb-btn-real--large"><?php esc_html_e( 'Großer Primär', 'ecf-framework' ); ?></span>
+                <span class="v2-cb-btn-real v2-cb-btn-real--link"><?php esc_html_e( 'Link', 'ecf-framework' ); ?></span>
+              </div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label"><?php esc_html_e( 'Card', 'ecf-framework' ); ?></div>
+              <div class="v2-cb-demo-stage">
+                <div class="v2-cb-card-real">
+                  <div class="v2-cb-card-real__media"></div>
+                  <div class="v2-cb-card-real__body">
+                    <div class="v2-cb-card-real__title"><?php esc_html_e( 'Karten-Titel', 'ecf-framework' ); ?></div>
+                    <div class="v2-cb-card-real__desc"><?php esc_html_e( 'Kurze Beschreibung des Karteninhalts.', 'ecf-framework' ); ?></div>
+                    <span class="v2-cb-btn-real v2-cb-btn-real--ghost" style="font-size:11px;padding:4px 10px"><?php esc_html_e( 'Mehr', 'ecf-framework' ); ?></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label"><?php esc_html_e( 'Badges', 'ecf-framework' ); ?></div>
+              <div class="v2-cb-demo-stage" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+                <span class="v2-cb-badge-real v2-cb-badge-real--primary"><?php esc_html_e( 'Neu', 'ecf-framework' ); ?></span>
+                <span class="v2-cb-badge-real v2-cb-badge-real--secondary"><?php esc_html_e( 'Beta', 'ecf-framework' ); ?></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /components -->
+
+      <!-- ── Layout ─────────────────────────────────────────── -->
+      <div id="v2-cb-layout" class="v2-tp">
+
+        <?php $render_hint( __( 'Layout-Klassen kommen meist auf einen Container.', 'ecf-framework' ) ); ?>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Container', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'Boxed-Container', 'ecf-framework' ), __( 'Inhalt zentriert auf Deine Container-Breite', 'ecf-framework' ), __( 'Container / Section', 'ecf-framework' ), 'ecf-container-boxed' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Grid', 'ecf-framework' ); ?></div>
+          <div class="v2-sh2" style="margin-bottom:12px"><?php esc_html_e( 'Auf dem Container, der die Spalten enthalten soll.', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( '2 Spalten', 'ecf-framework' ),       '', __( 'Container-Widget', 'ecf-framework' ), 'ecf-grid--2' ); ?>
+            <?php $render_ele( __( '3 Spalten', 'ecf-framework' ),       '', __( 'Container-Widget', 'ecf-framework' ), 'ecf-grid--3' ); ?>
+            <?php $render_ele( __( '4 Spalten', 'ecf-framework' ),       '', __( 'Container-Widget', 'ecf-framework' ), 'ecf-grid--4' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Stack — vertikale Abstände', 'ecf-framework' ); ?></div>
+          <div class="v2-sh2" style="margin-bottom:12px"><?php esc_html_e( 'Auf einem Container, der Elemente untereinander stapelt — sorgt für gleichmäßigen Abstand.', 'ecf-framework' ); ?></div>
+          <div class="v2-recipe-grid">
+            <?php $render_ele( __( 'Stack XS', 'ecf-framework' ), __( 'Sehr enger Abstand', 'ecf-framework' ),  __( 'Container-Widget', 'ecf-framework' ), 'ecf-stack--xs' ); ?>
+            <?php $render_ele( __( 'Stack S',  'ecf-framework' ), __( 'Enger Abstand', 'ecf-framework' ),       __( 'Container-Widget', 'ecf-framework' ), 'ecf-stack--s' ); ?>
+            <?php $render_ele( __( 'Stack M',  'ecf-framework' ), __( 'Standard-Abstand', 'ecf-framework' ),    __( 'Container-Widget', 'ecf-framework' ), 'ecf-stack--m' ); ?>
+            <?php $render_ele( __( 'Stack L',  'ecf-framework' ), __( 'Großer Abstand', 'ecf-framework' ),      __( 'Container-Widget', 'ecf-framework' ), 'ecf-stack--l' ); ?>
+            <?php $render_ele( __( 'Stack XL', 'ecf-framework' ), __( 'Sehr großer Abstand', 'ecf-framework' ), __( 'Container-Widget', 'ecf-framework' ), 'ecf-stack--xl' ); ?>
+          </div>
+        </div>
+
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Beispiele', 'ecf-framework' ); ?></div>
+
+          <div class="v2-cb-demo">
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-container-boxed</div>
+              <div class="v2-cb-demo-stage">
+                <div class="v2-cb-container-demo">
+                  <div class="v2-cb-container-demo__inner">
+                    <div class="v2-cb-line v2-cb-line--head"></div>
+                    <div class="v2-cb-line"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Inhalt zentriert mit Seitenrändern.', 'ecf-framework' ); ?></div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-grid--2 / 3 / 4</div>
+              <div class="v2-cb-demo-stage" style="display:flex;flex-direction:column;gap:8px">
+                <div class="v2-cb-grid-demo v2-cb-grid-demo--2"><span></span><span></span></div>
+                <div class="v2-cb-grid-demo v2-cb-grid-demo--3"><span></span><span></span><span></span></div>
+                <div class="v2-cb-grid-demo v2-cb-grid-demo--4"><span></span><span></span><span></span><span></span></div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Spalten-Anzahl im Container.', 'ecf-framework' ); ?></div>
+            </div>
+
+            <div class="v2-cb-demo-item">
+              <div class="v2-cb-demo-label">.ecf-stack--xs … xl</div>
+              <div class="v2-cb-demo-stage" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+                <div class="v2-cb-stack-demo v2-cb-stack-demo--xs"><span></span><span></span><span></span><div>xs</div></div>
+                <div class="v2-cb-stack-demo v2-cb-stack-demo--s"><span></span><span></span><span></span><div>s</div></div>
+                <div class="v2-cb-stack-demo v2-cb-stack-demo--m"><span></span><span></span><span></span><div>m</div></div>
+                <div class="v2-cb-stack-demo v2-cb-stack-demo--l"><span></span><span></span><span></span><div>l</div></div>
+                <div class="v2-cb-stack-demo v2-cb-stack-demo--xl"><span></span><span></span><span></span><div>xl</div></div>
+              </div>
+              <div class="v2-cb-demo-note"><?php esc_html_e( 'Vertikaler Abstand zwischen gestapelten Elementen.', 'ecf-framework' ); ?></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /layout -->
+
+    </div>
+  </div>
+</div><!-- /cookbook page -->
+
 <!-- ═══ PAGE: SYNC & EXPORT ════════════════════════════════════════ -->
 <div id="ecf-v2-page-sync" class="v2-page">
   <div class="v2-topbar">
@@ -2505,6 +2835,29 @@ trait ECF_Framework_Admin_V2_View_Trait {
         <button type="button" class="v2-tab" onclick="ecfV2Tab('st','system',this)" data-v2-tab-group="st" data-v2-tab="system"><span class="v2-tab-icon">⚙</span><?php esc_html_e( 'Plugin', 'ecf-framework' ); ?></button>
       </div>
 
+      <?php
+      // Helper: Render small token info (CSS variable / class name) under a setting row.
+      $tok = function ( $vars = [], $classes = [] ) {
+          $vars = array_filter( (array) $vars );
+          $classes = array_filter( (array) $classes );
+          if ( ! $vars && ! $classes ) {
+              return;
+          }
+          ?>
+          <div class="v2-tok">
+              <?php if ( $vars ) : ?>
+                  <span class="v2-tok-l"><?php esc_html_e( 'VAR', 'ecf-framework' ); ?></span>
+                  <?php foreach ( $vars as $v ) : ?><code><?php echo esc_html( $v ); ?></code><?php endforeach; ?>
+              <?php endif; ?>
+              <?php if ( $classes ) : ?>
+                  <span class="v2-tok-l"><?php esc_html_e( 'CLASS', 'ecf-framework' ); ?></span>
+                  <?php foreach ( $classes as $c ) : ?><code><?php echo esc_html( $c ); ?></code><?php endforeach; ?>
+              <?php endif; ?>
+          </div>
+          <?php
+      };
+      ?>
+
       <!-- TAB: DESIGN -->
       <div id="v2-st-design" class="v2-tp v2-tp--on">
 
@@ -2535,6 +2888,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
             <div>
               <div class="v2-sl"><?php esc_html_e( 'Fließtext', 'ecf-framework' ); ?></div>
               <div class="v2-sh2"><?php esc_html_e( 'Schrift für Absätze und Fließtext', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-base-font-family', '--ecf-base-body-font-family' ] ); ?>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
               <input type="hidden" name="<?php echo esc_attr( $opt ); ?>[typography][fonts][<?php echo $fi_primary; ?>][name]" value="primary">
@@ -2548,6 +2902,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
             <div>
               <div class="v2-sl"><?php esc_html_e( 'Überschriften', 'ecf-framework' ); ?></div>
               <div class="v2-sh2"><?php esc_html_e( 'Schrift für H1–H6', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-heading-font-family' ] ); ?>
             </div>
             <input type="hidden" name="<?php echo esc_attr( $opt ); ?>[typography][fonts][<?php echo $fi_secondary; ?>][name]" value="secondary">
             <input type="text" class="v2-si" name="<?php echo esc_attr( $opt ); ?>[typography][fonts][<?php echo $fi_secondary; ?>][value]" value="<?php echo esc_attr( $font_secondary ); ?>" style="max-width:220px">
@@ -2571,11 +2926,17 @@ trait ECF_Framework_Admin_V2_View_Trait {
             </div>
           </div>
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Body Text Size', 'ecf-framework' ); ?></div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Body Text Size', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-base-body-text-size' ] ); ?>
+            </div>
             <input type="text" class="v2-si" name="<?php echo esc_attr( $opt ); ?>[base_body_text_size]" value="<?php echo esc_attr( $settings['base_body_text_size'] ?? '16px' ); ?>" style="max-width:110px">
           </div>
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Body Font Weight', 'ecf-framework' ); ?></div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Body Font Weight', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-base-body-font-weight' ] ); ?>
+            </div>
             <select class="v2-si" name="<?php echo esc_attr( $opt ); ?>[base_body_font_weight]" style="max-width:110px">
               <?php foreach ( [ '300' => 'Light 300', '400' => 'Normal 400', '500' => 'Medium 500', '600' => 'SemiBold 600', '700' => 'Bold 700' ] as $wv => $wl ) : ?>
               <option value="<?php echo esc_attr( $wv ); ?>" <?php selected( $settings['base_body_font_weight'] ?? '400', $wv ); ?>><?php echo esc_html( $wl ); ?></option>
@@ -2625,19 +2986,31 @@ trait ECF_Framework_Admin_V2_View_Trait {
         <div class="v2-sh"><?php esc_html_e( 'Basisfarben', 'ecf-framework' ); ?></div>
         <div class="v2-sg">
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Textfarbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-base-text</div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Textfarbe', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-base-text-color' ] ); ?>
+            </div>
             <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[base_text_color]" value="<?php echo esc_attr( $settings['base_text_color'] ?? '#0f172a' ); ?>">
           </div>
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Hintergrundfarbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-base-bg</div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Hintergrundfarbe', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-base-background-color' ] ); ?>
+            </div>
             <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[base_background_color]" value="<?php echo esc_attr( $settings['base_background_color'] ?? '#f8fafc' ); ?>">
           </div>
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Link-Farbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-link-color</div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Link-Farbe', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-link-color' ] ); ?>
+            </div>
             <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[link_color]" value="<?php echo esc_attr( $settings['link_color'] ?? '#4f46e5' ); ?>">
           </div>
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Fokus-Farbe', 'ecf-framework' ); ?></div><div class="v2-sh2">--ecf-focus-color</div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Fokus-Farbe', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-focus-color', '--ecf-focus-outline-width', '--ecf-focus-outline-offset' ] ); ?>
+            </div>
             <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[focus_color]" value="<?php echo esc_attr( $settings['focus_color'] ?? '#0ea5e9' ); ?>">
           </div>
         </div>
@@ -2677,11 +3050,19 @@ trait ECF_Framework_Admin_V2_View_Trait {
         <div class="v2-sh"><?php esc_html_e( 'Layout & Container', 'ecf-framework' ); ?></div>
         <div class="v2-sg">
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Container Width', 'ecf-framework' ); ?></div><div class="v2-sh2"><?php esc_html_e( 'Max width for Elementor boxed layout', 'ecf-framework' ); ?></div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Container Width', 'ecf-framework' ); ?></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Max width for Elementor boxed layout', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-container-boxed' ], [ '.ecf-container-boxed' ] ); ?>
+            </div>
             <input type="text" class="v2-si" name="<?php echo esc_attr( $opt ); ?>[elementor_boxed_width]" value="<?php echo esc_attr( $container_w ); ?>" style="max-width:110px">
           </div>
           <div class="v2-sr">
-            <div><div class="v2-sl"><?php esc_html_e( 'Max Text Width', 'ecf-framework' ); ?></div><div class="v2-sh2"><?php esc_html_e( 'Optimal reading width for body text', 'ecf-framework' ); ?></div></div>
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Max Text Width', 'ecf-framework' ); ?></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Optimal reading width for body text', 'ecf-framework' ); ?></div>
+              <?php $tok( [ '--ecf-content-max-width' ], [ '.ecf-content-width' ] ); ?>
+            </div>
             <input type="text" class="v2-si" name="<?php echo esc_attr( $opt ); ?>[content_max_width]" value="<?php echo esc_attr( $text_max_w ); ?>" style="max-width:110px">
           </div>
         </div>
@@ -2890,6 +3271,76 @@ trait ECF_Framework_Admin_V2_View_Trait {
         </div>
       </div>
 
+      <!-- Auto-Klassen für Widgets -->
+      <?php
+        // Per-widget toggles default to enabled when the master is on but the
+        // key was never explicitly set (existing installs upgrading).
+        $auto_master_on = ! empty( $settings['auto_classes_enabled'] );
+        $auto_default_on = function ( $key ) use ( $settings ) {
+            return ! array_key_exists( $key, $settings ) || ! empty( $settings[ $key ] );
+        };
+        $auto_rows = [
+            [
+                'key'    => 'auto_classes_headings',
+                'widget' => __( 'Heading (h1–h5)', 'ecf-framework' ),
+                'class'  => 'ecf-heading-1 … ecf-heading-5',
+            ],
+            [
+                'key'    => 'auto_classes_buttons',
+                'widget' => __( 'Button', 'ecf-framework' ),
+                'class'  => 'ecf-button',
+            ],
+            [
+                'key'    => 'auto_classes_text_link',
+                'widget' => __( 'Text-Link', 'ecf-framework' ),
+                'class'  => 'ecf-text-link',
+            ],
+            [
+                'key'    => 'auto_classes_form',
+                'widget' => __( 'Form (Elementor Pro)', 'ecf-framework' ),
+                'class'  => 'ecf-form',
+            ],
+        ];
+      ?>
+      <div class="v2-sec">
+        <div class="v2-sh"><?php esc_html_e( 'Auto-Klassen für Widgets', 'ecf-framework' ); ?></div>
+        <div class="v2-sg">
+          <!-- Master-Toggle -->
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Auto-Klassen aktiviert', 'ecf-framework' ); ?></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Hängt Layrix-Klassen automatisch an Elementor-Widgets. Body-Text wird nicht verklasst — Größe ist global im System geregelt.', 'ecf-framework' ); ?></div>
+            </div>
+            <label class="v2-tog-label">
+              <input type="checkbox" class="v2-tog-cb" id="v2-auto-classes-master" name="<?php echo esc_attr( $opt ); ?>[auto_classes_enabled]" value="1" <?php checked( $auto_master_on ); ?>>
+              <span class="v2-tog<?php echo $auto_master_on ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
+            </label>
+          </div>
+
+          <!-- Per-Widget-Tabelle -->
+          <div class="v2-auto-classes-table<?php echo $auto_master_on ? '' : ' is-disabled'; ?>" id="v2-auto-classes-table">
+            <div class="v2-auto-classes-row v2-auto-classes-row--head">
+              <div><?php esc_html_e( 'Widget', 'ecf-framework' ); ?></div>
+              <div><?php esc_html_e( 'Bekommt Klasse', 'ecf-framework' ); ?></div>
+              <div><?php esc_html_e( 'Aktiv', 'ecf-framework' ); ?></div>
+            </div>
+            <?php foreach ( $auto_rows as $row ) :
+                $row_on = $auto_default_on( $row['key'] );
+            ?>
+            <div class="v2-auto-classes-row">
+              <div><?php echo esc_html( $row['widget'] ); ?></div>
+              <div><code class="v2-auto-classes-code"><?php echo esc_html( $row['class'] ); ?></code></div>
+              <div>
+                <label class="v2-tog-label">
+                  <input type="checkbox" class="v2-tog-cb" name="<?php echo esc_attr( $opt ); ?>[<?php echo esc_attr( $row['key'] ); ?>]" value="1" <?php checked( $row_on ); ?> <?php disabled( ! $auto_master_on ); ?>>
+                  <span class="v2-tog<?php echo $row_on ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
+                </label>
+              </div>
+            </div>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </div>
 
       <!-- Elementor Limits -->
       <?php

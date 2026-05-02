@@ -61,6 +61,8 @@ trait ECF_Framework_Hook_Registration_Trait {
         add_action('elementor/frontend/widget/before_render', [$this, 'append_ecf_classes_before_render']);
         add_action('elementor/frontend/container/before_render', [$this, 'append_ecf_classes_before_render']);
         add_action('elementor/frontend/section/before_render', [$this, 'append_ecf_classes_before_render']);
+        add_action('elementor/frontend/widget/before_render', [$this, 'apply_auto_classes_before_render']);
+        add_action('elementor/elements/elements_registered', [$this, 'register_atomic_widgets'], 99);
         add_action('elementor/editor/after_enqueue_scripts', [$this, 'editor_assets']);
     }
 

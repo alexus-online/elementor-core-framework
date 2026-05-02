@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.5 (2026-05-02)
+
+### Neu
+- **Layrix Section Atomic Widget** für Elementor v4: ein Widget = `<div class="ecf-section">` mit auto-erzeugtem inneren `<div class="ecf-container-boxed">`-Kind. Das Inner-Kind erscheint als echtes Element im Struktur-Tree, kann mit Inhalten befüllt werden und zeigt seine Klasse als Chip im Klassen-Feld an (über die Layrix-synchronisierte Global-Class-ID).
+- **Anwendungs-Tab (vormals Cookbook)** in der Sidebar: Karten-Grid pro Kategorie (Überschriften, Sections, Komponenten, Layout) mit klickbaren Klassen-Chips zum Kopieren. Plus Live-Visualisierung der Section-Varianten, Komponenten und Layout-Diagramme als Beispiel-Block.
+- **Auto-Klassen für Widgets** (Settings → ⚙ Plugin → Allgemein): Master-Toggle plus Per-Widget-Toggles in einer Tabelle. Heading h1–h5 → `ecf-heading-N`, Button → `ecf-button`, Text-Link → `ecf-text-link`, Form → `ecf-form`. Funktioniert für klassische v3-Widgets (Render-Hook) und v4-Atomic-Widgets (Editor-JS-Hook setzt die Klasse direkt in den Widget-Settings, sodass der Chip im Klassen-Feld sichtbar ist und beim Tag-Wechsel automatisch angepasst wird).
+- **Token-Info-Badges** in den v2-Settings: Container Width, Body Text Size, Schriftfamilien, Body Font Weight, Basisfarben und Fokus-Farbe zeigen jetzt die zugehörigen CSS-Variablen (und ggf. Klassen) als kleine Mono-Code-Chips unter dem Input.
+- Neue Starter-Klasse `ecf-text-link` (Default-aktiv), parallel zu `ecf-button` als BEM-Identifier für Text-Links.
+
+### Verbesserungen
+- v2-Settings: korrigierte Variablen-Namen für Basisfarben (`--ecf-base-text-color`, `--ecf-base-background-color` statt der vorher verkürzten Varianten).
+- Cookbook-Hint-Banner führt jetzt die Schritte als nummerierte Liste auf („1. Karte klicken → Klasse in Zwischenablage. 2. In Elementor das Feld CSS-Klassen suchen → einfügen.") und vermeidet v3-spezifische Pfade, weil v4 keinen „Erweitert"-Tab hat.
+- Cookbook: Schriftgrößen aller Buttons/Chips an `--v2-btn-fs` und `--v2-ui-base-fs` gehängt — keine 11px-Texte mehr.
+
 ## 0.5.4 (2026-05-01)
 
 ### Sicherheit

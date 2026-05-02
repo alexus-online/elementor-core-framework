@@ -196,6 +196,9 @@ trait ECF_Framework_Output_CSS_Trait {
             $css .= ".ecf-container-boxed,.cf-container-boxed,.elementor .ecf-container-boxed,.elementor .cf-container-boxed{--margin-inline-start:auto!important;--margin-inline-end:auto!important;width:100%!important;max-width:min(calc(100% - 2rem), var(--ecf-container-boxed))!important;margin-inline:auto!important;margin-left:auto!important;margin-right:auto!important;}";
             $css .= ".elementor .elementor-element.ecf-container-boxed,.elementor .elementor-element.cf-container-boxed{--margin-inline-start:auto!important;--margin-inline-end:auto!important;margin-inline-start:auto!important;margin-inline-end:auto!important;margin-left:auto!important;margin-right:auto!important;width:min(calc(100% - 2rem), var(--ecf-container-boxed))!important;max-width:min(calc(100% - 2rem), var(--ecf-container-boxed))!important;}";
             $css .= ".elementor .elementor-element.e-con.e-atomic-element.e-flexbox-base:has(> .elementor-element.ecf-container-boxed),.elementor .elementor-element.e-con.e-atomic-element.e-flexbox-base:has(> .elementor-element.cf-container-boxed){justify-content:center!important;}";
+            // Layrix Section atomic widget — outer band stretches full width.
+            // Inner uses ecf-container-boxed for the boxed max-width and centering.
+            $css .= ".ecf-section{display:block;width:100%;}";
         }
         $css .= "body{font-family:var(--ecf-base-body-font-family,var(--ecf-base-font-family));font-size:var(--ecf-base-body-text-size);font-weight:var(--ecf-base-body-font-weight);color:var(--ecf-base-text-color);background-color:var(--ecf-base-background-color);}";
         if (!array_key_exists('typography_browser_margin_reset', (array) $settings) || !empty($settings['typography_browser_margin_reset'])) {

@@ -205,6 +205,7 @@ trait ECF_Framework_Config_Trait {
             'ecf-button',
             'ecf-button--primary',
             'ecf-button--secondary',
+            'ecf-text-link',
             'ecf-footer',
             'ecf-footer__inner',
         ];
@@ -419,6 +420,7 @@ trait ECF_Framework_Config_Trait {
                 ['name' => 'ecf-button', 'category' => 'buttons'],
                 ['name' => 'ecf-button--primary', 'category' => 'buttons'],
                 ['name' => 'ecf-button--secondary', 'category' => 'buttons'],
+                ['name' => 'ecf-text-link', 'category' => 'buttons'],
                 ['name' => 'ecf-footer', 'category' => 'footer'],
                 ['name' => 'ecf-footer__inner', 'category' => 'footer'],
             ],

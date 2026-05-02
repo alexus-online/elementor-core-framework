@@ -542,6 +542,40 @@ trait ECF_Framework_Asset_Loading_Trait {
 
         wp_enqueue_style('ecf-editor', plugins_url('assets/editor.css', ECF_FRAMEWORK_FILE), [], $editor_css_ver);
         wp_enqueue_script('ecf-editor', plugins_url('assets/editor.js', ECF_FRAMEWORK_FILE), ['jquery'], $editor_js_ver, true);
+
+        $atomic_section_js_ver = $this->asset_version('assets/atomic-section-editor.js', '0.1.0');
+        wp_enqueue_script(
+            'ecf-atomic-section-editor',
+            plugins_url('assets/atomic-section-editor.js', ECF_FRAMEWORK_FILE),
+            ['elementor-editor'],
+            $atomic_section_js_ver,
+            true
+        );
+
+        // Class IDs for auto-classes feature. Layrix syncs starter classes to
+        // Elementor's Global Classes registry with deterministic IDs of the
+        // form 'g-ecf-' . substr(md5(label), 0, 10). The editor's Klassen chip
+        // UI displays classes by ID, so we hand the JS the IDs directly.
+        $cls_id = static function ($label) {
+            return 'g-ecf-' . substr(md5($label), 0, 10);
+        };
+        $auto_default_on = function ($key) use ($settings) {
+            return !array_key_exists($key, $settings) || !empty($settings[$key]);
+        };
+        wp_localize_script('ecf-atomic-section-editor', 'ecfAutoClasses', [
+            'masterEnabled'    => !empty($settings['auto_classes_enabled']),
+            'headingsEnabled'  => $auto_default_on('auto_classes_headings'),
+            'buttonsEnabled'   => $auto_default_on('auto_classes_buttons'),
+            'headingClassIds'  => [
+                'h1' => $cls_id('ecf-heading-1'),
+                'h2' => $cls_id('ecf-heading-2'),
+                'h3' => $cls_id('ecf-heading-3'),
+                'h4' => $cls_id('ecf-heading-4'),
+                'h5' => $cls_id('ecf-heading-5'),
+                'h6' => $cls_id('ecf-heading-5'),
+            ],
+            'buttonClassId'    => $cls_id('ecf-button'),
+        ]);
         wp_localize_script('ecf-editor', 'ecfEditor', [
             'variableTypeFilterEnabled' => !empty($settings['elementor_variable_type_filter']),
             'variableTypeFilterScopes' => [

@@ -4865,4 +4865,48 @@
     bindLive('[name$="[ui_btn_font_size]"]',  '--v2-btn-fs',      function(v) { return parseInt(v, 10) + 'px'; });
   }());
 
+  /* ── Auto-Klassen master toggle: enable/disable per-widget rows ──── */
+  (function() {
+    var master = document.getElementById('v2-auto-classes-master');
+    var table  = document.getElementById('v2-auto-classes-table');
+    if (!master || !table) return;
+    function sync() {
+      var on = master.checked;
+      table.classList.toggle('is-disabled', !on);
+      table.querySelectorAll('input.v2-tog-cb').forEach(function(cb) {
+        cb.disabled = !on;
+      });
+    }
+    master.addEventListener('change', sync);
+    sync();
+  }());
+
+  /* ── Cookbook: copy recipe snippets ──────────────────────────────── */
+  (function() {
+    function copyText(text, onDone) {
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); onDone(); } catch (_) {}
+        document.body.removeChild(ta);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      // Recipe card with data-v2-copy — copy the class string
+      var target = e.target.closest('[data-v2-copy]');
+      if (!target) return;
+      var cls = target.getAttribute('data-v2-copy') || '';
+      copyText(cls, function() {
+        target.classList.add('is-copied');
+        setTimeout(function() { target.classList.remove('is-copied'); }, 1200);
+      });
+    });
+  }());
+
 }());

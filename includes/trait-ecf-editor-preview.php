@@ -207,4 +207,76 @@ trait ECF_Framework_Editor_Preview_Trait {
         $classes = preg_replace('/\s+/', ' ', $classes);
         $element->add_render_attribute('_wrapper', 'class', $classes);
     }
+
+    /**
+     * Auto-apply Layrix utility classes to common Elementor widgets when the
+     * "auto_classes_enabled" setting is on. Covers both classic widgets (v3)
+     * and atomic widgets (v4): heading → ecf-heading-N (from tag), button →
+     * ecf-button, text-link → ecf-text-link, form → ecf-form. Body text is
+     * intentionally not auto-classed because base body size is a global
+     * setting in Layrix.
+     */
+    public function apply_auto_classes_before_render($element) {
+        $plugin_settings = $this->get_settings();
+        if (empty($plugin_settings['auto_classes_enabled'])) {
+            return;
+        }
+        if (!method_exists($element, 'get_name') || !method_exists($element, 'add_render_attribute')) {
+            return;
+        }
+        // Per-widget toggle: when key is not set yet (existing installs upgrading),
+        // default to enabled. When explicitly set to '0', honour that.
+        $is_enabled = function ($key) use ($plugin_settings) {
+            return !array_key_exists($key, $plugin_settings) || !empty($plugin_settings[$key]);
+        };
+        $name = $element->get_name();
+        $heading_widgets = [
+            'heading',
+            'e-heading',
+            'theme-site-title',
+            'theme-page-title',
+            'theme-post-title',
+        ];
+        if (in_array($name, $heading_widgets, true)) {
+            if (!$is_enabled('auto_classes_headings')) {
+                return;
+            }
+            $tag = '';
+            if (method_exists($element, 'get_settings_for_display')) {
+                $tag = strtolower((string) (
+                    $element->get_settings_for_display('tag')
+                    ?: $element->get_settings_for_display('header_size')
+                ));
+            }
+            $tag_to_class = [
+                'h1' => 'ecf-heading-1',
+                'h2' => 'ecf-heading-2',
+                'h3' => 'ecf-heading-3',
+                'h4' => 'ecf-heading-4',
+                'h5' => 'ecf-heading-5',
+                'h6' => 'ecf-heading-5',
+            ];
+            if (isset($tag_to_class[$tag])) {
+                $element->add_render_attribute('_wrapper', 'class', $tag_to_class[$tag]);
+            }
+            return;
+        }
+        if ($name === 'button' || $name === 'e-button') {
+            if ($is_enabled('auto_classes_buttons')) {
+                $element->add_render_attribute('_wrapper', 'class', 'ecf-button');
+            }
+            return;
+        }
+        if ($name === 'text-link') {
+            if ($is_enabled('auto_classes_text_link')) {
+                $element->add_render_attribute('_wrapper', 'class', 'ecf-text-link');
+            }
+            return;
+        }
+        if ($name === 'form') {
+            if ($is_enabled('auto_classes_form')) {
+                $element->add_render_attribute('_wrapper', 'class', 'ecf-form');
+            }
+        }
+    }
 }

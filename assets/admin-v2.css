@@ -818,6 +818,73 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 .ecf-v2-wrapper .v2-tog--on::after  { left: 16px; }
 .ecf-v2-wrapper .v2-tog--off::after { left: 2px; }
 
+/* ── Token-Info unter Settings-Inputs ──────────────────────────── */
+.ecf-v2-wrapper .v2-tok {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 6px;
+  line-height: 1;
+}
+.ecf-v2-wrapper .v2-tok-l {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, .14);
+  color: rgba(199, 210, 254, .9);
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+.ecf-v2-wrapper .v2-tok code {
+  background: rgba(0, 0, 0, .3);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--v2-text2);
+  border: 1px solid rgba(255,255,255,.05);
+}
+
+/* ── Auto-Klassen-Tabelle ───────────────────────────────────────── */
+.ecf-v2-wrapper .v2-auto-classes-table {
+  margin-top: 4px;
+  border: 1px solid var(--v2-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,.02);
+}
+.ecf-v2-wrapper .v2-auto-classes-row {
+  display: grid;
+  grid-template-columns: 1.4fr 2fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--v2-border);
+  font-size: var(--v2-ui-base-fs, 13px);
+}
+.ecf-v2-wrapper .v2-auto-classes-row:last-child { border-bottom: 0; }
+.ecf-v2-wrapper .v2-auto-classes-row--head {
+  background: rgba(0,0,0,.25);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--v2-text3);
+  font-weight: 600;
+}
+.ecf-v2-wrapper .v2-auto-classes-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--v2-btn-fs, 12px);
+  background: rgba(0,0,0,.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--v2-text1);
+}
+.ecf-v2-wrapper .v2-auto-classes-table.is-disabled { opacity: .45; pointer-events: none; }
+.ecf-v2-wrapper .v2-auto-classes-table.is-disabled .v2-auto-classes-row--head { opacity: 1; }
+
 /* ── Sync / Export ──────────────────────────────────────────────── */
 .ecf-v2-wrapper .v2-sync-stat { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .ecf-v2-wrapper .v2-ss-item { flex: 1; min-width: 80px; padding: 14px; border-radius: 7px; background: rgba(255,255,255,.03); border: 1px solid var(--v2-border); }
@@ -884,6 +951,272 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 .ecf-v2-wrapper .v2-tabs--icon .v2-tab { display: flex; align-items: center; gap: 5px; }
 .ecf-v2-wrapper .v2-tab-icon { font-size: 13px; line-height: 1; opacity: .7; }
 .ecf-v2-wrapper .v2-tab.v2-tab--on .v2-tab-icon { opacity: 1; }
+
+/* ── Cookbook hint banner ──────────────────────────────────────────── */
+.ecf-v2-wrapper .v2-recipe-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: rgba(99, 102, 241, .08);
+  border: 1px solid rgba(99, 102, 241, .2);
+  border-radius: 8px;
+  font-size: var(--v2-ui-base-fs, 13px);
+  color: var(--v2-text2);
+  line-height: 1.5;
+}
+.ecf-v2-wrapper .v2-recipe-hint > svg { flex-shrink: 0; margin-top: 3px; color: rgba(165, 180, 252, .9); }
+.ecf-v2-wrapper .v2-recipe-hint strong { color: var(--v2-text1); font-weight: 600; }
+.ecf-v2-wrapper .v2-recipe-steps {
+  margin: 0;
+  padding-left: 20px;
+  list-style: decimal;
+}
+.ecf-v2-wrapper .v2-recipe-steps li { margin: 0 0 4px; padding: 0; }
+.ecf-v2-wrapper .v2-recipe-steps li:last-child { margin-bottom: 0; }
+.ecf-v2-wrapper .v2-recipe-steps li::marker { color: var(--v2-text3); font-weight: 600; }
+
+/* Elementor recipes — card grid (Schriftstärken-style) */
+.ecf-v2-wrapper .v2-recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.ecf-v2-wrapper .v2-recipe--ele {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  margin: 0;
+  text-align: left;
+  background: var(--v2-surface2, rgba(255,255,255,.04));
+  border: 1px solid var(--v2-border);
+  border-radius: 10px;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .1s ease;
+}
+.ecf-v2-wrapper .v2-recipe--ele:hover {
+  border-color: var(--v2-accent);
+  background: rgba(255,255,255,.06);
+}
+.ecf-v2-wrapper .v2-recipe--ele:active { transform: translateY(1px); }
+.ecf-v2-wrapper .v2-recipe--ele:focus-visible {
+  outline: 2px solid var(--v2-accent);
+  outline-offset: 2px;
+}
+.ecf-v2-wrapper .v2-recipe-title {
+  font-size: var(--v2-ui-base-fs, 13px);
+  font-weight: 600;
+  color: var(--v2-text1);
+  line-height: 1.3;
+}
+.ecf-v2-wrapper .v2-recipe-desc {
+  font-size: var(--v2-ui-base-fs, 13px);
+  color: var(--v2-text3);
+  line-height: 1.4;
+  flex: 1;
+}
+.ecf-v2-wrapper .v2-recipe-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.06);
+  color: var(--v2-text1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--v2-btn-fs, 12px);
+  font-weight: 500;
+  pointer-events: none;
+}
+.ecf-v2-wrapper .v2-recipe-chip code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ecf-v2-wrapper .v2-recipe-chip-i { opacity: .55; flex-shrink: 0; }
+.ecf-v2-wrapper .v2-recipe--ele.is-copied {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, .12);
+}
+.ecf-v2-wrapper .v2-recipe--ele.is-copied .v2-recipe-chip {
+  background: #10b981;
+  color: #fff;
+}
+
+/* ── Cookbook visual demos ─────────────────────────────────────────── */
+.ecf-v2-wrapper .v2-cb-demo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.ecf-v2-wrapper .v2-cb-demo-item {
+  border: 1px solid var(--v2-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,.02);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ecf-v2-wrapper .v2-cb-demo-label {
+  padding: 8px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--v2-text2);
+  background: rgba(0,0,0,.25);
+  border-bottom: 1px solid var(--v2-border);
+}
+.ecf-v2-wrapper .v2-cb-demo-stage { padding: 16px; flex: 1; }
+.ecf-v2-wrapper .v2-cb-demo-note {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--v2-text3);
+  border-top: 1px solid var(--v2-border);
+}
+
+/* Skeleton "lines" used inside section visualizations */
+.ecf-v2-wrapper .v2-cb-line {
+  height: 6px;
+  width: 100%;
+  border-radius: 3px;
+  background: rgba(255,255,255,.18);
+  margin-bottom: 6px;
+}
+.ecf-v2-wrapper .v2-cb-line:last-child { margin-bottom: 0; }
+.ecf-v2-wrapper .v2-cb-line--head { height: 10px; width: 60%; background: rgba(255,255,255,.32); margin-bottom: 8px; }
+.ecf-v2-wrapper .v2-cb-line--hero { height: 14px; width: 70%; background: rgba(255,255,255,.42); margin-bottom: 8px; }
+.ecf-v2-wrapper .v2-cb-line--light { background: rgba(255,255,255,.65); }
+
+/* Section visualizations */
+.ecf-v2-wrapper .v2-cb-section {
+  background: rgba(255,255,255,.04);
+  padding: 22px 12px;
+  border-radius: 6px;
+  position: relative;
+}
+.ecf-v2-wrapper .v2-cb-section__inner {
+  max-width: 75%;
+  margin: 0 auto;
+}
+.ecf-v2-wrapper .v2-cb-section--show-inner .v2-cb-section__inner--highlight {
+  background: rgba(99,102,241,.18);
+  border: 1px dashed rgba(99,102,241,.5);
+  padding: 10px;
+  border-radius: 4px;
+}
+.ecf-v2-wrapper .v2-cb-section--hero {
+  padding: 36px 12px;
+  background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(168,85,247,.12));
+}
+.ecf-v2-wrapper .v2-cb-section--dark { background: #0a0a0a; }
+.ecf-v2-wrapper .v2-cb-section--accent { background: var(--v2-accent); }
+
+.ecf-v2-wrapper .v2-cb-eyebrow {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 8px;
+}
+.ecf-v2-wrapper .v2-cb-actions { display: flex; gap: 6px; margin-top: 10px; }
+.ecf-v2-wrapper .v2-cb-btn { display: inline-block; height: 18px; border-radius: 4px; }
+.ecf-v2-wrapper .v2-cb-btn--primary { width: 60px; background: var(--v2-accent); }
+.ecf-v2-wrapper .v2-cb-btn--ghost   { width: 50px; background: transparent; border: 1px solid rgba(255,255,255,.4); }
+
+/* Real-styled component examples */
+.ecf-v2-wrapper .v2-cb-btn-real {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: default;
+}
+.ecf-v2-wrapper .v2-cb-btn-real--primary   { background: var(--v2-accent); color: #fff; }
+.ecf-v2-wrapper .v2-cb-btn-real--secondary { background: rgba(255,255,255,.12); color: var(--v2-text1); }
+.ecf-v2-wrapper .v2-cb-btn-real--ghost     { background: transparent; border-color: var(--v2-border); color: var(--v2-text1); }
+.ecf-v2-wrapper .v2-cb-btn-real--large     { padding: 12px 22px; font-size: 14px; border-radius: 8px; }
+.ecf-v2-wrapper .v2-cb-btn-real--link      { background: transparent; color: var(--v2-accent); padding: 4px 0; text-decoration: underline; }
+
+.ecf-v2-wrapper .v2-cb-card-real {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--v2-border);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 240px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.ecf-v2-wrapper .v2-cb-card-real__media { aspect-ratio: 16/9; background: linear-gradient(135deg, rgba(99,102,241,.5), rgba(168,85,247,.4)); }
+.ecf-v2-wrapper .v2-cb-card-real__body { padding: 14px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.ecf-v2-wrapper .v2-cb-card-real__title { font-size: 14px; font-weight: 600; color: var(--v2-text1); }
+.ecf-v2-wrapper .v2-cb-card-real__desc  { font-size: 12px; color: var(--v2-text3); margin-bottom: 4px; }
+
+.ecf-v2-wrapper .v2-cb-badge-real {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ecf-v2-wrapper .v2-cb-badge-real--primary   { background: var(--v2-accent); color: #fff; }
+.ecf-v2-wrapper .v2-cb-badge-real--secondary { background: rgba(255,255,255,.14); color: var(--v2-text1); }
+
+/* Layout diagrams */
+.ecf-v2-wrapper .v2-cb-container-demo {
+  background: rgba(255,255,255,.04);
+  border: 1px dashed rgba(255,255,255,.15);
+  padding: 14px 50px;
+  border-radius: 4px;
+}
+.ecf-v2-wrapper .v2-cb-container-demo__inner {
+  background: rgba(99,102,241,.18);
+  border: 1px solid rgba(99,102,241,.4);
+  padding: 10px;
+  border-radius: 4px;
+}
+.ecf-v2-wrapper .v2-cb-grid-demo {
+  display: grid;
+  gap: 6px;
+  height: 24px;
+}
+.ecf-v2-wrapper .v2-cb-grid-demo > span { background: rgba(99,102,241,.3); border: 1px solid rgba(99,102,241,.5); border-radius: 3px; }
+.ecf-v2-wrapper .v2-cb-grid-demo--2 { grid-template-columns: repeat(2, 1fr); }
+.ecf-v2-wrapper .v2-cb-grid-demo--3 { grid-template-columns: repeat(3, 1fr); }
+.ecf-v2-wrapper .v2-cb-grid-demo--4 { grid-template-columns: repeat(4, 1fr); }
+
+.ecf-v2-wrapper .v2-cb-stack-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px dashed rgba(255,255,255,.12);
+  border-radius: 4px;
+  padding: 6px;
+  text-align: center;
+}
+.ecf-v2-wrapper .v2-cb-stack-demo > span { display: block; height: 8px; background: rgba(99,102,241,.4); border-radius: 2px; }
+.ecf-v2-wrapper .v2-cb-stack-demo > div { font-size: 9px; color: var(--v2-text3); margin-top: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ecf-v2-wrapper .v2-cb-stack-demo--xs > span + span { margin-top: 2px; }
+.ecf-v2-wrapper .v2-cb-stack-demo--s  > span + span { margin-top: 4px; }
+.ecf-v2-wrapper .v2-cb-stack-demo--m  > span + span { margin-top: 8px; }
+.ecf-v2-wrapper .v2-cb-stack-demo--l  > span + span { margin-top: 14px; }
+.ecf-v2-wrapper .v2-cb-stack-demo--xl > span + span { margin-top: 20px; }
+
 .ecf-v2-wrapper .v2-tab {
   padding: 7px 11px;
   font-size: 12px;
