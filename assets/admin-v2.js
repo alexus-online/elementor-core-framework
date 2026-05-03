@@ -3486,6 +3486,175 @@
       });
     });
 
+    /* Theme-Style-Importer modal — read kit on open, apply selected fields */
+    (function() {
+      var modal   = document.getElementById('ecf-kit-import-modal');
+      if (!modal) return;
+      var loading = document.getElementById('ecf-kit-import-loading');
+      var empty   = document.getElementById('ecf-kit-import-empty');
+      var fields  = document.getElementById('ecf-kit-import-fields');
+      var tbody   = document.getElementById('ecf-kit-import-tbody');
+      var toggle  = document.getElementById('ecf-kit-toggle-all');
+      var applyBtn= document.getElementById('ecf-kit-import-apply');
+      var nonce   = (window.ecfAdmin && window.ecfAdmin.restNonce) || '';
+      // Derive REST base from the existing settings URL (always present).
+      var base    = (window.ecfAdmin && window.ecfAdmin.restUrl) || '/wp-json/ecf-framework/v1/settings';
+      var url     = base.replace(/\/settings$/, '/');
+
+      function open() {
+        modal.style.display = 'flex';
+        loading.style.display = '';
+        empty.style.display   = 'none';
+        fields.style.display  = 'none';
+        applyBtn.disabled     = true;
+        tbody.innerHTML       = '';
+        fetch(url + 'kit-import-preview', {
+          credentials: 'same-origin',
+          headers: { 'X-WP-Nonce': nonce }
+        }).then(function(r){ return r.json(); }).then(function(data) {
+          loading.style.display = 'none';
+          if (!data || !data.available) { empty.style.display = ''; return; }
+          var hasAny = false;
+          Object.keys(data.fields || {}).forEach(function(path) {
+            var f = data.fields[path];
+            if (!f.value) return;
+            hasAny = true;
+            var tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--v2-border)';
+            var preview = '';
+            if (f.type === 'color') {
+              preview = '<span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:'+f.value+'"></span><code style="font-family:var(--v2-mono);font-size:11px">'+f.value+'</code></span>';
+            } else {
+              preview = '<code style="font-family:var(--v2-mono);font-size:11px">'+escapeHtml(f.value)+'</code>';
+            }
+            tr.innerHTML = '<td style="padding:8px 4px;vertical-align:middle"><input type="checkbox" data-kit-field="'+path+'" checked></td>' +
+                           '<td style="padding:8px 4px;vertical-align:middle">'+escapeHtml(f.label)+'</td>' +
+                           '<td style="padding:8px 4px;vertical-align:middle">'+preview+'</td>';
+            tbody.appendChild(tr);
+          });
+          if (hasAny) { fields.style.display = ''; applyBtn.disabled = false; }
+          else        { empty.style.display  = ''; }
+        }).catch(function(err) {
+          loading.textContent = 'Fehler: ' + err;
+        });
+      }
+
+      function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+      function close() { modal.style.display = 'none'; }
+
+      w.querySelectorAll('[data-ecf-kit-import]').forEach(function(b) {
+        b.addEventListener('click', open);
+      });
+      w.querySelectorAll('[data-ecf-kit-close]').forEach(function(b) {
+        b.addEventListener('click', close);
+      });
+      modal.addEventListener('click', function(e) { if (e.target === modal) close(); });
+
+      toggle.addEventListener('change', function() {
+        tbody.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = toggle.checked; });
+      });
+
+      applyBtn.addEventListener('click', function() {
+        var accept = [];
+        tbody.querySelectorAll('input[data-kit-field]:checked').forEach(function(cb) {
+          accept.push(cb.getAttribute('data-kit-field'));
+        });
+        if (!accept.length) return;
+        applyBtn.disabled = true;
+        applyBtn.textContent = 'Importiere…';
+        fetch(url + 'kit-import', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': nonce },
+          body: JSON.stringify({ accept: accept })
+        }).then(function(r){ return r.json(); }).then(function(d) {
+          if (d && d.success) {
+            applyBtn.textContent = '✓ ' + (d.written || 0) + ' Felder übernommen';
+            setTimeout(function() { window.location.reload(); }, 700);
+          } else {
+            applyBtn.disabled = false;
+            applyBtn.textContent = 'Fehler — nochmal versuchen';
+          }
+        }).catch(function(err) {
+          applyBtn.disabled = false;
+          applyBtn.textContent = 'Netzwerk-Fehler';
+        });
+      });
+    })();
+
+    /* Jump-to-tab buttons inside the Aktive overview — switch to the
+       management tab for the corresponding class category. */
+    w.querySelectorAll('[data-v2-jump-tab]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = btn.getAttribute('data-v2-jump-tab');
+        var tab = w.querySelector('.v2-tab[data-v2-tab-group="cl"][data-v2-tab="' + target + '"]');
+        if (tab) tab.click();
+      });
+    });
+
+    /* Live-search filter inside class panels (Starter/Extra/Utility).
+       Hides rows whose class name OR description doesn't include the
+       query, then collapses category headers whose rows are all hidden.
+       Scales the UX once the library hits hundreds of classes. */
+    w.querySelectorAll('.v2-cl-search').forEach(function(input) {
+      var panelId = input.getAttribute('data-v2-cl-search');
+      var panel   = w.querySelector('#' + panelId);
+      if (!panel) return;
+      var emptyMsg = w.querySelector('[data-v2-cl-empty="' + panelId + '"]');
+      input.addEventListener('input', function() {
+        var q = (input.value || '').trim().toLowerCase();
+        var anyVisible = false;
+        var visibleByCat = {};
+        panel.querySelectorAll('.v2-cl-row[data-v2-cl-cat]').forEach(function(row) {
+          var name = row.getAttribute('data-v2-cl-name') || '';
+          var desc = row.getAttribute('data-v2-cl-desc') || '';
+          var match = q === '' || name.indexOf(q) >= 0 || desc.indexOf(q) >= 0;
+          row.style.display = match ? '' : 'none';
+          if (match) {
+            anyVisible = true;
+            var cat = row.getAttribute('data-v2-cl-cat');
+            visibleByCat[cat] = (visibleByCat[cat] || 0) + 1;
+          }
+        });
+        panel.querySelectorAll('.v2-cl-group-head[data-v2-cl-cat]').forEach(function(head) {
+          var cat = head.getAttribute('data-v2-cl-cat');
+          head.style.display = visibleByCat[cat] ? '' : 'none';
+        });
+        if (emptyMsg) emptyMsg.style.display = (q !== '' && !anyVisible) ? '' : 'none';
+      });
+    });
+
+    /* Bulk-toggle "Alle ein / Alle aus" per category header — clicks each
+       checkbox in the same panel that shares the data-v2-cl-cat value, but
+       only if it differs from the desired state (so save-dirty tracking
+       sees one change per row, not no-ops). Respects the current search
+       filter: hidden rows aren't touched. */
+    w.querySelectorAll('[data-v2-cl-bulk]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var desiredOn = btn.getAttribute('data-v2-cl-bulk') === 'on';
+        var cat       = btn.getAttribute('data-v2-cl-cat');
+        var panel     = btn.closest('.v2-tp');
+        if (!panel) return;
+        panel.querySelectorAll('.v2-cl-row[data-v2-cl-cat="' + cat + '"]').forEach(function(row) {
+          if (row.style.display === 'none') return;
+          var cb = row.querySelector('input.v2-tog-cb');
+          if (!cb) return;
+          if (cb.checked !== desiredOn) {
+            cb.checked = desiredOn;
+            cb.dispatchEvent(new Event('change', { bubbles: true }));
+            var pill = row.querySelector('.v2-tog');
+            if (pill) {
+              pill.classList.toggle('v2-tog--on',  desiredOn);
+              pill.classList.toggle('v2-tog--off', !desiredOn);
+            }
+          }
+        });
+      });
+    });
+
     w.querySelectorAll('[data-v2-preset-filter]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         ecfV2FilterPresets(btn.dataset.v2PresetFilter, btn);

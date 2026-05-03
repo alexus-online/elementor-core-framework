@@ -36,6 +36,45 @@ trait ECF_Framework_REST_API_Trait {
             'permission_callback' => [$this, 'rest_manage_options_permission'],
         ]);
 
+        // Owner-only "Ideen" notes — Application Password authenticated.
+        // Permission self-checks via is_layrix_owner() (email match), so even
+        // a valid app-password from another user won't pass.
+        register_rest_route('ecf-framework/v1', '/owner-notes', [
+            [
+                'methods'             => \WP_REST_Server::READABLE,
+                'callback'            => [$this, 'rest_owner_notes_list'],
+                'permission_callback' => [$this, 'rest_owner_permission'],
+            ],
+            [
+                'methods'             => \WP_REST_Server::CREATABLE,
+                'callback'            => [$this, 'rest_owner_note_create'],
+                'permission_callback' => [$this, 'rest_owner_permission'],
+            ],
+        ]);
+        register_rest_route('ecf-framework/v1', '/owner-notes/(?P<id>[A-Za-z0-9_-]+)', [
+            'methods'             => \WP_REST_Server::DELETABLE,
+            'callback'            => [$this, 'rest_owner_note_delete'],
+            'permission_callback' => [$this, 'rest_owner_permission'],
+        ]);
+        register_rest_route('ecf-framework/v1', '/owner-notes/reorder', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'rest_owner_notes_reorder'],
+            'permission_callback' => [$this, 'rest_owner_permission'],
+        ]);
+
+        // Theme-Style-Importer — read kit + apply to Layrix settings.
+        // Standard manage_options gate (any admin can use this, not owner-only).
+        register_rest_route('ecf-framework/v1', '/kit-import-preview', [
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [$this, 'rest_kit_import_preview'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+        register_rest_route('ecf-framework/v1', '/kit-import', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_kit_import_apply'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+
         register_rest_route('ecf-framework/v1', '/layout', [
             [
                 'methods'             => \WP_REST_Server::READABLE,

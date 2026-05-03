@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Layrix
  * Description: Core-Framework-style tokens, editor panel, and native Elementor variable/class sync.
- * Version: 0.5.9
+ * Version: 0.6.0
  * Author: Alexander Kaiser
  * Update URI: https://github.com/alexus-online/layrix
  * Text Domain: ecf-framework
@@ -39,6 +39,8 @@ require_once __DIR__ . '/includes/trait-ecf-core-admin.php';
 require_once __DIR__ . '/includes/trait-ecf-rest-api.php';
 require_once __DIR__ . '/includes/trait-ecf-admin-v2-view.php';
 require_once __DIR__ . '/includes/trait-ecf-atomic-widgets.php';
+require_once __DIR__ . '/includes/trait-ecf-owner-notes.php';
+require_once __DIR__ . '/includes/trait-ecf-theme-style-import.php';
 
 if (!class_exists('ECF_Framework')) {
 class ECF_Framework {
@@ -62,6 +64,8 @@ class ECF_Framework {
     use ECF_Framework_REST_API_Trait;
     use ECF_Framework_Admin_V2_View_Trait;
     use ECF_Framework_Atomic_Widgets_Trait;
+    use ECF_Framework_Owner_Notes_Trait;
+    use ECF_Framework_Theme_Style_Import_Trait;
 
     private $option_name = 'ecf_framework_v50';
     private $github_repo = 'alexus-online/layrix';

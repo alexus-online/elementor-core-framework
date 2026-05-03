@@ -144,10 +144,15 @@ trait ECF_Framework_Admin_V2_View_Trait {
         $enabled_map      = $settings['starter_classes']['enabled'] ?? [];
         $utility_enabled  = $settings['utility_classes']['enabled'] ?? [];
         $custom_classes   = $settings['starter_classes']['custom'] ?? [];
-        $active_starter   = 0;
-        foreach ( array_merge( $starter_lib['basic'] ?? [], $starter_lib['advanced'] ?? [] ) as $cls ) {
-            if ( ! empty( $enabled_map[ $cls['name'] ] ) ) $active_starter++;
+        $active_starter_basic = 0;
+        foreach ( $starter_lib['basic'] ?? [] as $cls ) {
+            if ( ! empty( $enabled_map[ $cls['name'] ] ) ) $active_starter_basic++;
         }
+        $active_starter_extra = 0;
+        foreach ( $starter_lib['advanced'] ?? [] as $cls ) {
+            if ( ! empty( $enabled_map[ $cls['name'] ] ) ) $active_starter_extra++;
+        }
+        $active_starter = $active_starter_basic + $active_starter_extra;
         $active_utility = 0;
         foreach ( $utility_lib as $group ) {
             foreach ( $group as $cls ) {
@@ -418,6 +423,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <svg viewBox="0 0 13 13" fill="currentColor"><path d="M6.5 1a5.5 5.5 0 100 11A5.5 5.5 0 006.5 1zM5 6.5a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" opacity=".5"/></svg>
       <?php esc_html_e( 'Einstellungen', 'ecf-framework' ); ?>
     </button>
+    <?php $this->render_owner_notes_sidebar_button(); ?>
   </div>
 </nav>
 
@@ -453,6 +459,42 @@ trait ECF_Framework_Admin_V2_View_Trait {
   </div>
 </div>
 
+<!-- ═══ KIT IMPORT MODAL (Theme-Style-Importer) ═════════════════════ -->
+<div id="ecf-kit-import-modal" class="v2-modal-overlay" style="display:none;align-items:center;justify-content:center">
+  <div class="v2-modal-box" style="max-width:680px;width:100%;max-height:80vh;display:flex;flex-direction:column">
+    <div class="v2-modal-head">
+      <span><?php esc_html_e( 'Aus Elementor-Kit importieren', 'ecf-framework' ); ?></span>
+      <button type="button" class="v2-modal-close" data-ecf-kit-close>✕</button>
+    </div>
+    <div id="ecf-kit-import-body" style="padding:18px;overflow-y:auto;flex:1">
+      <p id="ecf-kit-import-loading" style="color:var(--v2-text3);font-size:13px"><?php esc_html_e( 'Lade Elementor-Kit-Daten…', 'ecf-framework' ); ?></p>
+      <div id="ecf-kit-import-empty" style="display:none;color:var(--v2-text3);font-size:13px;padding:30px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">📭</div>
+        <?php esc_html_e( 'Kein aktives Elementor-Kit gefunden oder keine Werte hinterlegt.', 'ecf-framework' ); ?>
+      </div>
+      <div id="ecf-kit-import-fields" style="display:none">
+        <p style="color:var(--v2-text2);font-size:12.5px;line-height:1.5;margin:0 0 14px">
+          <?php esc_html_e( 'Wähle die Felder aus, die du aus deinem aktiven Elementor-Kit übernehmen möchtest. Bestehende Layrix-Werte werden überschrieben.', 'ecf-framework' ); ?>
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--v2-border);color:var(--v2-text3);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em">
+              <th style="text-align:left;padding:8px 4px;width:22px"><input type="checkbox" id="ecf-kit-toggle-all" checked title="<?php esc_attr_e( 'Alle umschalten', 'ecf-framework' ); ?>"></th>
+              <th style="text-align:left;padding:8px 4px"><?php esc_html_e( 'Feld', 'ecf-framework' ); ?></th>
+              <th style="text-align:left;padding:8px 4px"><?php esc_html_e( 'Wert aus Elementor', 'ecf-framework' ); ?></th>
+            </tr>
+          </thead>
+          <tbody id="ecf-kit-import-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--v2-border)">
+      <button type="button" class="v2-btn v2-btn--ghost" data-ecf-kit-close><?php esc_html_e( 'Abbrechen', 'ecf-framework' ); ?></button>
+      <button type="button" class="v2-btn v2-btn--primary" id="ecf-kit-import-apply" disabled><?php esc_html_e( 'Auswahl übernehmen', 'ecf-framework' ); ?></button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ v2 Shell ═════════════════════════════════════════════════════ -->
 <div class="v2-shell">
 <form id="ecf-v2-form" method="post" autocomplete="off">
@@ -475,6 +517,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Farben', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
+      <button type="button" class="v2-btn v2-btn--ghost" data-ecf-kit-import title="<?php esc_attr_e( 'Farben/Schriften aus dem aktiven Elementor-Kit übernehmen', 'ecf-framework' ); ?>">↘ <?php esc_html_e( 'Aus Elementor importieren', 'ecf-framework' ); ?></button>
       <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
       <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
       <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
@@ -1961,74 +2004,166 @@ trait ECF_Framework_Admin_V2_View_Trait {
     <div class="v2-content">
       <div class="v2-ph"><h1><?php esc_html_e( 'Klassen', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Starter- und Utility-Klassen für semantische Struktur — aktivieren was gebraucht wird, dann mit Elementor synchronisieren.', 'ecf-framework' ); ?></p></div>
       <div class="v2-tabs">
-        <button type="button" class="v2-tab v2-tab--on" data-v2-tab-group="cl" data-v2-tab="starter"><?php esc_html_e( 'Starter', 'ecf-framework' ); ?><span class="v2-tc"><?php echo esc_html( $active_starter . '/' . ( count( $starter_lib['basic'] ?? [] ) + count( $starter_lib['advanced'] ?? [] ) ) ); ?></span></button>
+        <button type="button" class="v2-tab v2-tab--on" data-v2-tab-group="cl" data-v2-tab="active" title="<?php esc_attr_e( 'Übersicht aller aktivierten Klassen', 'ecf-framework' ); ?>"><?php esc_html_e( 'Aktive', 'ecf-framework' ); ?><span class="v2-tc"><?php echo esc_html( $active_total ); ?></span></button>
+        <button type="button" class="v2-tab" data-v2-tab-group="cl" data-v2-tab="starter"><?php esc_html_e( 'Starter', 'ecf-framework' ); ?><span class="v2-tc"><?php echo esc_html( $active_starter_basic . '/' . count( $starter_lib['basic'] ?? [] ) ); ?></span></button>
+        <button type="button" class="v2-tab" data-v2-tab-group="cl" data-v2-tab="extra" title="<?php esc_attr_e( 'Erweiterte Layout- und Komponenten-Klassen', 'ecf-framework' ); ?>"><?php esc_html_e( 'Extra', 'ecf-framework' ); ?><span class="v2-tc"><?php echo esc_html( $active_starter_extra . '/' . count( $starter_lib['advanced'] ?? [] ) ); ?></span></button>
         <button type="button" class="v2-tab" data-v2-tab-group="cl" data-v2-tab="utility"><?php esc_html_e( 'Utility', 'ecf-framework' ); ?><span class="v2-tc"><?php echo esc_html( $active_utility ); ?></span></button>
         <button type="button" class="v2-tab" data-v2-tab-group="cl" data-v2-tab="custom"><?php esc_html_e( 'Eigene', 'ecf-framework' ); ?><span class="v2-tc"><?php echo esc_html( $active_custom ); ?></span></button>
         <button type="button" class="v2-tab" data-v2-tab-group="cl" data-v2-tab="generator" title="<?php esc_attr_e( 'BEM-Klassen automatisch generieren und zu eigenen Klassen hinzufügen', 'ecf-framework' ); ?>"><?php esc_html_e( 'BEM-Generator', 'ecf-framework' ); ?></button>
       </div>
 
-      <!-- Starter classes -->
-      <div id="v2-cl-starter" class="v2-tp v2-tp--on">
-        <div class="v2-cl-group-label"><?php esc_html_e( 'Basic (recommended)', 'ecf-framework' ); ?></div>
-        <?php foreach ( $starter_lib['basic'] ?? [] as $cls ) :
-          $cls_name    = sanitize_html_class( $cls['name'] );
-          $cls_enabled = ! empty( $enabled_map[ $cls['name'] ] );
+      <!-- Active classes (read-only overview) -->
+      <div id="v2-cl-active" class="v2-tp v2-tp--on">
+        <?php
+          $active_groups = [
+            'starter' => [ 'label' => __( 'Starter', 'ecf-framework' ), 'chip' => 'v2-chip v2-chip--green', 'rows' => [] ],
+            'extra'   => [ 'label' => __( 'Extra',   'ecf-framework' ), 'chip' => 'v2-chip',                'rows' => [] ],
+            'utility' => [ 'label' => __( 'Utility', 'ecf-framework' ), 'chip' => 'v2-chip',                'rows' => [] ],
+            'custom'  => [ 'label' => __( 'Eigene',  'ecf-framework' ), 'chip' => 'v2-chip',                'rows' => [] ],
+          ];
+          foreach ( $starter_lib['basic'] ?? [] as $cls ) {
+            if ( ! empty( $enabled_map[ $cls['name'] ] ) ) {
+              $active_groups['starter']['rows'][] = [ 'name' => $cls['name'], 'desc' => ucfirst( $cls['category'] ?? '' ) ];
+            }
+          }
+          foreach ( $starter_lib['advanced'] ?? [] as $cls ) {
+            if ( ! empty( $enabled_map[ $cls['name'] ] ) ) {
+              $active_groups['extra']['rows'][] = [ 'name' => $cls['name'], 'desc' => ucfirst( $cls['category'] ?? '' ) ];
+            }
+          }
+          foreach ( $utility_lib as $group_items ) {
+            foreach ( $group_items as $cls ) {
+              if ( ! empty( $utility_enabled[ $cls['name'] ] ) ) {
+                $active_groups['utility']['rows'][] = [ 'name' => $cls['name'], 'desc' => $cls['label'] ?? '' ];
+              }
+            }
+          }
+          foreach ( $custom_classes as $row ) {
+            $cn = trim( (string) ( $row['name'] ?? '' ) );
+            if ( $cn !== '' ) $active_groups['custom']['rows'][] = [ 'name' => $cn, 'desc' => __( 'Custom', 'ecf-framework' ) ];
+          }
         ?>
-        <div class="v2-cl-row">
-          <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( ucfirst( $cls['category'] ?? '' ) ); ?></div></div>
-          <span class="v2-chip v2-chip--green">Starter</span>
+        <?php if ( $active_total === 0 ) : ?>
+          <div class="v2-empty-state">
+            <div class="v2-empty-state-icon">∅</div>
+            <div class="v2-empty-state-title"><?php esc_html_e( 'Noch keine Klassen aktiv', 'ecf-framework' ); ?></div>
+            <div class="v2-empty-state-desc"><?php esc_html_e( 'Aktiviere Klassen in den Tabs Starter, Extra, Utility oder Eigene.', 'ecf-framework' ); ?></div>
+          </div>
+        <?php else : foreach ( $active_groups as $tab_id => $grp ) : if ( empty( $grp['rows'] ) ) continue; ?>
+          <div class="v2-cl-group-label" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span><?php echo esc_html( $grp['label'] ); ?> <span style="opacity:.6">(<?php echo (int) count( $grp['rows'] ); ?>)</span></span>
+            <button type="button" class="v2-edit-btn" data-v2-jump-tab="<?php echo esc_attr( $tab_id ); ?>" title="<?php esc_attr_e( 'Verwalten', 'ecf-framework' ); ?>"><?php esc_html_e( 'Verwalten →', 'ecf-framework' ); ?></button>
+          </div>
+          <?php foreach ( $grp['rows'] as $r ) : ?>
+          <div class="v2-cl-row">
+            <div><div class="v2-cl-name">.<?php echo esc_html( sanitize_html_class( $r['name'] ) ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $r['desc'] ); ?></div></div>
+            <span class="<?php echo esc_attr( $grp['chip'] ); ?>"><?php echo esc_html( $grp['label'] ); ?></span>
+          </div>
+          <?php endforeach; ?>
+        <?php endforeach; endif; ?>
+      </div><!-- /active tab -->
+
+      <?php
+        /* Render helper for grouped class rows with bulk toggle + searchable
+           data-attrs. Used by Starter, Extra and Utility tabs.
+           $rows_by_cat: ['categoryKey' => [['name'=>..., 'desc'=>..., 'enabled'=>bool], ...]]
+           $name_tpl:    sprintf-style template, %s gets replaced by cls name
+           $chip_class:  chip CSS class (e.g. 'v2-chip v2-chip--green')
+           $chip_label:  chip text */
+        $render_class_group = function ( $rows_by_cat, $name_tpl, $chip_class, $chip_label ) use ( $opt ) {
+          ksort( $rows_by_cat );
+          foreach ( $rows_by_cat as $cat => $rows ) :
+            if ( empty( $rows ) ) continue;
+            $cat_attr = sanitize_key( $cat );
+        ?>
+        <div class="v2-cl-group-label v2-cl-group-head" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span><?php echo esc_html( ucfirst( $cat ) ); ?> <span style="opacity:.6">(<?php echo (int) count( $rows ); ?>)</span></span>
+          <span class="v2-cl-bulk" style="display:flex;gap:6px">
+            <button type="button" class="v2-edit-btn" data-v2-cl-bulk="on"  data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle aktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle ein', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-edit-btn" data-v2-cl-bulk="off" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle deaktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle aus', 'ecf-framework' ); ?></button>
+          </span>
+        </div>
+        <?php foreach ( $rows as $r ) :
+            $cls_name = sanitize_html_class( $r['name'] );
+            $field    = sprintf( $name_tpl, esc_attr( $r['name'] ) );
+        ?>
+        <div class="v2-cl-row" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" data-v2-cl-name="<?php echo esc_attr( strtolower( $r['name'] ) ); ?>" data-v2-cl-desc="<?php echo esc_attr( strtolower( $r['desc'] ) ); ?>">
+          <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $r['desc'] ); ?></div></div>
+          <span class="<?php echo esc_attr( $chip_class ); ?>"><?php echo esc_html( $chip_label ); ?></span>
           <label class="v2-tog-label">
             <input type="checkbox"
                    class="v2-tog-cb"
-                   name="<?php echo esc_attr( $opt ); ?>[starter_classes][enabled][<?php echo esc_attr( $cls['name'] ); ?>]"
+                   name="<?php echo esc_attr( $opt . $field ); ?>"
                    value="1"
-                   <?php checked( $cls_enabled ); ?>>
-            <span class="v2-tog<?php echo $cls_enabled ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
+                   <?php checked( $r['enabled'] ); ?>>
+            <span class="v2-tog<?php echo $r['enabled'] ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
           </label>
         </div>
         <?php endforeach; ?>
-        <div class="v2-cl-group-label" style="margin-top:12px"><?php esc_html_e( 'Advanced (extras)', 'ecf-framework' ); ?></div>
-        <?php foreach ( $starter_lib['advanced'] ?? [] as $cls ) :
-          $cls_name    = sanitize_html_class( $cls['name'] );
-          $cls_enabled = ! empty( $enabled_map[ $cls['name'] ] );
+        <?php endforeach;
+        };
+
+        /* Search box markup, parameter is the wrapper id of the tab panel. */
+        $render_class_search = function ( $panel_id ) {
         ?>
-        <div class="v2-cl-row">
-          <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( ucfirst( $cls['category'] ?? '' ) ); ?></div></div>
-          <span class="v2-chip">Extra</span>
-          <label class="v2-tog-label">
-            <input type="checkbox"
-                   class="v2-tog-cb"
-                   name="<?php echo esc_attr( $opt ); ?>[starter_classes][enabled][<?php echo esc_attr( $cls['name'] ); ?>]"
-                   value="1"
-                   <?php checked( $cls_enabled ); ?>>
-            <span class="v2-tog<?php echo $cls_enabled ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
-          </label>
+        <div class="v2-cl-search-wrap" style="margin-bottom:12px;position:sticky;top:0;z-index:5;background:var(--v2-bg);padding:6px 0">
+          <input type="search" class="v2-si v2-cl-search" data-v2-cl-search="<?php echo esc_attr( $panel_id ); ?>" placeholder="<?php esc_attr_e( 'Klassen suchen…', 'ecf-framework' ); ?>" style="width:100%">
+          <div class="v2-cl-search-empty" data-v2-cl-empty="<?php echo esc_attr( $panel_id ); ?>" style="display:none;padding:24px;text-align:center;opacity:.7"><?php esc_html_e( 'Keine Klassen gefunden', 'ecf-framework' ); ?></div>
         </div>
-        <?php endforeach; ?>
+        <?php
+        };
+      ?>
+
+      <!-- Starter classes (basic only, grouped by category) -->
+      <div id="v2-cl-starter" class="v2-tp">
+        <?php $render_class_search( 'v2-cl-starter' ); ?>
+        <?php
+          $starter_by_cat = [];
+          foreach ( $starter_lib['basic'] ?? [] as $cls ) {
+            $cat = $cls['category'] ?? 'other';
+            $starter_by_cat[ $cat ][] = [
+              'name'    => $cls['name'],
+              'desc'    => ucfirst( $cls['category'] ?? '' ),
+              'enabled' => ! empty( $enabled_map[ $cls['name'] ] ),
+            ];
+          }
+          $render_class_group( $starter_by_cat, '[starter_classes][enabled][%s]', 'v2-chip v2-chip--green', __( 'Starter', 'ecf-framework' ) );
+        ?>
       </div><!-- /starter tab -->
 
-      <!-- Utility classes -->
-      <div id="v2-cl-utility" class="v2-tp">
-        <?php foreach ( $utility_lib as $group_key => $group_items ) : ?>
-        <div class="v2-cl-group-label"><?php echo esc_html( ucfirst( $group_key ) ); ?></div>
-        <?php foreach ( $group_items as $cls ) :
-          $cls_name    = sanitize_html_class( $cls['name'] );
-          $cls_enabled = ! empty( $utility_enabled[ $cls['name'] ] );
+      <!-- Extra classes (advanced, grouped by category) -->
+      <div id="v2-cl-extra" class="v2-tp">
+        <?php $render_class_search( 'v2-cl-extra' ); ?>
+        <?php
+          $extra_by_cat = [];
+          foreach ( $starter_lib['advanced'] ?? [] as $cls ) {
+            $cat = $cls['category'] ?? 'other';
+            $extra_by_cat[ $cat ][] = [
+              'name'    => $cls['name'],
+              'desc'    => ucfirst( $cls['category'] ?? '' ),
+              'enabled' => ! empty( $enabled_map[ $cls['name'] ] ),
+            ];
+          }
+          $render_class_group( $extra_by_cat, '[starter_classes][enabled][%s]', 'v2-chip', __( 'Extra', 'ecf-framework' ) );
         ?>
-        <div class="v2-cl-row">
-          <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $cls['label'] ?? '' ); ?></div></div>
-          <span class="v2-chip">Utility</span>
-          <label class="v2-tog-label">
-            <input type="checkbox"
-                   class="v2-tog-cb"
-                   name="<?php echo esc_attr( $opt ); ?>[utility_classes][enabled][<?php echo esc_attr( $cls['name'] ); ?>]"
-                   value="1"
-                   <?php checked( $cls_enabled ); ?>>
-            <span class="v2-tog<?php echo $cls_enabled ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
-          </label>
-        </div>
-        <?php endforeach; ?>
-        <?php endforeach; ?>
+      </div><!-- /extra tab -->
+
+      <!-- Utility classes (already grouped by registry, just add search/bulk) -->
+      <div id="v2-cl-utility" class="v2-tp">
+        <?php $render_class_search( 'v2-cl-utility' ); ?>
+        <?php
+          $utility_by_cat = [];
+          foreach ( $utility_lib as $group_key => $group_items ) {
+            foreach ( $group_items as $cls ) {
+              $utility_by_cat[ $group_key ][] = [
+                'name'    => $cls['name'],
+                'desc'    => $cls['label'] ?? '',
+                'enabled' => ! empty( $utility_enabled[ $cls['name'] ] ),
+              ];
+            }
+          }
+          $render_class_group( $utility_by_cat, '[utility_classes][enabled][%s]', 'v2-chip', __( 'Utility', 'ecf-framework' ) );
+        ?>
       </div><!-- /utility tab -->
 
       <!-- Custom classes -->
@@ -3697,12 +3832,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
         </div>
       </div>
 
-      </div><!-- /v2-pl-general (elementor+updates content) -->
       </div><!-- /v2-st-system -->
 
     </div><!-- /content -->
   </div>
 </div><!-- /settings page -->
+
+<!-- Owner-only Ideen page — submits via REST (no <form> tag), so it lives inside the settings form like any other v2 page and inherits flex layout -->
+<?php $this->render_owner_notes_page(); ?>
 
 </form><!-- #ecf-v2-form -->
 

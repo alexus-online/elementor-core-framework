@@ -12,6 +12,9 @@ trait ECF_Framework_Hook_Registration_Trait {
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('wp_head', [$this, 'output_css'], 99);
         add_action('admin_post_ecf_clear_debug_history', [$this, 'handle_clear_debug_history']);
+        // Owner-only "Ideen" notes — handlers self-gate via is_layrix_owner().
+        add_action('admin_post_ecf_owner_note_save',   [$this, 'handle_owner_note_save']);
+        add_action('admin_post_ecf_owner_note_delete', [$this, 'handle_owner_note_delete']);
 
         add_filter('plugin_locale', [$this, 'filter_plugin_locale'], 10, 2);
         add_filter('gettext', [$this, 'filter_runtime_gettext'], 20, 3);
