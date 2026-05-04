@@ -132,8 +132,49 @@
     if (isButton(container)) {
       if (auto.buttonsEnabled && auto.buttonClassId) {
         ensureClassPresent(container, auto.buttonClassId);
+        // Elementor v4 atomic style-props live in their own React state
+        // and aren't reachable via $e.commands / container.settings. Hack
+        // workaround: when the inspector panel is rendered for this
+        // selected button, find any input whose value is the schema
+        // default #375EFB and replace it with "transparent" using a
+        // native value setter + input/change/blur events so React picks
+        // it up. Targets ONLY #375EFB, so user-set custom colors stay.
+        scheduleInspectorPickerFix();
       }
     }
+  }
+
+  function scheduleInspectorPickerFix() {
+    // Try a few times because the panel might still be rendering.
+    var tries = 0;
+    var iv = setInterval(function() {
+      tries++;
+      var hit = fixInspectorPickerOnce();
+      if (hit || tries >= 8) clearInterval(iv);
+    }, 150);
+  }
+
+  function fixInspectorPickerOnce() {
+    var found = false;
+    var inputs = document.querySelectorAll('input[type="text"], input[type="color"]');
+    var nativeSetter;
+    try {
+      nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    } catch (e) { return false; }
+    inputs.forEach(function(input) {
+      var v = (input.value || '').trim();
+      if (!/^#?375EFB$/i.test(v)) return;
+      if (input.__layrixPickerFixed) return;
+      input.__layrixPickerFixed = true;
+      try {
+        nativeSetter.call(input, 'transparent');
+        input.dispatchEvent(new Event('input',  { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('blur',   { bubbles: true }));
+        found = true;
+      } catch (e) {}
+    });
+    return found;
   }
 
   /* When the heading tag changes, swap the matching ecf-heading-N class.

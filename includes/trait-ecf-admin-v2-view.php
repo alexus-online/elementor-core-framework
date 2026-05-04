@@ -517,10 +517,15 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Farben', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--ghost" data-ecf-kit-import title="<?php esc_attr_e( 'Farben/Schriften aus dem aktiven Elementor-Kit übernehmen', 'ecf-framework' ); ?>">↘ <?php esc_html_e( 'Aus Elementor importieren', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-ecf-kit-import title="<?php esc_attr_e( 'Farben/Schriften aus dem aktiven Elementor-Kit übernehmen', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↘</span><span><?php esc_html_e( 'Aus Elementor importieren', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -837,40 +842,118 @@ trait ECF_Framework_Admin_V2_View_Trait {
       };
       ?>
 
-      <!-- Base Colors (moved from Einstellungen → Basisfarben) -->
+      <!-- Base Colors (Hintergrund/Link/Fokus). Jedes Feld bietet
+           entweder Custom-Hex oder einen Palette-Token als Wert —
+           wenn ein Token gewählt ist, wird var(--ecf-color-X) gespeichert
+           und der Hex-Picker greyed out. -->
+      <?php
+        // Build palette-token options once (used by all base color rows).
+        // Use the same German labels as the palette section above (Primär,
+        // Sekundär, Akzent, Fläche, Text) — fall back to user's title or
+        // ucfirst of the slug for custom palette tokens (accentmint etc).
+        $bcf_label_map = [
+          'primary'   => __( 'Primary',   'ecf-framework' ),
+          'secondary' => __( 'Secondary', 'ecf-framework' ),
+          'accent'    => __( 'Accent',    'ecf-framework' ),
+          'surface'   => __( 'Surface',   'ecf-framework' ),
+          'text'      => __( 'Text',      'ecf-framework' ),
+        ];
+        $palette_tokens = [];
+        $palette_hexes  = [];
+        foreach ( ( $settings['colors'] ?? [] ) as $crow ) {
+          $cn = sanitize_key( $crow['name'] ?? '' );
+          if ( $cn === '' ) continue;
+          $label = $bcf_label_map[ $cn ] ?? ucfirst( $cn );
+          $palette_tokens[ $cn ] = $label . ' — var(--ecf-color-' . $cn . ')';
+          $palette_hexes[ $cn ]  = (string) ( $crow['value'] ?? '' );
+        }
+      ?>
+      <script>window.ecfPaletteHexes = <?php echo wp_json_encode( $palette_hexes ); ?>;</script>
+      <?php
+
+        $base_color_field = function ( $field_key, $hex_default, $label, $tokens_to_show ) use ( $opt, $settings, $palette_tokens, $tok_local ) {
+          $current = (string) ( $settings[ $field_key ] ?? '' );
+          $is_var  = (bool) preg_match( '/^var\(\s*--ecf-color-([a-z0-9_-]+)\s*\)$/i', $current, $m );
+          $current_var_token = $is_var ? sanitize_key( $m[1] ) : '';
+          $current_hex = $is_var ? $hex_default : ( $current ?: $hex_default );
+          ?>
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><?php echo esc_html( $label ); ?></div>
+              <?php $tok_local( $tokens_to_show ); ?>
+            </div>
+            <div class="v2-base-color-field" data-bcf>
+              <select class="v2-si v2-si--sm" data-bcf-mode>
+                <option value=""<?php selected( ! $is_var ); ?>><?php esc_html_e( 'Custom (Hex)', 'ecf-framework' ); ?></option>
+                <?php foreach ( $palette_tokens as $tok_key => $tok_label ) : ?>
+                  <option value="<?php echo esc_attr( $tok_key ); ?>"<?php selected( $current_var_token, $tok_key ); ?>><?php echo esc_html( $tok_label ); ?></option>
+                <?php endforeach; ?>
+              </select>
+              <input type="color" class="v2-si v2-si--color" data-bcf-hex value="<?php echo esc_attr( $current_hex ); ?>"<?php echo $is_var ? ' disabled' : ''; ?> style="<?php echo $is_var ? 'opacity:.4;cursor:not-allowed' : ''; ?>">
+              <input type="hidden" name="<?php echo esc_attr( $opt ); ?>[<?php echo esc_attr( $field_key ); ?>]" data-bcf-store value="<?php echo esc_attr( $current ?: $hex_default ); ?>">
+            </div>
+          </div>
+          <?php
+        };
+      ?>
       <div class="v2-sec">
         <div class="v2-sh"><?php esc_html_e( 'Basisfarben', 'ecf-framework' ); ?></div>
         <div class="v2-sg">
-          <div class="v2-sr">
-            <div>
-              <div class="v2-sl"><?php esc_html_e( 'Textfarbe', 'ecf-framework' ); ?></div>
-              <?php $tok_local( [ '--ecf-base-text-color' ] ); ?>
-            </div>
-            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[base_text_color]" value="<?php echo esc_attr( $settings['base_text_color'] ?? '#0f172a' ); ?>">
-          </div>
-          <div class="v2-sr">
-            <div>
-              <div class="v2-sl"><?php esc_html_e( 'Hintergrundfarbe', 'ecf-framework' ); ?></div>
-              <?php $tok_local( [ '--ecf-base-background-color' ] ); ?>
-            </div>
-            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[base_background_color]" value="<?php echo esc_attr( $settings['base_background_color'] ?? '#f8fafc' ); ?>">
-          </div>
-          <div class="v2-sr">
-            <div>
-              <div class="v2-sl"><?php esc_html_e( 'Link-Farbe', 'ecf-framework' ); ?></div>
-              <?php $tok_local( [ '--ecf-link-color' ] ); ?>
-            </div>
-            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[link_color]" value="<?php echo esc_attr( $settings['link_color'] ?? '#4f46e5' ); ?>">
-          </div>
-          <div class="v2-sr">
-            <div>
-              <div class="v2-sl"><?php esc_html_e( 'Fokus-Farbe', 'ecf-framework' ); ?></div>
-              <?php $tok_local( [ '--ecf-focus-color', '--ecf-focus-outline-width', '--ecf-focus-outline-offset' ] ); ?>
-            </div>
-            <input type="color" class="v2-si v2-si--color" name="<?php echo esc_attr( $opt ); ?>[focus_color]" value="<?php echo esc_attr( $settings['focus_color'] ?? '#0ea5e9' ); ?>">
-          </div>
+          <?php $base_color_field( 'base_background_color', '#f8fafc', __( 'Hintergrundfarbe', 'ecf-framework' ), [ '--ecf-base-background-color' ] ); ?>
+          <?php $base_color_field( 'link_color',           '#4f46e5', __( 'Link-Farbe',       'ecf-framework' ), [ '--ecf-link-color' ] ); ?>
+          <?php $base_color_field( 'focus_color',          '#0ea5e9', __( 'Fokus-Farbe',      'ecf-framework' ), [ '--ecf-focus-color', '--ecf-focus-outline-width', '--ecf-focus-outline-offset' ] ); ?>
         </div>
       </div>
+      <script>
+      // Token <> Hex toggle for Basisfarben fields. The hidden input carries
+      // the actual saved value: either a hex string or var(--ecf-color-X).
+      // Token preview hex comes from window.ecfPaletteHexes (PHP-emitted)
+      // since :root CSS vars don't exist in wp-admin context.
+      (function() {
+        function getTokenHex(token) {
+          var raw = (window.ecfPaletteHexes && window.ecfPaletteHexes[token]) || '';
+          raw = String(raw).trim();
+          if (!raw) return '';
+          if (/^#[0-9a-f]{3,8}$/i.test(raw)) return raw;
+          // Convert rgb()/rgba()/hsl() to hex by routing through a temp element.
+          var tmp = document.createElement('div');
+          tmp.style.color = raw;
+          document.body.appendChild(tmp);
+          var rgb = getComputedStyle(tmp).color;
+          document.body.removeChild(tmp);
+          var m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          if (!m) return '';
+          var hex = '#';
+          for (var i = 1; i <= 3; i++) {
+            var c = parseInt(m[i], 10).toString(16);
+            hex += c.length === 1 ? '0' + c : c;
+          }
+          return hex;
+        }
+        document.querySelectorAll('[data-bcf]').forEach(function(wrap) {
+          var sel  = wrap.querySelector('[data-bcf-mode]');
+          var hex  = wrap.querySelector('[data-bcf-hex]');
+          var hide = wrap.querySelector('[data-bcf-store]');
+          if (!sel || !hex || !hide) return;
+          function sync() {
+            var token = sel.value;
+            if (token) {
+              hide.value = 'var(--ecf-color-' + token + ')';
+              var resolved = getTokenHex(token);
+              if (resolved) hex.value = resolved;
+              hex.disabled = true; hex.style.opacity = '.7'; hex.style.cursor = 'not-allowed';
+            } else {
+              hide.value = hex.value;
+              hex.disabled = false; hex.style.opacity = ''; hex.style.cursor = '';
+            }
+          }
+          sel.addEventListener('change', sync);
+          hex.addEventListener('input', function() { if (!sel.value) hide.value = hex.value; });
+          // Run once on initial load so saved-token rows show their hex preview.
+          if (sel.value) sync();
+        });
+      })();
+      </script>
 
     </div><!-- /content -->
 
@@ -932,9 +1015,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -999,9 +1087,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Typography', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -1408,9 +1501,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Abstände', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -1528,9 +1626,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Shadows', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -1635,9 +1738,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Variablen', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
       <span class="v2-topbar-note"><?php echo esc_html( $var_count_total . ' ' . __( 'variables total', 'ecf-framework' ) ); ?></span>
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -1997,7 +2105,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Classes', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">
@@ -3181,9 +3289,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Einstellungen', 'ecf-framework' ); ?></span></div>
     <div class="v2-topbar-r">
-      <button type="button" class="v2-btn v2-btn--ghost v2-btn--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><?php esc_html_e( 'Reset to defaults', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--ghost" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><?php esc_html_e( 'Discard changes', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+      <div class="v2-actions-menu">
+        <button type="button" class="v2-btn v2-btn--primary v2-actions-toggle" data-v2-actions-toggle aria-haspopup="menu" aria-expanded="false" title="<?php esc_attr_e( 'Weitere Aktionen', 'ecf-framework' ); ?>"><span class="v2-actions-toggle__label"><?php esc_html_e( 'Aktionen', 'ecf-framework' ); ?></span><span class="v2-actions-toggle__chevron" aria-hidden="true">▾</span></button>
+        <div class="v2-actions-menu__dropdown" role="menu" hidden>
+          <button type="button" role="menuitem" class="v2-actions-menu__item v2-actions-menu__item--danger" data-v2-reset-defaults title="<?php esc_attr_e( 'Reset ALL settings to plugin defaults', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">↺</span><span><?php esc_html_e( 'Auf Grundeinstellungen zurücksetzen', 'ecf-framework' ); ?></span></button>
+          <button type="button" role="menuitem" class="v2-actions-menu__item" data-v2-reset title="<?php esc_attr_e( 'Discard unsaved changes and reload page', 'ecf-framework' ); ?>"><span class="v2-actions-menu__icon" aria-hidden="true">✕</span><span><?php esc_html_e( 'Änderungen verwerfen', 'ecf-framework' ); ?></span></button>
+        </div>
+      </div>
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
     </div>
   </div>
   <div class="v2-page-body">

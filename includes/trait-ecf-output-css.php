@@ -152,7 +152,11 @@ trait ECF_Framework_Output_CSS_Trait {
         }
         $css .= "--ecf-container-boxed:" . esc_attr($settings['elementor_boxed_width'] ?? '1140px') . ";";
         $css .= "--ecf-content-max-width:" . esc_attr($settings['content_max_width'] ?? '72ch') . ";";
-        $css .= "--ecf-base-text-color:" . esc_attr($this->sanitize_css_color_value($settings['base_text_color'] ?? '#111827')) . ";";
+        // Alias: --ecf-base-text-color references the "text" palette token
+        // so there's only one source of truth for body-text color.
+        // Fallback chain: var(--ecf-color-text) → manual base_text_color → hard default.
+        $manual_text = $this->sanitize_css_color_value($settings['base_text_color'] ?? '#111827');
+        $css .= "--ecf-base-text-color:var(--ecf-color-text," . esc_attr($manual_text ?: '#111827') . ");";
         $css .= "--ecf-base-background-color:" . esc_attr($this->sanitize_css_color_value($settings['base_background_color'] ?? '#ffffff')) . ";";
         $css .= "--ecf-link-color:" . esc_attr($this->sanitize_css_color_value($settings['link_color'] ?? '#3b82f6')) . ";";
         $css .= "--ecf-focus-color:" . esc_attr($this->sanitize_css_color_value($settings['focus_color'] ?? '#6366f1')) . ";";
@@ -234,16 +238,14 @@ trait ECF_Framework_Output_CSS_Trait {
         if ($settings['enabled_components']['buttons'] === '1') {
             $css .= ".ecf-btn,.cf-btn{display:inline-flex;align-items:center;justify-content:center;padding:var(--ecf-space-s,8px) var(--ecf-space-m,16px);border-radius:var(--ecf-radius-m,12px);text-decoration:none;border:0;cursor:pointer;}.ecf-btn-primary,.cf-btn-primary{background:var(--ecf-color-primary,#3b82f6);color:#fff;}.ecf-btn-secondary,.cf-btn-secondary{background:var(--ecf-color-secondary,#64748b);color:#fff;}";
         }
-        // Neutralize Elementor v4 atomic-widget hard-coded button defaults
-        // (.elementor .e-button-base { background:#375EFB } and
-        //  .elementor .e-form-submit-button-base { background:#000;color:#fff })
-        // when the ecf-button auto-class is present. Specificity (0,3,0) beats
-        // Elementor's (0,2,0), so transparent + currentColor + token-driven
-        // padding/radius/font from the synced ecf-button Global Class win.
-        $css .= ".elementor .e-button-base.ecf-button,"
-              . ".elementor .e-form-submit-button-base.ecf-button{"
-              . "background-color:transparent;"
-              . "color:currentColor;"
+        // Layout-only overrides for ecf-button: padding/radius from Layrix
+        // tokens. Farben (background-color, color) bewusst NICHT mehr in
+        // diesem Block — die hat sonst user-set Custom-Farben blockiert.
+        // Default-#375EFB bleibt damit zwar im Render erhalten bis der
+        // User selbst eine Farbe setzt; das ist der akzeptierte Tradeoff
+        // damit Custom-Farben zuverlässig durchkommen.
+        $css .= ".e-button-base.ecf-button,"
+              . ".e-form-submit-button-base.ecf-button{"
               . "padding:var(--ecf-space-s,8px) var(--ecf-space-m,16px);"
               . "border-radius:var(--ecf-radius-m,12px);"
               . "}";
@@ -277,7 +279,7 @@ trait ECF_Framework_Output_CSS_Trait {
     }
 
     private function css_transient_key(): string {
-        return 'ecf_generated_css_v3';
+        return 'ecf_generated_css_v6';
     }
 
     public function clear_css_cache(): void {

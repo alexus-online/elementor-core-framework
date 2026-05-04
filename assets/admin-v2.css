@@ -285,6 +285,82 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
   color: var(--v2-text3);
 }
 
+/* Topbar overflow menu — bundles secondary actions (reset/discard/import)
+   so the topbar stays clean as more page-level actions get added. The
+   primary "Speichern" button sits next to the trigger, not inside. */
+.ecf-v2-wrapper .v2-actions-menu { position: relative; }
+.ecf-v2-wrapper .v2-actions-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.ecf-v2-wrapper .v2-actions-toggle[aria-expanded="true"] {
+  background: var(--v2-accent2);
+}
+.ecf-v2-wrapper .v2-actions-toggle[aria-expanded="true"] .v2-actions-toggle__chevron { transform: rotate(180deg); }
+.ecf-v2-wrapper .v2-actions-toggle__chevron {
+  font-size: 11px;
+  opacity: .7;
+  transition: transform .15s;
+  display: inline-block;
+}
+.ecf-v2-wrapper .v2-actions-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  background: var(--v2-s2);
+  border: 1px solid var(--v2-border2);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.25);
+  padding: 4px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ecf-v2-wrapper .v2-actions-menu__dropdown[hidden] { display: none; }
+.ecf-v2-wrapper .v2-actions-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font-size: 13px;
+  padding: 9px 12px;
+  background: transparent;
+  border: 0;
+  color: var(--v2-text);
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background .1s, color .1s;
+  white-space: nowrap;
+}
+.ecf-v2-wrapper .v2-actions-menu__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+  background: rgba(255,255,255,.06);
+  border-radius: 4px;
+  flex-shrink: 0;
+  color: var(--v2-text2);
+}
+.ecf-v2-wrapper .v2-actions-menu__item--danger .v2-actions-menu__icon {
+  background: rgba(239,68,68,.12);
+  color: #fca5a5;
+}
+.ecf-v2-wrapper .v2-actions-menu__item:hover {
+  background: rgba(255,255,255,.06);
+}
+.ecf-v2-wrapper .v2-actions-menu__item--danger { color: #fca5a5; }
+.ecf-v2-wrapper .v2-actions-menu__item--danger:hover {
+  background: rgba(239,68,68,.12);
+  color: #fecaca;
+}
+
 /* ── Buttons ────────────────────────────────────────────────────── */
 .ecf-v2-wrapper .v2-btn {
   display: inline-flex;
@@ -314,6 +390,21 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
   color: #fff;
 }
 .ecf-v2-wrapper .v2-btn--primary:hover { background: var(--v2-accent2); }
+
+/* Outline variant — matches the "Klassische Ansicht" topbar-toggle style:
+   blue text + soft tint + accent border. Used as a less-aggressive
+   primary alternative on save buttons that should sit visually next to
+   the solid Aktionen dropdown without competing for dominance. */
+.ecf-v2-wrapper .v2-btn--outline {
+  color: #60a5fa;
+  background: rgba(59,130,246,.1);
+  border: 1px solid rgba(59,130,246,.3);
+}
+.ecf-v2-wrapper .v2-btn--outline:hover {
+  background: rgba(59,130,246,.18);
+  border-color: rgba(59,130,246,.5);
+  color: #93c5fd;
+}
 
 /* ── Page body ──────────────────────────────────────────────────── */
 .ecf-v2-wrapper .v2-page-body {
@@ -1501,6 +1592,22 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 .ecf-v2-wrapper .v2-si--error {
   border-color: var(--v2-danger, #f87171) !important;
   background: rgba(248,113,113,.08) !important;
+}
+.ecf-v2-wrapper .v2-base-color-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ecf-v2-wrapper .v2-base-color-field .v2-si--sm {
+  min-width: 180px;
+  font-size: 11.5px;
+}
+.ecf-v2-wrapper .v2-base-color-field .v2-si--color {
+  width: 44px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity .12s;
 }
 .ecf-v2-wrapper .v2-si--sm {
   width: auto;

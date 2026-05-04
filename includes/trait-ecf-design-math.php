@@ -369,6 +369,13 @@ trait ECF_Framework_Design_Math_Trait {
     }
 
     private function sanitize_css_color_value($value, $format = '') {
+        // Preserve token references (var(--ecf-color-X)) — they're not parseable
+        // colors but valid CSS values that we want to flow through unchanged so
+        // the user can reference palette tokens in base colors / link colors.
+        $stripped = trim((string) $value);
+        if (preg_match('/^var\(\s*--ecf-color-[a-z0-9_-]+\s*\)$/i', $stripped)) {
+            return $stripped;
+        }
         $parsed = $this->parse_css_color($value);
         if (!$parsed) return '';
         $format = strtolower((string) $format);

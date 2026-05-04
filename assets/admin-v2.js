@@ -3486,6 +3486,37 @@
       });
     });
 
+    /* Topbar overflow-menu — toggle dropdown, close on outside click,
+       close after picking an item (so the user goes straight into the
+       action without a stale-open menu). */
+    w.querySelectorAll('[data-v2-actions-toggle]').forEach(function(toggle) {
+      var menu = toggle.parentElement;
+      if (!menu) return;
+      var dropdown = menu.querySelector('.v2-actions-menu__dropdown');
+      if (!dropdown) return;
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = !dropdown.hasAttribute('hidden');
+        if (open) { dropdown.setAttribute('hidden', ''); toggle.setAttribute('aria-expanded', 'false'); }
+        else      { dropdown.removeAttribute('hidden'); toggle.setAttribute('aria-expanded', 'true'); }
+      });
+      dropdown.querySelectorAll('.v2-actions-menu__item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          dropdown.setAttribute('hidden', '');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    });
+    document.addEventListener('click', function(e) {
+      w.querySelectorAll('.v2-actions-menu__dropdown:not([hidden])').forEach(function(dd) {
+        if (!dd.parentElement.contains(e.target)) {
+          dd.setAttribute('hidden', '');
+          var t = dd.parentElement.querySelector('[data-v2-actions-toggle]');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
     /* Theme-Style-Importer modal — read kit on open, apply selected fields */
     (function() {
       var modal   = document.getElementById('ecf-kit-import-modal');
