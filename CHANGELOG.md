@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1.1 (2026-05-05)
+
+### Verbesserungen
+- **Klassen-Defaults UI** gruppiert nach Kategorien (Überschriften / Komponenten / Sektionen / Layout) als ausklappbare Accordions. Erste Kategorie default offen, Rest collapsed — übersichtlicher bei vielen Layrix-Klassen.
+
+### Fix
+- **`ecf-button` Schema bereinigt**: `background-color` und `color` aus den Klassen-Defaults entfernt. Vorher hat das Admin-UI Werte angeboten die nicht durchgesetzt werden konnten (Atomic-Widgets schreiben Style-Props nicht in `container.settings`), und der Sync hätte Default-Farben in Elementor's Global-Class-Registry geschrieben, die User-Custom-Farben blockieren. Buttons erben Farbe jetzt vom User oder Elementor-Default; Layrix steuert nur Geometrie/Typografie (Padding, Radius, Font-Size).
+
 ## 0.5.7 (2026-05-02)
 
 ### Neu

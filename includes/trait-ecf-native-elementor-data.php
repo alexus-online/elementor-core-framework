@@ -46,13 +46,17 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             'ecf-button' => [
                 'label'    => __('Button (Basis)', 'ecf-framework'),
                 'category' => 'components',
+                // background-color / color bewusst NICHT mehr im Schema —
+                // sonst lügt das Admin-UI über Werte die nicht durchgesetzt
+                // werden, und der Sync würde Farb-Defaults in Elementor's
+                // Global-Class-Registry schreiben die user-set Custom-Farben
+                // blockieren. Buttons erben Farbe vom user oder Elementor-
+                // Default, Layrix steuert nur Geometrie/Typografie.
                 'props'    => [
                     'padding-block'    => [ 'label' => __('Padding (oben/unten)',   'ecf-framework'), 'type' => 'size',  'default' => 'ecf-space-s'   ],
                     'padding-inline'   => [ 'label' => __('Padding (links/rechts)', 'ecf-framework'), 'type' => 'size',  'default' => 'ecf-space-m'   ],
                     'border-radius'    => [ 'label' => __('Eckenradius',            'ecf-framework'), 'type' => 'size',  'default' => 'ecf-radius-m'  ],
                     'font-size'        => [ 'label' => __('Schriftgröße',           'ecf-framework'), 'type' => 'size',  'default' => 'ecf-text-m'    ],
-                    'background-color' => [ 'label' => __('Hintergrund',            'ecf-framework'), 'type' => 'color', 'default' => 'transparent'   ],
-                    'color'            => [ 'label' => __('Textfarbe',              'ecf-framework'), 'type' => 'color', 'default' => 'currentColor'  ],
                 ],
             ],
         ];

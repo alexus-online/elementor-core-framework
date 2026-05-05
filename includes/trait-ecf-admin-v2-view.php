@@ -3674,28 +3674,75 @@ trait ECF_Framework_Admin_V2_View_Trait {
           };
           ?>
 
-          <?php foreach ( $cls_schema as $class_name => $cls_def ) : ?>
-            <div class="v2-sec" style="margin-bottom:16px;border:1px solid var(--v2-border);border-radius:8px;padding:12px 14px;background:rgba(255,255,255,.02)">
-              <div class="v2-sh" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                <span><?php echo esc_html( $cls_def['label'] ); ?></span>
-                <code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;color:var(--v2-text2);font-weight:400">.<?php echo esc_html( $class_name ); ?></code>
-              </div>
-              <div class="v2-sg">
-                <?php foreach ( $cls_def['props'] as $prop_key => $prop_def ) :
-                  $current = $cls_defaults[ $class_name ][ $prop_key ] ?? '';
-                  $sch_def = $prop_def['default'] ?? '';
-                ?>
-                <div class="v2-sr">
-                  <div>
-                    <div class="v2-sl"><?php echo esc_html( $prop_def['label'] ); ?></div>
-                    <div class="v2-sh2"><code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);color:var(--v2-text3)"><?php echo esc_html( $prop_key ); ?></code></div>
+          <?php
+            // Group schema entries by category for accordion rendering.
+            $cls_by_cat = [];
+            foreach ( $cls_schema as $class_name => $cls_def ) {
+              $cat = sanitize_key( $cls_def['category'] ?? 'other' );
+              $cls_by_cat[ $cat ][ $class_name ] = $cls_def;
+            }
+            $cat_labels = [
+              'typography' => __( 'Überschriften',     'ecf-framework' ),
+              'components' => __( 'Komponenten',        'ecf-framework' ),
+              'sections'   => __( 'Sektionen',          'ecf-framework' ),
+              'layout'     => __( 'Layout',             'ecf-framework' ),
+              'other'      => __( 'Weitere Klassen',    'ecf-framework' ),
+            ];
+            // Stable order: typography, components, sections, layout, then any remaining
+            $cat_order = [ 'typography', 'components', 'sections', 'layout' ];
+            foreach ( array_keys( $cls_by_cat ) as $k ) {
+              if ( ! in_array( $k, $cat_order, true ) ) $cat_order[] = $k;
+            }
+          ?>
+
+          <?php $cat_first_rendered = false; foreach ( $cat_order as $cat ) :
+            if ( empty( $cls_by_cat[ $cat ] ) ) continue;
+            $cat_label = $cat_labels[ $cat ] ?? ucfirst( $cat );
+            $cat_count = count( $cls_by_cat[ $cat ] );
+            $cat_open = ! $cat_first_rendered; // first non-empty category open, rest collapsed
+            $cat_first_rendered = true;
+          ?>
+            <details class="v2-cls-cat"<?php echo $cat_open ? ' open' : ''; ?> style="margin-bottom:12px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(255,255,255,.02);overflow:hidden">
+              <summary style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;list-style:none;font-weight:600;font-size:13.5px">
+                <span style="display:flex;align-items:center;gap:10px">
+                  <span class="v2-cls-cat__chevron" style="display:inline-block;font-size:10px;opacity:.6;transition:transform .15s">▼</span>
+                  <span><?php echo esc_html( $cat_label ); ?></span>
+                  <span style="font-weight:400;font-size:11.5px;color:var(--v2-text3)">(<?php echo (int) $cat_count; ?>)</span>
+                </span>
+              </summary>
+              <div style="padding:0 14px 14px">
+                <?php foreach ( $cls_by_cat[ $cat ] as $class_name => $cls_def ) : ?>
+                  <div class="v2-sec" style="margin:10px 0 0;border:1px solid var(--v2-border);border-radius:8px;padding:12px 14px;background:rgba(0,0,0,.18)">
+                    <div class="v2-sh" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                      <span><?php echo esc_html( $cls_def['label'] ); ?></span>
+                      <code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;color:var(--v2-text2);font-weight:400">.<?php echo esc_html( $class_name ); ?></code>
+                    </div>
+                    <div class="v2-sg">
+                      <?php foreach ( $cls_def['props'] as $prop_key => $prop_def ) :
+                        $current = $cls_defaults[ $class_name ][ $prop_key ] ?? '';
+                        $sch_def = $prop_def['default'] ?? '';
+                      ?>
+                      <div class="v2-sr">
+                        <div>
+                          <div class="v2-sl"><?php echo esc_html( $prop_def['label'] ); ?></div>
+                          <div class="v2-sh2"><code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);color:var(--v2-text3)"><?php echo esc_html( $prop_key ); ?></code></div>
+                        </div>
+                        <?php $render_cls_select( $class_name, $prop_key, $current, $sch_def ); ?>
+                      </div>
+                      <?php endforeach; ?>
+                    </div>
                   </div>
-                  <?php $render_cls_select( $class_name, $prop_key, $current, $sch_def ); ?>
-                </div>
                 <?php endforeach; ?>
               </div>
-            </div>
+            </details>
           <?php endforeach; ?>
+
+          <style>
+            .v2-cls-cat > summary::-webkit-details-marker { display: none; }
+            .v2-cls-cat[open] .v2-cls-cat__chevron { transform: rotate(0deg); }
+            .v2-cls-cat:not([open]) .v2-cls-cat__chevron { transform: rotate(-90deg); }
+            .v2-cls-cat > summary:hover { background: rgba(255,255,255,.03); }
+          </style>
         </div>
       </div>
 
