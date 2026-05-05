@@ -1,5 +1,64 @@
 # Changelog
 
+## 0.6.2 (2026-05-05)
+
+### Neu — Status-Seite
+- **Neuer Sidebar-Eintrag „📊 Status"** (Gruppe „Übersicht"). Zentrale Anlaufstelle für alle An/Aus-Schalter:
+  - Sync-Summary-Card (zeigt Anzahl gesynchter Variablen + Klassen, grün/orange je nach Zustand, Direkt-Sync-Button)
+  - Sync-Toggles (Auto-Sync, Auto-Sync Variablen, Auto-Sync Klassen)
+  - Auto-Klassen-Toggles (Master + Headings/Buttons/Text-Links/Forms)
+  - Plugin-Pflege-Toggles (Autosave, GitHub-Update-Prüfung, Elementor-Status-Cards)
+  - „Alle aktivieren" / „Alle deaktivieren"-Bulk-Buttons rechts oben
+- Toggle-Sync zwischen Status- und Settings-Page: Änderung an einem Toggle in Status spiegelt sich automatisch in der Settings-Page (gleiche Setting, kein Konflikt beim Save).
+
+### Neu — FAQ-Seite
+- **Neuer Sidebar-Eintrag „📚 FAQ"** mit 43 Fragen über 7 Kategorien (Erste Schritte, Grundwerte, Klassen, Sync, Auto-Klassen, Updates, Probleme).
+- **Live-Suche** mit Volltext-Filter über Frage, Antwort und Keywords.
+- **Kategorie-Chips** als Filter-Toggles oben.
+- **„🔗 Hier öffnen"-Buttons** pro Antwort: Direkt-Sprung zur passenden Layrix-Seite.
+- Akkordeon-Layout, Empty-State bei keinen Treffern, Counter (z.B. „12 / 43 Fragen").
+- **Faktengeprüft** — alle Antworten technisch verifiziert (Elementor-Versionsverhalten, WP-Cron-Mechanik, Limit-Werte, Type-Skala, Root-Font-Modi).
+
+### Neu — „Wie funktioniert's?"-Seite
+- **Neuer Sidebar-Eintrag** unter „Übersicht" mit Drei-Layer-Architektur-Erklärung:
+  - **Visuelles Datenfluss-Diagramm**: 3 farblich getrennte Layer-Karten (grün/indigo/orange) mit Pfeilen + Labels („Sync", „wird referenziert von") — auf Mobile vertikal gestackt.
+  - **3 Detail-Karten** als Definitionslisten: Was ist es / Wo gespeichert / Wo bearbeite ich pro Layer.
+  - **Architektur-FAQ-Akkordeon** mit 6 Fragen rund um Datenfluss, Plugin-Deaktivieren, Werte-Konflikte.
+- FAQ-Eintrag „Was ist Layrix?" verlinkt direkt auf die Page.
+
+### Neu — Externe Sprachdateien (statt hardcoded HTML)
+- **`assets/data/faq-{de,en}.json`** und **`assets/data/how-it-works-{de,en}.json`**: alle FAQ- und Architektur-Inhalte aus dem PHP-Code in strukturierte JSON-Dateien ausgelagert. Vorteile:
+  - Saubere Trennung Content / Code
+  - Übersetzer kopieren `faq-en.json` → `faq-fr.json` und übersetzen, fertig
+  - Locale-aware Loader, Fallback-Kette wenn eine Sprache fehlt
+- Neue Loader-Traits: `trait-ecf-faq-data.php` + `trait-ecf-how-it-works-data.php` (~70 Zeilen, lesen JSON, cachen pro Request).
+
+### Neu — Wizard-UX
+- **Wizard-Cancel-Sync-Prompt**: Wenn der User den Wizard abbricht (Skip/×/ESC) UND noch nie gesynct hat, kommt ein Modal: „Layrix-Tokens sind noch nicht in Elementor verfügbar. Jetzt synchronisieren?". Sonst still gewesen.
+- **Wizard-Persistenz auf `localStorage`**: vorher kam der Wizard nach jedem Browser-Tab-Wechsel wieder (sessionStorage). Jetzt persistent pro Browser. Manueller Re-Start via Button „🚀 Wizard starten" auf Erste-Schritte-Page funktioniert weiterhin.
+
+### Neu — Top-Page-Warnbanner
+- Erscheint auf jeder Layrix-Page solange weder Variablen noch Klassen je gesynct wurden — orange, mit ⚠-Icon und Direkt-Sync-Button. Verschwindet automatisch nach erfolgreichem Sync (kein Reload nötig).
+
+### Verbesserungen — Standardwerte für neue Installs
+Auto-Sync und Auto-Klassen sind jetzt standardmäßig **alle an**:
+- `elementor_auto_sync_enabled`, `elementor_auto_sync_variables`, `elementor_auto_sync_classes`
+- `auto_classes_enabled` Master + alle Sub-Toggles (Headings, Buttons, Text-Links, Forms)
+
+Bestehende Installationen behalten ihre eigenen Toggle-Stände unverändert (kein ungefragtes Überschreiben).
+
+### Verbesserungen — Begriffs-Politur
+- **„Tokens" → „Grundwerte"** global im UI ersetzt (verständlicher für Endnutzer): Sidebar-Gruppe, FAQ-Kategorie, alle Page-Beschreibungen, Such-Placeholder, Aside-Panel-Label.
+- FAQ-Antworten mit präziseren Fakten:
+  - Elementor-Version: V4 atomic widgets statt pauschal „v3 + v4" — Variables seit 3.31, Classes seit 3.33.
+  - Type-Skala: 15 Stufen (5xs-7xl) statt fälschlich „8 Stufen".
+  - Root-Font-Modi: nur 62.5% / 100% (kein freier Slider).
+  - Elementor-Limit (100 Variablen/Klassen) ist Core-Limit, **nicht** Free-vs-Pro.
+  - Update-Trigger: WP-Cron + Plugins-Page-Aufruf + manuell, nicht nur WP-Cron.
+
+### Fix — Wizard-Positionierung
+- Wizard-Callout sitzt wieder fix oben (`top: 16px`) rechts neben der Nav, überdeckt nie mehr Page-Inhalte.
+
 ## 0.6.1.2 (2026-05-05)
 
 ### Fix (kritisch)

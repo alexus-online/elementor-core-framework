@@ -1,0 +1,97 @@
+{
+  "header": {
+    "title": "Wie Layrix funktioniert",
+    "intro": "Layrix verwaltet dein Design-System auf drei Ebenen. Hier siehst du wie sie zusammenhängen — und welche Ebene du wann anpacken solltest."
+  },
+  "flow": [
+    {
+      "kind": "layer",
+      "num": 1,
+      "modifier": "source",
+      "title": "Layrix Settings",
+      "sub": "Source of Truth",
+      "chip_html": "<code>--ecf-color-primary: #3b82f6</code>"
+    },
+    {
+      "kind": "arrow",
+      "label": "Sync"
+    },
+    {
+      "kind": "layer",
+      "num": 2,
+      "modifier": "vars",
+      "title": "Elementor Variables",
+      "sub_html": "<code>e-gv-XXX</code>",
+      "chip": "im Style-Panel als Token sichtbar"
+    },
+    {
+      "kind": "arrow",
+      "label": "wird referenziert von"
+    },
+    {
+      "kind": "layer",
+      "num": 3,
+      "modifier": "classes",
+      "title": "Global Classes",
+      "sub_html": "<code>g-ecf-XXX</code>",
+      "chip": "z.B. ecf-button, ecf-heading-1"
+    }
+  ],
+  "cards": [
+    {
+      "num": 1,
+      "title": "Layrix Settings",
+      "rows": [
+        { "dt": "Was ist das?", "dd_html": "Deine zentrale Quelle der Wahrheit. Alle Grundwerte (Farben, Spacings, Radien, Schatten, Schriften) und Klassen-Defaults." },
+        { "dt": "Wo gespeichert?", "dd_html": "WordPress-Option <code>ecf_framework_v50</code> (DB-Tabelle <code>wp_options</code>)." },
+        { "dt": "Wo bearbeite ich?", "dd_html": "Im Layrix-Plugin selbst — linke Sidebar → Grundwerte oder Klassen." }
+      ]
+    },
+    {
+      "num": 2,
+      "title": "Elementor Variables",
+      "rows": [
+        { "dt": "Was ist das?", "dd_html": "Globale CSS-Variablen die Elementor selbst kennt. Layrix-Werte werden 1:1 dort hineingespiegelt — sodass sie im Elementor-Editor als Tokens auswählbar sind." },
+        { "dt": "ID-Format", "dd_html": "<code>e-gv-a1b2c3d4</code> (von Elementor zufällig generiert)" },
+        { "dt": "Wo bearbeite ich?", "dd_html": "Theoretisch in Elementor → Site Settings → Variables — aber nicht empfohlen. Der nächste Layrix-Sync würde deine Werte zurückschreiben. Lieber im Layrix-Plugin ändern." }
+      ]
+    },
+    {
+      "num": 3,
+      "title": "Elementor Global Classes",
+      "rows": [
+        { "dt": "Was ist das?", "dd_html": "Klassen wie ecf-button, ecf-heading-1, ecf-container-boxed. Sie referenzieren die Variables aus Ebene 2 für ihre Werte (Padding, Schriftgröße etc.)." },
+        { "dt": "ID-Format", "dd_html": "<code>g-ecf-a1b2c3d4e5</code> (deterministisch aus Klassennamen abgeleitet)" },
+        { "dt": "Wo bearbeite ich?", "dd_html": "Im Elementor Klassen-Editor — du kannst eigene Properties hinzufügen (Background, Hover, …). Layrix mergt seit 0.6.1.2 nur seine eigenen Properties beim Sync, deine Custom-Werte bleiben erhalten." }
+      ]
+    }
+  ],
+  "faq_title": "Häufig gestellte Fragen zur Architektur",
+  "faqs": [
+    {
+      "q": "Wann wird gesynct?",
+      "a_html": "<p>Wenn Auto-Sync an ist (Standard): nach jedem Save in Layrix automatisch im Hintergrund. Sonst manuell über die Sync-Seite oder über den „Jetzt synchronisieren\"-Button auf der Status-Seite.</p>"
+    },
+    {
+      "q": "Was passiert wenn ich in Elementor direkt eine Variable ändere?",
+      "a_html": "<p>Beim nächsten Sync schreibt Layrix den Backend-Wert wieder über deinen Elementor-Wert. Layer 1 ist Source of Truth. Ändere die Werte daher immer im Layrix-Plugin.</p>"
+    },
+    {
+      "q": "Was wenn ich an einer Layrix-Klasse Custom-Werte setze?",
+      "a_html": "<p>Eigene Properties (z.B. background-color, hover-State) bleiben seit 0.6.1.2 unangetastet. Layrix mergt nur seine eigenen Property-Keys (padding, font-size, border-radius, …). Frühere Versionen haben die kompletten Variants ersetzt — daher der wichtige Fix.</p>"
+    },
+    {
+      "q": "Was passiert beim Plugin-Deaktivieren?",
+      "a_html": "<p>Layer 1 (Layrix-Settings) bleibt in der DB liegen. Layer 2 und 3 (Elementor Variables/Classes) bleiben ebenfalls in Elementors Datenbank — nur das von Layrix dynamisch generierte Frontend-CSS verschwindet.</p><p>Sauberer Exit: Sync-Seite → CSS herunterladen → ins Theme einbinden. Klassen im HTML bleiben dann auch ohne Plugin gestylt.</p>",
+      "link": { "page": "sync", "label": "Zur Sync-Seite" }
+    },
+    {
+      "q": "Was wenn Elementor was zerschießt (Update, anderes Plugin, …)?",
+      "a_html": "<p>Solange Layer 1 (deine Layrix-Settings) intakt ist, kannst du Layer 2 + 3 jederzeit per Sync regenerieren. Empfehlung: regelmäßig Preset exportieren (Sync-Seite → Preset exportieren) als Backup deiner Settings.</p>"
+    },
+    {
+      "q": "Warum überleben manche Werte den Sync, andere nicht?",
+      "a_html": "<p>Faustregel: Layrix-managed Properties (padding, font-size, border-radius, max-width auf Layrix-Klassen) gewinnen vom Backend. Alles andere — eigene Klassen, eigene Variables, Custom-Properties an Layrix-Klassen, Per-Element-Styles — bleibt unangetastet.</p>"
+    }
+  ]
+}

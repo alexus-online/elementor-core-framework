@@ -1413,6 +1413,10 @@
           ? (i18n.sync_label || '') + ' ' + parts.join(', ')
           : (i18n.elementor_synced || '');
         _setPill('saved', label);
+        /* Erste-Sync-Warnung oben in der Page entfernen, falls noch sichtbar. */
+        var warn = document.getElementById('v2-sync-warning');
+        if (warn) warn.remove();
+        if (window.ecfAdmin) ecfAdmin.hasEverSynced = true;
         var snap = data.meta && data.meta.elementor_limit_snapshot;
         if (snap) {
           var cTotal = parseInt(snap.classes_total, 10);
@@ -2800,12 +2804,48 @@
     document.removeEventListener('keydown', _wizardEsc);
   }
 
+  /* Wenn der User den Wizard abbricht und noch nie gesynct hat, einmal
+     anbieten Layrix → Elementor zu syncen. Sonst stehen Tokens und Klassen
+     nur im Plugin, aber nicht in Elementor verfügbar. */
+  function _wizardCancelWithSyncPrompt() {
+    try { localStorage.setItem(_wizardKey, '1'); } catch(ex) {}
+    _wizardCloseCallout();
+    var ov = document.querySelector('.v2-wiz-overlay');
+    if (ov) ov.remove();
+    if (window.ecfAdmin && ecfAdmin.hasEverSynced) return; // schon gesynct, kein Prompt nötig
+
+    var existing = document.getElementById('v2-wiz-sync-prompt');
+    if (existing) existing.remove();
+    var i18n = (window.ecfAdmin && ecfAdmin.i18n) || {};
+    var box = document.createElement('div');
+    box.id = 'v2-wiz-sync-prompt';
+    box.className = 'v2-modal-overlay';
+    box.innerHTML = '<div class="v2-modal-box" style="width:440px;max-width:calc(100vw - 32px)">'
+      + '<div class="v2-modal-head"><span>' + escapeHtml(i18n.wiz_sync_title || 'Sync zu Elementor?') + '</span><button type="button" class="v2-modal-close" data-wiz-sync="later">✕</button></div>'
+      + '<div class="v2-modal-body">'
+        + '<p style="margin:0;font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);line-height:1.55">'
+        + escapeHtml(i18n.wiz_sync_body || 'Du hast den Wizard abgebrochen. Layrix-Tokens und -Klassen sind noch nicht in Elementor verfügbar. Jetzt synchronisieren?')
+        + '</p>'
+      + '</div>'
+      + '<div class="v2-modal-foot">'
+        + '<button type="button" class="v2-btn v2-btn--ghost" data-wiz-sync="later">' + escapeHtml(i18n.wiz_sync_later || 'Später') + '</button>'
+        + '<button type="button" class="v2-btn v2-btn--primary" data-wiz-sync="now">' + escapeHtml(i18n.wiz_sync_now || 'Jetzt synchronisieren') + '</button>'
+      + '</div>'
+      + '</div>';
+    document.body.appendChild(box);
+    box.addEventListener('click', function(e) {
+      var action = (e.target.closest && e.target.closest('[data-wiz-sync]') || {}).dataset && e.target.closest('[data-wiz-sync]').dataset.wizSync;
+      if (!action) return;
+      box.remove();
+      if (action === 'now') {
+        if (typeof ecfV2Sync === 'function') ecfV2Sync(null);
+      }
+    });
+  }
+
   function _wizardEsc(e) {
     if (e.key === 'Escape') {
-      try { sessionStorage.setItem(_wizardKey, '1'); } catch(ex) {}
-      _wizardCloseCallout();
-      var ov = document.querySelector('.v2-wiz-overlay');
-      if (ov) ov.remove();
+      _wizardCancelWithSyncPrompt();
     }
   }
 
@@ -2891,8 +2931,7 @@
       document.body.appendChild(ov);
       modal.querySelector('.v2-wiz__next').addEventListener('click', function() { ov.remove(); _wizardShowStep(idx + 1); });
       modal.querySelector('.v2-wiz__close').addEventListener('click', function() {
-        try { sessionStorage.setItem(_wizardKey, '1'); } catch(ex) {}
-        ov.remove();
+        _wizardCancelWithSyncPrompt();
       });
       document.addEventListener('keydown', _wizardEsc);
 
@@ -2932,8 +2971,7 @@
       document.addEventListener('keydown', _wizardEsc);
       cl.querySelector('.v2-wiz-callout__next').addEventListener('click', function() { _wizardShowStep(idx + 1); });
       cl.querySelector('.v2-wiz-callout__skip').addEventListener('click', function() {
-        try { sessionStorage.setItem(_wizardKey, '1'); } catch(ex) {}
-        _wizardCloseCallout();
+        _wizardCancelWithSyncPrompt();
       });
       if (hasBack) {
         cl.querySelector('.v2-wiz-callout__back').addEventListener('click', function() { _wizardShowStep(idx - 1); });
@@ -2942,7 +2980,7 @@
 
     } else if (step.mode === 'toast') {
       _wizardCloseCallout();
-      try { sessionStorage.setItem(_wizardKey, '1'); } catch(ex) {}
+      try { localStorage.setItem(_wizardKey, '1'); } catch(ex) {}
       var toast = document.createElement('div');
       toast.className = 'v2-wiz-toast';
       toast.innerHTML = '<span class="v2-wiz-toast__icon">🎉</span>'
@@ -2962,7 +3000,7 @@
   }
 
   function ecfV2StartWizard() {
-    try { sessionStorage.removeItem(_wizardKey); } catch(ex) {}
+    try { localStorage.removeItem(_wizardKey); sessionStorage.removeItem(_wizardKey); } catch(ex) {}
     _wizardStep = 0;
     _wizardCloseCallout();
     var ov = document.querySelector('.v2-wiz-overlay');
@@ -4253,7 +4291,15 @@
       if (e.target.closest('[data-v2-wizard-start]')) ecfV2StartWizard();
     });
     /* Auto-start wizard on first visit */
-    try { if (!sessionStorage.getItem(_wizardKey)) _wizardShowStep(0); } catch(ex) {}
+    /* Wizard läuft einmal (localStorage = pro Browser persistent) — Fallback
+       auf sessionStorage falls localStorage geblockt ist. Manueller Re-Start
+       über ecfV2StartWizard() (Button "🚀 Wizard starten" auf Erste Schritte). */
+    try {
+      var done = false;
+      try { done = !!localStorage.getItem(_wizardKey); } catch(ex) {}
+      if (!done) try { done = !!sessionStorage.getItem(_wizardKey); } catch(ex) {}
+      if (!done) _wizardShowStep(0);
+    } catch(ex) {}
 
     /* Changelog modal — move to body so display:none on ecf-main doesn't block it */
     w.addEventListener('click', function(e) {
@@ -5244,6 +5290,126 @@
     bindLive('[name$="[ui_nav_font_size]"]',  '--v2-ui-nav-fs',   function(v) { return parseInt(v, 10) + 'px'; });
     bindLive('[name$="[ui_btn_font_size]"]',  '--v2-btn-fs',      function(v) { return parseInt(v, 10) + 'px'; });
   }());
+
+  /* ── FAQ-Page: Live-Suche, Kategorie-Filter, Direct-Jump ─────────── */
+  (function() {
+    var search = document.getElementById('v2-faq-search');
+    var clearBtn = document.getElementById('v2-faq-search-clear');
+    var list = document.getElementById('v2-faq-list');
+    var emptyState = document.getElementById('v2-faq-empty');
+    var countEl = document.getElementById('v2-faq-count');
+    if (!search || !list) return;
+
+    var items = Array.prototype.slice.call(list.querySelectorAll('.v2-faq-item'));
+    var totalCount = items.length;
+    var activeCat = 'all';
+    var activeQuery = '';
+
+    function applyFilter() {
+      var q = activeQuery.trim().toLowerCase();
+      var visible = 0;
+      items.forEach(function(item) {
+        var cat = item.dataset.faqCat || '';
+        var hay = item.dataset.faqHaystack || '';
+        var catMatch = (activeCat === 'all') || (cat === activeCat);
+        var queryMatch = !q || hay.indexOf(q) !== -1;
+        var show = catMatch && queryMatch;
+        item.classList.toggle('is-hidden', !show);
+        if (show) visible++;
+      });
+      if (emptyState) emptyState.hidden = visible !== 0;
+      if (countEl) {
+        var label = (window.ecfAdmin && ecfAdmin.i18n && ecfAdmin.i18n.faq_questions) || 'Fragen';
+        if (visible === totalCount) {
+          countEl.textContent = totalCount + ' ' + label;
+        } else {
+          countEl.textContent = visible + ' / ' + totalCount + ' ' + label;
+        }
+      }
+      if (clearBtn) clearBtn.hidden = !q;
+    }
+
+    search.addEventListener('input', function() {
+      activeQuery = search.value;
+      applyFilter();
+    });
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        search.value = '';
+        activeQuery = '';
+        applyFilter();
+        search.focus();
+      });
+    }
+
+    document.querySelectorAll('.v2-faq-cat[data-faq-cat]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.v2-faq-cat').forEach(function(b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        activeCat = btn.dataset.faqCat;
+        applyFilter();
+      });
+    });
+
+    /* Direct-Jump: Klick auf "🔗 Hier öffnen" navigiert zur Layrix-Page */
+    list.addEventListener('click', function(e) {
+      var jumpBtn = e.target.closest('[data-faq-jump]');
+      if (!jumpBtn) return;
+      var pageId = jumpBtn.dataset.faqJump;
+      if (!pageId) return;
+      if (typeof ecfV2Go === 'function') {
+        ecfV2Go(pageId);
+      } else {
+        var navItem = document.querySelector('.v2-ni[data-v2-page="' + pageId + '"]');
+        if (navItem) navItem.click();
+      }
+    });
+  }());
+
+  /* ── Status-Page: Toggle ↔ Settings-Page synchron halten ──────────────
+     Dieselbe Setting (z.B. auto_classes_enabled) wird in Status UND in
+     Settings als Checkbox gerendert. Damit beide Stellen denselben Wert
+     anzeigen UND beim Save kein toggle den anderen überschreibt, syncen
+     wir bei jeder Änderung über das gleiche name-Attribut. */
+  document.addEventListener('change', function(e) {
+    var src = e.target;
+    if (!src || !(src.matches && src.matches('input[type="checkbox"][name]'))) return;
+    if (!src.dataset || !src.dataset.v2StatusKey) {
+      /* Kommt nicht aus Status-Page; aber evtl. aus Settings → sync nach Status */
+    }
+    var name = src.name;
+    if (!name) return;
+    document.querySelectorAll('input[type="checkbox"][name="' + name.replace(/"/g, '\\"') + '"]').forEach(function(cb) {
+      if (cb === src) return;
+      if (cb.checked === src.checked) return;
+      cb.checked = src.checked;
+      var tog = cb.nextElementSibling;
+      if (tog && tog.classList && tog.classList.contains('v2-tog')) {
+        tog.classList.toggle('v2-tog--on', src.checked);
+        tog.classList.toggle('v2-tog--off', !src.checked);
+      }
+    });
+  });
+
+  /* ── Status-Page: Bulk Toggle alle aktivieren/deaktivieren ─────────── */
+  document.addEventListener('click', function(e) {
+    var bulk = e.target.closest('[data-v2-status-bulk]');
+    if (!bulk) return;
+    var on = bulk.dataset.v2StatusBulk === 'all-on';
+    var page = document.getElementById('ecf-v2-page-status');
+    if (!page) return;
+    page.querySelectorAll('input[data-v2-status-key]').forEach(function(cb) {
+      var was = cb.checked;
+      cb.checked = on;
+      var tog = cb.nextElementSibling;
+      if (tog && tog.classList.contains('v2-tog')) {
+        tog.classList.toggle('v2-tog--on', on);
+        tog.classList.toggle('v2-tog--off', !on);
+      }
+      if (was !== on) cb.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    if (typeof ecfV2ScheduleAutosave === 'function') ecfV2ScheduleAutosave();
+  });
 
   /* ── Auto-Klassen master toggle: enable/disable per-widget rows ──── */
   (function() {

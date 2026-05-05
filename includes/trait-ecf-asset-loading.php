@@ -160,8 +160,10 @@ trait ECF_Framework_Asset_Loading_Trait {
         wp_enqueue_script('ecf-admin', plugins_url('assets/admin.js', ECF_FRAMEWORK_FILE), ['jquery', 'jquery-ui-sortable', 'wp-color-picker'], $admin_js_ver, false);
         $admin_v2_js_ver = $this->asset_version('assets/admin-v2.js', '0.1.0');
         wp_enqueue_script('ecf-admin-v2', plugins_url('assets/admin-v2.js', ECF_FRAMEWORK_FILE), [], $admin_v2_js_ver, true);
+        $synced_var_labels = get_option($this->synced_variable_labels_option_name(), []);
         wp_localize_script('ecf-admin', 'ecfAdmin', [
             'elementorAutoSync' => !empty($settings['elementor_auto_sync_enabled']),
+            'hasEverSynced'     => is_array($synced_var_labels) && count($synced_var_labels) > 0,
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('ecf_variables'),
             'restUrl' => esc_url_raw(rest_url('ecf-framework/v1/settings')),
@@ -271,6 +273,10 @@ trait ECF_Framework_Asset_Loading_Trait {
                 'wiz_next_done'         => __('Done', 'ecf-framework'),
                 'wiz_title_ready'       => __('You\'re all set!', 'ecf-framework'),
                 'wiz_body_ready'        => __('All areas explored, Elementor synced — you\'re good to go.', 'ecf-framework'),
+                'wiz_sync_title'        => __('Sync zu Elementor?', 'ecf-framework'),
+                'wiz_sync_body'         => __('Du hast den Wizard abgebrochen. Layrix-Grundwerte und -Klassen sind noch nicht in Elementor verfügbar. Jetzt synchronisieren?', 'ecf-framework'),
+                'wiz_sync_now'          => __('Jetzt synchronisieren', 'ecf-framework'),
+                'wiz_sync_later'        => __('Später', 'ecf-framework'),
                 'harmony_sync_hint' => __('Auto-Sync is off. Enable it in Sync settings or sync manually.', 'ecf-framework'),
                 'autosync_prompt_msg' => __('Auto-Sync is disabled! Enable now?', 'ecf-framework'),
                 'autosync_enabled_success' => __('Auto-Sync enabled successfully.', 'ecf-framework'),

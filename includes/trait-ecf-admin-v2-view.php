@@ -353,6 +353,27 @@ trait ECF_Framework_Admin_V2_View_Trait {
 ?>
 <div class="ecf-v2-wrapper" id="ecf-v2-wrapper" style="--v2-btn-fs:<?php echo esc_attr( $v2_btn_fs ); ?>px;--v2-ui-base-fs:<?php echo esc_attr( $v2_base_fs ); ?>px;--v2-ui-nav-fs:<?php echo esc_attr( $v2_nav_fs ); ?>px;--v2-font:<?php echo esc_attr( $v2_font_val ); ?>">
 
+<?php
+  /* Sync-Status für oberen Warnbanner: wenn weder Variablen noch Klassen
+     je nach Elementor synchronisiert wurden, sind Layrix-Grundwerte dort gar
+     nicht verfügbar. Banner mit Sync-CTA. */
+  $synced_vars_count    = method_exists( $this, 'synced_variable_labels_option_name' )
+    ? count( (array) get_option( $this->synced_variable_labels_option_name(), [] ) ) : 0;
+  $synced_classes_count = method_exists( $this, 'synced_class_labels_option_name' )
+    ? count( (array) get_option( $this->synced_class_labels_option_name(), [] ) ) : 0;
+  $needs_first_sync = ( $synced_vars_count === 0 && $synced_classes_count === 0 );
+?>
+<?php if ( $needs_first_sync ) : ?>
+<div class="v2-sync-warning" id="v2-sync-warning" role="alert">
+  <span class="v2-sync-warning__icon" aria-hidden="true">⚠</span>
+  <div class="v2-sync-warning__body">
+    <strong class="v2-sync-warning__title"><?php esc_html_e( 'Noch nicht mit Elementor synchronisiert', 'ecf-framework' ); ?></strong>
+    <span class="v2-sync-warning__desc"><?php esc_html_e( 'Layrix-Grundwerte und -Klassen sind in Elementor noch nicht verfügbar. Klick auf „Jetzt synchronisieren", damit deine Farben, Schriften, Spacings und Klassen im Editor nutzbar werden.', 'ecf-framework' ); ?></span>
+  </div>
+  <button type="button" class="v2-btn v2-btn--primary v2-sync-warning__cta" data-v2-sync><?php esc_html_e( 'Jetzt synchronisieren', 'ecf-framework' ); ?></button>
+</div>
+<?php endif; ?>
+
 <!-- ═══ v2 Sidebar ═══════════════════════════════════════════════════ -->
 <nav class="v2-sb">
   <div class="v2-sb-head">
@@ -360,7 +381,20 @@ trait ECF_Framework_Admin_V2_View_Trait {
     <div class="v2-sb-byline"><span>Alexander Kaiser</span><span class="v2-ver">v<?php echo esc_html( $ver ); ?></span></div>
   </div>
   <div class="v2-sb-nav">
-    <div class="v2-sb-group"><?php esc_html_e( 'Tokens', 'ecf-framework' ); ?></div>
+    <div class="v2-sb-group"><?php esc_html_e( 'Übersicht', 'ecf-framework' ); ?></div>
+    <button type="button" class="v2-ni" data-v2-page="status">
+      <svg viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.1" opacity=".55"/><path d="M4 6.5l2 2 3-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <?php esc_html_e( 'Status', 'ecf-framework' ); ?>
+    </button>
+    <button type="button" class="v2-ni" data-v2-page="faq">
+      <svg viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.1" opacity=".55"/><path d="M5 5c0-1 .67-1.5 1.5-1.5S8 4 8 5c0 .8-.5 1-1 1.5S6.5 7 6.5 7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/><circle cx="6.5" cy="9.5" r=".7" fill="currentColor"/></svg>
+      <?php esc_html_e( 'FAQ', 'ecf-framework' ); ?>
+    </button>
+    <button type="button" class="v2-ni" data-v2-page="how-it-works">
+      <svg viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="3.5" height="3.5" rx=".7" stroke="currentColor" stroke-width="1.1" opacity=".7"/><rect x="8.5" y="1" width="3.5" height="3.5" rx=".7" stroke="currentColor" stroke-width="1.1" opacity=".55"/><rect x="4.5" y="8.5" width="3.5" height="3.5" rx=".7" stroke="currentColor" stroke-width="1.1" opacity=".4"/><path d="M4.5 2.7h4M2.7 4.5v4M10.3 4.5v3" stroke="currentColor" stroke-width="1" opacity=".5"/></svg>
+      <?php esc_html_e( 'Wie funktioniert\'s?', 'ecf-framework' ); ?>
+    </button>
+    <div class="v2-sb-group" style="margin-top:2px"><?php esc_html_e( 'Grundwerte', 'ecf-framework' ); ?></div>
     <button type="button" class="v2-ni" data-v2-page="colors">
       <svg viewBox="0 0 13 13" fill="none"><circle cx="4" cy="4" r="2.2" fill="currentColor" opacity=".7"/><circle cx="9" cy="4" r="2.2" fill="currentColor" opacity=".5"/><circle cx="4" cy="9" r="2.2" fill="currentColor" opacity=".5"/><circle cx="9" cy="9" r="2.2" fill="currentColor" opacity=".3"/></svg>
       <?php esc_html_e( 'Farben', 'ecf-framework' ); ?>
@@ -432,7 +466,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-search-box">
     <div class="v2-search-input-row">
       <svg width="14" height="14" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.3" opacity=".5"/><path d="M8.5 8.5L11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".5"/></svg>
-      <input type="text" id="v2-search-input" class="v2-search-inp" placeholder="<?php esc_attr_e( 'Token, Klasse oder Seite suchen…', 'ecf-framework' ); ?>" autocomplete="off">
+      <input type="text" id="v2-search-input" class="v2-search-inp" placeholder="<?php esc_attr_e( 'Grundwert, Klasse oder Seite suchen…', 'ecf-framework' ); ?>" autocomplete="off">
       <kbd class="v2-search-esc">Esc</kbd>
     </div>
     <div id="v2-search-results" class="v2-search-results"></div>
@@ -511,6 +545,284 @@ trait ECF_Framework_Admin_V2_View_Trait {
 
 <div id="v2-autosave-pill" class="v2-autosave-pill v2-autosave-pill--hidden"></div>
 <span id="v2-last-saved" class="v2-last-saved v2-last-saved--hidden"></span>
+
+<!-- ═══ PAGE: STATUS & TOGGLES ═══════════════════════════════════════ -->
+<?php
+  $opt = $this->option_name;
+  /* Sync-Snapshot für Statusanzeige */
+  $synced_vars_count    = method_exists( $this, 'synced_variable_labels_option_name' )
+    ? count( (array) get_option( $this->synced_variable_labels_option_name(), [] ) ) : 0;
+  $synced_classes_count = method_exists( $this, 'synced_class_labels_option_name' )
+    ? count( (array) get_option( $this->synced_class_labels_option_name(), [] ) ) : 0;
+  $is_synced = ( $synced_vars_count > 0 || $synced_classes_count > 0 );
+
+  /* Helper für eine Toggle-Zeile, schreibt direkt in die Layrix-Settings.
+     Nutzt das existierende name="<opt>[<key>]" + .v2-tog-cb Pattern,
+     damit ecfV2CollectData() / Autosave die Werte mitnimmt. */
+  $status_toggle = function ( $key, $label, $desc = '' ) use ( $opt, $settings ) {
+    $on = ! empty( $settings[ $key ] );
+    ?>
+    <label class="v2-status-row">
+      <span class="v2-status-row__body">
+        <span class="v2-status-row__label"><?php echo esc_html( $label ); ?></span>
+        <?php if ( $desc ) : ?>
+          <span class="v2-status-row__desc"><?php echo esc_html( $desc ); ?></span>
+        <?php endif; ?>
+      </span>
+      <span class="v2-tog-label">
+        <input type="checkbox"
+               class="v2-tog-cb"
+               name="<?php echo esc_attr( $opt ); ?>[<?php echo esc_attr( $key ); ?>]"
+               value="1"
+               data-v2-status-key="<?php echo esc_attr( $key ); ?>"
+               <?php checked( $on ); ?>>
+        <span class="v2-tog<?php echo $on ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
+      </span>
+    </label>
+    <?php
+  };
+?>
+<div id="ecf-v2-page-status" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Status', 'ecf-framework' ); ?></span></div>
+    <div class="v2-topbar-r">
+      <button type="button" class="v2-btn v2-btn--ghost v2-btn--sm" data-v2-status-bulk="all-on"><?php esc_html_e( 'Alle aktivieren', 'ecf-framework' ); ?></button>
+      <button type="button" class="v2-btn v2-btn--ghost v2-btn--sm" data-v2-status-bulk="all-off"><?php esc_html_e( 'Alle deaktivieren', 'ecf-framework' ); ?></button>
+    </div>
+  </div>
+
+  <div class="v2-page-body">
+    <div class="v2-content">
+    <div class="v2-ph">
+      <h1><?php esc_html_e( 'Status & Toggles', 'ecf-framework' ); ?></h1>
+      <p><?php esc_html_e( 'Alle wichtigen An/Aus-Einstellungen auf einen Blick. Änderungen werden automatisch gespeichert.', 'ecf-framework' ); ?></p>
+    </div>
+
+    <!-- Sync-Status-Card -->
+    <div class="v2-status-summary <?php echo $is_synced ? 'is-ok' : 'is-warn'; ?>">
+      <div class="v2-status-summary__icon" aria-hidden="true"><?php echo $is_synced ? '✓' : '⚠'; ?></div>
+      <div class="v2-status-summary__body">
+        <strong class="v2-status-summary__title">
+          <?php if ( $is_synced ) : ?>
+            <?php esc_html_e( 'Mit Elementor synchronisiert', 'ecf-framework' ); ?>
+          <?php else : ?>
+            <?php esc_html_e( 'Noch nicht mit Elementor synchronisiert', 'ecf-framework' ); ?>
+          <?php endif; ?>
+        </strong>
+        <span class="v2-status-summary__desc">
+          <?php
+          if ( $is_synced ) {
+            printf(
+              /* translators: 1: variable count, 2: class count */
+              esc_html__( '%1$d Variablen und %2$d Klassen sind in Elementor verfügbar.', 'ecf-framework' ),
+              (int) $synced_vars_count,
+              (int) $synced_classes_count
+            );
+          } else {
+            esc_html_e( 'Layrix-Grundwerte und -Klassen sind in Elementor noch nicht verfügbar.', 'ecf-framework' );
+          }
+          ?>
+        </span>
+      </div>
+      <button type="button" class="v2-btn v2-btn--primary" data-v2-sync><?php esc_html_e( 'Jetzt synchronisieren', 'ecf-framework' ); ?></button>
+    </div>
+
+    <!-- Sync & Auto-Klassen -->
+    <div class="v2-sec">
+      <div class="v2-sh"><?php esc_html_e( 'Sync mit Elementor', 'ecf-framework' ); ?></div>
+      <div class="v2-status-list">
+        <?php $status_toggle( 'elementor_auto_sync_enabled',  __( 'Auto-Sync',           'ecf-framework' ), __( 'Synct nach jedem Save automatisch zu Elementor.',                'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'elementor_auto_sync_variables', __( 'Auto-Sync Variablen', 'ecf-framework' ), __( 'Grundwerte (Farben, Schriften, Spacings) → Elementor-Variablen.',  'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'elementor_auto_sync_classes',   __( 'Auto-Sync Klassen',   'ecf-framework' ), __( 'Layrix-Klassen → Elementor Global-Class-Registry.',            'ecf-framework' ) ); ?>
+      </div>
+    </div>
+
+    <div class="v2-sec">
+      <div class="v2-sh"><?php esc_html_e( 'Auto-Klassen für neue Widgets', 'ecf-framework' ); ?></div>
+      <div class="v2-status-list">
+        <?php $status_toggle( 'auto_classes_enabled',  __( 'Master',     'ecf-framework' ), __( 'Master-Toggle. Wenn aus, wirkt keine der Auto-Klassen.', 'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'auto_classes_headings', __( 'Headings',   'ecf-framework' ), __( 'h1–h5 bekommen automatisch ecf-heading-1..5.',           'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'auto_classes_buttons',  __( 'Buttons',    'ecf-framework' ), __( 'Buttons bekommen automatisch ecf-button.',               'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'auto_classes_text_link',__( 'Text-Links', 'ecf-framework' ), __( 'Text-Links bekommen automatisch ecf-text-link.',         'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'auto_classes_form',     __( 'Forms',      'ecf-framework' ), __( 'Forms bekommen automatisch ecf-form.',                   'ecf-framework' ) ); ?>
+      </div>
+    </div>
+
+    <div class="v2-sec">
+      <div class="v2-sh"><?php esc_html_e( 'Plugin-Pflege', 'ecf-framework' ); ?></div>
+      <div class="v2-status-list">
+        <?php $status_toggle( 'autosave_enabled',           __( 'Autosave (Layrix-Settings)', 'ecf-framework' ), __( 'Speichert Layrix-Einstellungen automatisch nach jeder Änderung.', 'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'github_update_checks_enabled', __( 'GitHub-Update-Prüfung',     'ecf-framework' ), __( 'Layrix prüft GitHub auf neue Versionen und bietet Updates an.', 'ecf-framework' ) ); ?>
+        <?php $status_toggle( 'show_elementor_status_cards', __( 'Elementor-Status-Cards',     'ecf-framework' ), __( 'Zeigt Elementor-Limits und Sync-Status auf relevanten Seiten.', 'ecf-framework' ) ); ?>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: FAQ ════════════════════════════════════════════════════ -->
+<?php
+  $faq_categories = method_exists( $this, 'faq_categories' ) ? $this->faq_categories() : [];
+  $faq_entries    = method_exists( $this, 'faq_entries' )    ? $this->faq_entries()    : [];
+?>
+<div id="ecf-v2-page-faq" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'FAQ', 'ecf-framework' ); ?></span></div>
+    <div class="v2-topbar-r">
+      <span class="v2-faq-count" id="v2-faq-count"><?php echo (int) count( $faq_entries ); ?> <?php esc_html_e( 'Fragen', 'ecf-framework' ); ?></span>
+    </div>
+  </div>
+  <div class="v2-page-body">
+    <div class="v2-content">
+      <div class="v2-ph">
+        <h1><?php esc_html_e( 'Häufig gestellte Fragen', 'ecf-framework' ); ?></h1>
+        <p><?php esc_html_e( 'Suche nach einem Stichwort oder filtere nach Kategorie. Klick auf eine Frage öffnet die Antwort.', 'ecf-framework' ); ?></p>
+      </div>
+
+      <!-- Search + Filter Bar -->
+      <div class="v2-faq-search-row">
+        <div class="v2-faq-search">
+          <svg class="v2-faq-search__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4" opacity=".7"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <input type="search"
+                 class="v2-faq-search__input"
+                 id="v2-faq-search"
+                 placeholder="<?php esc_attr_e( 'z.B. button, sync, padding, schatten…', 'ecf-framework' ); ?>"
+                 autocomplete="off"
+                 spellcheck="false">
+          <button type="button" class="v2-faq-search__clear" id="v2-faq-search-clear" hidden aria-label="<?php esc_attr_e( 'Suche zurücksetzen', 'ecf-framework' ); ?>">✕</button>
+        </div>
+      </div>
+
+      <div class="v2-faq-cats" role="tablist">
+        <button type="button" class="v2-faq-cat is-active" data-faq-cat="all"><?php esc_html_e( 'Alle', 'ecf-framework' ); ?></button>
+        <?php foreach ( $faq_categories as $cat_key => $cat_label ) : ?>
+          <button type="button" class="v2-faq-cat" data-faq-cat="<?php echo esc_attr( $cat_key ); ?>"><?php echo esc_html( $cat_label ); ?></button>
+        <?php endforeach; ?>
+      </div>
+
+      <!-- FAQ Items -->
+      <div class="v2-faq-list" id="v2-faq-list">
+        <?php foreach ( $faq_entries as $faq ) :
+          $cat_key = $faq['category'] ?? '';
+          $cat_label = $faq_categories[ $cat_key ] ?? $cat_key;
+          $haystack = strtolower( wp_strip_all_tags( ( $faq['q'] ?? '' ) . ' ' . ( $faq['a'] ?? '' ) . ' ' . ( $faq['keywords'] ?? '' ) ) );
+        ?>
+        <details class="v2-faq-item"
+                 data-faq-cat="<?php echo esc_attr( $cat_key ); ?>"
+                 data-faq-haystack="<?php echo esc_attr( $haystack ); ?>">
+          <summary class="v2-faq-q">
+            <span class="v2-faq-q__chevron" aria-hidden="true">▸</span>
+            <span class="v2-faq-q__text"><?php echo esc_html( $faq['q'] ?? '' ); ?></span>
+            <span class="v2-faq-q__cat"><?php echo esc_html( $cat_label ); ?></span>
+          </summary>
+          <div class="v2-faq-a">
+            <?php echo wp_kses_post( $faq['a'] ?? '' ); ?>
+            <?php if ( ! empty( $faq['link']['page'] ) ) : ?>
+              <div class="v2-faq-a__cta">
+                <button type="button" class="v2-btn v2-btn--ghost v2-btn--sm" data-faq-jump="<?php echo esc_attr( $faq['link']['page'] ); ?>">
+                  🔗 <?php echo esc_html( $faq['link']['label'] ?? __( 'Hier öffnen', 'ecf-framework' ) ); ?>
+                </button>
+              </div>
+            <?php endif; ?>
+          </div>
+        </details>
+        <?php endforeach; ?>
+      </div>
+
+      <div class="v2-faq-empty" id="v2-faq-empty" hidden>
+        <p><?php esc_html_e( 'Keine Fragen gefunden. Versuch ein anderes Stichwort oder klicke „Alle".', 'ecf-framework' ); ?></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: WIE FUNKTIONIERT'S? (Architektur / Drei-Layer-Erklärung) ═══ -->
+<?php
+  $hiw = method_exists( $this, 'load_how_it_works_content' ) ? $this->load_how_it_works_content() : [];
+  $hiw_header = is_array( $hiw['header'] ?? null ) ? $hiw['header'] : [];
+  $hiw_flow   = is_array( $hiw['flow']   ?? null ) ? $hiw['flow']   : [];
+  $hiw_cards  = is_array( $hiw['cards']  ?? null ) ? $hiw['cards']  : [];
+  $hiw_faqs   = is_array( $hiw['faqs']   ?? null ) ? $hiw['faqs']   : [];
+?>
+<div id="ecf-v2-page-how-it-works" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Wie funktioniert\'s?', 'ecf-framework' ); ?></span></div>
+  </div>
+  <div class="v2-page-body">
+    <div class="v2-content">
+      <div class="v2-ph">
+        <h1><?php echo esc_html( $hiw_header['title'] ?? '' ); ?></h1>
+        <p><?php echo esc_html( $hiw_header['intro'] ?? '' ); ?></p>
+      </div>
+
+      <!-- Datenfluss-Diagramm -->
+      <div class="v2-hiw-flow" aria-label="<?php esc_attr_e( 'Datenfluss zwischen Layrix und Elementor', 'ecf-framework' ); ?>">
+        <?php foreach ( $hiw_flow as $node ) :
+          $kind = $node['kind'] ?? '';
+          if ( $kind === 'layer' ) :
+            $modifier = sanitize_html_class( $node['modifier'] ?? '' );
+            $sub_html = isset( $node['sub_html'] ) ? wp_kses_post( $node['sub_html'] ) : '';
+            $chip_html = isset( $node['chip_html'] ) ? wp_kses_post( $node['chip_html'] ) : '';
+        ?>
+          <div class="v2-hiw-flow__layer<?php echo $modifier ? ' v2-hiw-flow__layer--' . esc_attr( $modifier ) : ''; ?>" data-hiw-layer="<?php echo esc_attr( (string) ( $node['num'] ?? '' ) ); ?>">
+            <div class="v2-hiw-flow__num"><?php echo esc_html( (string) ( $node['num'] ?? '' ) ); ?></div>
+            <div class="v2-hiw-flow__title"><?php echo esc_html( $node['title'] ?? '' ); ?></div>
+            <div class="v2-hiw-flow__sub"><?php echo $sub_html ?: esc_html( $node['sub'] ?? '' ); ?></div>
+            <div class="v2-hiw-flow__chip"><?php echo $chip_html ?: esc_html( $node['chip'] ?? '' ); ?></div>
+          </div>
+        <?php elseif ( $kind === 'arrow' ) : ?>
+          <div class="v2-hiw-flow__arrow" aria-hidden="true">
+            <span class="v2-hiw-flow__arrow-label"><?php echo esc_html( $node['label'] ?? '' ); ?></span>
+            <svg viewBox="0 0 60 16" fill="none"><path d="M0 8h54M48 2l8 6-8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        <?php endif; endforeach; ?>
+      </div>
+
+      <!-- Layer-Detail-Karten -->
+      <div class="v2-hiw-cards">
+        <?php foreach ( $hiw_cards as $card ) : ?>
+          <div class="v2-hiw-card">
+            <div class="v2-hiw-card__head">
+              <span class="v2-hiw-card__num"><?php echo esc_html( (string) ( $card['num'] ?? '' ) ); ?></span>
+              <h3><?php echo esc_html( $card['title'] ?? '' ); ?></h3>
+            </div>
+            <dl class="v2-hiw-card__body">
+              <?php foreach ( (array) ( $card['rows'] ?? [] ) as $row ) : ?>
+                <dt><?php echo esc_html( $row['dt'] ?? '' ); ?></dt>
+                <dd><?php echo wp_kses_post( $row['dd_html'] ?? '' ); ?></dd>
+              <?php endforeach; ?>
+            </dl>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+      <!-- Architektur-FAQ -->
+      <?php if ( ! empty( $hiw_faqs ) ) : ?>
+      <div class="v2-sec" style="margin-top:24px">
+        <div class="v2-sh"><?php echo esc_html( $hiw['faq_title'] ?? __( 'Architektur-FAQ', 'ecf-framework' ) ); ?></div>
+        <div class="v2-faq-list" style="margin-top:8px">
+          <?php foreach ( $hiw_faqs as $faq ) : ?>
+            <details class="v2-faq-item">
+              <summary class="v2-faq-q"><span class="v2-faq-q__chevron" aria-hidden="true">▸</span><span class="v2-faq-q__text"><?php echo esc_html( $faq['q'] ?? '' ); ?></span></summary>
+              <div class="v2-faq-a">
+                <?php echo wp_kses_post( $faq['a_html'] ?? '' ); ?>
+                <?php if ( ! empty( $faq['link']['page'] ) ) : ?>
+                  <div class="v2-faq-a__cta">
+                    <button type="button" class="v2-btn v2-btn--ghost v2-btn--sm" data-faq-jump="<?php echo esc_attr( $faq['link']['page'] ); ?>">🔗 <?php echo esc_html( $faq['link']['label'] ?? __( 'Hier öffnen', 'ecf-framework' ) ); ?></button>
+                  </div>
+                <?php endif; ?>
+              </div>
+            </details>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ PAGE: FARBEN & RADIUS ═══════════════════════════════════════ -->
 <div id="ecf-v2-page-colors" class="v2-page v2-page--on">
@@ -677,7 +989,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               </div>
               <div class="v2-tr-meta">
                 <span class="v2-chip v2-chip--hi v2-chip--clickable" id="v2-hex-<?php echo esc_attr( $cname ); ?>" onclick="event.stopPropagation();ecfV2ToggleEdit('<?php echo esc_js( $cname ); ?>')" title="<?php esc_attr_e( 'Farbe bearbeiten', 'ecf-framework' ); ?>"><?php echo esc_html( $chex ); ?></span>
-                <button type="button" class="v2-edit-btn" onclick="event.stopPropagation();ecfV2ToggleEdit('<?php echo esc_js( $cname ); ?>')" title="<?php esc_attr_e( 'Token bearbeiten', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Token bearbeiten', 'ecf-framework' ); ?>">
+                <button type="button" class="v2-edit-btn" onclick="event.stopPropagation();ecfV2ToggleEdit('<?php echo esc_js( $cname ); ?>')" title="<?php esc_attr_e( 'Grundwert bearbeiten', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Grundwert bearbeiten', 'ecf-framework' ); ?>">
                   <svg width="11" height="11" viewBox="0 0 13 13" fill="none"><path d="M8.5 2L11 4.5 5 10.5H2.5V8L8.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
                 <button type="button" class="v2-edit-btn v2-edit-btn--danger" onclick="event.stopPropagation();var _t=this.closest('.v2-tr');if(_t){_t.remove();ecfV2ScheduleAutosave();}" title="<?php esc_attr_e( 'Remove', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Remove', 'ecf-framework' ); ?>">×</button>
@@ -843,7 +1155,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
       ?>
 
       <!-- Base Colors (Hintergrund/Link/Fokus). Jedes Feld bietet
-           entweder Custom-Hex oder einen Palette-Token als Wert —
+           entweder Custom-Hex oder einen Palette-Grundwert als Wert —
            wenn ein Token gewählt ist, wird var(--ecf-color-X) gespeichert
            und der Hex-Picker greyed out. -->
       <?php
@@ -960,7 +1272,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
     <aside class="v2-aside" id="v2-color-aside">
       <div class="v2-as-head"><?php esc_html_e( 'Ausgewählte Farbe', 'ecf-framework' ); ?></div>
       <div class="v2-aside-swatch" id="v2-cp-main" data-active-id="<?php echo esc_attr( array_key_first( $c ) ?: 'primary' ); ?>" style="background:<?php echo esc_attr( reset( $c ) ?: '#3b82f6' ); ?>;cursor:pointer" title="<?php esc_attr_e( 'Click to edit', 'ecf-framework' ); ?>"></div>
-      <div class="v2-as-row"><span class="v2-as-k">Token</span><span class="v2-as-v" id="v2-cp-label"><?php $first_key = array_key_first( $c ) ?: 'primary'; echo esc_html( $color_de_labels[ $first_key ] ?? $first_key ); ?></span></div>
+      <div class="v2-as-row"><span class="v2-as-k">Grundwert</span><span class="v2-as-v" id="v2-cp-label"><?php $first_key = array_key_first( $c ) ?: 'primary'; echo esc_html( $color_de_labels[ $first_key ] ?? $first_key ); ?></span></div>
       <div class="v2-as-block">
         <div class="v2-as-head"><?php esc_html_e( 'Alle Farben', 'ecf-framework' ); ?></div>
         <?php foreach ( $c as $cname => $chex ) : ?>
@@ -1099,7 +1411,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   </div>
   <div class="v2-page-body">
     <div class="v2-content">
-      <div class="v2-ph"><h1><?php esc_html_e( 'Typografie', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Schriftfamilien, flüssige Schriftskalierung, Stärken und Zeilenhöhen als Design-Tokens.', 'ecf-framework' ); ?></p></div>
+      <div class="v2-ph"><h1><?php esc_html_e( 'Typografie', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Schriftfamilien, flüssige Schriftskalierung, Stärken und Zeilenhöhen als Design-Grundwerte.', 'ecf-framework' ); ?></p></div>
       <div class="v2-tabs">
         <button type="button" class="v2-tab v2-tab--on" data-v2-tab-group="ty" data-v2-tab="fonts"><?php esc_html_e( 'Schriften', 'ecf-framework' ); ?></button>
         <button type="button" class="v2-tab" data-v2-tab-group="ty" data-v2-tab="scale"><?php esc_html_e( 'Schriftgrößen', 'ecf-framework' ); ?><span class="v2-tc"><?php echo $typo_steps; ?></span></button>
@@ -1666,7 +1978,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               </div>
               <div class="v2-tr-meta" style="margin-left:auto">
                 <button type="button" class="v2-chip v2-chip--hi v2-chip--copy" onclick="event.stopPropagation();ecfV2CopyText('--ecf-shadow-<?php echo esc_js( $sname ); ?>')" title="<?php esc_attr_e( 'Variablenname kopieren', 'ecf-framework' ); ?>">--ecf-shadow-<?php echo esc_html( $sname ); ?></button>
-                <button type="button" class="v2-edit-btn" onclick="event.stopPropagation();ecfV2ToggleEdit('sh-<?php echo esc_js( $sname ); ?>')" title="<?php esc_attr_e( 'Token bearbeiten', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Token bearbeiten', 'ecf-framework' ); ?>">
+                <button type="button" class="v2-edit-btn" onclick="event.stopPropagation();ecfV2ToggleEdit('sh-<?php echo esc_js( $sname ); ?>')" title="<?php esc_attr_e( 'Grundwert bearbeiten', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Grundwert bearbeiten', 'ecf-framework' ); ?>">
                   <svg width="11" height="11" viewBox="0 0 13 13" fill="none"><path d="M8.5 2L11 4.5 5 10.5H2.5V8L8.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
               </div>
@@ -1750,7 +2062,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   </div>
   <div class="v2-page-body">
     <div class="v2-content">
-      <div class="v2-ph"><h1><?php esc_html_e( 'Variablen', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Live-Übersicht aller Design-Tokens, die beim nächsten Sync in Elementor landen. Werte hier änderst du in den jeweiligen Token-Tabs (Farben, Typografie, Abstände…). Diese Ansicht ist nur zur Kontrolle.', 'ecf-framework' ); ?></p></div>
+      <div class="v2-ph"><h1><?php esc_html_e( 'Variablen', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Live-Übersicht aller Design-Grundwerte, die beim nächsten Sync in Elementor landen. Werte hier änderst du in den jeweiligen Grundwerte-Tabs (Farben, Typografie, Abstände…). Diese Ansicht ist nur zur Kontrolle.', 'ecf-framework' ); ?></p></div>
       <div class="v2-var-search-bar">
         <input type="search" id="v2-var-search" class="v2-si" placeholder="<?php esc_attr_e( 'Variable suchen…', 'ecf-framework' ); ?>" style="max-width:280px">
         <span id="v2-var-search-count" class="v2-var-search-count"></span>
@@ -1865,7 +2177,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <div id="v2-vr-lh" class="v2-tp">
         <div class="v2-sec">
           <div class="v2-sh"><?php esc_html_e( 'Zeilenhöhen', 'ecf-framework' ); ?> <span title="<?php esc_attr_e( 'Leading = Zeilenhöhe (line-height). Steuert den Abstand zwischen Textzeilen. Unitloser Wert empfohlen (z. B. 1.5 = 1,5-fache Schriftgröße). Enge Werte (1.1–1.3) für Überschriften, weite (1.5–1.7) für Fließtext.', 'ecf-framework' ); ?>" style="font-size:var(--v2-btn-fs, 12px);font-weight:400;color:var(--v2-text3);border:1px solid var(--v2-border);border-radius:50%;padding:0 4px;cursor:help;vertical-align:middle">?</span></div>
-          <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Wiederverwendbare Zeilenhöhen als --ecf-leading-* Tokens für Überschriften, Fließtext und UI-Elemente.', 'ecf-framework' ); ?></p>
+          <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Wiederverwendbare Zeilenhöhen als --ecf-leading-* Grundwerte für Überschriften, Fließtext und UI-Elemente.', 'ecf-framework' ); ?></p>
           <div class="v2-tl v2-tl--ty" id="v2-lh-list">
             <?php
             $lh_defaults = [
@@ -1910,7 +2222,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <div id="v2-vr-ls" class="v2-tp">
         <div class="v2-sec">
           <div class="v2-sh"><?php esc_html_e( 'Buchstabenabstand', 'ecf-framework' ); ?> <span title="<?php esc_attr_e( 'Tracking = Buchstabenabstand (letter-spacing). Negative Werte rücken Buchstaben enger zusammen, positive weiter auseinander. Einheit em empfohlen (relativ zur Schriftgröße).', 'ecf-framework' ); ?>" style="font-size:var(--v2-btn-fs, 12px);font-weight:400;color:var(--v2-text3);border:1px solid var(--v2-border);border-radius:50%;padding:0 4px;cursor:help;vertical-align:middle">?</span></div>
-          <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Wiederverwendbare Buchstabenabstand-Werte als --ecf-tracking-* Tokens (em-Einheiten empfohlen, z. B. 0.02em).', 'ecf-framework' ); ?></p>
+          <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Wiederverwendbare Buchstabenabstand-Werte als --ecf-tracking-* Grundwerte (em-Einheiten empfohlen, z. B. 0.02em).', 'ecf-framework' ); ?></p>
           <div class="v2-tl v2-tl--ty" id="v2-ls-list">
             <?php
             $ls_defaults = [
@@ -2002,7 +2314,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <section class="v2-pv-hero">
         <div class="v2-pv-hero-label"><?php esc_html_e( 'Typografie', 'ecf-framework' ); ?></div>
         <h1 class="v2-pv-h1"><?php esc_html_e( 'Design das überzeugt', 'ecf-framework' ); ?></h1>
-        <p class="v2-pv-body"><?php esc_html_e( 'Dein Design-System mit konsistenten Tokens für Farben, Abstände und Typografie — direkt in Elementor.', 'ecf-framework' ); ?></p>
+        <p class="v2-pv-body"><?php esc_html_e( 'Dein Design-System mit konsistenten Grundwerte für Farben, Abstände und Typografie — direkt in Elementor.', 'ecf-framework' ); ?></p>
         <div class="v2-pv-actions">
           <button class="v2-pv-btn v2-pv-btn--primary"><?php esc_html_e( 'Primär-Button', 'ecf-framework' ); ?></button>
           <button class="v2-pv-btn v2-pv-btn--secondary"><?php esc_html_e( 'Sekundär', 'ecf-framework' ); ?></button>
@@ -2776,7 +3088,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   </div>
   <div class="v2-page-body">
     <div class="v2-content">
-      <div class="v2-ph"><h1><?php esc_html_e( 'Sync & Export', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Alle Tokens und Klassen mit Elementor synchronisieren oder für die Versionierung exportieren.', 'ecf-framework' ); ?></p></div>
+      <div class="v2-ph"><h1><?php esc_html_e( 'Sync & Export', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Alle Grundwerte und Klassen mit Elementor synchronisieren oder für die Versionierung exportieren.', 'ecf-framework' ); ?></p></div>
       <div class="v2-info-callout">
         <div class="v2-info-callout-row"><strong><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></strong> <?php esc_html_e( '→ sichert deine Einstellungen in der Datenbank (passiert automatisch nach jeder Änderung).', 'ecf-framework' ); ?></div>
         <div class="v2-info-callout-row"><strong><?php esc_html_e( 'Sync mit Elementor', 'ecf-framework' ); ?></strong> <?php esc_html_e( '→ schreibt CSS-Variablen und Klassen in den Elementor-Speicher. Danach müssen offene Elementor-Tabs neu geladen werden.', 'ecf-framework' ); ?></div>
@@ -3131,7 +3443,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               ],
               [
                   'num'   => '2',
-                  'title' => __( 'Design-Tokens aufbauen', 'ecf-framework' ),
+                  'title' => __( 'Design-Grundwerte aufbauen', 'ecf-framework' ),
                   'desc'  => __( 'Farben, Abstände, Radien, Schatten und Typografie anpassen — Layrix generiert daraus die CSS-Variablen.', 'ecf-framework' ),
                   'done'  => $is_seeded,
                   'page'  => 'colors',
@@ -3164,7 +3476,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               [
                   'num'   => '6',
                   'title' => __( 'In Elementor bauen', 'ecf-framework' ),
-                  'desc'  => __( 'Layrix Section aus dem Widget-Panel ziehen, Headings und Buttons reinwerfen — Padding, Schriftgröße, Border-Radius greifen automatisch aus deinen Token-Defaults. Anwendung-Tab in Layrix für Klassen-Übersicht.', 'ecf-framework' ),
+                  'desc'  => __( 'Layrix Section aus dem Widget-Panel ziehen, Headings und Buttons reinwerfen — Padding, Schriftgröße, Border-Radius greifen automatisch aus deinen Klassen-Defaults. Anwendung-Tab in Layrix für Klassen-Übersicht.', 'ecf-framework' ),
                   'done'  => false,
                   'page'  => 'cookbook',
                   'cta'   => __( 'Zur Anwendung', 'ecf-framework' ),
@@ -3301,7 +3613,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   </div>
   <div class="v2-page-body">
     <div class="v2-content">
-      <div class="v2-ph"><h1><?php esc_html_e( 'Einstellungen', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Globale Basiswerte für das Design-System — beeinflussen alle Tokens und das generierte CSS.', 'ecf-framework' ); ?></p></div>
+      <div class="v2-ph"><h1><?php esc_html_e( 'Einstellungen', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Globale Basiswerte für das Design-System — beeinflussen alle Grundwerte und das generierte CSS.', 'ecf-framework' ); ?></p></div>
 
       <!-- Tabs -->
       <div class="v2-tabs v2-tabs--icon" style="margin-bottom:20px">
@@ -4042,7 +4354,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <button type="button" class="v2-modal-close" id="v2-conflict-cancel">✕</button>
     </div>
     <div class="v2-modal-body">
-      <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Folgende Tokens wurden in Elementor verändert und weichen von Layrix ab. Beim Sync überschreibt Layrix diese Werte.', 'ecf-framework' ); ?></p>
+      <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Folgende Grundwerte wurden in Elementor verändert und weichen von Layrix ab. Beim Sync überschreibt Layrix diese Werte.', 'ecf-framework' ); ?></p>
       <div id="v2-conflict-list" style="max-height:200px;overflow-y:auto"></div>
     </div>
     <div class="v2-modal-foot">
