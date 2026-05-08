@@ -347,6 +347,10 @@
     var baseIdx = steps.indexOf(baseIndex);
     if (baseIdx < 0) baseIdx = Math.floor(steps.length / 2);
 
+    // Sample-Cap: Über diesem Wert wird das Visual nicht mehr 1:1 gerendert
+    // (sonst sprengt h1 mit aggressivem Ratio das Layout). Bei capping markieren
+    // wir die Zelle, damit nicht der Eindruck entsteht 2xl/3xl/4xl wären gleich.
+    var SAMPLE_CAP_PX = 96;
     var isDual = (minBase !== maxBase || minRatio !== maxRatio);
     var html = '';
     steps.forEach(function(step, i) {
@@ -356,12 +360,15 @@
       var isBase = (i === baseIdx);
       var sampleMin = minPx >= 28 ? 'The quick fox' : 'The quick fox jumps over the fence';
       var sampleMax = maxPx >= 28 ? 'The quick fox' : 'The quick fox jumps over the fence';
-      html += '<div class="v2-ty-row' + (isBase ? ' v2-ty-row--active' : '') + (isDual ? ' v2-ty-row--dual' : '') + '">'
-        + '<span class="v2-ty-step">' + step + '</span>'
+      var minCapped = minPx > SAMPLE_CAP_PX;
+      var maxCapped = maxPx > SAMPLE_CAP_PX;
+      var anyCapped = minCapped || maxCapped;
+      html += '<div class="v2-ty-row' + (isBase ? ' v2-ty-row--active' : '') + (isDual ? ' v2-ty-row--dual' : '') + (anyCapped ? ' v2-ty-row--capped' : '') + '">'
+        + '<span class="v2-ty-step">' + step + (anyCapped ? ' <span class="v2-ty-cap-badge" title="Vorschau-Größe gedeckelt — echter Wert siehe Range rechts">↗</span>' : '') + '</span>'
         + '<span class="v2-ty-samples">'
-        +   '<span class="v2-ty-sample v2-ty-sample--min" style="font-size:' + Math.min(minPx, 48) + 'px" title="Min ' + minPx.toFixed(1) + 'px">' + sampleMin + '</span>'
+        +   '<span class="v2-ty-sample v2-ty-sample--min' + (minCapped ? ' v2-ty-sample--capped' : '') + '" style="font-size:' + Math.min(minPx, SAMPLE_CAP_PX) + 'px" title="Min ' + minPx.toFixed(1) + 'px' + (minCapped ? ' (Vorschau gedeckelt bei ' + SAMPLE_CAP_PX + 'px)' : '') + '">' + sampleMin + '</span>'
         + (isDual
-          ? '<span class="v2-ty-sample v2-ty-sample--max" style="font-size:' + Math.min(maxPx, 48) + 'px" title="Max ' + maxPx.toFixed(1) + 'px">' + sampleMax + '</span>'
+          ? '<span class="v2-ty-sample v2-ty-sample--max' + (maxCapped ? ' v2-ty-sample--capped' : '') + '" style="font-size:' + Math.min(maxPx, SAMPLE_CAP_PX) + 'px" title="Max ' + maxPx.toFixed(1) + 'px' + (maxCapped ? ' (Vorschau gedeckelt bei ' + SAMPLE_CAP_PX + 'px)' : '') + '">' + sampleMax + '</span>'
           : '')
         + '</span>'
         + '<span class="v2-ty-range">'

@@ -863,6 +863,10 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 .ecf-v2-wrapper .v2-ty-sample--min { opacity: .55; }
 .ecf-v2-wrapper .v2-ty-sample--max { opacity: 1; }
 .ecf-v2-wrapper .v2-ty-range { margin-left: auto; font-family: var(--v2-mono); font-size: var(--v2-btn-fs, 12px); color: var(--v2-text3); flex-shrink: 0; text-align: right; line-height: 1.6; }
+/* Capped sample marker — Vorschau-Größe wird gedeckelt damit aggressive
+   Skalen das Layout nicht sprengen. Echter Wert steht weiter rechts. */
+.ecf-v2-wrapper .v2-ty-sample--capped { border-left: 2px solid rgba(234,179,8,.55); padding-left: 6px; }
+.ecf-v2-wrapper .v2-ty-cap-badge { display: inline-block; margin-left: 4px; color: rgba(234,179,8,.85); font-size: 10px; cursor: help; }
 
 /* ── Font preview ───────────────────────────────────────────────── */
 .ecf-v2-wrapper .v2-font-preview {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.3.2 (2026-05-08)
+
+### Fix
+- **Skalenvorschau (Typografie → Schriftgrößen) zeigt jetzt deutlich realistischere Größen** ab 2xl/3xl/4xl. Der Sample-Cap wurde von 48 px auf 96 px erhöht, sodass für normale Skalen (Ratio ≤ 1.4) die Vorschau visuell exakt der berechneten Größe entspricht. Bei aggressiven Skalen (Ratio > 1.5) wird das Sample weiterhin gedeckelt — aber jetzt mit einem `↗`-Badge am Step-Label, einem gelben Border-Strich am Sample und einem Tooltip der den echten Wert nennt. Vorher: 2xl/3xl/4xl sahen alle gleich groß aus, weil sie still bei 48 px gecappt wurden — was den Eindruck erweckte die Skala wäre kaputt.
+
 ## 0.6.3.1 (2026-05-08)
 
 ### Fix
