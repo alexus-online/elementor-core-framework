@@ -36,6 +36,12 @@ trait ECF_Framework_REST_API_Trait {
             'permission_callback' => [$this, 'rest_manage_options_permission'],
         ]);
 
+        register_rest_route('ecf-framework/v1', '/token-usage', [
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [$this, 'rest_token_usage'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+
         // Owner-only "Ideen" notes — Application Password authenticated.
         // Permission self-checks via is_layrix_owner() (email match), so even
         // a valid app-password from another user won't pass.

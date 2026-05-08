@@ -36,12 +36,27 @@ body.toplevel_page_ecf-framework #wpfooter { display: none !important; }
 body.toplevel_page_ecf-framework #wpbody,
 body.toplevel_page_ecf-framework #wpbody-content,
 body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
+[data-ecf-ui-v2] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+[data-ecf-ui-v2] > .v2-banners {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
 [data-ecf-ui-v2] > .ecf-v2-wrapper {
   display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
   height: calc(100vh - 32px);
+}
+/* Wenn Banner vorhanden: Wrapper-Höhe um Banner-Höhe reduzieren */
+[data-ecf-ui-v2]:has(.v2-banners) > .ecf-v2-wrapper {
+  height: auto;
+  flex: 1;
 }
 
 /* ── v2 design tokens ───────────────────────────────────────────── */
@@ -1543,6 +1558,54 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
   font-family: var(--v2-mono); font-size: var(--v2-btn-fs, 12px);
 }
 
+/* Klassen-Defaults Pair (Padding-Felder mit Lock-Toggle) */
+.ecf-v2-wrapper .v2-cls-pair__lock {
+  background: rgba(255,255,255,.05); border: 1px solid var(--v2-border);
+  border-radius: 6px; padding: 4px 8px; cursor: pointer;
+  font-size: var(--v2-btn-fs, 12px); color: var(--v2-text2);
+  transition: background .12s, border-color .12s;
+}
+.ecf-v2-wrapper .v2-cls-pair__lock:hover { background: rgba(255,255,255,.1); }
+.ecf-v2-wrapper .v2-cls-pair[data-cls-pair-linked="1"] .v2-cls-pair__lock {
+  background: rgba(99,102,241,.15); border-color: var(--v2-accent2); color: var(--v2-accent2);
+}
+
+/* ── Token-Usage-Inspector ───────────────────────────────────────── */
+.ecf-v2-wrapper .v2-tu-results { display: flex; flex-direction: column; gap: 6px; }
+.ecf-v2-wrapper .v2-tu-row {
+  display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--v2-border); border-radius: 8px;
+  background: var(--v2-s1);
+  transition: border-color .12s, background .12s;
+}
+.ecf-v2-wrapper .v2-tu-row:hover { border-color: rgba(255,255,255,.18); background: var(--v2-s2); }
+.ecf-v2-wrapper .v2-tu-row__title {
+  font-size: var(--v2-ui-base-fs, 13px); font-weight: 600; color: var(--v2-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ecf-v2-wrapper .v2-tu-row__type {
+  font-size: var(--v2-btn-fs, 12px); color: var(--v2-text3); font-family: var(--v2-mono);
+}
+.ecf-v2-wrapper .v2-tu-row__kinds { display: flex; gap: 4px; }
+.ecf-v2-wrapper .v2-tu-row__chip {
+  font-size: var(--v2-btn-fs, 12px); padding: 2px 8px; border-radius: 999px;
+  background: rgba(99,102,241,.14); color: var(--v2-accent2); font-weight: 600;
+}
+.ecf-v2-wrapper .v2-tu-row__hits {
+  font-size: var(--v2-btn-fs, 12px); color: var(--v2-text2); font-variant-numeric: tabular-nums;
+}
+.ecf-v2-wrapper .v2-tu-row__action {
+  font-size: var(--v2-btn-fs, 12px);
+  padding: 6px 12px;
+  background: var(--v2-accent2); color: #fff; border: none; border-radius: 5px;
+  cursor: pointer; text-decoration: none;
+  white-space: nowrap;
+}
+.ecf-v2-wrapper .v2-tu-row__action:hover { background: var(--v2-accent); }
+.ecf-v2-wrapper .v2-tu-loading { padding: 32px 16px; text-align: center; color: var(--v2-text3); }
+
 /* ── FAQ-Page ────────────────────────────────────────────────────── */
 .ecf-v2-wrapper .v2-faq-count {
   font-size: var(--v2-btn-fs, 12px); color: var(--v2-text3); padding: 6px 10px;
@@ -1694,7 +1757,6 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 
 /* Top-Page-Auto-Klassen-Warning */
 .v2-autoclass-warning {
-  position: sticky; top: 0; z-index: 49;
   display: flex; align-items: center; gap: 14px;
   margin: 0; padding: 12px 18px;
   background: linear-gradient(90deg, rgba(234, 179, 8, .14) 0%, rgba(234, 179, 8, .06) 100%);
@@ -1736,7 +1798,6 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 
 /* Top-Page-Sync-Warning (gerendert wenn noch nie gesynct wurde) */
 .v2-sync-warning {
-  position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; gap: 14px;
   margin: 0; padding: 12px 18px;
   background: linear-gradient(90deg, rgba(251, 146, 60, .14) 0%, rgba(251, 146, 60, .06) 100%);

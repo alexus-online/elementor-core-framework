@@ -202,6 +202,14 @@
       "keywords": "dark mode dunkel modus farbe variante prefers-color-scheme"
     },
     {
+      "id": "tk-token-usage-inspector",
+      "category": "tokens",
+      "q": "Wie sehe ich wo ein Grundwert verwendet wird?",
+      "a": "<p>Sidebar → <strong>Verwendung</strong>. Wähle einen Grundwert (z.B. <code>ecf-space-m</code>) → Klick auf „Scannen\" → Layrix durchsucht alle Elementor-Daten und listet alle Posts/Templates auf, die diesen Grundwert referenzieren. Pro Treffer:</p><ul><li>Post-Titel + Typ (Seite / Template / Beitrag)</li><li>Anzahl der Vorkommen</li><li>Art der Verwendung (Variable / Klasse)</li><li>Direkt-Link um den Post in Elementor zu öffnen</li></ul><p>Praktisch wenn du einen Grundwert ändern willst und vorher den Blast-Radius wissen möchtest — oder einen ungenutzten Grundwert aus dem Limit entfernen willst.</p>",
+      "keywords": "grundwert token usage verwendung wo wird genutzt scan blast radius elementor referenziert",
+      "link": { "page": "token-usage", "label": "Zur Verwendung-Seite" }
+    },
+    {
       "id": "tk-units-converter",
       "category": "tokens",
       "q": "Was bedeutet rem, em, vw bei der Body-Textgröße?",
@@ -391,8 +399,15 @@
       "id": "ac-layrix-section",
       "category": "auto-classes",
       "q": "Was ist das Layrix-Section-Widget in Elementor?",
-      "a": "<p>Ein Atomic-Widget für Elementor v4 das eine vorgefertigte <strong>Section + Inner-Container</strong>-Struktur einfügt:</p><ul><li>Outer-Div bekommt automatisch <code>ecf-layrix-section</code> (Padding-Block + Padding-Inline aus Layrix-Spacing-Grundwerten)</li><li>Inner-Div bekommt automatisch <code>ecf-container-boxed</code> (max-width aus dem Container-Boxed-Grundwert)</li></ul><p>Drag&Drop ein Widget statt zwei verschachtelte Flexbox-Container.</p>",
-      "keywords": "layrix section widget atomic v4 container boxed inner"
+      "a": "<p>Ein Atomic-Widget für Elementor v4 das eine vorgefertigte <strong>Section + Inner-Container</strong>-Struktur einfügt:</p><ul><li>Outer-Div bekommt automatisch <code>ecf-layrix-section</code>: <strong>display: flex; flex-direction: column</strong> (vertikaler Stack), Padding-Block + Padding-Inline aus Layrix-Spacing-Grundwerten</li><li>Inner-Div bekommt automatisch <code>ecf-container-boxed</code> (max-width aus dem Container-Boxed-Grundwert)</li></ul><p>Drag&Drop ein Widget statt zwei verschachtelte Flexbox-Container. Wenn du eine andere Layout-Richtung brauchst (z.B. row), kannst du das im Elementor-Klassen-Editor an der ecf-layrix-section-Klasse überschreiben.</p>",
+      "keywords": "layrix section widget atomic v4 container boxed inner flex column layout direction stack auto-select inner-div springen"
+    },
+    {
+      "id": "ac-layrix-section-inner-focus",
+      "category": "auto-classes",
+      "q": "Wieso wird beim Einfügen einer Layrix Section der innere Container automatisch ausgewählt?",
+      "a": "<p>Beabsichtigt: damit du sofort Widgets in den richtigen Container droppen kannst, ohne erst manuell ein Element tiefer zu klicken.</p><p>Layrix springt direkt in den inneren <code>ecf-container-boxed</code>-Container, weil 99% der Inhalte (Headings, Buttons, Bilder, …) in den Inner gehören — nicht in die Outer-Section. Outer-Section ist hauptsächlich für Padding und Hintergrund.</p>",
+      "keywords": "section inner auswählen automatisch sprung focus container boxed"
     },
 
     {

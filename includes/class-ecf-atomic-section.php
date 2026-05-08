@@ -78,7 +78,8 @@ if ( ! class_exists( 'ECF_Atomic_Section' ) ) {
                 static::BASE_STYLE_KEY => \Elementor\Modules\AtomicWidgets\Styles\Style_Definition::make()
                     ->add_variant(
                         \Elementor\Modules\AtomicWidgets\Styles\Style_Variant::make()
-                            ->add_prop( 'display', \Elementor\Modules\AtomicWidgets\PropTypes\Primitives\String_Prop_Type::generate( 'block' ) )
+                            ->add_prop( 'display',        \Elementor\Modules\AtomicWidgets\PropTypes\Primitives\String_Prop_Type::generate( 'flex' ) )
+                            ->add_prop( 'flex-direction', \Elementor\Modules\AtomicWidgets\PropTypes\Primitives\String_Prop_Type::generate( 'column' ) )
                             ->add_prop( 'min-width', \Elementor\Modules\AtomicWidgets\PropTypes\Size_Prop_Type::generate( [
                                 'size' => 30,
                                 'unit' => 'px',
@@ -95,9 +96,15 @@ if ( ! class_exists( 'ECF_Atomic_Section' ) ) {
             if ( ! class_exists( '\Elementor\Modules\AtomicWidgets\Elements\Div_Block\Div_Block' ) ) {
                 return [];
             }
-            // Layrix syncs starter classes to Elementor's Global Classes registry
-            // with deterministic IDs ('g-ecf-' . substr(md5(label), 0, 10)).
-            $inner_class_id = 'g-ecf-' . substr( md5( 'ecf-container-boxed' ), 0, 10 );
+            // Real-Registry-Lookup: wenn Elementor die Klasse 'ecf-container-boxed'
+            // bereits unter einer anderen ID gespeichert hat, müssen wir DIESE ID
+            // verwenden — sonst zeigt der Klassen-Picker im Inspector nur "lokal"
+            // weil er das Label zur ID nicht auflösen kann.
+            // Fallback: deterministische ID, falls Klasse noch nicht in Registry.
+            $inner_class_id = self::resolve_global_class_id( 'ecf-container-boxed' );
+            if ( $inner_class_id === '' ) {
+                $inner_class_id = 'g-ecf-' . substr( md5( 'ecf-container-boxed' ), 0, 10 );
+            }
             $inner_settings = [
                 'classes' => \Elementor\Modules\AtomicWidgets\PropTypes\Classes_Prop_Type::generate( [ $inner_class_id ] ),
             ];
@@ -137,6 +144,33 @@ if ( ! class_exists( 'ECF_Atomic_Section' ) ) {
             }
 
             $this->add_render_attribute( '_wrapper', array_merge( $initial_attributes, $attributes ) );
+        }
+
+        /**
+         * Findet die echte Class-ID einer Layrix-Klasse in Elementors Global-
+         * Classes-Registry. Returnt '' wenn nicht gefunden — dann muss der
+         * Aufrufer auf die deterministische ID zurückfallen.
+         */
+        public static function resolve_global_class_id( string $label ): string {
+            if ( ! class_exists( '\Elementor\Modules\GlobalClasses\Global_Classes_Repository' ) ) {
+                return '';
+            }
+            try {
+                $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
+                    ->context( \Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND );
+                $current = $repo->all()->get();
+                $items = $current['items'] ?? [];
+                $needle = strtolower( $label );
+                foreach ( $items as $id => $item ) {
+                    if ( ! is_array( $item ) ) continue;
+                    if ( strtolower( (string) ( $item['label'] ?? '' ) ) === $needle ) {
+                        return (string) $id;
+                    }
+                }
+            } catch ( \Throwable $e ) {
+                // ignorieren — Fallback ist deterministische ID
+            }
+            return '';
         }
     }
 

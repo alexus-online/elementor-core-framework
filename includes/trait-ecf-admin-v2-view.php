@@ -351,8 +351,6 @@ trait ECF_Framework_Admin_V2_View_Trait {
   $v2_font    = sanitize_text_field( $settings['ui_font_family'] ?? '' );
   $v2_font_val = $v2_font ?: "'Plus Jakarta Sans', system-ui, sans-serif";
 ?>
-<div class="ecf-v2-wrapper" id="ecf-v2-wrapper" style="--v2-btn-fs:<?php echo esc_attr( $v2_btn_fs ); ?>px;--v2-ui-base-fs:<?php echo esc_attr( $v2_base_fs ); ?>px;--v2-ui-nav-fs:<?php echo esc_attr( $v2_nav_fs ); ?>px;--v2-font:<?php echo esc_attr( $v2_font_val ); ?>">
-
 <?php
   /* Sync-Status für oberen Warnbanner: wenn weder Variablen noch Klassen
      je nach Elementor synchronisiert wurden, sind Layrix-Grundwerte dort gar
@@ -362,19 +360,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
   $synced_classes_count = method_exists( $this, 'synced_class_labels_option_name' )
     ? count( (array) get_option( $this->synced_class_labels_option_name(), [] ) ) : 0;
   $needs_first_sync = ( $synced_vars_count === 0 && $synced_classes_count === 0 );
-?>
-<?php if ( $needs_first_sync ) : ?>
-<div class="v2-sync-warning" id="v2-sync-warning" role="alert">
-  <span class="v2-sync-warning__icon" aria-hidden="true">⚠</span>
-  <div class="v2-sync-warning__body">
-    <strong class="v2-sync-warning__title"><?php esc_html_e( 'Noch nicht mit Elementor synchronisiert', 'ecf-framework' ); ?></strong>
-    <span class="v2-sync-warning__desc"><?php esc_html_e( 'Layrix-Grundwerte und -Klassen sind in Elementor noch nicht verfügbar. Klick auf „Jetzt synchronisieren", damit deine Farben, Schriften, Spacings und Klassen im Editor nutzbar werden.', 'ecf-framework' ); ?></span>
-  </div>
-  <button type="button" class="v2-btn v2-btn--primary v2-sync-warning__cta" data-v2-sync><?php esc_html_e( 'Jetzt synchronisieren', 'ecf-framework' ); ?></button>
-</div>
-<?php endif; ?>
 
-<?php
   /* Auto-Klassen-Warning: wenn Master oder einer der Sub-Toggles aus ist,
      bekommen neue Widgets ihre Layrix-Klasse nicht automatisch. Banner mit
      Liste der inaktiven Toggles + One-Click-Aktivieren. */
@@ -393,33 +379,49 @@ trait ECF_Framework_Admin_V2_View_Trait {
   }
   $ac_master_off = empty( $settings['auto_classes_enabled'] );
 ?>
-<?php if ( ! empty( $ac_inactive ) ) : ?>
-<div class="v2-autoclass-warning<?php echo $ac_master_off ? ' is-master-off' : ''; ?>" id="v2-autoclass-warning" role="alert">
-  <span class="v2-autoclass-warning__icon" aria-hidden="true">⚠</span>
-  <div class="v2-autoclass-warning__body">
-    <strong class="v2-autoclass-warning__title">
-      <?php
-      if ( $ac_master_off ) {
-        esc_html_e( 'Auto-Klassen sind deaktiviert', 'ecf-framework' );
-      } else {
-        esc_html_e( 'Auto-Klassen teilweise deaktiviert', 'ecf-framework' );
-      }
-      ?>
-    </strong>
-    <span class="v2-autoclass-warning__desc">
-      <?php if ( $ac_master_off ) : ?>
-        <?php esc_html_e( 'Neue Widgets im Elementor (Headings, Buttons, Text-Links, Forms) bekommen aktuell keine Layrix-Klasse automatisch. Du müsstest sie manuell setzen.', 'ecf-framework' ); ?>
-      <?php else : ?>
-        <?php esc_html_e( 'Folgende Auto-Klassen-Toggles sind aus:', 'ecf-framework' ); ?>
-        <strong><?php echo esc_html( implode( ', ', array_values( $ac_inactive ) ) ); ?></strong>
-      <?php endif; ?>
-    </span>
+<?php if ( $needs_first_sync || ! empty( $ac_inactive ) ) : ?>
+<div class="v2-banners">
+  <?php if ( $needs_first_sync ) : ?>
+  <div class="v2-sync-warning" id="v2-sync-warning" role="alert">
+    <span class="v2-sync-warning__icon" aria-hidden="true">⚠</span>
+    <div class="v2-sync-warning__body">
+      <strong class="v2-sync-warning__title"><?php esc_html_e( 'Noch nicht mit Elementor synchronisiert', 'ecf-framework' ); ?></strong>
+      <span class="v2-sync-warning__desc"><?php esc_html_e( 'Layrix-Grundwerte und -Klassen sind in Elementor noch nicht verfügbar. Klick auf „Jetzt synchronisieren", damit deine Farben, Schriften, Spacings und Klassen im Editor nutzbar werden.', 'ecf-framework' ); ?></span>
+    </div>
+    <button type="button" class="v2-btn v2-btn--primary v2-sync-warning__cta" data-v2-sync><?php esc_html_e( 'Jetzt synchronisieren', 'ecf-framework' ); ?></button>
   </div>
-  <button type="button" class="v2-btn v2-btn--primary v2-autoclass-warning__cta" id="v2-autoclass-warning-cta">
-    <?php esc_html_e( 'Alle aktivieren', 'ecf-framework' ); ?>
-  </button>
+  <?php endif; ?>
+  <?php if ( ! empty( $ac_inactive ) ) : ?>
+  <div class="v2-autoclass-warning<?php echo $ac_master_off ? ' is-master-off' : ''; ?>" id="v2-autoclass-warning" role="alert">
+    <span class="v2-autoclass-warning__icon" aria-hidden="true">⚠</span>
+    <div class="v2-autoclass-warning__body">
+      <strong class="v2-autoclass-warning__title">
+        <?php
+        if ( $ac_master_off ) {
+          esc_html_e( 'Auto-Klassen sind deaktiviert', 'ecf-framework' );
+        } else {
+          esc_html_e( 'Auto-Klassen teilweise deaktiviert', 'ecf-framework' );
+        }
+        ?>
+      </strong>
+      <span class="v2-autoclass-warning__desc">
+        <?php if ( $ac_master_off ) : ?>
+          <?php esc_html_e( 'Neue Widgets im Elementor (Headings, Buttons, Text-Links, Forms) bekommen aktuell keine Layrix-Klasse automatisch. Du müsstest sie manuell setzen.', 'ecf-framework' ); ?>
+        <?php else : ?>
+          <?php esc_html_e( 'Folgende Auto-Klassen-Toggles sind aus:', 'ecf-framework' ); ?>
+          <strong><?php echo esc_html( implode( ', ', array_values( $ac_inactive ) ) ); ?></strong>
+        <?php endif; ?>
+      </span>
+    </div>
+    <button type="button" class="v2-btn v2-btn--primary v2-autoclass-warning__cta" id="v2-autoclass-warning-cta">
+      <?php esc_html_e( 'Alle aktivieren', 'ecf-framework' ); ?>
+    </button>
+  </div>
+  <?php endif; ?>
 </div>
 <?php endif; ?>
+
+<div class="ecf-v2-wrapper" id="ecf-v2-wrapper" style="--v2-btn-fs:<?php echo esc_attr( $v2_btn_fs ); ?>px;--v2-ui-base-fs:<?php echo esc_attr( $v2_base_fs ); ?>px;--v2-ui-nav-fs:<?php echo esc_attr( $v2_nav_fs ); ?>px;--v2-font:<?php echo esc_attr( $v2_font_val ); ?>">
 
 <!-- ═══ v2 Sidebar ═══════════════════════════════════════════════════ -->
 <nav class="v2-sb">
@@ -440,6 +442,10 @@ trait ECF_Framework_Admin_V2_View_Trait {
     <button type="button" class="v2-ni" data-v2-page="how-it-works">
       <svg viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="3.5" height="3.5" rx=".7" stroke="currentColor" stroke-width="1.1" opacity=".7"/><rect x="8.5" y="1" width="3.5" height="3.5" rx=".7" stroke="currentColor" stroke-width="1.1" opacity=".55"/><rect x="4.5" y="8.5" width="3.5" height="3.5" rx=".7" stroke="currentColor" stroke-width="1.1" opacity=".4"/><path d="M4.5 2.7h4M2.7 4.5v4M10.3 4.5v3" stroke="currentColor" stroke-width="1" opacity=".5"/></svg>
       <?php esc_html_e( 'Wie funktioniert\'s?', 'ecf-framework' ); ?>
+    </button>
+    <button type="button" class="v2-ni" data-v2-page="token-usage">
+      <svg viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.2" opacity=".7"/><path d="M8 8l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <?php esc_html_e( 'Verwendung', 'ecf-framework' ); ?>
     </button>
     <div class="v2-sb-group" style="margin-top:2px"><?php esc_html_e( 'Grundwerte', 'ecf-framework' ); ?></div>
     <button type="button" class="v2-ni" data-v2-page="colors">
@@ -867,6 +873,63 @@ trait ECF_Framework_Admin_V2_View_Trait {
         </div>
       </div>
       <?php endif; ?>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: TOKEN-USAGE-INSPECTOR ═════════════════════════════════════ -->
+<?php
+  /* Token-Optionen für den Picker — alle Token-Labels die in den Layrix-
+     Settings existieren (gruppiert nach Token-Typ) */
+  $tu_groups = method_exists( $this, 'layrix_size_variable_options' )
+    ? $this->layrix_size_variable_options()
+    : [];
+  /* Plus Farben aus den Color-Settings */
+  $tu_color_labels = [];
+  if ( isset( $settings['colors'] ) && is_array( $settings['colors'] ) ) {
+    foreach ( $settings['colors'] as $color_row ) {
+      $cname = is_array( $color_row ) ? sanitize_key( (string) ( $color_row['name'] ?? '' ) ) : '';
+      if ( $cname !== '' ) $tu_color_labels[] = 'ecf-color-' . $cname;
+    }
+  }
+  if ( ! empty( $tu_color_labels ) ) {
+    $tu_groups[ __( 'Farben', 'ecf-framework' ) ] = $tu_color_labels;
+  }
+?>
+<div id="ecf-v2-page-token-usage" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Verwendung', 'ecf-framework' ); ?></span></div>
+  </div>
+  <div class="v2-page-body">
+    <div class="v2-content">
+      <div class="v2-ph">
+        <h1><?php esc_html_e( 'Grundwert-Verwendung prüfen', 'ecf-framework' ); ?></h1>
+        <p><?php esc_html_e( 'Wähle einen Grundwert aus — Layrix scant alle Elementor-Daten und zeigt dir auf welchen Seiten und Templates er aktuell verwendet wird.', 'ecf-framework' ); ?></p>
+      </div>
+
+      <div class="v2-sec" style="padding:14px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(0,0,0,.18);margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label for="v2-tu-token" style="font-size:var(--v2-ui-base-fs, 13px);font-weight:600;color:var(--v2-text)"><?php esc_html_e( 'Grundwert', 'ecf-framework' ); ?></label>
+          <select id="v2-tu-token" class="v2-si" style="min-width:280px">
+            <option value=""><?php esc_html_e( '— Grundwert auswählen —', 'ecf-framework' ); ?></option>
+            <?php foreach ( $tu_groups as $group_label => $vars ) : ?>
+              <optgroup label="<?php echo esc_attr( $group_label ); ?>">
+                <?php foreach ( $vars as $var ) : ?>
+                  <option value="<?php echo esc_attr( $var ); ?>"><?php echo esc_html( $var ); ?></option>
+                <?php endforeach; ?>
+              </optgroup>
+            <?php endforeach; ?>
+          </select>
+          <button type="button" class="v2-btn v2-btn--primary" id="v2-tu-scan"><?php esc_html_e( 'Scannen', 'ecf-framework' ); ?></button>
+          <span class="v2-tu-status" id="v2-tu-status" style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)"></span>
+        </div>
+      </div>
+
+      <div class="v2-tu-results" id="v2-tu-results">
+        <div class="v2-tu-empty" style="padding:32px 16px;text-align:center;color:var(--v2-text3);font-size:var(--v2-ui-base-fs, 13px)">
+          <?php esc_html_e( 'Wähle einen Grundwert und klicke auf „Scannen".', 'ecf-framework' ); ?>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -4006,12 +4069,19 @@ trait ECF_Framework_Admin_V2_View_Trait {
 
           <?php
           $cls_schema = method_exists( $this, 'layrix_class_defaults_schema' ) ? $this->layrix_class_defaults_schema() : [];
-          $cls_options = method_exists( $this, 'layrix_size_variable_options' ) ? $this->layrix_size_variable_options() : [];
           $cls_defaults = $settings['layrix_class_defaults'] ?? [];
+          /* $cls_options_for liefert pro Aufruf gefilterte Optionen je nach
+             token_type aus dem Schema. Spacing-Properties zeigen nur Abstände,
+             Typography-Properties zeigen nur Schriftgrößen, etc. */
+          $cls_options_for = function ( $token_type ) {
+              if ( ! method_exists( $this, 'layrix_size_variable_options' ) ) return [];
+              return $this->layrix_size_variable_options( $token_type ?: null );
+          };
 
-          $render_cls_select = function ( $class_name, $prop_key, $current_value, $schema_default ) use ( $opt, $cls_options ) {
+          $render_cls_select = function ( $class_name, $prop_key, $current_value, $schema_default, $token_type = '' ) use ( $opt, $cls_options_for ) {
               $name_attr = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][' . esc_attr( $prop_key ) . ']';
               $value     = $current_value !== '' ? $current_value : $schema_default;
+              $options   = $cls_options_for( $token_type );
               ?>
               <select class="v2-si" name="<?php echo $name_attr; ?>" style="max-width:240px">
                   <option value=""><?php
@@ -4021,7 +4091,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
                           esc_html( $schema_default )
                       );
                   ?></option>
-                  <?php foreach ( $cls_options as $group_label => $vars ) : ?>
+                  <?php foreach ( $options as $group_label => $vars ) : ?>
                       <optgroup label="<?php echo esc_attr( $group_label ); ?>">
                           <?php foreach ( $vars as $var ) : ?>
                               <option value="<?php echo esc_attr( $var ); ?>" <?php selected( $value, $var ); ?>><?php echo esc_html( $var ); ?></option>
@@ -4070,23 +4140,81 @@ trait ECF_Framework_Admin_V2_View_Trait {
                 </span>
               </summary>
               <div style="padding:0 14px 14px">
-                <?php foreach ( $cls_by_cat[ $cat ] as $class_name => $cls_def ) : ?>
+                <?php foreach ( $cls_by_cat[ $cat ] as $class_name => $cls_def ) :
+                  /* Pair-Gruppierung: Properties mit gleichem 'pair'-Key (z.B.
+                     padding-block-start + padding-block-end) werden als ein Block
+                     mit Lock-Icon gerendert. */
+                  $pair_groups  = [];
+                  $single_props = [];
+                  foreach ( $cls_def['props'] as $prop_key => $prop_def ) {
+                    $pair_key = $prop_def['pair'] ?? '';
+                    if ( $pair_key !== '' ) {
+                      $role = $prop_def['pair_role'] ?? '';
+                      $pair_groups[ $pair_key ][ $role ] = [ 'key' => $prop_key, 'def' => $prop_def ];
+                    } else {
+                      $single_props[ $prop_key ] = $prop_def;
+                    }
+                  }
+                ?>
                   <div class="v2-sec" style="margin:10px 0 0;border:1px solid var(--v2-border);border-radius:8px;padding:12px 14px;background:rgba(0,0,0,.18)">
                     <div class="v2-sh" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
                       <span><?php echo esc_html( $cls_def['label'] ); ?></span>
                       <code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;color:var(--v2-text2);font-weight:400">.<?php echo esc_html( $class_name ); ?></code>
                     </div>
                     <div class="v2-sg">
-                      <?php foreach ( $cls_def['props'] as $prop_key => $prop_def ) :
+                      <?php foreach ( $pair_groups as $pair_key => $roles ) :
+                        if ( empty( $roles['start'] ) || empty( $roles['end'] ) ) continue;
+                        $start_prop_key = $roles['start']['key'];
+                        $end_prop_key   = $roles['end']['key'];
+                        $start_current  = $cls_defaults[ $class_name ][ $start_prop_key ] ?? '';
+                        $end_current    = $cls_defaults[ $class_name ][ $end_prop_key ]   ?? '';
+                        $start_sch_def  = $roles['start']['def']['default'] ?? '';
+                        $end_sch_def    = $roles['end']['def']['default']   ?? '';
+                        // Initial Lock-State: linked wenn beide Werte identisch (oder leer = beide nutzen Default)
+                        $effective_start = $start_current !== '' ? $start_current : $start_sch_def;
+                        $effective_end   = $end_current   !== '' ? $end_current   : $end_sch_def;
+                        $is_linked       = ( $effective_start === $effective_end );
+                        $linked_key_name = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][_linked_' . esc_attr( $pair_key ) . ']';
+                        $start_label = preg_replace( '/^Padding\s+/i', '', (string) ( $roles['start']['def']['label'] ?? '' ) );
+                        $end_label   = preg_replace( '/^Padding\s+/i', '', (string) ( $roles['end']['def']['label']   ?? '' ) );
+                        $pair_label  = ucfirst( str_replace( [ 'padding-block', 'padding-inline' ], [ 'Padding (oben/unten)', 'Padding (links/rechts)' ], $pair_key ) );
+                      ?>
+                      <div class="v2-cls-pair" data-cls-pair-class="<?php echo esc_attr( $class_name ); ?>" data-cls-pair-key="<?php echo esc_attr( $pair_key ); ?>" data-cls-pair-linked="<?php echo $is_linked ? '1' : '0'; ?>" style="border-bottom:1px solid var(--v2-border);padding:8px 0">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                          <button type="button" class="v2-cls-pair__lock" title="<?php esc_attr_e( 'Werte verknüpfen / entkoppeln', 'ecf-framework' ); ?>" aria-pressed="<?php echo $is_linked ? 'true' : 'false'; ?>">
+                            <span class="v2-cls-pair__lock-icon" aria-hidden="true"><?php echo $is_linked ? '🔗' : '🔓'; ?></span>
+                          </button>
+                          <div class="v2-sl" style="flex:1"><?php echo esc_html( $pair_label ); ?></div>
+                          <input type="hidden" name="<?php echo $linked_key_name; ?>" value="<?php echo $is_linked ? '1' : '0'; ?>" class="v2-cls-pair__linked-state">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+                          <div>
+                            <div class="v2-sh2" style="margin-bottom:4px"><?php echo esc_html( $start_label ); ?></div>
+                            <?php $render_cls_select( $class_name, $start_prop_key, $start_current, $start_sch_def, $roles['start']['def']['token_type'] ?? '' ); ?>
+                          </div>
+                          <div>
+                            <div class="v2-sh2" style="margin-bottom:4px"><?php echo esc_html( $end_label ); ?></div>
+                            <?php $render_cls_select( $class_name, $end_prop_key, $end_current, $end_sch_def, $roles['end']['def']['token_type'] ?? '' ); ?>
+                          </div>
+                        </div>
+                      </div>
+                      <?php endforeach; ?>
+                      <?php foreach ( $single_props as $prop_key => $prop_def ) :
                         $current = $cls_defaults[ $class_name ][ $prop_key ] ?? '';
                         $sch_def = $prop_def['default'] ?? '';
+                        $is_editable = ! isset( $prop_def['editable'] ) || $prop_def['editable'] !== false;
                       ?>
                       <div class="v2-sr">
                         <div>
                           <div class="v2-sl"><?php echo esc_html( $prop_def['label'] ); ?></div>
                           <div class="v2-sh2"><code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);color:var(--v2-text3)"><?php echo esc_html( $prop_key ); ?></code></div>
                         </div>
-                        <?php $render_cls_select( $class_name, $prop_key, $current, $sch_def ); ?>
+                        <?php if ( $is_editable ) : ?>
+                          <?php $render_cls_select( $class_name, $prop_key, $current, $sch_def, $prop_def['token_type'] ?? '' ); ?>
+                        <?php else :
+                          $effective = $current !== '' ? $current : $sch_def; ?>
+                          <code title="<?php esc_attr_e( 'Fest verdrahtet — nicht änderbar (Selbstreferenz)', 'ecf-framework' ); ?>" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(99,102,241,.14);color:var(--v2-accent2);padding:6px 10px;border-radius:4px"><?php echo esc_html( $effective ); ?></code>
+                        <?php endif; ?>
                       </div>
                       <?php endforeach; ?>
                     </div>

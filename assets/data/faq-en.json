@@ -202,6 +202,14 @@
       "keywords": "dark mode color variant prefers-color-scheme"
     },
     {
+      "id": "tk-token-usage-inspector",
+      "category": "tokens",
+      "q": "How do I see where a design value (token) is used?",
+      "a": "<p>Sidebar → <strong>Usage</strong>. Pick a token (e.g. <code>ecf-space-m</code>) → click „Scan\" → Layrix searches all Elementor data and lists every post/template that references this token. Per result:</p><ul><li>Post title + type (page / template / post)</li><li>Number of occurrences</li><li>Kind of use (variable / class)</li><li>Direct link to open the post in Elementor</li></ul><p>Useful when you want to change a token and know the blast radius — or remove an unused token from the global-class limit.</p>",
+      "keywords": "token usage where used scan blast radius elementor referenced",
+      "link": { "page": "token-usage", "label": "Go to Usage" }
+    },
+    {
       "id": "tk-units-converter",
       "category": "tokens",
       "q": "What do rem, em, vw mean for body text size?",
@@ -391,8 +399,15 @@
       "id": "ac-layrix-section",
       "category": "auto-classes",
       "q": "What is the Layrix Section widget in Elementor?",
-      "a": "<p>An atomic widget for Elementor v4 that inserts a ready-made <strong>Section + Inner Container</strong> structure:</p><ul><li>Outer div automatically gets <code>ecf-layrix-section</code> (padding-block + padding-inline from Layrix spacing values)</li><li>Inner div automatically gets <code>ecf-container-boxed</code> (max-width from the container-boxed value)</li></ul><p>Drag&Drop one widget instead of two nested flexbox containers.</p>",
-      "keywords": "layrix section widget atomic v4 container boxed inner"
+      "a": "<p>An atomic widget for Elementor v4 that inserts a ready-made <strong>Section + Inner Container</strong> structure:</p><ul><li>Outer div automatically gets <code>ecf-layrix-section</code>: <strong>display: flex; flex-direction: column</strong> (vertical stack), padding-block + padding-inline from Layrix spacing values</li><li>Inner div automatically gets <code>ecf-container-boxed</code> (max-width from the container-boxed value)</li></ul><p>Drag&Drop one widget instead of two nested flexbox containers. If you need another layout direction (e.g. row), override it on the ecf-layrix-section class in Elementor's class editor.</p>",
+      "keywords": "layrix section widget atomic v4 container boxed inner flex column layout direction stack auto-select"
+    },
+    {
+      "id": "ac-layrix-section-inner-focus",
+      "category": "auto-classes",
+      "q": "Why is the inner container auto-selected when inserting a Layrix Section?",
+      "a": "<p>By design: so you can immediately drop widgets into the right container without having to click one level deeper manually.</p><p>Layrix jumps straight to the inner <code>ecf-container-boxed</code> container because 99% of content (headings, buttons, images, …) belongs inside it — not on the outer section. The outer section is mainly for padding and background.</p>",
+      "keywords": "section inner auto-select focus container boxed"
     },
 
     {

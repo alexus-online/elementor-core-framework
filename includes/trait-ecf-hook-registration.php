@@ -9,6 +9,8 @@ trait ECF_Framework_Hook_Registration_Trait {
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_init', [$this, 'register']);
+        // Catch-up-Sync wenn Plugin-Schema sich geändert hat (neue Defaults etc.)
+        add_action('admin_init', [$this, 'maybe_run_schema_migration'], 20);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('wp_head', [$this, 'output_css'], 99);
         add_action('admin_post_ecf_clear_debug_history', [$this, 'handle_clear_debug_history']);

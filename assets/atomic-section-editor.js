@@ -221,17 +221,244 @@
   /* ────────────────────────────────────────────────────────────────────
    * Wiring
    * ────────────────────────────────────────────────────────────────── */
-  function setupCommandListener() {
-    if (!window.$e || !window.$e.commands || typeof window.$e.commands.on !== 'function') return false;
-    window.$e.commands.on('run:after', function(component, command) {
-      if (command === 'document/elements/create' ||
-          command === 'document/elements/duplicate' ||
-          command === 'document/elements/paste' ||
-          command === 'document/elements/import') {
-        setTimeout(scanCurrentDocument, 50);
+  /* Wenn eine Layrix-Section gerade gedroppt wurde, direkt in den inneren
+     Container springen (Elementor selektiert sonst den outer div). User
+     fängt damit sofort an Inhalt einzufügen statt erst manuell zu klicken.
+
+     Probiert mehrere Command-Varianten und macht Retries, weil
+     default_children async erstellt werden. */
+  function _findInnerContainer(c) {
+    if (!c) return null;
+    var kids = c.children;
+    if (!kids) return null;
+    /* Elementor v4: plain Array (kein Backbone). Erst prüfen. */
+    if (Array.isArray(kids) && kids.length)   return kids[0];
+    if (typeof kids.first === 'function')     return kids.first();
+    if (typeof kids.at === 'function')        return kids.at(0);
+    if (kids.models && kids.models.length)    return kids.models[0];
+    if (kids.length && kids[0])               return kids[0];
+    return null;
+  }
+
+  function _trySelectInner(outerContainer, attempt) {
+    attempt = attempt || 0;
+    var inner = _findInnerContainer(outerContainer);
+    if (!inner) {
+      if (attempt < 15) {
+        setTimeout(function() { _trySelectInner(outerContainer, attempt + 1); }, 80);
       }
+      return;
+    }
+    if (!window.$e || typeof window.$e.run !== 'function') return;
+    var attempts = [
+      ['document/elements/select',         { container: inner }],
+      ['document/elements/select',         { container: inner, append: false }],
+      ['document/elements/select-all',     { containers: [inner] }],
+      ['panel/editor/open',                { model: inner.model, view: inner.view }],
+    ];
+    for (var i = 0; i < attempts.length; i++) {
+      try {
+        window.$e.run(attempts[i][0], attempts[i][1]);
+        return; // erstes erfolgreiches Command genügt
+      } catch (err) { /* nächstes probieren */ }
+    }
+    // Letzter Fallback: Elementor's altes Backbone-API zur Selection
+    try {
+      if (inner.model && inner.model.trigger) inner.model.trigger('request:edit');
+    } catch (err) {}
+  }
+
+  function selectInnerOnLayrixSectionCreate(args) {
+    if (!args) return;
+    var newContainers = args.containers || (args.container ? [args.container] : []);
+    if (!newContainers || !newContainers.length) return;
+    newContainers.forEach(function(c) {
+      if (!isLayrixSection(c)) return;
+      setTimeout(function() { _trySelectInner(c); }, 80);
     });
-    return true;
+  }
+
+  /* Multi-channel listener: $e.commands ist in v4 nicht zuverlässig (Events-
+     Map bleibt leer in manchen Builds). Plus Backbone-Add auf children-
+     Collection plus MutationObserver auf Editor-DOM. */
+  var _seenLayrixSections = new WeakSet();
+
+  function _handleNewSectionContainer(container) {
+    if (!container) return;
+    if (_seenLayrixSections.has(container)) return;
+    _seenLayrixSections.add(container);
+    setTimeout(function() {
+      _trySelectInner(container);
+      _ensureInnerHasContainerBoxedClass(container);
+    }, 80);
+  }
+
+  /* Inner-Div des frisch gedroppten Layrix-Section bekommt die
+     ecf-container-boxed-Klasse als Chip — auch wenn PHP's
+     define_default_children() das schon vorgegeben hat, wird's beim
+     Atomic-Element-Type-Rebuild manchmal verloren. JS-Side nachziehen. */
+  function _ensureInnerHasContainerBoxedClass(outerContainer, attempt) {
+    attempt = attempt || 0;
+    if (!auto || !auto.containerBoxedClassId) return;
+    var inner = _findInnerContainer(outerContainer);
+    if (!inner) {
+      if (attempt < 15) setTimeout(function() {
+        _ensureInnerHasContainerBoxedClass(outerContainer, attempt + 1);
+      }, 80);
+      return;
+    }
+    ensureClassPresent(inner, auto.containerBoxedClassId);
+  }
+
+  function _attachChildrenAddListener() {
+    if (!window.elementor || !window.elementor.documents) return;
+    var doc = window.elementor.documents.getCurrent && window.elementor.documents.getCurrent();
+    if (!doc || !doc.container) return;
+
+    function listenOn(container) {
+      if (!container || !container.children || typeof container.children.on !== 'function') return;
+      if (container.__layrixAddHooked) return;
+      container.__layrixAddHooked = true;
+      container.children.on('add', function(model) {
+        // model ist ein Backbone-Model — dazugehöriger Container ist meistens
+        // über elementor.helpers oder Children-Lookup erreichbar.
+        try {
+          var addedContainer = null;
+          // Modern Elementor: Container hat .children mit Backbone-Collection
+          // Wir suchen den Container per ID.
+          var elType = model.get && (model.get('widgetType') || model.get('elType'));
+          if (elType !== 'e-layrix-section') {
+            // Auch Sub-Children rekursiv hooken (User dropt evt. Sections in Sections)
+            return;
+          }
+          // Container hat oft .children — finde frisch hinzugefügten in container.children
+          if (container.children && container.children.length) {
+            // Letztes Kind ist meist das frisch hinzugefügte
+            var childContainers = (typeof container.children.toJSON === 'function')
+              ? null
+              : null;
+            // Alternative: über elementor.helpers.containerFromModel
+            if (window.elementor && window.elementor.helpers && typeof window.elementor.helpers.findContainer === 'function') {
+              addedContainer = window.elementor.helpers.findContainer(model);
+            }
+          }
+          if (!addedContainer) {
+            // Fallback: scan ganzer Tree und suche das Section mit gleicher Model-ID
+            var sectionId = model.get && model.get('id');
+            if (sectionId && doc.container.children) {
+              doc.container.children.each(function(c) {
+                if (c.id === sectionId) addedContainer = c;
+              });
+            }
+          }
+          if (addedContainer) _handleNewSectionContainer(addedContainer);
+        } catch (err) {}
+      });
+    }
+    listenOn(doc.container);
+  }
+
+  function _attachMutationObserver() {
+    if (!window.MutationObserver) return;
+    if (window._layrixSectionObserver) return;
+    var previewIframe = document.querySelector('#elementor-preview-iframe');
+    var iframeDoc = previewIframe && (previewIframe.contentDocument || (previewIframe.contentWindow && previewIframe.contentWindow.document));
+    if (!iframeDoc) {
+      setTimeout(_attachMutationObserver, 500);
+      return;
+    }
+    var obs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (!m.addedNodes) return;
+        m.addedNodes.forEach(function(node) {
+          if (!node || node.nodeType !== 1) return;
+          var matches = [];
+          if (node.matches && node.matches('[data-element_type="e-layrix-section"]')) matches.push(node);
+          if (node.querySelectorAll) {
+            node.querySelectorAll('[data-element_type="e-layrix-section"]').forEach(function(n) { matches.push(n); });
+          }
+          matches.forEach(function(domNode) {
+            // Aus DOM-Knoten zurück zum Container via Elementor-Helpers
+            var modelId = domNode.dataset && (domNode.dataset.id || domNode.getAttribute('data-id'));
+            if (!modelId) return;
+            // Tree scannen, Container mit dieser ID finden
+            if (!window.elementor || !window.elementor.documents) return;
+            var doc = window.elementor.documents.getCurrent && window.elementor.documents.getCurrent();
+            if (!doc || !doc.container) return;
+            function findById(c) {
+              if (!c) return null;
+              if (c.id === modelId) return c;
+              var kids = c.children;
+              if (!kids) return null;
+              var found = null;
+              /* v4: plain Array */
+              if (Array.isArray(kids)) {
+                for (var i = 0; i < kids.length && !found; i++) found = findById(kids[i]);
+              } else if (typeof kids.each === 'function') {
+                /* Backbone */
+                kids.each(function(k) { if (!found) found = findById(k); });
+              }
+              return found;
+            }
+            var container = findById(doc.container);
+            if (container) _handleNewSectionContainer(container);
+          });
+        });
+      });
+    });
+    obs.observe(iframeDoc.body, { childList: true, subtree: true });
+    window._layrixSectionObserver = obs;
+  }
+
+  function setupCommandListener() {
+    if (window._layrixCommandListenerRegistered) return true; // einmal-Guard
+    var ok = false;
+    /* Channel 1: $e.commands run:after — args.container ist der PARENT
+       (wo das neue Element rein erstellt wird), nicht das frisch erstellte
+       Element selbst. Wir nehmen darum den letzten Child des Parents. */
+    if (window.$e && window.$e.commands && typeof window.$e.commands.on === 'function') {
+      try {
+        window.$e.commands.on('run:after', function(component, command, args) {
+          if (/^document\/elements\/(create|duplicate|paste|import)$/.test(String(command))) {
+            setTimeout(scanCurrentDocument, 50);
+          }
+          if (command !== 'document/elements/create' || !args) return;
+          /* Layrix-Section-Detection via args.model — das ist das frisch
+             erstellte Element-Definition. */
+          var newType = '';
+          if (args.model) {
+            if (args.model.get && typeof args.model.get === 'function') {
+              newType = args.model.get('widgetType') || args.model.get('elType') || '';
+            } else {
+              newType = args.model.widgetType || args.model.elType || '';
+            }
+          }
+          if (newType !== 'e-layrix-section') return;
+          var parent = args.container;
+          if (!parent) return;
+          /* Frisch erstelltes Element ist der letzte Child des Parents.
+             Default_children werden async erzeugt → kurz warten. */
+          setTimeout(function() {
+            var kids = parent.children;
+            if (!kids) return;
+            var lastChild = null;
+            if (Array.isArray(kids) && kids.length)         lastChild = kids[kids.length - 1];
+            else if (typeof kids.last === 'function')        lastChild = kids.last();
+            else if (typeof kids.at === 'function' && kids.length) lastChild = kids.at(kids.length - 1);
+            else if (kids.length && kids[kids.length - 1])   lastChild = kids[kids.length - 1];
+            if (lastChild) _handleNewSectionContainer(lastChild);
+          }, 50);
+        });
+        ok = true;
+      } catch (err) {}
+    }
+    /* Channel 2: document children Backbone add (in v4 plain Array,
+       wird hier null-safe abgefangen) */
+    try { _attachChildrenAddListener(); } catch (err) {}
+    /* Channel 3: MutationObserver auf Editor-DOM */
+    try { _attachMutationObserver(); ok = true; } catch (err) {}
+    if (ok) window._layrixCommandListenerRegistered = true;
+    return ok;
   }
 
   /* ────────────────────────────────────────────────────────────────────
@@ -263,7 +490,10 @@
   }
 
   function init() {
-    if (!auto) return;
+    /* setupCommandListener + scanCurrentDocument laufen unabhängig von auto:
+       Layrix-Section-Inner-Auto-Select braucht ecfAutoClasses nicht.
+       applyAutoClassIfApplicable() prüft 'auto' selbst. */
+    if (!auto) auto = window.ecfAutoClasses || null; // Lazy-Refresh falls erst spät verfügbar
     setupCommandListener();
     setTimeout(scanCurrentDocument, 200);
     setTimeout(injectRuntimeCss, 200);

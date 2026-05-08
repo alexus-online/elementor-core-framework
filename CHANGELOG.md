@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.2.2 (2026-05-07)
+
+### Neu
+- **Token-Usage-Inspector** — neue Sidebar-Seite „Verwendung". Wähle einen Grundwert (z.B. `ecf-space-m`), klick „Scannen" → Layrix durchsucht alle Elementor-Daten und listet alle Posts/Templates die diesen Grundwert nutzen, mit Anzahl Vorkommen, Art (Variable/Klasse) und Direkt-Link „In Elementor öffnen".
+- **Klassen-Defaults UI: Pair-Padding mit Lock-Toggle** — bei Layrix-Section und Button hat Padding jetzt zwei Felder (oben/unten bzw. links/rechts) mit Lock-Icon links. Lock an = Wert spiegelt zwischen beiden Feldern, Lock aus = unabhängig.
+- **Property-Filter im Klassen-Defaults-Dropdown**: Padding zeigt nur Abstände, Schriftgröße nur Schriftgrößen, Border-Radius nur Radien. Schema-getrieben via `token_type`.
+- **Container-Boxed max-width als read-only Chip** — Selbstreferenz, deshalb kein Dropdown mehr (war konzeptionell verwirrend).
+- **Layrix-Section: `display: flex; flex-direction: column` als Default** — Section stackt Children jetzt automatisch vertikal, sowohl im Atomic-Widget-Base-Style als auch in der Global-Class.
+- **Inner-Container Auto-Select beim Drop**: Wenn du eine Layrix-Section einfügst, springt der Editor direkt in den Inner-Div (`ecf-container-boxed`) — du kannst sofort Inhalt droppen ohne erst tiefer klicken.
+- **Inner-Container `ecf-container-boxed`-Chip-Detection robuster**: Class-IDs werden jetzt aus Elementors Registry per Lookup statt deterministisch hardcoded — funktioniert auch wenn die Klasse mit anderer ID schon existiert. Fallback auf deterministische ID bleibt.
+
+### Architektur
+- **Schema-Version-Migration** (`trait-ecf-schema-migration.php`): Bei Plugin-Update werden neue Class-Defaults automatisch in Elementors Registry gesynct (Catch-up-Sync im Hintergrund nach Page-Load) — User muss nicht mehr manuell „Jetzt synchronisieren" klicken nach jedem Update. Sicher: nutzt das variant-merge-per-meta-Verfahren, User-Customizations bleiben.
+
+### Verbesserungen
+- **„Token" → „Grundwert"** überall in der Verwendungs-Page (war an einigen Stellen noch übrig vom globalen Refactor).
+- **Layout-Fix**: Top-Banner (Sync-Warning, Auto-Klassen-Warning) standen im flex-Wrapper und schoben die Sidebar zur Seite — jetzt außerhalb des flex-Containers, Layout intakt.
+- **Spacing-/Type-Skala dynamisch**: Klassen-Defaults-Dropdowns lesen die Stufen aus den aktuellen Settings — wenn du in Tokens → Abstände eine neue Stufe hinzufügst (z.B. `6xl`), erscheint sie automatisch im Padding-Picker.
+- FAQ: 2 neue Einträge (Token-Usage-Inspector + Layrix-Section Inner-Auto-Focus) in DE und EN.
+
 ## 0.6.2.1 (2026-05-07)
 
 ### Neu

@@ -5291,6 +5291,131 @@
     bindLive('[name$="[ui_btn_font_size]"]',  '--v2-btn-fs',      function(v) { return parseInt(v, 10) + 'px'; });
   }());
 
+  /* ── Token-Usage-Inspector: scan + render results ─────────────────── */
+  (function() {
+    function escAttr(s) { return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function postTypeLabel(pt) {
+      var map = { 'page': 'Seite', 'post': 'Beitrag', 'elementor_library': 'Template' };
+      return map[pt] || pt;
+    }
+    function renderResults(token, results) {
+      var box = document.getElementById('v2-tu-results');
+      if (!box) return;
+      if (!results || !results.length) {
+        box.innerHTML = '<div class="v2-tu-empty" style="padding:32px 16px;text-align:center;color:var(--v2-text3)">'
+          + 'Grundwert <code>' + escapeHtml(token) + '</code> wird in keinem Post verwendet.'
+          + '</div>';
+        return;
+      }
+      var html = results.map(function(r) {
+        var kindChips = '';
+        if (r.kinds && r.kinds.variable) kindChips += '<span class="v2-tu-row__chip">Variable</span>';
+        if (r.kinds && r.kinds.class)    kindChips += '<span class="v2-tu-row__chip">Klasse</span>';
+        return '<div class="v2-tu-row">'
+          + '<div class="v2-tu-row__title">' + escapeHtml(r.post_title)
+          + ' <span class="v2-tu-row__type">(' + escapeHtml(postTypeLabel(r.post_type)) + ' #' + r.post_id + ')</span></div>'
+          + '<div class="v2-tu-row__kinds">' + kindChips + '</div>'
+          + '<div class="v2-tu-row__hits">' + (r.hits || 0) + '×</div>'
+          + '<a class="v2-tu-row__action" href="' + escAttr(r.edit_url) + '" target="_blank" rel="noopener">In Elementor öffnen ↗</a>'
+          + '</div>';
+      }).join('');
+      box.innerHTML = html;
+    }
+    function runScan() {
+      var sel    = document.getElementById('v2-tu-token');
+      var status = document.getElementById('v2-tu-status');
+      var box    = document.getElementById('v2-tu-results');
+      if (!sel || !box) return;
+      var token = sel.value;
+      if (!token) {
+        if (status) status.textContent = 'Bitte zuerst einen Grundwert wählen.';
+        return;
+      }
+      if (!window.ecfAdmin || !ecfAdmin.tokenUsageRestUrl) {
+        if (status) status.textContent = 'REST-Endpoint nicht verfügbar.';
+        return;
+      }
+      if (status) status.textContent = 'Scanne …';
+      box.innerHTML = '<div class="v2-tu-loading">⏳ Layrix scannt alle Elementor-Daten — kann je nach Site-Größe ein paar Sekunden dauern …</div>';
+      var url = ecfAdmin.tokenUsageRestUrl + (ecfAdmin.tokenUsageRestUrl.indexOf('?') === -1 ? '?' : '&') + 'token=' + encodeURIComponent(token);
+      fetch(url, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data || !data.success) {
+            if (status) status.textContent = 'Fehler beim Scan.';
+            box.innerHTML = '<div class="v2-tu-empty">Fehler beim Scan.</div>';
+            return;
+          }
+          if (status) status.textContent = data.count + ' Treffer';
+          renderResults(token, data.results || []);
+        })
+        .catch(function() {
+          if (status) status.textContent = 'Netzwerk-Fehler.';
+          box.innerHTML = '<div class="v2-tu-empty">Netzwerk-Fehler.</div>';
+        });
+    }
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'v2-tu-scan') runScan();
+    });
+    document.addEventListener('change', function(e) {
+      var sel = e.target;
+      if (sel && sel.id === 'v2-tu-token' && sel.value) runScan();
+    });
+  }());
+
+  /* ── Klassen-Defaults Pair-Padding: Lock-Toggle + Wert-Sync ──────────
+     Padding-Felder pro Achse haben zwei Dropdowns + Lock-Icon. Lock an =
+     Eingabe in einem spiegelt zum anderen. Lock aus = unabhängig. */
+  (function() {
+    function findPairDropdowns(pairWrap) {
+      var selects = pairWrap.querySelectorAll('select[name*="[layrix_class_defaults]"]');
+      if (selects.length < 2) return null;
+      return [selects[0], selects[1]];
+    }
+    function updateLockUI(pairWrap, linked) {
+      pairWrap.dataset.clsPairLinked = linked ? '1' : '0';
+      var btn = pairWrap.querySelector('.v2-cls-pair__lock');
+      if (btn) {
+        btn.setAttribute('aria-pressed', linked ? 'true' : 'false');
+        var icon = btn.querySelector('.v2-cls-pair__lock-icon');
+        if (icon) icon.textContent = linked ? '🔗' : '🔓';
+      }
+      var hidden = pairWrap.querySelector('.v2-cls-pair__linked-state');
+      if (hidden) hidden.value = linked ? '1' : '0';
+    }
+    document.addEventListener('click', function(e) {
+      var lockBtn = e.target.closest('.v2-cls-pair__lock');
+      if (!lockBtn) return;
+      var pairWrap = lockBtn.closest('.v2-cls-pair');
+      if (!pairWrap) return;
+      var nowLinked = pairWrap.dataset.clsPairLinked !== '1';
+      updateLockUI(pairWrap, nowLinked);
+      if (nowLinked) {
+        // Beim erneuten Verkoppeln: erstes Feld als führend, zweites angleichen
+        var dd = findPairDropdowns(pairWrap);
+        if (dd && dd[0].value !== dd[1].value) {
+          dd[1].value = dd[0].value;
+          dd[1].dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      if (typeof ecfV2ScheduleAutosave === 'function') ecfV2ScheduleAutosave();
+    });
+    document.addEventListener('change', function(e) {
+      var sel = e.target.closest('select[name*="[layrix_class_defaults]"]');
+      if (!sel) return;
+      var pairWrap = sel.closest('.v2-cls-pair');
+      if (!pairWrap) return;
+      if (pairWrap.dataset.clsPairLinked !== '1') return;
+      var dd = findPairDropdowns(pairWrap);
+      if (!dd) return;
+      var other = (sel === dd[0]) ? dd[1] : dd[0];
+      if (other && other.value !== sel.value) {
+        other.value = sel.value;
+        other.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  }());
+
   /* ── Auto-Klassen-Warning: alle Toggles auf einen Klick aktivieren ─── */
   (function() {
     var cta = document.getElementById('v2-autoclass-warning-cta');

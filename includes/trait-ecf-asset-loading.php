@@ -172,6 +172,7 @@ trait ECF_Framework_Asset_Loading_Trait {
             'fontSearchRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/fonts/search')),
             'layoutRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/layout')),
             'elementorValuesRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/elementor-values')),
+            'tokenUsageRestUrl'      => esc_url_raw(rest_url('ecf-framework/v1/token-usage')),
             'customPresetsRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/custom-presets')),
             'resetDefaultsUrl'    => esc_url_raw(rest_url('ecf-framework/v1/reset-defaults')),
 'restNonce' => wp_create_nonce('wp_rest'),
@@ -562,7 +563,29 @@ trait ECF_Framework_Asset_Loading_Trait {
         // Elementor's Global Classes registry with deterministic IDs of the
         // form 'g-ecf-' . substr(md5(label), 0, 10). The editor's Klassen chip
         // UI displays classes by ID, so we hand the JS the IDs directly.
-        $cls_id = static function ($label) {
+        // Echte Class-ID aus Elementors Registry holen (cached pro Label).
+        // Fallback auf deterministische ID falls Klasse noch nicht in Registry.
+        $registry_class_ids = null;
+        $load_registry_ids = static function () use (&$registry_class_ids) {
+            if ($registry_class_ids !== null) return $registry_class_ids;
+            $registry_class_ids = [];
+            if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) return $registry_class_ids;
+            try {
+                $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
+                    ->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+                $current = $repo->all()->get();
+                foreach (($current['items'] ?? []) as $id => $item) {
+                    if (!is_array($item)) continue;
+                    $label = strtolower((string) ($item['label'] ?? ''));
+                    if ($label !== '') $registry_class_ids[$label] = (string) $id;
+                }
+            } catch (\Throwable $e) {}
+            return $registry_class_ids;
+        };
+        $cls_id = static function ($label) use ($load_registry_ids) {
+            $registry = $load_registry_ids();
+            $key = strtolower((string) $label);
+            if (isset($registry[$key])) return $registry[$key];
             return 'g-ecf-' . substr(md5($label), 0, 10);
         };
         $auto_default_on = function ($key) use ($settings) {
@@ -616,6 +639,7 @@ trait ECF_Framework_Asset_Loading_Trait {
             ],
             'buttonClassId'      => $cls_id('ecf-button'),
             'layrixSectionClassId' => $cls_id('ecf-layrix-section'),
+            'containerBoxedClassId' => $cls_id('ecf-container-boxed'),
             'variableIds'      => $variable_ids,
             'headingTypography' => [
                 'h1' => [ 'size' => 'ecf-text-4xl', 'leading' => 'ecf-leading-tight' ],

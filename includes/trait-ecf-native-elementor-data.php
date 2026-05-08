@@ -12,36 +12,38 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
                 'label'    => __('Layrix Section', 'ecf-framework'),
                 'category' => 'sections',
                 'props'    => [
-                    'padding-block'  => [ 'label' => __('Padding (oben/unten)',  'ecf-framework'), 'type' => 'size', 'default' => 'ecf-space-2xl' ],
-                    'padding-inline' => [ 'label' => __('Padding (links/rechts)','ecf-framework'), 'type' => 'size', 'default' => 'ecf-space-m'   ],
+                    'padding-block-start'  => [ 'label' => __('Padding oben',    'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing', 'default' => 'ecf-space-2xl', 'pair' => 'padding-block',  'pair_role' => 'start' ],
+                    'padding-block-end'    => [ 'label' => __('Padding unten',   'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing', 'default' => 'ecf-space-2xl', 'pair' => 'padding-block',  'pair_role' => 'end'   ],
+                    'padding-inline-start' => [ 'label' => __('Padding links',   'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing', 'default' => 'ecf-space-m',   'pair' => 'padding-inline', 'pair_role' => 'start' ],
+                    'padding-inline-end'   => [ 'label' => __('Padding rechts',  'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing', 'default' => 'ecf-space-m',   'pair' => 'padding-inline', 'pair_role' => 'end'   ],
                 ],
             ],
             'ecf-container-boxed' => [
                 'label'    => __('Container (Boxed)', 'ecf-framework'),
                 'category' => 'sections',
                 'props'    => [
-                    'max-width' => [ 'label' => __('Max-Breite', 'ecf-framework'), 'type' => 'size', 'default' => 'ecf-container-boxed' ],
+                    'max-width' => [ 'label' => __('Max-Breite', 'ecf-framework'), 'type' => 'size', 'token_type' => 'container', 'default' => 'ecf-container-boxed', 'editable' => false ],
                 ],
             ],
             'ecf-heading-1' => [
                 'label' => __('H1 Überschrift', 'ecf-framework'), 'category' => 'typography',
-                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'default' => 'ecf-text-4xl' ] ],
+                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'token_type' => 'typography', 'default' => 'ecf-text-4xl' ] ],
             ],
             'ecf-heading-2' => [
                 'label' => __('H2 Überschrift', 'ecf-framework'), 'category' => 'typography',
-                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'default' => 'ecf-text-3xl' ] ],
+                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'token_type' => 'typography', 'default' => 'ecf-text-3xl' ] ],
             ],
             'ecf-heading-3' => [
                 'label' => __('H3 Überschrift', 'ecf-framework'), 'category' => 'typography',
-                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'default' => 'ecf-text-2xl' ] ],
+                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'token_type' => 'typography', 'default' => 'ecf-text-2xl' ] ],
             ],
             'ecf-heading-4' => [
                 'label' => __('H4 Überschrift', 'ecf-framework'), 'category' => 'typography',
-                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'default' => 'ecf-text-xl' ] ],
+                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'token_type' => 'typography', 'default' => 'ecf-text-xl' ] ],
             ],
             'ecf-heading-5' => [
                 'label' => __('H5 Überschrift', 'ecf-framework'), 'category' => 'typography',
-                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'default' => 'ecf-text-l' ] ],
+                'props' => [ 'font-size' => [ 'label' => __('Schriftgröße', 'ecf-framework'), 'type' => 'size', 'token_type' => 'typography', 'default' => 'ecf-text-l' ] ],
             ],
             'ecf-button' => [
                 'label'    => __('Button (Basis)', 'ecf-framework'),
@@ -53,10 +55,12 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
                 // blockieren. Buttons erben Farbe vom user oder Elementor-
                 // Default, Layrix steuert nur Geometrie/Typografie.
                 'props'    => [
-                    'padding-block'    => [ 'label' => __('Padding (oben/unten)',   'ecf-framework'), 'type' => 'size',  'default' => 'ecf-space-s'   ],
-                    'padding-inline'   => [ 'label' => __('Padding (links/rechts)', 'ecf-framework'), 'type' => 'size',  'default' => 'ecf-space-m'   ],
-                    'border-radius'    => [ 'label' => __('Eckenradius',            'ecf-framework'), 'type' => 'size',  'default' => 'ecf-radius-m'  ],
-                    'font-size'        => [ 'label' => __('Schriftgröße',           'ecf-framework'), 'type' => 'size',  'default' => 'ecf-text-m'    ],
+                    'padding-block-start'  => [ 'label' => __('Padding oben',   'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing',    'default' => 'ecf-space-s', 'pair' => 'padding-block',  'pair_role' => 'start' ],
+                    'padding-block-end'    => [ 'label' => __('Padding unten',  'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing',    'default' => 'ecf-space-s', 'pair' => 'padding-block',  'pair_role' => 'end'   ],
+                    'padding-inline-start' => [ 'label' => __('Padding links',  'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing',    'default' => 'ecf-space-m', 'pair' => 'padding-inline', 'pair_role' => 'start' ],
+                    'padding-inline-end'   => [ 'label' => __('Padding rechts', 'ecf-framework'), 'type' => 'size', 'token_type' => 'spacing',    'default' => 'ecf-space-m', 'pair' => 'padding-inline', 'pair_role' => 'end'   ],
+                    'border-radius'        => [ 'label' => __('Eckenradius',    'ecf-framework'), 'type' => 'size', 'token_type' => 'radius',     'default' => 'ecf-radius-m'  ],
+                    'font-size'            => [ 'label' => __('Schriftgröße',   'ecf-framework'), 'type' => 'size', 'token_type' => 'typography', 'default' => 'ecf-text-m'    ],
                 ],
             ],
         ];
@@ -72,6 +76,17 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         if ($user_value !== '') {
             return $user_value;
         }
+        // Backward-Compat: padding-block-start/-end fallen auf 'padding-block' zurück
+        // wenn der alte gemeinsame Wert noch im User-Settings steht (vor 0.6.2.2).
+        // Gleiches für inline-start/-end ↔ padding-inline.
+        if ($prop_key === 'padding-block-start' || $prop_key === 'padding-block-end') {
+            $legacy = $settings['layrix_class_defaults'][$class_name]['padding-block'] ?? '';
+            if ($legacy !== '') return $legacy;
+        }
+        if ($prop_key === 'padding-inline-start' || $prop_key === 'padding-inline-end') {
+            $legacy = $settings['layrix_class_defaults'][$class_name]['padding-inline'] ?? '';
+            if ($legacy !== '') return $legacy;
+        }
         $schema = $this->layrix_class_defaults_schema();
         return $schema[$class_name]['props'][$prop_key]['default'] ?? '';
     }
@@ -79,27 +94,59 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
     /**
      * Available size variable labels for the UI dropdown, grouped by family.
      */
-    public function layrix_size_variable_options() {
-        return [
-            __('Schriftgrößen', 'ecf-framework') => [
-                'ecf-text-5xs', 'ecf-text-4xs', 'ecf-text-3xs', 'ecf-text-2xs',
-                'ecf-text-xs', 'ecf-text-s', 'ecf-text-m', 'ecf-text-l',
-                'ecf-text-xl', 'ecf-text-2xl', 'ecf-text-3xl', 'ecf-text-4xl',
-                'ecf-text-5xl', 'ecf-text-6xl', 'ecf-text-7xl',
-            ],
-            __('Abstände', 'ecf-framework') => [
-                'ecf-space-2xs', 'ecf-space-xs', 'ecf-space-s', 'ecf-space-m',
-                'ecf-space-l', 'ecf-space-xl', 'ecf-space-2xl', 'ecf-space-3xl',
-                'ecf-space-4xl', 'ecf-space-5xl',
-            ],
-            __('Radien', 'ecf-framework') => [
-                'ecf-radius-xs', 'ecf-radius-s', 'ecf-radius-m', 'ecf-radius-l',
-                'ecf-radius-xl', 'ecf-radius-full',
-            ],
-            __('Container & Lese-Maximum', 'ecf-framework') => [
-                'ecf-container-boxed', 'ecf-content-max-width',
-            ],
+    /**
+     * Liefert die für ein Klassen-Default-Dropdown verfügbaren Token-Labels.
+     * Wenn $token_type angegeben ist (z.B. 'spacing'), wird nur diese Gruppe
+     * zurückgegeben — sonst alle Gruppen.
+     *
+     * Spacing- und Typography-Listen werden DYNAMISCH aus den Settings
+     * gelesen, damit der Dropdown automatisch synchron bleibt wenn der User
+     * Stufen hinzufügt oder entfernt.
+     */
+    public function layrix_size_variable_options(?string $token_type = null) {
+        $settings = $this->get_settings();
+
+        // Spacing-Stufen aus Settings (Default: 2xs/xs/s/m/l/xl/2xl)
+        $spacing_steps = isset($settings['spacing']['steps']) && is_array($settings['spacing']['steps'])
+            ? $settings['spacing']['steps']
+            : ['2xs', 'xs', 's', 'm', 'l', 'xl', '2xl'];
+        $spacing_labels = array_values(array_map(static function ($step) {
+            return 'ecf-space-' . $step;
+        }, array_filter($spacing_steps, 'is_string')));
+
+        // Typography-Stufen aus Settings
+        $type_steps = isset($settings['typography']['scale']['steps']) && is_array($settings['typography']['scale']['steps'])
+            ? $settings['typography']['scale']['steps']
+            : ['5xs','4xs','3xs','2xs','xs','s','m','l','xl','2xl','3xl','4xl','5xl','6xl','7xl'];
+        $typography_labels = array_values(array_map(static function ($step) {
+            return 'ecf-text-' . $step;
+        }, array_filter($type_steps, 'is_string')));
+
+        // Radius-Stufen aus Settings (Liste von ['name' => 'xs', …])
+        $radius_rows = isset($settings['radius']) && is_array($settings['radius']) ? $settings['radius'] : [];
+        $radius_labels = [];
+        foreach ($radius_rows as $row) {
+            $name = is_array($row) ? ($row['name'] ?? '') : '';
+            if ($name !== '') $radius_labels[] = 'ecf-radius-' . $name;
+        }
+        if (empty($radius_labels)) {
+            $radius_labels = ['ecf-radius-xs', 'ecf-radius-s', 'ecf-radius-m', 'ecf-radius-l', 'ecf-radius-xl', 'ecf-radius-full'];
+        }
+
+        $groups = [
+            'typography' => [ 'label' => __('Schriftgrößen', 'ecf-framework'),         'items' => $typography_labels ],
+            'spacing'    => [ 'label' => __('Abstände',      'ecf-framework'),         'items' => $spacing_labels    ],
+            'radius'     => [ 'label' => __('Radien',        'ecf-framework'),         'items' => $radius_labels     ],
+            'container'  => [ 'label' => __('Container & Lese-Maximum', 'ecf-framework'), 'items' => ['ecf-container-boxed', 'ecf-content-max-width'] ],
         ];
+
+        if ($token_type !== null && isset($groups[$token_type])) {
+            return [ $groups[$token_type]['label'] => $groups[$token_type]['items'] ];
+        }
+        // Default: alle Gruppen (Backward-Compat)
+        $out = [];
+        foreach ($groups as $g) $out[$g['label']] = $g['items'];
+        return $out;
     }
 
     private function build_native_class_payloads() {
@@ -181,10 +228,36 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             };
 
             $out = [];
-            $padding_block  = isset($props_schema['padding-block'])  ? $resolve('padding-block')  : null;
-            $padding_inline = isset($props_schema['padding-inline']) ? $resolve('padding-inline') : null;
-            if ($padding_block && $padding_inline) {
-                $out['padding'] = $padding_dimensions($padding_block, $padding_inline);
+            // Padding aus 4 separaten Properties bauen (block-start/end + inline-start/end).
+            // Backward-Compat: wenn nur die alten 'padding-block' / 'padding-inline'
+            // Schema-Keys da sind, weiter symmetrisch.
+            if (isset($props_schema['padding-block-start']) || isset($props_schema['padding-block-end'])
+             || isset($props_schema['padding-inline-start']) || isset($props_schema['padding-inline-end'])) {
+                $bs = isset($props_schema['padding-block-start'])  ? $resolve('padding-block-start')  : null;
+                $be = isset($props_schema['padding-block-end'])    ? $resolve('padding-block-end')    : null;
+                $ls = isset($props_schema['padding-inline-start']) ? $resolve('padding-inline-start') : null;
+                $le = isset($props_schema['padding-inline-end'])   ? $resolve('padding-inline-end')   : null;
+                $bs_ref = $bs ? $size_var_ref($bs) : null;
+                $be_ref = $be ? $size_var_ref($be) : null;
+                $ls_ref = $ls ? $size_var_ref($ls) : null;
+                $le_ref = $le ? $size_var_ref($le) : null;
+                if ($bs_ref && $be_ref && $ls_ref && $le_ref) {
+                    $out['padding'] = [
+                        '$$type' => 'dimensions',
+                        'value'  => [
+                            'block-start'  => $bs_ref,
+                            'inline-end'   => $le_ref,
+                            'block-end'    => $be_ref,
+                            'inline-start' => $ls_ref,
+                        ],
+                    ];
+                }
+            } else {
+                $padding_block  = isset($props_schema['padding-block'])  ? $resolve('padding-block')  : null;
+                $padding_inline = isset($props_schema['padding-inline']) ? $resolve('padding-inline') : null;
+                if ($padding_block && $padding_inline) {
+                    $out['padding'] = $padding_dimensions($padding_block, $padding_inline);
+                }
             }
             foreach (['border-radius', 'font-size', 'max-width'] as $simple_prop) {
                 if (isset($props_schema[$simple_prop])) {
@@ -250,12 +323,22 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         // Layrix Section atomic widget identifier class — always sync it so
         // the Klassen chip renders for the widget even on existing installs
         // where the user's starter_classes settings predate this class.
+        // Default-Layout: flex column. Wirkt für jedes Element mit der Klasse,
+        // unabhängig vom Atomic-Section-Widget. User kann im Klassen-Editor
+        // manuell überschreiben.
         if (!isset($items['ecf-layrix-section'])) {
+            $section_props = array_merge(
+                $build_class_props('ecf-layrix-section'),
+                [
+                    'display'        => ['$$type' => 'string', 'value' => 'flex'],
+                    'flex-direction' => ['$$type' => 'string', 'value' => 'column'],
+                ]
+            );
             $items['ecf-layrix-section'] = [
                 'type' => 'class',
                 'label' => 'ecf-layrix-section',
                 'sync_to_v3' => false,
-                'variants' => $with_props($build_class_props('ecf-layrix-section')),
+                'variants' => $with_props($section_props),
             ];
         }
 

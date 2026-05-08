@@ -63,6 +63,11 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
                 if (!is_string($cls) || !isset($schema[$cls]) || !is_array($props)) continue;
                 $allowed_props = array_keys($schema[$cls]['props'] ?? []);
                 foreach ($props as $prop_key => $value) {
+                    // Pair-Lock-State (z.B. _linked_padding-block) als '0' / '1' speichern
+                    if (is_string($prop_key) && strpos($prop_key, '_linked_') === 0) {
+                        $output['layrix_class_defaults'][$cls][$prop_key] = !empty($value) ? '1' : '0';
+                        continue;
+                    }
                     if (!in_array($prop_key, $allowed_props, true)) continue;
                     $value = sanitize_text_field((string) $value);
                     if ($value === '') continue;
