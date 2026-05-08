@@ -5161,6 +5161,7 @@
 
   /* ── Konflikterkennung beim Sync ────────────────────────────────────── */
   var _syncConflicts = [];
+  var _classConflicts = [];
   var _pendingSyncBtn = null;
   var _pendingSyncForm = null;
 
@@ -5168,54 +5169,108 @@
     if (form) { form.submit(); } else { ecfV2Sync(btn); }
   }
 
-  function _runSyncAfterCheck(btn, form) {
-    if (!window.ecfAdmin || !ecfAdmin.elementorValuesRestUrl) {
-      _doSync(btn, form);
+  function _detectColorConflicts() {
+    if (!window.ecfAdmin || !ecfAdmin.elementorValuesRestUrl) return Promise.resolve([]);
+    return fetch(ecfAdmin.elementorValuesRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.available || !data.values) return [];
+        var elValues = data.values;
+        var settings = ecfV2CollectData();
+        var colors   = (settings && settings.colors) ? settings.colors : [];
+        var conflicts = [];
+        colors.forEach(function(row) {
+          var name = (row.name || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+          var layrixVal = (row.value || '').toLowerCase();
+          var elKey = 'ecf-color-' + name;
+          if (elValues[elKey] && elValues[elKey].toLowerCase() !== layrixVal) {
+            conflicts.push({ name: name, layrix: layrixVal, elementor: elValues[elKey] });
+          }
+        });
+        return conflicts;
+      })
+      .catch(function() { return []; });
+  }
+
+  function _detectClassConflicts() {
+    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve([]);
+    return fetch(ecfAdmin.syncConflictsRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        return (data && data.success && Array.isArray(data.conflicts)) ? data.conflicts : [];
+      })
+      .catch(function() { return []; });
+  }
+
+  function _renderClassConflicts(conflicts) {
+    var block = document.getElementById('v2-class-conflict-block');
+    var listEl = document.getElementById('v2-class-conflict-list');
+    if (!block || !listEl) return;
+    if (!conflicts.length) {
+      block.hidden = true;
+      listEl.innerHTML = '';
       return;
     }
-    fetch(ecfAdmin.elementorValuesRestUrl, {
-      headers: { 'X-WP-Nonce': ecfAdmin.restNonce },
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!data || !data.available || !data.values) {
+    block.hidden = false;
+    /* Default-Aktion: 'elementor_wins' (User-Wert in Elementor bleibt → Backend wird angepasst) */
+    listEl.innerHTML = conflicts.map(function(c) {
+      return '<div class="v2-class-conflict-row" data-conflict-class="' + escapeHtml(c.class) + '" data-conflict-prop="' + escapeHtml(c.prop) + '" data-conflict-elementor="' + escapeHtml(c.elementor) + '" style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--v2-border)">'
+        + '<div>'
+          + '<div style="font-size:var(--v2-ui-base-fs, 13px);font-weight:600">' + escapeHtml(c.class_label || c.class) + '</div>'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3);font-family:var(--v2-mono)">' + escapeHtml(c.prop) + '</div>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Layrix</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2)">' + escapeHtml(c.backend) + '</code>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Elementor</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-accent2)">' + escapeHtml(c.elementor) + '</code>'
+        + '</div>'
+        + '<select class="v2-si v2-si--sm v2-conflict-action" style="max-width:200px">'
+          + '<option value="elementor_wins" selected>Elementor übernehmen</option>'
+          + '<option value="layrix_wins">Layrix erzwingen</option>'
+        + '</select>'
+        + '</div>';
+    }).join('');
+  }
+
+  function _runSyncAfterCheck(btn, form) {
+    Promise.all([_detectColorConflicts(), _detectClassConflicts()])
+    .then(function(results) {
+      var colorConflicts = results[0] || [];
+      var classConflicts = results[1] || [];
+      if (!colorConflicts.length && !classConflicts.length) {
         _doSync(btn, form);
         return;
       }
-      var elValues = data.values;
-      var settings = ecfV2CollectData();
-      var colors   = (settings && settings.colors) ? settings.colors : [];
-      var conflicts = [];
-      colors.forEach(function(row) {
-        var name = (row.name || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
-        var layrixVal = (row.value || '').toLowerCase();
-        var elKey = 'ecf-color-' + name;
-        if (elValues[elKey] && elValues[elKey].toLowerCase() !== layrixVal) {
-          conflicts.push({ name: name, layrix: layrixVal, elementor: elValues[elKey] });
-        }
-      });
-      if (!conflicts.length) {
-        _doSync(btn, form);
-        return;
-      }
-      _syncConflicts = conflicts;
+      _syncConflicts = colorConflicts;
+      _classConflicts = classConflicts;
       _pendingSyncBtn = btn;
       _pendingSyncForm = form;
+
       var listEl = document.getElementById('v2-conflict-list');
       if (listEl) {
-        listEl.innerHTML = conflicts.map(function(c) {
-          return '<div class="v2-conflict-row">'
-            + '<span class="v2-conflict-name">--ecf-color-' + escapeHtml(c.name) + '</span>'
-            + '<span class="v2-conflict-vals">'
-            + '<span class="v2-conflict-swatch" style="background:' + escapeHtml(c.layrix) + '" title="Layrix"></span>'
-            + escapeHtml(c.layrix)
-            + ' <span class="v2-conflict-arrow">→</span> '
-            + '<span class="v2-conflict-swatch" style="background:' + escapeHtml(c.elementor) + '" title="Elementor"></span>'
-            + escapeHtml(c.elementor)
-            + '</span>'
-            + '</div>';
-        }).join('');
+        if (colorConflicts.length) {
+          listEl.innerHTML = colorConflicts.map(function(c) {
+            return '<div class="v2-conflict-row">'
+              + '<span class="v2-conflict-name">--ecf-color-' + escapeHtml(c.name) + '</span>'
+              + '<span class="v2-conflict-vals">'
+              + '<span class="v2-conflict-swatch" style="background:' + escapeHtml(c.layrix) + '" title="Layrix"></span>'
+              + escapeHtml(c.layrix)
+              + ' <span class="v2-conflict-arrow">→</span> '
+              + '<span class="v2-conflict-swatch" style="background:' + escapeHtml(c.elementor) + '" title="Elementor"></span>'
+              + escapeHtml(c.elementor)
+              + '</span>'
+              + '</div>';
+          }).join('');
+          listEl.style.display = '';
+        } else {
+          listEl.style.display = 'none';
+        }
       }
+      _renderClassConflicts(classConflicts);
+
       var modal = document.getElementById('v2-conflict-modal');
       if (modal) modal.hidden = false;
     })
@@ -5224,19 +5279,64 @@
     });
   }
 
+  /* Bulk-Action-Buttons im Modal */
+  document.addEventListener('click', function(e) {
+    var bulkBtn = e.target.closest('[data-conflict-bulk]');
+    if (!bulkBtn) return;
+    var action = bulkBtn.dataset.conflictBulk;
+    document.querySelectorAll('.v2-class-conflict-row .v2-conflict-action').forEach(function(sel) {
+      sel.value = action;
+    });
+  });
+
   /* Wire up conflict modal buttons */
   document.addEventListener('click', function(e) {
     if (e.target.id === 'v2-conflict-cancel' || e.target.id === 'v2-conflict-cancel2') {
       var modal = document.getElementById('v2-conflict-modal');
       if (modal) modal.hidden = true;
       _pendingSyncBtn = null;
+      _pendingSyncForm = null;
     }
     if (e.target.id === 'v2-conflict-confirm') {
       var modal2 = document.getElementById('v2-conflict-modal');
-      if (modal2) modal2.hidden = true;
-      _doSync(_pendingSyncBtn, _pendingSyncForm);
+      /* Klassen-Konflikt-Resolutionen sammeln. Nur "elementor_wins" wird ans
+         Resolve-Endpoint gesendet — schreibt Elementor-Wert ins Backend.
+         "layrix_wins" braucht keine Aktion: der nachfolgende Sync schreibt
+         Backend-Wert eh nach Elementor (heutiges Verhalten). */
+      var resolutions = [];
+      document.querySelectorAll('.v2-class-conflict-row').forEach(function(row) {
+        var sel = row.querySelector('.v2-conflict-action');
+        if (!sel || sel.value !== 'elementor_wins') return;
+        resolutions.push({
+          class: row.dataset.conflictClass,
+          prop: row.dataset.conflictProp,
+          elementor: row.dataset.conflictElementor,
+          action: 'elementor_wins',
+        });
+      });
+      var btn = _pendingSyncBtn, form = _pendingSyncForm;
       _pendingSyncBtn = null;
       _pendingSyncForm = null;
+
+      var afterResolve = function() {
+        if (modal2) modal2.hidden = true;
+        _doSync(btn, form);
+      };
+      if (resolutions.length && window.ecfAdmin && ecfAdmin.syncConflictsResolveRestUrl) {
+        fetch(ecfAdmin.syncConflictsResolveRestUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': ecfAdmin.restNonce,
+          },
+          body: JSON.stringify({ resolutions: resolutions }),
+        })
+        .then(function(r) { return r.json(); })
+        .then(afterResolve)
+        .catch(afterResolve);
+      } else {
+        afterResolve();
+      }
     }
   });
 
@@ -5289,6 +5389,156 @@
     bindLive('[name$="[ui_base_font_size]"]', '--v2-ui-base-fs',  function(v) { return parseInt(v, 10) + 'px'; });
     bindLive('[name$="[ui_nav_font_size]"]',  '--v2-ui-nav-fs',   function(v) { return parseInt(v, 10) + 'px'; });
     bindLive('[name$="[ui_btn_font_size]"]',  '--v2-btn-fs',      function(v) { return parseInt(v, 10) + 'px'; });
+  }());
+
+  /* ── Klassen-Refactor: Preview + Apply ─────────────────────────────── */
+  (function() {
+    var lastPreviewMatches = [];
+    var lastFrom = '';
+    var lastTo   = '';
+
+    function escAttr(s) { return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function postTypeLabel(pt) {
+      var map = { 'page': 'Seite', 'post': 'Beitrag', 'elementor_library': 'Template' };
+      return map[pt] || pt;
+    }
+
+    function renderPreviewResults(matches) {
+      var box = document.getElementById('v2-cr-results');
+      if (!box) return;
+      if (!matches || !matches.length) {
+        box.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--v2-text3);border:1px dashed var(--v2-border);border-radius:8px">'
+          + 'Klasse <code>' + escapeHtml(lastFrom) + '</code> wurde in keinem Post gefunden.'
+          + '</div>';
+        return;
+      }
+      var totalHits = matches.reduce(function(s, m) { return s + (m.hits || 0); }, 0);
+      var rows = matches.map(function(m) {
+        return '<div class="v2-cr-row" style="display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--v2-border)">'
+          + '<input type="checkbox" checked class="v2-cr-check" data-post-id="' + m.post_id + '">'
+          + '<div><div style="font-weight:600">' + escapeHtml(m.post_title) + ' <span style="color:var(--v2-text3);font-family:var(--v2-mono);font-size:var(--v2-btn-fs, 12px)">(' + escapeHtml(postTypeLabel(m.post_type)) + ' #' + m.post_id + ')</span></div></div>'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2);font-variant-numeric:tabular-nums">' + (m.hits || 0) + '×</div>'
+          + '<a href="' + escAttr(m.edit_url) + '" target="_blank" rel="noopener" class="v2-btn v2-btn--ghost v2-btn--sm" style="white-space:nowrap;font-size:var(--v2-btn-fs, 12px)">Öffnen ↗</a>'
+          + '</div>';
+      }).join('');
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+        + '<div style="font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)">'
+        + '<strong>' + matches.length + ' Posts</strong>, ' + totalHits + ' Vorkommen'
+        + '</div>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button type="button" class="v2-btn v2-btn--ghost v2-btn--sm" id="v2-cr-toggle-all">Alle umschalten</button>'
+        + '<button type="button" class="v2-btn v2-btn--primary" id="v2-cr-apply" style="background:#dc2626">Jetzt umbenennen</button>'
+        + '</div>'
+        + '</div>'
+        + '<div style="border:1px solid var(--v2-border);border-radius:8px;max-height:480px;overflow-y:auto">'
+        + rows
+        + '</div>';
+    }
+
+    function runPreview() {
+      var fromEl = document.getElementById('v2-cr-from');
+      var toEl   = document.getElementById('v2-cr-to');
+      var status = document.getElementById('v2-cr-status');
+      var box    = document.getElementById('v2-cr-results');
+      if (!fromEl || !toEl) return;
+      var from = (fromEl.value || '').trim();
+      var to   = (toEl.value   || '').trim();
+      if (!from || !to) {
+        if (status) status.textContent = 'Bitte alte und neue Klasse angeben.';
+        return;
+      }
+      if (from === to) {
+        if (status) status.textContent = 'Alte und neue Klasse sind identisch.';
+        return;
+      }
+      if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(to)) {
+        if (status) status.textContent = 'Neuer Klassenname ungültig (nur a-z, 0-9, _ und - erlaubt; muss mit Buchstabe beginnen).';
+        return;
+      }
+      if (!window.ecfAdmin || !ecfAdmin.classRefactorPreviewRestUrl) {
+        if (status) status.textContent = 'REST-Endpoint nicht verfügbar.';
+        return;
+      }
+      lastFrom = from;
+      lastTo = to;
+      if (status) status.textContent = 'Scanne …';
+      if (box) box.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--v2-text3)">⏳ Layrix scannt alle Elementor-Daten …</div>';
+      var url = ecfAdmin.classRefactorPreviewRestUrl
+        + '?from=' + encodeURIComponent(from)
+        + '&to='   + encodeURIComponent(to);
+      fetch(url, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data || !data.success) {
+            if (status) status.textContent = 'Fehler beim Scan.';
+            return;
+          }
+          lastPreviewMatches = data.matches || [];
+          if (status) status.textContent = data.count + ' Posts, ' + (data.total_hits || 0) + ' Vorkommen';
+          renderPreviewResults(lastPreviewMatches);
+        })
+        .catch(function() {
+          if (status) status.textContent = 'Netzwerk-Fehler.';
+        });
+    }
+
+    function runApply() {
+      var checked = Array.prototype.slice.call(document.querySelectorAll('.v2-cr-check:checked'))
+        .map(function(cb) { return parseInt(cb.dataset.postId, 10); })
+        .filter(function(id) { return id > 0; });
+      if (!checked.length) {
+        alert('Keine Posts ausgewählt.');
+        return;
+      }
+      var msg = 'Wirklich ausführen?\n\nKlasse "' + lastFrom + '" wird in ' + checked.length
+              + ' Posts durch "' + lastTo + '" ersetzt.\n\nDieser Vorgang ist nicht automatisch rückgängig zu machen.';
+      if (!confirm(msg)) return;
+
+      var status = document.getElementById('v2-cr-status');
+      if (status) status.textContent = 'Schreibe …';
+      var applyBtn = document.getElementById('v2-cr-apply');
+      if (applyBtn) applyBtn.disabled = true;
+
+      fetch(ecfAdmin.classRefactorApplyRestUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': ecfAdmin.restNonce,
+        },
+        body: JSON.stringify({ from: lastFrom, to: lastTo, post_ids: checked }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (applyBtn) applyBtn.disabled = false;
+        if (!data || !data.success) {
+          if (status) status.textContent = 'Fehler beim Schreiben.';
+          return;
+        }
+        if (status) {
+          status.textContent = '✓ Fertig: ' + (data.posts_updated || 0) + ' Posts aktualisiert, '
+            + (data.total_replacements || 0) + ' Vorkommen ersetzt.';
+        }
+        if (typeof ecfV2Toast === 'function') {
+          ecfV2Toast('Klassen-Refactor abgeschlossen', 'success');
+        }
+        // Re-Preview damit Liste aktualisiert wird (Posts mit alter Klasse sollten weg sein)
+        runPreview();
+      })
+      .catch(function() {
+        if (applyBtn) applyBtn.disabled = false;
+        if (status) status.textContent = 'Netzwerk-Fehler beim Schreiben.';
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'v2-cr-preview') runPreview();
+      if (e.target && e.target.id === 'v2-cr-apply') runApply();
+      if (e.target && e.target.id === 'v2-cr-toggle-all') {
+        var checks = document.querySelectorAll('.v2-cr-check');
+        var anyOff = Array.prototype.some.call(checks, function(c) { return !c.checked; });
+        checks.forEach(function(c) { c.checked = anyOff; });
+      }
+    });
   }());
 
   /* ── Token-Usage-Inspector: scan + render results ─────────────────── */

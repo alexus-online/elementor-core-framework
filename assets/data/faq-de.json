@@ -295,6 +295,14 @@
       "link": { "page": "cookbook", "label": "Zur Anwendung" }
     },
     {
+      "id": "cl-class-refactor-tool",
+      "category": "classes",
+      "q": "Wie benenne ich eine Klasse in allen Seiten gleichzeitig um?",
+      "a": "<p>Sidebar → <strong>Klassen umbenennen</strong>. Du gibst die alte und die neue Klasse an, klickst „Vorschau\" — Layrix listet alle Posts/Templates die die alte Klasse nutzen mit Anzahl der Vorkommen. Nach Prüfung klickst du „Jetzt umbenennen\" → Layrix ersetzt die Klasse in allen ausgewählten Posts.</p><p>Funktioniert sowohl in V3-klassischen Widgets (CSS-Klassen-Feld) als auch V4-atomic-Widgets (Klassen-Array). Bei Layrix-Global-Klassen wird zusätzlich die Class-ID in Elementors Registry mit ersetzt — sodass die Verbindung zur Global-Class erhalten bleibt wenn die neue Klasse auch eine Layrix-Klasse ist.</p><p><strong>Achtung:</strong> Schreibender Vorgang. Vor dem Apply Backup machen wenn du dir unsicher bist.</p>",
+      "keywords": "klasse umbenennen find replace refactor migration ersetzen klassen-name umbenennung",
+      "link": { "page": "class-refactor", "label": "Zur Klassen-Umbenennen-Seite" }
+    },
+    {
       "id": "cl-shadow-utility-classes",
       "category": "classes",
       "q": "Was sind die Schatten-Utility-Klassen (ecf-shadow-xs, ecf-shadow-l, …)?",

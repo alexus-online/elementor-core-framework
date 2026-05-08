@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.3 (2026-05-08)
+
+### Neu
+- **Klassen umbenennen — Find & Replace** (neue Sidebar-Seite): Custom-Klassennamen über alle Posts und Templates umbenennen — V3 (`_css_classes`) und V4 (Atomic-Widgets `classes.value`). Zwei-Schritt-Workflow: Vorschau scannt alle Elementor-Daten, listet Treffer pro Post mit Hit-Count und Edit-Link, dann gezielt anwenden mit Confirm-Dialog. JSON-Walker matcht ausschließlich an Klassen-Slots — Klassennamen die wörtlich in URLs, Text-Inhalten, Labels oder Custom-CSS auftauchen, werden nicht angefasst. Defense-in-Depth: JSON-Validity-Check vor jedem Write, Per-Post-Cache-Invalidierung, globaler Elementor-Files-Manager-Bust nach Erfolg. Layrix-Global-Klassen werden mit Hinweis abgewiesen — die werden über Layrix-Settings umbenannt, nicht über das Refactor-Tool.
+- **Klassen-Sync-Konflikt-Detection**: Beim manuellen „Klassen synchronisieren" prüft Layrix vorab ob es Property-Werte gibt die in Elementor anders gesetzt sind als in Layrix. Wenn ja: Modal mit Conflict-Block pro betroffener Klasse/Property, Buttons „Layrix wins" / „Elementor wins" pro Zeile. Pair-Padding (`padding-block-start/end` + `padding-inline-start/end`) wird als zusammenhängender Block erkannt statt als 4 einzelne Konflikte. Resolve-Endpoint akzeptiert nur Token-Labels (lowercase letter+digits+dash), keine literalen CSS-Werte.
+
+### Architektur
+- **JSON-Walker statt Raw-Regex** im Refactor-Tool: rekursiver Tree-Walker zielt präzise auf Elementor-Klassen-Slots (`_css_classes` V3, `{$$type:"classes",value:[...]}` V4 atomic). Re-Encoding mit `JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE` (Elementor-konform).
+- **Schema-Migration-Trait**: Property-/Klassen-Defaults bekommen Schema-Versionen und werden bei Plugin-Update automatisch in Elementors Registry gemerged (Catch-up-Sync nach Page-Load) — User muss nach Updates nicht mehr manuell synchronisieren.
+
+### Verbesserungen
+- FAQ: Neue Einträge `cl-class-refactor-tool` und `sy-conflict-modal` (DE + EN).
+- Sicherheits-Review im Refactor-Tool: SQL via `prepare`/`esc_like`, neuer Klassenname streng gegen `^[a-zA-Z][a-zA-Z0-9_-]*$` validiert, JSON-Validity-Check, Walker-scoped Replace.
+
 ## 0.6.2.2 (2026-05-07)
 
 ### Neu

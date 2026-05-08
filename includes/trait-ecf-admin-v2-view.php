@@ -447,6 +447,10 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <svg viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.2" opacity=".7"/><path d="M8 8l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       <?php esc_html_e( 'Verwendung', 'ecf-framework' ); ?>
     </button>
+    <button type="button" class="v2-ni" data-v2-page="class-refactor">
+      <svg viewBox="0 0 13 13" fill="none"><path d="M2 3h6M2 7h4M2 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".5"/><path d="M9 5l3 1.5L9 8z" fill="currentColor" opacity=".8"/></svg>
+      <?php esc_html_e( 'Klassen umbenennen', 'ecf-framework' ); ?>
+    </button>
     <div class="v2-sb-group" style="margin-top:2px"><?php esc_html_e( 'Grundwerte', 'ecf-framework' ); ?></div>
     <button type="button" class="v2-ni" data-v2-page="colors">
       <svg viewBox="0 0 13 13" fill="none"><circle cx="4" cy="4" r="2.2" fill="currentColor" opacity=".7"/><circle cx="9" cy="4" r="2.2" fill="currentColor" opacity=".5"/><circle cx="4" cy="9" r="2.2" fill="currentColor" opacity=".5"/><circle cx="9" cy="9" r="2.2" fill="currentColor" opacity=".3"/></svg>
@@ -930,6 +934,47 @@ trait ECF_Framework_Admin_V2_View_Trait {
           <?php esc_html_e( 'Wähle einen Grundwert und klicke auf „Scannen".', 'ecf-framework' ); ?>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: KLASSEN-REFACTOR (Find & Replace) ═════════════════════════ -->
+<div id="ecf-v2-page-class-refactor" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Klassen umbenennen', 'ecf-framework' ); ?></span></div>
+  </div>
+  <div class="v2-page-body">
+    <div class="v2-content">
+      <div class="v2-ph">
+        <h1><?php esc_html_e( 'Klassen umbenennen — Find & Replace', 'ecf-framework' ); ?></h1>
+        <p><?php esc_html_e( 'Ersetzt einen Klassennamen in allen Elementor-Daten — auf jeder Seite, in jedem Element. Klassisch (V3) und atomic (V4) gleichermaßen.', 'ecf-framework' ); ?></p>
+      </div>
+
+      <div class="v2-cr-warning" style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid rgba(234,179,8,.4);border-radius:8px;background:rgba(234,179,8,.08);margin-bottom:16px">
+        <span style="font-size:18px;line-height:1;color:#facc15">⚠</span>
+        <div style="font-size:var(--v2-btn-fs, 12px);color:#fde68a;line-height:1.55">
+          <strong><?php esc_html_e( 'Achtung — schreibender Vorgang', 'ecf-framework' ); ?></strong><br>
+          <?php esc_html_e( 'Diese Aktion verändert die Datenbank-Inhalte deiner Posts dauerhaft. Erst Vorschau anschauen → dann ausführen. Mache vorher ein Backup wenn du dir unsicher bist.', 'ecf-framework' ); ?>
+        </div>
+      </div>
+
+      <div class="v2-sec" style="padding:14px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(0,0,0,.18);margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:12px;align-items:end">
+          <div>
+            <label for="v2-cr-from" class="v2-sl"><?php esc_html_e( 'Alte Klasse', 'ecf-framework' ); ?></label>
+            <input type="text" id="v2-cr-from" class="v2-si" placeholder="my-button" style="width:100%;font-family:var(--v2-mono)">
+          </div>
+          <div style="font-size:18px;color:var(--v2-text3);align-self:center;padding-top:18px">→</div>
+          <div>
+            <label for="v2-cr-to" class="v2-sl"><?php esc_html_e( 'Neue Klasse', 'ecf-framework' ); ?></label>
+            <input type="text" id="v2-cr-to" class="v2-si" placeholder="ecf-button" style="width:100%;font-family:var(--v2-mono)">
+          </div>
+          <button type="button" id="v2-cr-preview" class="v2-btn v2-btn--primary" style="white-space:nowrap"><?php esc_html_e( 'Vorschau', 'ecf-framework' ); ?></button>
+        </div>
+        <div class="v2-cr-status" id="v2-cr-status" style="margin-top:10px;font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)"></div>
+      </div>
+
+      <div class="v2-cr-results" id="v2-cr-results"></div>
     </div>
   </div>
 </div>
@@ -4523,18 +4568,32 @@ trait ECF_Framework_Admin_V2_View_Trait {
 
 <!-- Konflikt-Modal -->
 <div id="v2-conflict-modal" class="v2-modal-overlay" hidden>
-  <div class="v2-modal-box" style="width:460px">
+  <div class="v2-modal-box" style="width:680px;max-width:calc(100vw - 32px)">
     <div class="v2-modal-head">
       <span>⚠ <?php esc_html_e( 'Konflikte erkannt', 'ecf-framework' ); ?></span>
       <button type="button" class="v2-modal-close" id="v2-conflict-cancel">✕</button>
     </div>
     <div class="v2-modal-body">
-      <p style="font-size:12px;color:var(--v2-text2);margin:0 0 12px"><?php esc_html_e( 'Folgende Grundwerte wurden in Elementor verändert und weichen von Layrix ab. Beim Sync überschreibt Layrix diese Werte.', 'ecf-framework' ); ?></p>
-      <div id="v2-conflict-list" style="max-height:200px;overflow-y:auto"></div>
+      <p style="font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);margin:0 0 12px">
+        <?php esc_html_e( 'Folgende Werte wurden in Elementor angepasst und weichen vom Layrix-Backend ab. Wähle pro Konflikt was gewinnen soll.', 'ecf-framework' ); ?>
+      </p>
+      <!-- Color-Konflikte (Legacy) -->
+      <div id="v2-conflict-list" style="max-height:160px;overflow-y:auto;margin-bottom:12px"></div>
+      <!-- Klassen-Property-Konflikte -->
+      <div id="v2-class-conflict-block" hidden>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px">
+          <strong style="font-size:var(--v2-ui-base-fs, 13px)"><?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?></strong>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
+          </div>
+        </div>
+        <div id="v2-class-conflict-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--v2-border);border-radius:6px"></div>
+      </div>
     </div>
     <div class="v2-modal-foot">
       <button type="button" class="v2-btn v2-btn--ghost" id="v2-conflict-cancel2"><?php esc_html_e( 'Abbrechen', 'ecf-framework' ); ?></button>
-      <button type="button" class="v2-btn v2-btn--primary" id="v2-conflict-confirm"><?php esc_html_e( 'Trotzdem sync', 'ecf-framework' ); ?></button>
+      <button type="button" class="v2-btn v2-btn--primary" id="v2-conflict-confirm"><?php esc_html_e( 'Sync mit Auswahl ausführen', 'ecf-framework' ); ?></button>
     </div>
   </div>
 </div>

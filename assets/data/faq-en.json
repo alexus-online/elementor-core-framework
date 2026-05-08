@@ -295,6 +295,14 @@
       "link": { "page": "cookbook", "label": "Go to Application" }
     },
     {
+      "id": "cl-class-refactor-tool",
+      "category": "classes",
+      "q": "How do I rename a class across all pages at once?",
+      "a": "<p>Sidebar → <strong>Klassen umbenennen</strong>. Enter the old and new class, click „Vorschau\" — Layrix lists every post/template using the old class with the number of occurrences. After review, click „Jetzt umbenennen\" → Layrix replaces the class in every selected post.</p><p>Works for both V3 classic widgets (CSS-Classes field) and V4 atomic widgets (classes array). For Layrix global classes, the registry class-ID is replaced too — so the link to the global class is preserved when the new class is also a Layrix class.</p><p><strong>Caution:</strong> Writes to the DB. Make a backup beforehand if uncertain.</p>",
+      "keywords": "class rename find replace refactor migration",
+      "link": { "page": "class-refactor", "label": "Go to Class Rename" }
+    },
+    {
       "id": "cl-shadow-utility-classes",
       "category": "classes",
       "q": "What are the shadow utility classes (ecf-shadow-xs, ecf-shadow-l, …)?",

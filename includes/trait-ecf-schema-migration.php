@@ -55,7 +55,7 @@ trait ECF_Framework_Schema_Migration_Trait {
         update_option($this->synced_schema_version_option_name(), $current, false);
 
         $plugin = $this;
-        add_action('shutdown', static function () use ($plugin, $current) {
+        add_action('shutdown', static function () use ($plugin) {
             if (function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }

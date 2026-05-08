@@ -42,6 +42,32 @@ trait ECF_Framework_REST_API_Trait {
             'permission_callback' => [$this, 'rest_manage_options_permission'],
         ]);
 
+        // Sync-Conflict-Detection: Vergleicht Layrix-Backend-Defaults mit
+        // dem was in Elementors Class-Registry steht. Wird vor manuellem
+        // Sync aufgerufen, um User-Customizations nicht still zu nuken.
+        register_rest_route('ecf-framework/v1', '/sync-conflicts', [
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [$this, 'rest_sync_conflicts'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+        register_rest_route('ecf-framework/v1', '/sync-conflicts/resolve', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_sync_conflicts_resolve'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+
+        // Class-Refactor: Find & Replace für Klassennamen über alle Posts
+        register_rest_route('ecf-framework/v1', '/class-refactor/preview', [
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [$this, 'rest_class_refactor_preview'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+        register_rest_route('ecf-framework/v1', '/class-refactor/apply', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_class_refactor_apply'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+
         // Owner-only "Ideen" notes — Application Password authenticated.
         // Permission self-checks via is_layrix_owner() (email match), so even
         // a valid app-password from another user won't pass.
@@ -141,6 +167,55 @@ trait ECF_Framework_REST_API_Trait {
 
     public function rest_manage_options_permission() {
         return $this->can_manage_framework();
+    }
+
+    public function rest_sync_conflicts(\WP_REST_Request $request) {
+        if (!method_exists($this, 'detect_class_sync_conflicts')) {
+            return rest_ensure_response(['success' => true, 'conflicts' => [], 'count' => 0]);
+        }
+        $conflicts = $this->detect_class_sync_conflicts();
+        return rest_ensure_response([
+            'success'   => true,
+            'conflicts' => $conflicts,
+            'count'     => count($conflicts),
+        ]);
+    }
+
+    public function rest_sync_conflicts_resolve(\WP_REST_Request $request) {
+        $payload = (array) $request->get_json_params();
+        $resolutions = isset($payload['resolutions']) && is_array($payload['resolutions'])
+            ? $payload['resolutions'] : [];
+        if (empty($resolutions)) {
+            return rest_ensure_response(['success' => true, 'updated' => 0]);
+        }
+        $settings = $this->get_settings();
+        if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) {
+            $settings['layrix_class_defaults'] = [];
+        }
+        $updated = 0;
+        $token_pattern = '/^[a-z][a-z0-9_-]*$/i';
+        foreach ($resolutions as $r) {
+            if (!is_array($r)) continue;
+            if (($r['action'] ?? '') !== 'elementor_wins') continue;
+            $class = (string) ($r['class'] ?? '');
+            $prop  = (string) ($r['prop'] ?? '');
+            $value = (string) ($r['elementor'] ?? '');
+            if ($class === '' || $prop === '' || $value === '') continue;
+            // Nur Token-Labels akzeptieren (lowercase letter+digits+dash) — keine literalen CSS-Werte
+            if (!preg_match($token_pattern, $value)) continue;
+            $settings['layrix_class_defaults'][$class][$prop] = $value;
+            $updated++;
+        }
+        if ($updated > 0) {
+            $sanitized = $this->sanitize_settings($settings);
+            update_option($this->option_name, $sanitized);
+            $this->settings_cache = $sanitized;
+            $this->clear_css_cache();
+            if (method_exists($this, 'clear_elementor_sync_caches')) {
+                $this->clear_elementor_sync_caches();
+            }
+        }
+        return rest_ensure_response(['success' => true, 'updated' => $updated]);
     }
 
     public function rest_get_settings(\WP_REST_Request $request) {
