@@ -718,18 +718,18 @@ trait ECF_Framework_Config_Trait {
     }
 
     private function utility_type_size_prop($step, $settings = null) {
+        // Wir referenzieren die :root-Variable `--ecf-text-{step}` statt einen
+        // statischen rem-Max-Wert auszugeben. So bleiben die Klassen responsiv
+        // (clamp() greift), respektieren :root-Overrides und Theme-Switches.
+        // Existenz-Check der Skala: wenn der Step in den Settings nicht
+        // vorkommt, null zurück → Fallback auf default-var im Aufrufer.
         if ($settings === null) {
             $settings = $this->get_settings();
         }
         $root_base_px = $this->get_root_font_base_px($settings);
         foreach ($this->build_type_scale_preview($settings['typography']['scale'], $root_base_px) as $item) {
             if (($item['step'] ?? '') === $step) {
-                $preferred = trim((string) ($item['max'] ?? '')) . 'rem';
-                $prop = $this->size_prop($preferred);
-                if ($prop !== null) {
-                    return $prop;
-                }
-                return $this->size_prop(trim((string) ($item['max_px'] ?? '')) . 'px');
+                return $this->string_prop('var(--ecf-text-' . sanitize_key($step) . ')');
             }
         }
         return null;

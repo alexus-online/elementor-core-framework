@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.3.1 (2026-05-08)
+
+### Fix
+- **Type-Scale-Klassen referenzieren wieder die CSS-Variable** statt einen statischen rem-Max-Wert: `.ecf-heading-1..5`, `.ecf-body-l/m/s`, `.ecf-caption`, `.ecf-overline` rendern jetzt z.B. `font-size: var(--ecf-text-4xl)` statt `font-size: 41.71rem`. Folge: `clamp()` greift wieder (responsiv Mobile→Desktop), `:root`-Overrides und Theme-Switches wirken auf die Headings, statt von einem statisch eingefrorenen Wert blockiert zu werden. Ursache: `utility_type_size_prop()` hat den max-Wert aus `build_type_scale_preview()` direkt als `size`-Prop emittiert.
+
 ## 0.6.3 (2026-05-08)
 
 ### Neu
