@@ -156,8 +156,7 @@ if ( ! class_exists( 'ECF_Atomic_Section' ) ) {
                 return '';
             }
             try {
-                $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
-                    ->context( \Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND );
+                $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
                 $current = $repo->all()->get();
                 $items = $current['items'] ?? [];
                 $needle = strtolower( $label );

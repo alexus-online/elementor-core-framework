@@ -398,7 +398,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $this->ajax_error(__('Elementor global classes repository is not available.', 'ecf-framework'), 500);
         }
 
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
         $order = $current['order'] ?? [];
@@ -621,7 +621,7 @@ trait ECF_Framework_Native_Elementor_Handlers_Trait {
             $this->ajax_error(__('Elementor global classes repository is not available.', 'ecf-framework'), 500);
         }
 
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
         $order = $current['order'] ?? [];

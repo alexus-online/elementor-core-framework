@@ -46,8 +46,7 @@ trait ECF_Framework_Token_Usage_Trait {
             || class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
             try {
                 if (class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
-                    $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
-                        ->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+                    $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
                     $current = $repo->all()->get();
                     foreach (($current['items'] ?? []) as $id => $item) {
                         if (!is_array($item)) continue;

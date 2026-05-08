@@ -575,8 +575,7 @@ trait ECF_Framework_Asset_Loading_Trait {
             $registry_class_ids = [];
             if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) return $registry_class_ids;
             try {
-                $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
-                    ->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+                $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
                 $current = $repo->all()->get();
                 foreach (($current['items'] ?? []) as $id => $item) {
                     if (!is_array($item)) continue;

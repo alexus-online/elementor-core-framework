@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.3.3 (2026-05-08)
+
+### Fix (kritisch)
+- **Compat mit Elementor 4.2** wiederhergestellt. Elementor 4.2 hat die Methode `Global_Classes_Repository::context()` entfernt und durch ein Preview-Trait (`set_preview()`) ersetzt — Default in beiden Versionen ist Frontend. Layrix rief 13× explizit `->context(CONTEXT_FRONTEND)` auf und produzierte beim Aktivieren von Elementor 4.2 einen Fatal Error: *„Call to undefined method Elementor\Modules\GlobalClasses\Global_Classes_Repository::context()"*. Fix: alle expliziten `->context(CONTEXT_FRONTEND)`-Aufrufe entfernt — der Default-Frontend-Kontext ist in 4.0.x und 4.2+ identisch, daher backward-kompatibel. Betrifft: Token-Usage-Inspector, Class-Refactor, Sync-Conflict-Detection, Atomic-Section-Class-ID-Lookup und alle Stellen die Layrix-Globals aus der Elementor-Registry lesen.
+
 ## 0.6.3.2 (2026-05-08)
 
 ### Fix

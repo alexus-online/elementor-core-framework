@@ -234,8 +234,7 @@ trait ECF_Framework_Class_Refactor_Trait {
     private function lookup_class_id_in_registry(string $label): string {
         if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) return '';
         try {
-            $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
-                ->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+            $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
             $current = $repo->all()->get();
             $needle = strtolower($label);
             foreach (($current['items'] ?? []) as $id => $item) {

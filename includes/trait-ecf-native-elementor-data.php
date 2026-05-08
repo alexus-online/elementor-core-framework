@@ -458,8 +458,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
 
         $settings = $this->get_settings();
         try {
-            $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()
-                ->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+            $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
             $current = $repo->all()->get();
         } catch (\Throwable $e) {
             return $conflicts;
@@ -796,7 +795,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             throw new \Exception('Elementor global classes repository not available.');
         }
 
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
         $order = $current['order'] ?? [];
@@ -1253,7 +1252,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         if (!class_exists('\Elementor\Modules\GlobalClasses\Global_Classes_Repository')) {
             throw new \Exception('Elementor global classes repository not available.');
         }
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
         $order = $current['order'] ?? [];
@@ -1278,7 +1277,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             return [];
         }
         $exclude = array_flip(array_map('strtolower', $exclude_labels));
-        $repo    = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo    = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $items   = $repo->all()->get()['items'] ?? [];
         $labels  = [];
         foreach ($items as $id => $item) {
@@ -1297,7 +1296,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             return 0;
         }
 
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
         $count = 0;
@@ -1316,7 +1315,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             return 0;
         }
 
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
 
@@ -1328,7 +1327,7 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             return [];
         }
 
-        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make()->context(\Elementor\Modules\GlobalClasses\Global_Classes_Repository::CONTEXT_FRONTEND);
+        $repo = \Elementor\Modules\GlobalClasses\Global_Classes_Repository::make();
         $current = $repo->all()->get();
         $items = $current['items'] ?? [];
         if (!is_array($items)) {
