@@ -217,13 +217,32 @@
   window.ecfV2CopyText = ecfV2CopyText;
 
   /* ── Toast ───────────────────────────────────────────────────────────── */
-  function ecfV2Toast(msg, type) {
+  function ecfV2Toast(msg, type, opts) {
     var el = document.getElementById('ecf-v2-toast');
     if (!el) return;
-    el.textContent = (type === 'success' ? '✓ ' : 'ℹ ') + msg;
+    opts = opts || {};
+    var icon = type === 'success' ? '✓ ' : (type === 'error' ? '✗ ' : (type === 'warning' ? '⚠ ' : 'ℹ '));
+    el.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = icon + msg;
+    el.appendChild(span);
+    if (opts.actionLabel && typeof opts.action === 'function') {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'v2-toast__action';
+      btn.textContent = opts.actionLabel;
+      btn.style.cssText = 'margin-left:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:inherit;padding:3px 12px;border-radius:4px;cursor:pointer;font-weight:600;font-size:inherit;font-family:inherit';
+      btn.addEventListener('click', function() {
+        try { opts.action(); } catch (e) {}
+        el.classList.remove('v2-toast--show');
+      });
+      el.appendChild(btn);
+    }
     el.className = 'v2-toast v2-toast--' + (type || 'info') + ' v2-toast--show';
     clearTimeout(el._ecfT);
-    el._ecfT = setTimeout(function() { el.classList.remove('v2-toast--show'); }, 3000);
+    if (!opts.persistent) {
+      el._ecfT = setTimeout(function() { el.classList.remove('v2-toast--show'); }, opts.duration || 3000);
+    }
   }
   window.ecfV2Toast = ecfV2Toast;
 
@@ -5990,6 +6009,69 @@
         setTimeout(function() { target.classList.remove('is-copied'); }, 1200);
       });
     });
+  }());
+
+  /* ── Mirror-Mode: Live-Drift-Check bei Tab-Switch ───────────────────
+     Wenn der User vom Elementor-Tab zurück in den Layrix-Tab wechselt,
+     fetched ein throttled Check die aktuellen Konflikte. Falls Mirror-
+     Mode aktiv ist und promotable Konflikte da sind, werden sie still
+     in die Overrides geschrieben (analog zum Page-Load-Promote im PHP).
+     Toast informiert mit Reload-Button — kein Auto-Reload damit der
+     User nichts verliert was er gerade in Layrix tippt. */
+  (function() {
+    if (typeof document === 'undefined') return;
+    var lastCheck = 0;
+    var THROTTLE_MS = 3000;
+    function checkAndPromote() {
+      var now = Date.now();
+      if (now - lastCheck < THROTTLE_MS) return;
+      lastCheck = now;
+      if (!window.ecfAdmin) return;
+      if (ecfAdmin.syncMode !== 'mirror') return;
+      if (!ecfAdmin.elementorAutoSync) return;
+      if (!ecfAdmin.syncConflictsRestUrl || !ecfAdmin.syncConflictsResolveRestUrl) return;
+      fetch(ecfAdmin.syncConflictsRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data || !data.success) return;
+          var classes   = Array.isArray(data.conflicts) ? data.conflicts : [];
+          var variables = Array.isArray(data.variable_conflicts) ? data.variable_conflicts : [];
+          if (!classes.length && !variables.length) return;
+          var resolutions = [];
+          var tokenPattern = /^[a-z][a-z0-9_-]*$/i;
+          classes.forEach(function(c) {
+            if (!tokenPattern.test(String(c.elementor || ''))) return;
+            resolutions.push({ type: 'class', class: c.class, prop: c.prop, elementor: c.elementor, action: 'elementor_wins' });
+          });
+          variables.forEach(function(v) {
+            resolutions.push({ type: 'variable', label: v.label, elementor: v.elementor, action: 'elementor_wins' });
+          });
+          if (!resolutions.length) return;
+          fetch(ecfAdmin.syncConflictsResolveRestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+            body: JSON.stringify({ resolutions: resolutions }),
+          })
+            .then(function(r) { return r.json(); })
+            .then(function(out) {
+              if (!out || !out.success || !out.updated) return;
+              if (typeof ecfV2Toast === 'function') {
+                /* Toast mit Reload-CTA: User sieht dass sich was geändert hat,
+                   entscheidet selbst wann er reloadt damit nichts in-progress
+                   verloren geht. */
+                var n = out.updated;
+                var msg = n + ' Wert' + (n === 1 ? '' : 'e') + ' aus Elementor übernommen — Anzeigen?';
+                ecfV2Toast(msg, 'success', { actionLabel: 'Aktualisieren', action: function() { window.location.reload(); }, persistent: true });
+              }
+            })
+            .catch(function() {});
+        })
+        .catch(function() {});
+    }
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') checkAndPromote();
+    });
+    window.addEventListener('focus', checkAndPromote);
   }());
 
   /* ── Klassen-Werte: Akkordeon-State über Reload persistieren ────────
