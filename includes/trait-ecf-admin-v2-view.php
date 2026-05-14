@@ -4584,11 +4584,22 @@ trait ECF_Framework_Admin_V2_View_Trait {
         <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px">
           <strong style="font-size:var(--v2-ui-base-fs, 13px)"><?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?></strong>
           <div style="display:flex;gap:6px">
-            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
-            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" data-conflict-scope="class" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    data-conflict-scope="class" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
           </div>
         </div>
         <div id="v2-class-conflict-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--v2-border);border-radius:6px"></div>
+      </div>
+      <!-- Variablen-Konflikte -->
+      <div id="v2-variable-conflict-block" hidden style="margin-top:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px">
+          <strong style="font-size:var(--v2-ui-base-fs, 13px)"><?php esc_html_e( 'Variablen-Werte', 'ecf-framework' ); ?></strong>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" data-conflict-scope="variable" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    data-conflict-scope="variable" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
+          </div>
+        </div>
+        <div id="v2-variable-conflict-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--v2-border);border-radius:6px"></div>
       </div>
     </div>
     <div class="v2-modal-foot">

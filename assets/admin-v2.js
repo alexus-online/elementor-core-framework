@@ -5199,14 +5199,21 @@
       .catch(function() { return []; });
   }
 
-  function _detectClassConflicts() {
-    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve([]);
+  /* Holt Klassen- UND Variablen-Konflikte in einem Request vom selben Endpoint.
+     Returns: { classes: [...], variables: [...] } */
+  function _fetchSyncConflicts() {
+    var empty = { classes: [], variables: [] };
+    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve(empty);
     return fetch(ecfAdmin.syncConflictsRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        return (data && data.success && Array.isArray(data.conflicts)) ? data.conflicts : [];
+        if (!data || !data.success) return empty;
+        return {
+          classes:   Array.isArray(data.conflicts) ? data.conflicts : [],
+          variables: Array.isArray(data.variable_conflicts) ? data.variable_conflicts : [],
+        };
       })
-      .catch(function() { return []; });
+      .catch(function() { return empty; });
   }
 
   function _renderClassConflicts(conflicts) {
@@ -5242,12 +5249,52 @@
     }).join('');
   }
 
+  /* Variable-Konflikt-Zeile. Rendert Color-Variablen mit Swatch, sonst Text-Code. */
+  function _renderVariableConflicts(conflicts) {
+    var block = document.getElementById('v2-variable-conflict-block');
+    var listEl = document.getElementById('v2-variable-conflict-list');
+    if (!block || !listEl) return;
+    if (!conflicts.length) {
+      block.hidden = true;
+      listEl.innerHTML = '';
+      return;
+    }
+    block.hidden = false;
+
+    listEl.innerHTML = conflicts.map(function(c) {
+      var isColor = c.type === 'global-color-variable';
+      var swatch = function(val) {
+        if (!isColor) return '';
+        return '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--v2-border);vertical-align:middle;margin-right:4px;background:' + escapeHtml(val) + '"></span>';
+      };
+      return '<div class="v2-variable-conflict-row" data-conflict-label="' + escapeHtml(c.label) + '" data-conflict-elementor="' + escapeHtml(c.elementor) + '" data-conflict-type="' + escapeHtml(c.type || '') + '" style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--v2-border)">'
+        + '<div>'
+          + '<div style="font-size:var(--v2-ui-base-fs, 13px);font-weight:600;font-family:var(--v2-mono)">--' + escapeHtml(c.label) + '</div>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Layrix</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2)">' + swatch(c.backend) + escapeHtml(c.backend) + '</code>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Elementor</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-accent2)">' + swatch(c.elementor) + escapeHtml(c.elementor) + '</code>'
+        + '</div>'
+        + '<select class="v2-si v2-si--sm v2-conflict-action" style="max-width:200px">'
+          + '<option value="elementor_wins" selected>Elementor übernehmen</option>'
+          + '<option value="layrix_wins">Layrix erzwingen</option>'
+        + '</select>'
+        + '</div>';
+    }).join('');
+  }
+
   function _runSyncAfterCheck(btn, form) {
-    Promise.all([_detectColorConflicts(), _detectClassConflicts()])
+    Promise.all([_detectColorConflicts(), _fetchSyncConflicts()])
     .then(function(results) {
       var colorConflicts = results[0] || [];
-      var classConflicts = results[1] || [];
-      if (!colorConflicts.length && !classConflicts.length) {
+      var sync = results[1] || { classes: [], variables: [] };
+      var classConflicts = sync.classes;
+      var variableConflicts = sync.variables;
+      if (!colorConflicts.length && !classConflicts.length && !variableConflicts.length) {
         _doSync(btn, form);
         return;
       }
@@ -5277,6 +5324,7 @@
         }
       }
       _renderClassConflicts(classConflicts);
+      _renderVariableConflicts(variableConflicts);
 
       var modal = document.getElementById('v2-conflict-modal');
       if (modal) modal.hidden = false;
@@ -5286,12 +5334,17 @@
     });
   }
 
-  /* Bulk-Action-Buttons im Modal */
+  /* Bulk-Action-Buttons im Modal. Scope ('class' | 'variable') zielt nur auf
+     die jeweilige Sektion — Class-Bulk ändert keine Variable-Dropdowns. */
   document.addEventListener('click', function(e) {
     var bulkBtn = e.target.closest('[data-conflict-bulk]');
     if (!bulkBtn) return;
     var action = bulkBtn.dataset.conflictBulk;
-    document.querySelectorAll('.v2-class-conflict-row .v2-conflict-action').forEach(function(sel) {
+    var scope = bulkBtn.dataset.conflictScope || 'class';
+    var rowSel = scope === 'variable'
+      ? '.v2-variable-conflict-row .v2-conflict-action'
+      : '.v2-class-conflict-row .v2-conflict-action';
+    document.querySelectorAll(rowSel).forEach(function(sel) {
       sel.value = action;
     });
   });
@@ -5306,17 +5359,28 @@
     }
     if (e.target.id === 'v2-conflict-confirm') {
       var modal2 = document.getElementById('v2-conflict-modal');
-      /* Klassen-Konflikt-Resolutionen sammeln. Nur "elementor_wins" wird ans
-         Resolve-Endpoint gesendet — schreibt Elementor-Wert ins Backend.
-         "layrix_wins" braucht keine Aktion: der nachfolgende Sync schreibt
-         Backend-Wert eh nach Elementor (heutiges Verhalten). */
+      /* Konflikt-Resolutionen sammeln (Klassen + Variablen). Nur "elementor_wins"
+         wird ans Resolve-Endpoint gesendet — schreibt Elementor-Wert ins
+         Backend. "layrix_wins" braucht keine Aktion: der nachfolgende Sync
+         schreibt Backend-Wert eh nach Elementor (heutiges Verhalten). */
       var resolutions = [];
       document.querySelectorAll('.v2-class-conflict-row').forEach(function(row) {
         var sel = row.querySelector('.v2-conflict-action');
         if (!sel || sel.value !== 'elementor_wins') return;
         resolutions.push({
+          type: 'class',
           class: row.dataset.conflictClass,
           prop: row.dataset.conflictProp,
+          elementor: row.dataset.conflictElementor,
+          action: 'elementor_wins',
+        });
+      });
+      document.querySelectorAll('.v2-variable-conflict-row').forEach(function(row) {
+        var sel = row.querySelector('.v2-conflict-action');
+        if (!sel || sel.value !== 'elementor_wins') return;
+        resolutions.push({
+          type: 'variable',
+          label: row.dataset.conflictLabel,
           elementor: row.dataset.conflictElementor,
           action: 'elementor_wins',
         });

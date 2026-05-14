@@ -170,14 +170,19 @@ trait ECF_Framework_REST_API_Trait {
     }
 
     public function rest_sync_conflicts(\WP_REST_Request $request) {
-        if (!method_exists($this, 'detect_class_sync_conflicts')) {
-            return rest_ensure_response(['success' => true, 'conflicts' => [], 'count' => 0]);
-        }
-        $conflicts = $this->detect_class_sync_conflicts();
+        $class_conflicts = method_exists($this, 'detect_class_sync_conflicts')
+            ? $this->detect_class_sync_conflicts()
+            : [];
+        $variable_conflicts = method_exists($this, 'detect_variable_sync_conflicts')
+            ? $this->detect_variable_sync_conflicts()
+            : [];
         return rest_ensure_response([
-            'success'   => true,
-            'conflicts' => $conflicts,
-            'count'     => count($conflicts),
+            'success'            => true,
+            // Klassen-Konflikte unter dem alten Key — bewahrt Backward-Compat für JS-Clients
+            'conflicts'          => $class_conflicts,
+            'count'              => count($class_conflicts),
+            'variable_conflicts' => $variable_conflicts,
+            'variable_count'     => count($variable_conflicts),
         ]);
     }
 
@@ -192,11 +197,29 @@ trait ECF_Framework_REST_API_Trait {
         if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) {
             $settings['layrix_class_defaults'] = [];
         }
+        if (!isset($settings['layrix_variable_overrides']) || !is_array($settings['layrix_variable_overrides'])) {
+            $settings['layrix_variable_overrides'] = [];
+        }
         $updated = 0;
         $token_pattern = '/^[a-z][a-z0-9_-]*$/i';
         foreach ($resolutions as $r) {
             if (!is_array($r)) continue;
             if (($r['action'] ?? '') !== 'elementor_wins') continue;
+            $type = (string) ($r['type'] ?? 'class');
+
+            if ($type === 'variable') {
+                $label = (string) ($r['label'] ?? '');
+                $value = (string) ($r['elementor'] ?? '');
+                if ($label === '' || $value === '') continue;
+                if (!preg_match($token_pattern, $label)) continue;
+                // Variablen sind atomare Werte — beliebige Strings erlaubt (Farbe, Size, etc.),
+                // Sanitize läuft im sanitize_settings darüber.
+                $settings['layrix_variable_overrides'][$label] = $value;
+                $updated++;
+                continue;
+            }
+
+            // Default / type === 'class': bestehender Klassen-Resolve-Pfad.
             $class = (string) ($r['class'] ?? '');
             $prop  = (string) ($r['prop'] ?? '');
             $value = (string) ($r['elementor'] ?? '');
