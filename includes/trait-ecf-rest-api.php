@@ -335,6 +335,65 @@ trait ECF_Framework_REST_API_Trait {
         ]);
     }
 
+    /**
+     * Beim Page-Load der Layrix-Admin: wenn Mirror-Mode aktiv ist, fange
+     * Elementor-Drift ein die seit dem letzten Layrix-Save passiert ist.
+     * Damit zeigt die UI (Klassen-Werte, Variablen-Liste) immer die effektiv
+     * aktuellen Werte an — nicht den letzten Stand vom letzten Save.
+     *
+     * Idempotent: wenn keine Konflikte da sind, passiert nichts.
+     * Cheap genug für Page-Load weil die Detect-Funktionen nur einen
+     * Variables_Repository-Load + Vergleiche per Label machen.
+     */
+    public function auto_promote_mirror_on_page_load() {
+        $settings = $this->get_settings();
+        if (($settings['sync_mode'] ?? 'mirror') !== 'mirror') return;
+        if (empty($settings['elementor_auto_sync_enabled'])) return;
+
+        $var_conflicts = method_exists($this, 'detect_variable_sync_conflicts')
+            ? $this->detect_variable_sync_conflicts() : [];
+        $cls_conflicts = method_exists($this, 'detect_class_sync_conflicts')
+            ? $this->detect_class_sync_conflicts() : [];
+        if (empty($var_conflicts) && empty($cls_conflicts)) return;
+
+        if (!isset($settings['layrix_variable_overrides']) || !is_array($settings['layrix_variable_overrides'])) {
+            $settings['layrix_variable_overrides'] = [];
+        }
+        if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) {
+            $settings['layrix_class_defaults'] = [];
+        }
+
+        $token_pattern = '/^[a-z][a-z0-9_-]*$/i';
+        $changed = false;
+        foreach ($var_conflicts as $vc) {
+            $label = (string) ($vc['label'] ?? '');
+            $value = (string) ($vc['elementor'] ?? '');
+            if ($label === '' || $value === '') continue;
+            if (!preg_match($token_pattern, $label)) continue;
+            $settings['layrix_variable_overrides'][$label] = $value;
+            $changed = true;
+        }
+        foreach ($cls_conflicts as $cc) {
+            $cls = (string) ($cc['class'] ?? '');
+            $prop = (string) ($cc['prop'] ?? '');
+            $value = (string) ($cc['elementor'] ?? '');
+            if ($cls === '' || $prop === '' || $value === '') continue;
+            // Class-Defaults speichern nur Token-Refs, keine literalen Werte.
+            if (!preg_match($token_pattern, $value)) continue;
+            $settings['layrix_class_defaults'][$cls][$prop] = $value;
+            $changed = true;
+        }
+
+        if (!$changed) return;
+        $sanitized = $this->sanitize_settings($settings);
+        update_option($this->option_name, $sanitized);
+        $this->settings_cache = $sanitized;
+        $this->clear_css_cache();
+        if (method_exists($this, 'clear_elementor_sync_caches')) {
+            $this->clear_elementor_sync_caches();
+        }
+    }
+
     public function rest_get_settings(\WP_REST_Request $request) {
         return rest_ensure_response([
             'success'  => true,

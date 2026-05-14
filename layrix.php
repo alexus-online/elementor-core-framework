@@ -204,6 +204,13 @@ class ECF_Framework {
     }
 
     public function settings_page() {
+        // Mirror-Mode: vor dem Render der Layrix-UI Elementor-Drift einfangen.
+        // Ohne diesen Call sieht der User in Klassen-Werte/Variablen die alten
+        // Layrix-Defaults selbst nachdem er in Elementor andere Werte gesetzt
+        // hat — weil Mirror-Promote sonst nur im rest_update_settings läuft.
+        if ( method_exists( $this, 'auto_promote_mirror_on_page_load' ) ) {
+            $this->auto_promote_mirror_on_page_load();
+        }
         $settings = $this->get_settings();
         $cleanup_variable_count = $this->get_native_variable_cleanup_count();
         $cleanup_class_count = $this->get_native_class_cleanup_count();
