@@ -730,9 +730,26 @@
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data && data.success) {
-        _setPill('saved', _si18n.autosave_saved || '');
-        if (window.ecfAdmin && !ecfAdmin.elementorAutoSync) {
-          ecfV2AutoSyncPrompt();
+        var sync = data.autosync || {};
+        if (sync.paused) {
+          /* Auto-Sync wurde wegen Klassen-/Variablen-Konflikten ausgesetzt
+             damit User-Edits in Elementor nicht stillschweigend überschrieben
+             werden. Pill warnt + Toast verweist auf manuellen Sync mit
+             Conflict-Modal. */
+          var n = (sync.variable_conflicts || 0) + (sync.class_conflicts || 0);
+          var pausedText = (_si18n.autosave_paused || 'Gespeichert. Sync pausiert ({n} Konflikte)').replace('{n}', n);
+          _setPill('warning', pausedText);
+          if (typeof ecfV2Toast === 'function') {
+            ecfV2Toast(_si18n.autosave_paused_toast ||
+              'Auto-Sync angehalten: ' + n + ' Konflikt' + (n === 1 ? '' : 'e') +
+              ' zwischen Layrix und Elementor. Klick „Sync mit Elementor" um zu entscheiden welcher Wert gewinnt.',
+              'warning');
+          }
+        } else {
+          _setPill('saved', _si18n.autosave_saved || '');
+          if (window.ecfAdmin && !ecfAdmin.elementorAutoSync) {
+            ecfV2AutoSyncPrompt();
+          }
         }
       } else {
         _setPill('error', _si18n.autosave_failed || '');

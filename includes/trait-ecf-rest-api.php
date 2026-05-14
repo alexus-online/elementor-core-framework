@@ -269,18 +269,36 @@ trait ECF_Framework_REST_API_Trait {
             $this->clear_elementor_sync_caches();
         }
 
-        $auto_sync = !empty($sanitized['elementor_auto_sync_enabled']);
-        if ($auto_sync && method_exists($this, 'sync_native_variables_merge')) {
+        $auto_sync       = !empty($sanitized['elementor_auto_sync_enabled']);
+        $sync_classes_on = !empty($sanitized['elementor_auto_sync_classes']);
+
+        // Conflict-Gate: bevor Auto-Sync läuft prüfen ob Elementor-seitige
+        // Edits stillschweigend überschrieben würden. Bei Konflikten wird die
+        // betroffene Sync-Seite (variables und/oder classes) ausgelassen — der
+        // Save bleibt erfolgreich, das Frontend bekommt aber Counts zurück und
+        // kann den User auf manuellen Sync mit Conflict-UI verweisen.
+        $variable_conflicts = ($auto_sync && method_exists($this, 'detect_variable_sync_conflicts'))
+            ? $this->detect_variable_sync_conflicts()
+            : [];
+        $class_conflicts    = ($auto_sync && $sync_classes_on && method_exists($this, 'detect_class_sync_conflicts'))
+            ? $this->detect_class_sync_conflicts()
+            : [];
+
+        $will_sync_vars    = $auto_sync && empty($variable_conflicts) && method_exists($this, 'sync_native_variables_merge');
+        $will_sync_classes = $auto_sync && $sync_classes_on && empty($class_conflicts) && method_exists($this, 'sync_native_classes_merge');
+
+        if ($will_sync_vars || $will_sync_classes) {
             $plugin_ref = $this;
-            $sync_classes = !empty($sanitized['elementor_auto_sync_classes']);
-            add_action('shutdown', static function () use ($plugin_ref, $sync_classes) {
+            add_action('shutdown', static function () use ($plugin_ref, $will_sync_vars, $will_sync_classes) {
                 // Flush response to client first so the save feels instant
                 if (function_exists('fastcgi_finish_request')) {
                     fastcgi_finish_request();
                 }
                 try {
-                    $plugin_ref->sync_native_variables_merge();
-                    if ($sync_classes && method_exists($plugin_ref, 'sync_native_classes_merge')) {
+                    if ($will_sync_vars) {
+                        $plugin_ref->sync_native_variables_merge();
+                    }
+                    if ($will_sync_classes) {
                         $plugin_ref->sync_native_classes_merge();
                     }
                 } catch (\Throwable $e) {
@@ -293,7 +311,15 @@ trait ECF_Framework_REST_API_Trait {
             'success'  => true,
             'message'  => __('Settings updated.', 'ecf-framework'),
             'settings' => $this->get_settings(),
-            'meta' => $this->rest_admin_meta(),
+            'meta'     => $this->rest_admin_meta(),
+            'autosync' => [
+                'enabled'            => (bool) $auto_sync,
+                'variable_conflicts' => count($variable_conflicts),
+                'class_conflicts'    => count($class_conflicts),
+                'variables_synced'   => (bool) $will_sync_vars,
+                'classes_synced'     => (bool) $will_sync_classes,
+                'paused'             => $auto_sync && (!empty($variable_conflicts) || !empty($class_conflicts)),
+            ],
         ]);
     }
 
