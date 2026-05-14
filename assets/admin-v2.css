@@ -2350,7 +2350,50 @@ body.toplevel_page_ecf-framework #wpcontent { background: #09090b !important; }
 .v2-autosave-pill--saved   { background: rgba(16,185,129,.18); color: #6ee7b7; border: 1px solid rgba(16,185,129,.35); opacity: 1; transform: translateX(-50%) translateY(0); }
 .v2-autosave-pill--unsaved { background: rgba(245,158,11,.15); color: #fcd34d; border: 1px solid rgba(245,158,11,.3); opacity: 1; transform: translateX(-50%) translateY(0); }
 .v2-autosave-pill--error   { background: rgba(239,68,68,.18); color: #fca5a5; border: 1px solid rgba(239,68,68,.3); opacity: 1; transform: translateX(-50%) translateY(0); }
-.v2-autosave-pill--warning { background: rgba(245,158,11,.20); color: #fbbf24; border: 1px solid rgba(245,158,11,.45); opacity: 1; transform: translateX(-50%) translateY(0); font-weight: 600; }
+.v2-autosave-pill--warning { background: rgba(245,158,11,.20); color: #fbbf24; border: 1px solid rgba(245,158,11,.45); opacity: 1; transform: translateX(-50%) translateY(0); font-weight: 600; cursor: pointer; }
+.v2-autosave-pill--warning:hover { background: rgba(245,158,11,.30); }
+
+/* ── Override Reset-Button + Badge ──────────────────────────────────── */
+.v2-reset-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  border: 1px solid rgba(245,158,11,.45);
+  background: rgba(245,158,11,.10);
+  color: #fbbf24;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .12s ease, transform .12s ease;
+  padding: 0;
+  margin-right: 4px;
+}
+.v2-reset-btn:hover { background: rgba(245,158,11,.25); transform: rotate(-15deg); }
+.v2-reset-btn:active { transform: rotate(-30deg) scale(0.95); }
+.v2-override-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-left: 6px;
+  background: rgba(245,158,11,.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245,158,11,.35);
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.v2-is-overridden td.v2-vval,
+.v2-is-overridden td.v2-vval code,
+select.v2-is-overridden {
+  font-style: italic;
+  color: #fbbf24 !important;
+}
+select.v2-is-overridden {
+  border-color: rgba(245,158,11,.45) !important;
+}
 .v2-last-saved { position: fixed; bottom: 14px; right: 18px; z-index: 99999; font-size: var(--v2-btn-fs, 12px); color: var(--v2-text3); pointer-events: none; transition: opacity .3s; }
 .v2-last-saved--hidden { opacity: 0; }
 

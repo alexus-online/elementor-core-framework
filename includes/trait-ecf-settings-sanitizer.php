@@ -103,6 +103,10 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
         $output['auto_classes_form']       = !empty($input['auto_classes_form'])       ? '1' : '0';
         $output['elementor_auto_sync_variables'] = !empty($input['elementor_auto_sync_variables']) ? '1' : '0';
         $output['elementor_auto_sync_classes'] = !empty($input['elementor_auto_sync_classes']) ? '1' : '0';
+        $sync_mode_input = isset($input['sync_mode']) ? sanitize_key($input['sync_mode']) : '';
+        $output['sync_mode'] = in_array($sync_mode_input, ['mirror', 'strict'], true)
+            ? $sync_mode_input
+            : ($saved_settings['sync_mode'] ?? $defaults['sync_mode'] ?? 'mirror');
         $output['github_update_checks_enabled'] = !empty($input['github_update_checks_enabled']) ? '1' : '0';
         $content_width_value  = trim((string) ($input['content_max_width_value'] ?? $input['content_max_width'] ?? ''));
         $content_width_format = sanitize_key($input['content_max_width_format'] ?? '');

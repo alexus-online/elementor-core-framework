@@ -9,6 +9,18 @@ trait ECF_Framework_Admin_V2_View_Trait {
         $ver = get_plugin_data( ECF_FRAMEWORK_FILE )['Version'] ?? '0.4';
         $opt = $this->option_name; // ecf_framework_v50
 
+        /* ── Override-Maps (für Reset-Icons in der UI) ───────────────
+           layrix_variable_overrides: [label => value] für Tokens die
+           durch Mirror-Mode oder Conflict-Resolve übernommen wurden.
+           layrix_class_defaults: [class => [prop => token]] für
+           Klassen-Defaults die vom Schema-Default abweichen. */
+        $var_overrides_map   = isset( $settings['layrix_variable_overrides'] ) && is_array( $settings['layrix_variable_overrides'] )
+            ? $settings['layrix_variable_overrides']
+            : [];
+        $class_overrides_map = isset( $settings['layrix_class_defaults'] ) && is_array( $settings['layrix_class_defaults'] )
+            ? $settings['layrix_class_defaults']
+            : [];
+
         /* ── Color data (indexed array) ─────────────────────────────── */
         $colors_arr = $settings['colors'] ?? [];
         $c = [];   // [name => hex]
@@ -2243,7 +2255,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
               $cval  = $row['value'] ?? '';
               if ( ! $cname ) continue;
             ?>
-            <tr data-varname="--ecf-color-<?php echo esc_attr( $cname ); ?>"><td><span class="v2-vn">--ecf-color-<?php echo esc_html( $cname ); ?></span></td><td><span class="v2-tb v2-tb-c"><?php esc_html_e( 'Color', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $cval ); ?></td><td><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="color" data-var-name="<?php echo esc_attr( $cname ); ?>" data-var-value="<?php echo esc_attr( $cval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
+            <?php $cov_label = 'ecf-color-' . $cname; $cov_active = isset( $var_overrides_map[ $cov_label ] ); ?>
+            <tr data-varname="--ecf-color-<?php echo esc_attr( $cname ); ?>"<?php if ( $cov_active ) echo ' class="v2-is-overridden"'; ?>><td><span class="v2-vn">--ecf-color-<?php echo esc_html( $cname ); ?></span><?php if ( $cov_active ) : ?> <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen', 'ecf-framework' ); ?>"><?php esc_html_e( 'overridden', 'ecf-framework' ); ?></span><?php endif; ?></td><td><span class="v2-tb v2-tb-c"><?php esc_html_e( 'Color', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $cval ); ?></td><td><?php if ( $cov_active ) : ?><button type="button" class="v2-reset-btn v2-override-reset" data-override-type="variable" data-override-label="<?php echo esc_attr( $cov_label ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Layrix-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button><?php endif; ?><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="color" data-var-name="<?php echo esc_attr( $cname ); ?>" data-var-value="<?php echo esc_attr( $cval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
             <?php endforeach; ?>
             <tr class="v2-vt-group"><td colspan="4"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></td></tr>
             <?php foreach ( $radius_arr as $rrow ) :
@@ -2251,7 +2264,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
               if ( ! $rname ) continue;
               $rmin = $rrow['min'] ?? '';
             ?>
-            <tr data-varname="--ecf-radius-<?php echo esc_attr( $rname ); ?>"><td><span class="v2-vn">--ecf-radius-<?php echo esc_html( $rname ); ?></span></td><td><span class="v2-tb v2-tb-r"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $rmin . ( $rmin !== ( $rrow['max'] ?? '' ) ? '–' . $rrow['max'] : '' ) ); ?></td><td><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="radius" data-var-name="<?php echo esc_attr( $rname ); ?>" data-var-value="<?php echo esc_attr( $rmin ); ?>" data-var-max="<?php echo esc_attr( $rrow['max'] ?? $rmin ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
+            <?php $rov_label = 'ecf-radius-' . $rname; $rov_active = isset( $var_overrides_map[ $rov_label ] ); ?>
+            <tr data-varname="--ecf-radius-<?php echo esc_attr( $rname ); ?>"<?php if ( $rov_active ) echo ' class="v2-is-overridden"'; ?>><td><span class="v2-vn">--ecf-radius-<?php echo esc_html( $rname ); ?></span><?php if ( $rov_active ) : ?> <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen', 'ecf-framework' ); ?>"><?php esc_html_e( 'overridden', 'ecf-framework' ); ?></span><?php endif; ?></td><td><span class="v2-tb v2-tb-r"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $rmin . ( $rmin !== ( $rrow['max'] ?? '' ) ? '–' . $rrow['max'] : '' ) ); ?></td><td><?php if ( $rov_active ) : ?><button type="button" class="v2-reset-btn v2-override-reset" data-override-type="variable" data-override-label="<?php echo esc_attr( $rov_label ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Layrix-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button><?php endif; ?><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="radius" data-var-name="<?php echo esc_attr( $rname ); ?>" data-var-value="<?php echo esc_attr( $rmin ); ?>" data-var-max="<?php echo esc_attr( $rrow['max'] ?? $rmin ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
             <?php endforeach; ?>
             <tr class="v2-vt-group"><td colspan="4"><?php esc_html_e( 'Schatten', 'ecf-framework' ); ?></td></tr>
             <?php foreach ( $shadows_arr as $srow ) :
@@ -2259,7 +2273,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
               $sval  = $srow['value'] ?? '';
               if ( ! $sname ) continue;
             ?>
-            <tr data-varname="--ecf-shadow-<?php echo esc_attr( $sname ); ?>"><td><span class="v2-vn">--ecf-shadow-<?php echo esc_html( $sname ); ?></span></td><td><span class="v2-tb v2-tb-sh"><?php esc_html_e( 'Shadow', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?php echo esc_html( $sval ); ?></td><td><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="shadow" data-var-name="<?php echo esc_attr( $sname ); ?>" data-var-value="<?php echo esc_attr( $sval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
+            <?php $sov_label = 'ecf-shadow-' . $sname; $sov_active = isset( $var_overrides_map[ $sov_label ] ); ?>
+            <tr data-varname="--ecf-shadow-<?php echo esc_attr( $sname ); ?>"<?php if ( $sov_active ) echo ' class="v2-is-overridden"'; ?>><td><span class="v2-vn">--ecf-shadow-<?php echo esc_html( $sname ); ?></span><?php if ( $sov_active ) : ?> <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen', 'ecf-framework' ); ?>"><?php esc_html_e( 'overridden', 'ecf-framework' ); ?></span><?php endif; ?></td><td><span class="v2-tb v2-tb-sh"><?php esc_html_e( 'Shadow', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?php echo esc_html( $sval ); ?></td><td><?php if ( $sov_active ) : ?><button type="button" class="v2-reset-btn v2-override-reset" data-override-type="variable" data-override-label="<?php echo esc_attr( $sov_label ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Layrix-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button><?php endif; ?><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="shadow" data-var-name="<?php echo esc_attr( $sname ); ?>" data-var-value="<?php echo esc_attr( $sval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
             <?php endforeach; ?>
           </tbody>
         </table>
@@ -4100,6 +4115,16 @@ trait ECF_Framework_Admin_V2_View_Trait {
               <span class="v2-tog<?php echo ! empty( $settings['autosave_enabled'] ) ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
             </label>
           </div>
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Sync-Modus', 'ecf-framework' ); ?></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Mirror: Elementor-Edits werden automatisch übernommen. Strict: Konflikte erfordern manuelle Auflösung.', 'ecf-framework' ); ?></div>
+            </div>
+            <select class="v2-si" name="<?php echo esc_attr( $opt ); ?>[sync_mode]" style="max-width:200px">
+              <option value="mirror" <?php selected( ($settings['sync_mode'] ?? 'mirror'), 'mirror' ); ?>><?php esc_html_e( 'Mirror (empfohlen)', 'ecf-framework' ); ?></option>
+              <option value="strict" <?php selected( ($settings['sync_mode'] ?? 'mirror'), 'strict' ); ?>><?php esc_html_e( 'Strict (Conflict-Modal)', 'ecf-framework' ); ?></option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -4127,8 +4152,14 @@ trait ECF_Framework_Admin_V2_View_Trait {
               $name_attr = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][' . esc_attr( $prop_key ) . ']';
               $value     = $current_value !== '' ? $current_value : $schema_default;
               $options   = $cls_options_for( $token_type );
+              // Override-Indikator: User-Wert weicht vom Schema-Default ab UND
+              // ist explizit gesetzt (nicht leer). Reset-Icon erscheint dann
+              // neben dem Select, Klick entfernt den Eintrag aus
+              // layrix_class_defaults und bringt den Schema-Default zurück.
+              $is_override = ( $current_value !== '' && $current_value !== $schema_default );
               ?>
-              <select class="v2-si" name="<?php echo $name_attr; ?>" style="max-width:240px">
+              <span style="display:inline-flex;align-items:center;gap:6px">
+              <select class="v2-si<?php echo $is_override ? ' v2-is-overridden' : ''; ?>" name="<?php echo $name_attr; ?>" style="max-width:240px">
                   <option value=""><?php
                       printf(
                           /* translators: %s: variable name */
@@ -4144,6 +4175,10 @@ trait ECF_Framework_Admin_V2_View_Trait {
                       </optgroup>
                   <?php endforeach; ?>
               </select>
+              <?php if ( $is_override ) : ?>
+                <button type="button" class="v2-reset-btn v2-override-reset" data-override-type="class" data-override-class="<?php echo esc_attr( $class_name ); ?>" data-override-prop="<?php echo esc_attr( $prop_key ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Schema-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button>
+              <?php endif; ?>
+              </span>
               <?php
           };
           ?>

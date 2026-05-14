@@ -13,6 +13,12 @@ trait ECF_Framework_Config_Trait {
             'elementor_auto_sync_enabled' => '1',
             'elementor_auto_sync_variables' => '1',
             'elementor_auto_sync_classes' => '1',
+            // Sync-Mode: 'mirror' (Default) übernimmt Elementor-seitige Edits automatisch
+            // in layrix_*_overrides. 'strict' blockiert Auto-Sync bei Konflikten und
+            // erfordert manuelle Auflösung via Conflict-Modal. Mirror passt für Solo-
+            // Builder die in Elementor frei editieren; Strict für Agentur-Setups mit
+            // mehreren Editoren wo Layrix als canonical Design-System bleiben soll.
+            'sync_mode' => 'mirror',
             'auto_classes_enabled'   => '1',
             'auto_classes_headings'  => '1',
             'auto_classes_buttons'   => '1',

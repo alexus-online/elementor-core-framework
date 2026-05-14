@@ -175,6 +175,7 @@ trait ECF_Framework_Asset_Loading_Trait {
             'tokenUsageRestUrl'      => esc_url_raw(rest_url('ecf-framework/v1/token-usage')),
             'syncConflictsRestUrl'        => esc_url_raw(rest_url('ecf-framework/v1/sync-conflicts')),
             'syncConflictsResolveRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/sync-conflicts/resolve')),
+            'syncConflictsReleaseRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/sync-conflicts/release')),
             'classRefactorPreviewRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/class-refactor/preview')),
             'classRefactorApplyRestUrl'   => esc_url_raw(rest_url('ecf-framework/v1/class-refactor/apply')),
             'customPresetsRestUrl' => esc_url_raw(rest_url('ecf-framework/v1/custom-presets')),

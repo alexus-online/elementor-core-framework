@@ -731,19 +731,28 @@
     .then(function(data) {
       if (data && data.success) {
         var sync = data.autosync || {};
+        var promoted = (sync.auto_promoted_vars || 0) + (sync.auto_promoted_classes || 0);
         if (sync.paused) {
-          /* Auto-Sync wurde wegen Klassen-/Variablen-Konflikten ausgesetzt
-             damit User-Edits in Elementor nicht stillschweigend überschrieben
-             werden. Pill warnt + Toast verweist auf manuellen Sync mit
-             Conflict-Modal. */
+          /* Strict-Mode: Auto-Sync wegen Konflikten ausgesetzt. Pill warnt
+             + Toast verweist auf manuellen Sync mit Conflict-Modal. Pill
+             ist klickbar — direkter Sprung zur Conflict-Auflösung. */
           var n = (sync.variable_conflicts || 0) + (sync.class_conflicts || 0);
           var pausedText = (_si18n.autosave_paused || 'Gespeichert. Sync pausiert ({n} Konflikte)').replace('{n}', n);
           _setPill('warning', pausedText);
           if (typeof ecfV2Toast === 'function') {
             ecfV2Toast(_si18n.autosave_paused_toast ||
               'Auto-Sync angehalten: ' + n + ' Konflikt' + (n === 1 ? '' : 'e') +
-              ' zwischen Layrix und Elementor. Klick „Sync mit Elementor" um zu entscheiden welcher Wert gewinnt.',
+              ' zwischen Layrix und Elementor. Klick auf die Pille oder den Sync-Button um zu entscheiden welcher Wert gewinnt.',
               'warning');
+          }
+        } else if (promoted > 0) {
+          /* Mirror-Mode: Konflikte wurden automatisch zu Overrides promotet,
+             Sync lief trotzdem durch. Toast informiert, Pill bleibt grün. */
+          _setPill('saved', _si18n.autosave_saved || '');
+          if (typeof ecfV2Toast === 'function') {
+            ecfV2Toast('Auto-Sync: ' + promoted + ' Wert' + (promoted === 1 ? '' : 'e') +
+              ' aus Elementor übernommen. Override-Icons in der Variablen-/Klassen-Liste zeigen die betroffenen Tokens.',
+              'success');
           }
         } else {
           _setPill('saved', _si18n.autosave_saved || '');
@@ -5949,6 +5958,68 @@
         target.classList.add('is-copied');
         setTimeout(function() { target.classList.remove('is-copied'); }, 1200);
       });
+    });
+  }());
+
+  /* ── Override Reset-Button + clickable warning pill ─────────────────
+     Reset-Buttons (.v2-override-reset) entfernen einen einzelnen Override
+     aus layrix_variable_overrides oder layrix_class_defaults via REST.
+     Nach Erfolg: Page reload damit das UI den Schema-Default wieder zeigt
+     und alle Reset-Icons konsistent verschwinden. Warning-Pill öffnet bei
+     Klick das Sync-Conflict-Modal — direkter Pfad zur Auflösung. */
+  (function() {
+    document.addEventListener('click', function(e) {
+      var resetBtn = e.target.closest('.v2-override-reset');
+      if (resetBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!window.ecfAdmin || !ecfAdmin.syncConflictsReleaseRestUrl) {
+          if (typeof ecfV2Toast === 'function') ecfV2Toast('Release-Endpoint nicht verfügbar', 'error');
+          return;
+        }
+        var type = resetBtn.dataset.overrideType || '';
+        var body = { type: type };
+        if (type === 'variable') {
+          body.label = resetBtn.dataset.overrideLabel || '';
+        } else if (type === 'class') {
+          body.class = resetBtn.dataset.overrideClass || '';
+          body.prop  = resetBtn.dataset.overrideProp || '';
+        } else {
+          return;
+        }
+        resetBtn.disabled = true;
+        fetch(ecfAdmin.syncConflictsReleaseRestUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+          body: JSON.stringify(body),
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data && data.success && data.removed > 0) {
+              if (typeof ecfV2Toast === 'function') ecfV2Toast('Override entfernt — Layrix-Default wiederhergestellt', 'success');
+              window.setTimeout(function() { window.location.reload(); }, 600);
+            } else {
+              resetBtn.disabled = false;
+              if (typeof ecfV2Toast === 'function') ecfV2Toast('Override konnte nicht entfernt werden', 'error');
+            }
+          })
+          .catch(function() {
+            resetBtn.disabled = false;
+            if (typeof ecfV2Toast === 'function') ecfV2Toast('Netzwerkfehler beim Override-Reset', 'error');
+          });
+        return;
+      }
+
+      /* Pill in --warning state ist klickbar → öffnet Sync-Conflict-Flow.
+         Reuse von _runSyncAfterCheck (existierender Manual-Sync-Code) — bei
+         vorhandenen Konflikten zeigt es das Modal direkt. */
+      var pill = e.target.closest('.v2-autosave-pill--warning');
+      if (pill) {
+        e.preventDefault();
+        if (typeof _runSyncAfterCheck === 'function') {
+          _runSyncAfterCheck(null, null);
+        }
+      }
     });
   }());
 

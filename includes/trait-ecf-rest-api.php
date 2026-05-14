@@ -55,6 +55,15 @@ trait ECF_Framework_REST_API_Trait {
             'callback'            => [$this, 'rest_sync_conflicts_resolve'],
             'permission_callback' => [$this, 'rest_manage_options_permission'],
         ]);
+        // Override-Release: entfernt einen einzelnen Override-Eintrag aus
+        // layrix_variable_overrides oder layrix_class_defaults. Damit kann
+        // ein User einen Token-Wert zurück auf den von Layrix berechneten
+        // Default setzen (z.B. nach einem versehentlichen Auto-Mirror).
+        register_rest_route('ecf-framework/v1', '/sync-conflicts/release', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_sync_conflicts_release'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
 
         // Class-Refactor: Find & Replace für Klassennamen über alle Posts
         register_rest_route('ecf-framework/v1', '/class-refactor/preview', [
@@ -241,6 +250,65 @@ trait ECF_Framework_REST_API_Trait {
         return rest_ensure_response(['success' => true, 'updated' => $updated]);
     }
 
+    /**
+     * Entfernt einzelne Override-Einträge:
+     *  - { type: 'variable', label: 'ecf-text-2xl' } → löscht layrix_variable_overrides[label]
+     *  - { type: 'class',    class: 'ecf-button', prop: 'padding-inline-start' } → löscht
+     *    layrix_class_defaults[class][prop]
+     * Batch via { releases: [...] } möglich. Settings werden danach re-sanitized
+     * und gespeichert; Cache geleert damit der Token-Wert sofort wieder den
+     * Layrix-berechneten Default zeigt.
+     */
+    public function rest_sync_conflicts_release(\WP_REST_Request $request) {
+        $payload  = (array) $request->get_json_params();
+        $releases = isset($payload['releases']) && is_array($payload['releases']) ? $payload['releases'] : [$payload];
+        if (empty($releases)) {
+            return rest_ensure_response(['success' => true, 'removed' => 0]);
+        }
+        $settings = $this->get_settings();
+        if (!isset($settings['layrix_variable_overrides']) || !is_array($settings['layrix_variable_overrides'])) {
+            $settings['layrix_variable_overrides'] = [];
+        }
+        if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) {
+            $settings['layrix_class_defaults'] = [];
+        }
+        $removed = 0;
+        foreach ($releases as $r) {
+            if (!is_array($r)) continue;
+            $type = (string) ($r['type'] ?? '');
+            if ($type === 'variable') {
+                $label = (string) ($r['label'] ?? '');
+                if ($label === '') continue;
+                if (isset($settings['layrix_variable_overrides'][$label])) {
+                    unset($settings['layrix_variable_overrides'][$label]);
+                    $removed++;
+                }
+            } elseif ($type === 'class') {
+                $cls  = (string) ($r['class'] ?? '');
+                $prop = (string) ($r['prop']  ?? '');
+                if ($cls === '' || $prop === '') continue;
+                if (isset($settings['layrix_class_defaults'][$cls][$prop])) {
+                    unset($settings['layrix_class_defaults'][$cls][$prop]);
+                    // Leere Klasse aufräumen
+                    if (empty($settings['layrix_class_defaults'][$cls])) {
+                        unset($settings['layrix_class_defaults'][$cls]);
+                    }
+                    $removed++;
+                }
+            }
+        }
+        if ($removed > 0) {
+            $sanitized = $this->sanitize_settings($settings);
+            update_option($this->option_name, $sanitized);
+            $this->settings_cache = $sanitized;
+            $this->clear_css_cache();
+            if (method_exists($this, 'clear_elementor_sync_caches')) {
+                $this->clear_elementor_sync_caches();
+            }
+        }
+        return rest_ensure_response(['success' => true, 'removed' => $removed]);
+    }
+
     public function rest_get_settings(\WP_REST_Request $request) {
         return rest_ensure_response([
             'success'  => true,
@@ -271,6 +339,7 @@ trait ECF_Framework_REST_API_Trait {
 
         $auto_sync       = !empty($sanitized['elementor_auto_sync_enabled']);
         $sync_classes_on = !empty($sanitized['elementor_auto_sync_classes']);
+        $sync_mode       = isset($sanitized['sync_mode']) ? (string) $sanitized['sync_mode'] : 'mirror';
 
         // Conflict-Gate: bevor Auto-Sync läuft prüfen ob Elementor-seitige
         // Edits stillschweigend überschrieben würden. Bei Konflikten wird die
@@ -283,6 +352,60 @@ trait ECF_Framework_REST_API_Trait {
         $class_conflicts    = ($auto_sync && $sync_classes_on && method_exists($this, 'detect_class_sync_conflicts'))
             ? $this->detect_class_sync_conflicts()
             : [];
+
+        // Mirror-Mode: Konflikte werden automatisch zu Overrides promotet, damit
+        // Elementor-seitige Edits zu Layrix' Source-of-Truth werden ohne dass
+        // der User den Conflict-Dialog durchklicken muss. Idempotent: erneute
+        // Promotion derselben Werte ist No-Op. Strict-Mode überspringt diesen
+        // Block und behält das Conflict-Gate-Verhalten.
+        $auto_promoted_vars    = 0;
+        $auto_promoted_classes = 0;
+        $token_label_pattern   = '/^[a-z][a-z0-9_-]*$/i';
+
+        if ($sync_mode === 'mirror' && (!empty($variable_conflicts) || !empty($class_conflicts))) {
+            if (!isset($sanitized['layrix_variable_overrides']) || !is_array($sanitized['layrix_variable_overrides'])) {
+                $sanitized['layrix_variable_overrides'] = [];
+            }
+            if (!isset($sanitized['layrix_class_defaults']) || !is_array($sanitized['layrix_class_defaults'])) {
+                $sanitized['layrix_class_defaults'] = [];
+            }
+            foreach ($variable_conflicts as $vc) {
+                $label = (string) ($vc['label'] ?? '');
+                $value = (string) ($vc['elementor'] ?? '');
+                if ($label === '' || $value === '') continue;
+                if (!preg_match($token_label_pattern, $label)) continue;
+                $sanitized['layrix_variable_overrides'][$label] = $value;
+                $auto_promoted_vars++;
+            }
+            foreach ($class_conflicts as $cc) {
+                $cls   = (string) ($cc['class'] ?? '');
+                $prop  = (string) ($cc['prop']  ?? '');
+                $value = (string) ($cc['elementor'] ?? '');
+                if ($cls === '' || $prop === '' || $value === '') continue;
+                // Class-Resolve nimmt nur Token-Labels — literale CSS-Werte
+                // werden nicht in layrix_class_defaults gespeichert (Sanitizer
+                // würde sie eh ablehnen). Solche Konflikte bleiben sichtbar
+                // im manuellen Sync-Modal.
+                if (!preg_match($token_label_pattern, $value)) continue;
+                $sanitized['layrix_class_defaults'][$cls][$prop] = $value;
+                $auto_promoted_classes++;
+            }
+            if ($auto_promoted_vars > 0 || $auto_promoted_classes > 0) {
+                $sanitized = $this->sanitize_settings($sanitized);
+                update_option($this->option_name, $sanitized);
+                $this->settings_cache = $sanitized;
+                $this->clear_css_cache();
+                if (method_exists($this, 'clear_elementor_sync_caches')) {
+                    $this->clear_elementor_sync_caches();
+                }
+                // Re-detect: promoteted overrides sollten die Konflikte
+                // eliminieren (Layrix-Payload matched jetzt Elementor)
+                $variable_conflicts = method_exists($this, 'detect_variable_sync_conflicts')
+                    ? $this->detect_variable_sync_conflicts() : [];
+                $class_conflicts = ($sync_classes_on && method_exists($this, 'detect_class_sync_conflicts'))
+                    ? $this->detect_class_sync_conflicts() : [];
+            }
+        }
 
         $will_sync_vars    = $auto_sync && empty($variable_conflicts) && method_exists($this, 'sync_native_variables_merge');
         $will_sync_classes = $auto_sync && $sync_classes_on && empty($class_conflicts) && method_exists($this, 'sync_native_classes_merge');
@@ -313,12 +436,17 @@ trait ECF_Framework_REST_API_Trait {
             'settings' => $this->get_settings(),
             'meta'     => $this->rest_admin_meta(),
             'autosync' => [
-                'enabled'            => (bool) $auto_sync,
-                'variable_conflicts' => count($variable_conflicts),
-                'class_conflicts'    => count($class_conflicts),
-                'variables_synced'   => (bool) $will_sync_vars,
-                'classes_synced'     => (bool) $will_sync_classes,
-                'paused'             => $auto_sync && (!empty($variable_conflicts) || !empty($class_conflicts)),
+                'enabled'              => (bool) $auto_sync,
+                'mode'                 => $sync_mode,
+                'variable_conflicts'   => count($variable_conflicts),
+                'class_conflicts'      => count($class_conflicts),
+                'variables_synced'     => (bool) $will_sync_vars,
+                'classes_synced'       => (bool) $will_sync_classes,
+                'paused'               => $auto_sync && (!empty($variable_conflicts) || !empty($class_conflicts)),
+                // Mirror-Mode-Telemetrie: wie viele Konflikte wurden in dieser
+                // Save-Runde automatisch zu Overrides promotet
+                'auto_promoted_vars'   => $auto_promoted_vars,
+                'auto_promoted_classes'=> $auto_promoted_classes,
             ],
         ]);
     }
