@@ -272,7 +272,9 @@ trait ECF_Framework_REST_API_Trait {
         if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) {
             $settings['layrix_class_defaults'] = [];
         }
-        $removed = 0;
+        $removed         = 0;
+        $touched_vars    = false;
+        $touched_classes = false;
         foreach ($releases as $r) {
             if (!is_array($r)) continue;
             $type = (string) ($r['type'] ?? '');
@@ -282,6 +284,7 @@ trait ECF_Framework_REST_API_Trait {
                 if (isset($settings['layrix_variable_overrides'][$label])) {
                     unset($settings['layrix_variable_overrides'][$label]);
                     $removed++;
+                    $touched_vars = true;
                 }
             } elseif ($type === 'class') {
                 $cls  = (string) ($r['class'] ?? '');
@@ -289,14 +292,16 @@ trait ECF_Framework_REST_API_Trait {
                 if ($cls === '' || $prop === '') continue;
                 if (isset($settings['layrix_class_defaults'][$cls][$prop])) {
                     unset($settings['layrix_class_defaults'][$cls][$prop]);
-                    // Leere Klasse aufräumen
                     if (empty($settings['layrix_class_defaults'][$cls])) {
                         unset($settings['layrix_class_defaults'][$cls]);
                     }
                     $removed++;
+                    $touched_classes = true;
                 }
             }
         }
+        $synced_vars    = false;
+        $synced_classes = false;
         if ($removed > 0) {
             $sanitized = $this->sanitize_settings($settings);
             update_option($this->option_name, $sanitized);
@@ -305,8 +310,29 @@ trait ECF_Framework_REST_API_Trait {
             if (method_exists($this, 'clear_elementor_sync_caches')) {
                 $this->clear_elementor_sync_caches();
             }
+            // Reset bedeutet: User will explizit Layrix' (jetzt nicht-überschriebenen)
+            // Wert in Elementor sehen. Wir syncen sofort, damit Mirror-Mode beim
+            // nächsten Auto-Sync nicht den alten Elementor-Wert wieder zurück
+            // promoted und den Reset effektiv rückgängig macht.
+            try {
+                if ($touched_vars && method_exists($this, 'sync_native_variables_merge')) {
+                    $this->sync_native_variables_merge();
+                    $synced_vars = true;
+                }
+                if ($touched_classes && method_exists($this, 'sync_native_classes_merge')) {
+                    $this->sync_native_classes_merge();
+                    $synced_classes = true;
+                }
+            } catch (\Throwable $e) {
+                error_log( 'ECF release-sync failed: ' . $e->getMessage() );
+            }
         }
-        return rest_ensure_response(['success' => true, 'removed' => $removed]);
+        return rest_ensure_response([
+            'success'        => true,
+            'removed'        => $removed,
+            'synced_vars'    => $synced_vars,
+            'synced_classes' => $synced_classes,
+        ]);
     }
 
     public function rest_get_settings(\WP_REST_Request $request) {
