@@ -394,6 +394,52 @@ trait ECF_Framework_REST_API_Trait {
         }
     }
 
+    /**
+     * Filter-Callback für rest_request_after_callbacks: triggert die Mirror-
+     * Drift-Promote nach jedem Elementor-REST-Write der relevant für unsere
+     * Sync ist (Variables, Global-Classes, Kit-Elements). Damit ist Layrix'
+     * Override-State sofort aktuell — nicht erst beim nächsten Layrix-Page-
+     * Load oder Tab-Switch.
+     *
+     * Schmaler Filter: nur POST/PUT/PATCH/DELETE, nur Elementor-Routes mit
+     * variable/class/kit Teil im Pfad, nur wenn die Response erfolgreich war
+     * (Status 2xx). No-Op wenn keine Konflikte oder Strict-Mode.
+     */
+    public function maybe_auto_promote_after_elementor_save($response, $handler, $request) {
+        if (!($request instanceof \WP_REST_Request)) return $response;
+        $method = strtoupper((string) $request->get_method());
+        if (!in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) return $response;
+        $route = (string) $request->get_route();
+        if (strpos($route, '/elementor/') !== 0) return $response;
+        // Schmaler Trigger-Set: nur Routes die wirklich Variables oder Classes
+        // ändern. Spart unnötige Drift-Checks bei z.B. /elementor/v1/feedback.
+        $relevant = (
+            strpos($route, '/global-classes') !== false ||
+            strpos($route, '/variables') !== false ||
+            strpos($route, '/kit-elements') !== false ||
+            strpos($route, '/globals/colors') !== false ||
+            strpos($route, '/globals/typography') !== false
+        );
+        if (!$relevant) return $response;
+        // Response-Status prüfen: nur bei Erfolg promoten
+        if ($response instanceof \WP_REST_Response) {
+            $status = (int) $response->get_status();
+            if ($status < 200 || $status >= 300) return $response;
+        } elseif ($response instanceof \WP_Error) {
+            return $response;
+        }
+        if (method_exists($this, 'auto_promote_mirror_on_page_load')) {
+            // Re-use the same idempotent helper. In Strict-Mode oder bei
+            // deaktiviertem Auto-Sync ist das ein No-Op (early return drinnen).
+            try {
+                $this->auto_promote_mirror_on_page_load();
+            } catch (\Throwable $e) {
+                error_log('ECF mirror-promote-after-elementor-save failed: ' . $e->getMessage());
+            }
+        }
+        return $response;
+    }
+
     public function rest_get_settings(\WP_REST_Request $request) {
         return rest_ensure_response([
             'success'  => true,

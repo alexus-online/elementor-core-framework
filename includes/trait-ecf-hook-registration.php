@@ -12,6 +12,11 @@ trait ECF_Framework_Hook_Registration_Trait {
         // Catch-up-Sync wenn Plugin-Schema sich geändert hat (neue Defaults etc.)
         add_action('admin_init', [$this, 'maybe_run_schema_migration'], 20);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
+        // Mirror-Mode: nach jedem Elementor-REST-Save (Variables, Global-Classes,
+        // Kit-Elements) Drift in Layrix' Override-Maps einfangen. Macht Layrix
+        // sofort wissend von Elementor-Edits, ohne dass der User die Layrix-
+        // Page neu öffnen muss.
+        add_filter('rest_request_after_callbacks', [$this, 'maybe_auto_promote_after_elementor_save'], 10, 3);
         add_action('wp_head', [$this, 'output_css'], 99);
         add_action('admin_post_ecf_clear_debug_history', [$this, 'handle_clear_debug_history']);
         // Owner-only "Ideen" notes — handlers self-gate via is_layrix_owner().
