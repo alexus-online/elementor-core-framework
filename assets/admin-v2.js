@@ -5324,6 +5324,37 @@
         _doSync(btn, form);
         return;
       }
+      /* Mirror-Modus: User hat sich für „Elementor wins"-Default entschieden.
+         Beim manuellen Sync wird das Modal übersprungen und alle Konflikte
+         werden automatisch via /sync-conflicts/resolve mit elementor_wins
+         promotet — selbe Semantik wie Auto-Sync. Toast informiert. */
+      var mode = (window.ecfAdmin && ecfAdmin.syncMode) || 'mirror';
+      if (mode === 'mirror' && (classConflicts.length || variableConflicts.length)) {
+        var resolutions = [];
+        classConflicts.forEach(function(c) {
+          resolutions.push({ type: 'class', class: c.class, prop: c.prop, elementor: c.elementor, action: 'elementor_wins' });
+        });
+        variableConflicts.forEach(function(v) {
+          resolutions.push({ type: 'variable', label: v.label, elementor: v.elementor, action: 'elementor_wins' });
+        });
+        if (resolutions.length && window.ecfAdmin && ecfAdmin.syncConflictsResolveRestUrl) {
+          fetch(ecfAdmin.syncConflictsResolveRestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+            body: JSON.stringify({ resolutions: resolutions }),
+          })
+          .then(function(r) { return r.json(); })
+          .then(function() {
+            if (typeof ecfV2Toast === 'function') {
+              ecfV2Toast(resolutions.length + ' Wert' + (resolutions.length === 1 ? '' : 'e') +
+                ' aus Elementor übernommen — Sync läuft', 'success');
+            }
+            _doSync(btn, form);
+          })
+          .catch(function() { _doSync(btn, form); });
+          return;
+        }
+      }
       _syncConflicts = colorConflicts;
       _classConflicts = classConflicts;
       _pendingSyncBtn = btn;
@@ -5979,34 +6010,52 @@
         }
         var type = resetBtn.dataset.overrideType || '';
         var body = { type: type };
+        var confirmLabel = '';
         if (type === 'variable') {
           body.label = resetBtn.dataset.overrideLabel || '';
+          confirmLabel = '--' + body.label;
         } else if (type === 'class') {
           body.class = resetBtn.dataset.overrideClass || '';
           body.prop  = resetBtn.dataset.overrideProp || '';
+          confirmLabel = '.' + body.class + ' → ' + body.prop;
         } else {
           return;
         }
-        resetBtn.disabled = true;
-        fetch(ecfAdmin.syncConflictsReleaseRestUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
-          body: JSON.stringify(body),
-        })
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            if (data && data.success && data.removed > 0) {
-              if (typeof ecfV2Toast === 'function') ecfV2Toast('Override entfernt — Layrix-Default wiederhergestellt', 'success');
-              window.setTimeout(function() { window.location.reload(); }, 600);
-            } else {
-              resetBtn.disabled = false;
-              if (typeof ecfV2Toast === 'function') ecfV2Toast('Override konnte nicht entfernt werden', 'error');
-            }
+        /* Confirm-Dialog: Reset entfernt den von Mirror-Mode promoteten oder
+           manuell gesetzten Override → Token nutzt wieder Layrix-berechneten
+           Default. Beim nächsten Sync wird Layrix' Wert nach Elementor
+           geschrieben (überschreibt also einen ggf. dort noch abweichenden
+           Wert). Daher Confirm. */
+        var confirmFn = (typeof ecfV2Confirm === 'function')
+          ? ecfV2Confirm
+          : function(msg) { return Promise.resolve(window.confirm(msg)); };
+        confirmFn(
+          'Override für „' + confirmLabel + '" wirklich entfernen? ' +
+          'Der Wert nutzt dann wieder den Layrix-Default. Beim nächsten Sync wird Layrix\' Wert nach Elementor geschrieben.',
+          { danger: true, confirmLabel: 'Override entfernen', cancelLabel: 'Abbrechen' }
+        ).then(function(ok) {
+          if (!ok) return;
+          resetBtn.disabled = true;
+          fetch(ecfAdmin.syncConflictsReleaseRestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+            body: JSON.stringify(body),
           })
-          .catch(function() {
-            resetBtn.disabled = false;
-            if (typeof ecfV2Toast === 'function') ecfV2Toast('Netzwerkfehler beim Override-Reset', 'error');
-          });
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data && data.success && data.removed > 0) {
+                if (typeof ecfV2Toast === 'function') ecfV2Toast('Override entfernt — Layrix-Default wiederhergestellt', 'success');
+                window.setTimeout(function() { window.location.reload(); }, 600);
+              } else {
+                resetBtn.disabled = false;
+                if (typeof ecfV2Toast === 'function') ecfV2Toast('Override konnte nicht entfernt werden', 'error');
+              }
+            })
+            .catch(function() {
+              resetBtn.disabled = false;
+              if (typeof ecfV2Toast === 'function') ecfV2Toast('Netzwerkfehler beim Override-Reset', 'error');
+            });
+        });
         return;
       }
 

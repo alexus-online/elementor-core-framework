@@ -4627,8 +4627,12 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <button type="button" class="v2-modal-close" id="v2-conflict-cancel">✕</button>
     </div>
     <div class="v2-modal-body">
-      <p style="font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);margin:0 0 12px">
-        <?php esc_html_e( 'Folgende Werte wurden in Elementor angepasst und weichen vom Layrix-Backend ab. Wähle pro Konflikt was gewinnen soll.', 'ecf-framework' ); ?>
+      <p style="font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);margin:0 0 12px;line-height:1.55">
+        <strong style="color:var(--v2-text1)"><?php esc_html_e( 'Du hast in Elementor Werte angepasst, die vom Layrix-Default abweichen.', 'ecf-framework' ); ?></strong><br>
+        <span style="color:var(--v2-accent2);font-weight:600">„<?php esc_html_e( 'Elementor übernehmen', 'ecf-framework' ); ?>"</span>
+        = <?php esc_html_e( 'dein Elementor-Wert wird Layrix\' neuer Standard.', 'ecf-framework' ); ?><br>
+        <span style="color:var(--v2-text2);font-weight:600">„<?php esc_html_e( 'Layrix erzwingen', 'ecf-framework' ); ?>"</span>
+        = <?php esc_html_e( 'Layrix-Wert überschreibt deinen Elementor-Edit beim nächsten Sync.', 'ecf-framework' ); ?>
       </p>
       <!-- Color-Konflikte (Legacy) -->
       <div id="v2-conflict-list" style="max-height:160px;overflow-y:auto;margin-bottom:12px"></div>
