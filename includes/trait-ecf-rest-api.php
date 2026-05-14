@@ -170,14 +170,19 @@ trait ECF_Framework_REST_API_Trait {
     }
 
     public function rest_sync_conflicts(\WP_REST_Request $request) {
-        if (!method_exists($this, 'detect_class_sync_conflicts')) {
-            return rest_ensure_response(['success' => true, 'conflicts' => [], 'count' => 0]);
-        }
-        $conflicts = $this->detect_class_sync_conflicts();
+        $class_conflicts = method_exists($this, 'detect_class_sync_conflicts')
+            ? $this->detect_class_sync_conflicts()
+            : [];
+        $variable_conflicts = method_exists($this, 'detect_variable_sync_conflicts')
+            ? $this->detect_variable_sync_conflicts()
+            : [];
         return rest_ensure_response([
-            'success'   => true,
-            'conflicts' => $conflicts,
-            'count'     => count($conflicts),
+            'success'            => true,
+            // Klassen-Konflikte unter dem alten Key — bewahrt Backward-Compat für JS-Clients
+            'conflicts'          => $class_conflicts,
+            'count'              => count($class_conflicts),
+            'variable_conflicts' => $variable_conflicts,
+            'variable_count'     => count($variable_conflicts),
         ]);
     }
 
@@ -192,11 +197,29 @@ trait ECF_Framework_REST_API_Trait {
         if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) {
             $settings['layrix_class_defaults'] = [];
         }
+        if (!isset($settings['layrix_variable_overrides']) || !is_array($settings['layrix_variable_overrides'])) {
+            $settings['layrix_variable_overrides'] = [];
+        }
         $updated = 0;
         $token_pattern = '/^[a-z][a-z0-9_-]*$/i';
         foreach ($resolutions as $r) {
             if (!is_array($r)) continue;
             if (($r['action'] ?? '') !== 'elementor_wins') continue;
+            $type = (string) ($r['type'] ?? 'class');
+
+            if ($type === 'variable') {
+                $label = (string) ($r['label'] ?? '');
+                $value = (string) ($r['elementor'] ?? '');
+                if ($label === '' || $value === '') continue;
+                if (!preg_match($token_pattern, $label)) continue;
+                // Variablen sind atomare Werte — beliebige Strings erlaubt (Farbe, Size, etc.),
+                // Sanitize läuft im sanitize_settings darüber.
+                $settings['layrix_variable_overrides'][$label] = $value;
+                $updated++;
+                continue;
+            }
+
+            // Default / type === 'class': bestehender Klassen-Resolve-Pfad.
             $class = (string) ($r['class'] ?? '');
             $prop  = (string) ($r['prop'] ?? '');
             $value = (string) ($r['elementor'] ?? '');
@@ -246,18 +269,36 @@ trait ECF_Framework_REST_API_Trait {
             $this->clear_elementor_sync_caches();
         }
 
-        $auto_sync = !empty($sanitized['elementor_auto_sync_enabled']);
-        if ($auto_sync && method_exists($this, 'sync_native_variables_merge')) {
+        $auto_sync       = !empty($sanitized['elementor_auto_sync_enabled']);
+        $sync_classes_on = !empty($sanitized['elementor_auto_sync_classes']);
+
+        // Conflict-Gate: bevor Auto-Sync läuft prüfen ob Elementor-seitige
+        // Edits stillschweigend überschrieben würden. Bei Konflikten wird die
+        // betroffene Sync-Seite (variables und/oder classes) ausgelassen — der
+        // Save bleibt erfolgreich, das Frontend bekommt aber Counts zurück und
+        // kann den User auf manuellen Sync mit Conflict-UI verweisen.
+        $variable_conflicts = ($auto_sync && method_exists($this, 'detect_variable_sync_conflicts'))
+            ? $this->detect_variable_sync_conflicts()
+            : [];
+        $class_conflicts    = ($auto_sync && $sync_classes_on && method_exists($this, 'detect_class_sync_conflicts'))
+            ? $this->detect_class_sync_conflicts()
+            : [];
+
+        $will_sync_vars    = $auto_sync && empty($variable_conflicts) && method_exists($this, 'sync_native_variables_merge');
+        $will_sync_classes = $auto_sync && $sync_classes_on && empty($class_conflicts) && method_exists($this, 'sync_native_classes_merge');
+
+        if ($will_sync_vars || $will_sync_classes) {
             $plugin_ref = $this;
-            $sync_classes = !empty($sanitized['elementor_auto_sync_classes']);
-            add_action('shutdown', static function () use ($plugin_ref, $sync_classes) {
+            add_action('shutdown', static function () use ($plugin_ref, $will_sync_vars, $will_sync_classes) {
                 // Flush response to client first so the save feels instant
                 if (function_exists('fastcgi_finish_request')) {
                     fastcgi_finish_request();
                 }
                 try {
-                    $plugin_ref->sync_native_variables_merge();
-                    if ($sync_classes && method_exists($plugin_ref, 'sync_native_classes_merge')) {
+                    if ($will_sync_vars) {
+                        $plugin_ref->sync_native_variables_merge();
+                    }
+                    if ($will_sync_classes) {
                         $plugin_ref->sync_native_classes_merge();
                     }
                 } catch (\Throwable $e) {
@@ -270,7 +311,15 @@ trait ECF_Framework_REST_API_Trait {
             'success'  => true,
             'message'  => __('Settings updated.', 'ecf-framework'),
             'settings' => $this->get_settings(),
-            'meta' => $this->rest_admin_meta(),
+            'meta'     => $this->rest_admin_meta(),
+            'autosync' => [
+                'enabled'            => (bool) $auto_sync,
+                'variable_conflicts' => count($variable_conflicts),
+                'class_conflicts'    => count($class_conflicts),
+                'variables_synced'   => (bool) $will_sync_vars,
+                'classes_synced'     => (bool) $will_sync_classes,
+                'paused'             => $auto_sync && (!empty($variable_conflicts) || !empty($class_conflicts)),
+            ],
         ]);
     }
 
