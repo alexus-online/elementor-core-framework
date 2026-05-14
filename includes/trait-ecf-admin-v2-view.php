@@ -2664,37 +2664,58 @@ trait ECF_Framework_Admin_V2_View_Trait {
            $name_tpl:    sprintf-style template, %s gets replaced by cls name
            $chip_class:  chip CSS class (e.g. 'v2-chip v2-chip--green')
            $chip_label:  chip text */
-        $render_class_group = function ( $rows_by_cat, $name_tpl, $chip_class, $chip_label ) use ( $opt ) {
+        $render_class_group = function ( $rows_by_cat, $name_tpl, $chip_class, $chip_label, $tab_group = '' ) use ( $opt ) {
           ksort( $rows_by_cat );
-          foreach ( $rows_by_cat as $cat => $rows ) :
-            if ( empty( $rows ) ) continue;
+          // Skip empty categories upfront so Tab-Header korrekt zählt
+          $rows_by_cat = array_filter( $rows_by_cat, static function ( $r ) { return ! empty( $r ); } );
+          if ( empty( $rows_by_cat ) ) return;
+          $tab_group = $tab_group !== '' ? $tab_group : 'cl-cat';
+        ?>
+        <div class="v2-tabs" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--v2-border);padding-bottom:0">
+          <?php $tab_first = true; foreach ( $rows_by_cat as $cat => $rows ) :
+            $cat_attr = sanitize_key( $cat );
+          ?>
+            <button type="button"
+                    class="v2-tab<?php echo $tab_first ? ' v2-tab--on' : ''; ?>"
+                    data-v2-tab-group="<?php echo esc_attr( $tab_group ); ?>"
+                    data-v2-tab="<?php echo esc_attr( $cat_attr ); ?>"
+                    onclick="ecfV2Tab('<?php echo esc_js( $tab_group ); ?>','<?php echo esc_js( $cat_attr ); ?>',this)">
+              <?php echo esc_html( ucfirst( $cat ) ); ?>
+              <span style="opacity:.55;font-weight:400;margin-left:4px">(<?php echo (int) count( $rows ); ?>)</span>
+            </button>
+          <?php $tab_first = false; endforeach; ?>
+        </div>
+
+        <?php $panel_first = true; foreach ( $rows_by_cat as $cat => $rows ) :
             $cat_attr = sanitize_key( $cat );
         ?>
-        <div class="v2-cl-group-label v2-cl-group-head" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <span><?php echo esc_html( ucfirst( $cat ) ); ?> <span style="opacity:.6">(<?php echo (int) count( $rows ); ?>)</span></span>
-          <span class="v2-cl-bulk" style="display:flex;gap:6px">
-            <button type="button" class="v2-edit-btn" data-v2-cl-bulk="on"  data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle aktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle ein', 'ecf-framework' ); ?></button>
-            <button type="button" class="v2-edit-btn" data-v2-cl-bulk="off" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle deaktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle aus', 'ecf-framework' ); ?></button>
-          </span>
+        <div id="v2-<?php echo esc_attr( $tab_group ); ?>-<?php echo esc_attr( $cat_attr ); ?>" class="v2-tp<?php echo $panel_first ? ' v2-tp--on' : ''; ?>">
+          <div class="v2-cl-group-label v2-cl-group-head" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span><?php echo esc_html( ucfirst( $cat ) ); ?> <span style="opacity:.6">(<?php echo (int) count( $rows ); ?>)</span></span>
+            <span class="v2-cl-bulk" style="display:flex;gap:6px">
+              <button type="button" class="v2-edit-btn" data-v2-cl-bulk="on"  data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle aktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle ein', 'ecf-framework' ); ?></button>
+              <button type="button" class="v2-edit-btn" data-v2-cl-bulk="off" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle deaktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle aus', 'ecf-framework' ); ?></button>
+            </span>
+          </div>
+          <?php foreach ( $rows as $r ) :
+              $cls_name = sanitize_html_class( $r['name'] );
+              $field    = sprintf( $name_tpl, esc_attr( $r['name'] ) );
+          ?>
+          <div class="v2-cl-row" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" data-v2-cl-name="<?php echo esc_attr( strtolower( $r['name'] ) ); ?>" data-v2-cl-desc="<?php echo esc_attr( strtolower( $r['desc'] ) ); ?>">
+            <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $r['desc'] ); ?></div></div>
+            <span class="<?php echo esc_attr( $chip_class ); ?>"><?php echo esc_html( $chip_label ); ?></span>
+            <label class="v2-tog-label">
+              <input type="checkbox"
+                     class="v2-tog-cb"
+                     name="<?php echo esc_attr( $opt . $field ); ?>"
+                     value="1"
+                     <?php checked( $r['enabled'] ); ?>>
+              <span class="v2-tog<?php echo $r['enabled'] ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
+            </label>
+          </div>
+          <?php endforeach; ?>
         </div>
-        <?php foreach ( $rows as $r ) :
-            $cls_name = sanitize_html_class( $r['name'] );
-            $field    = sprintf( $name_tpl, esc_attr( $r['name'] ) );
-        ?>
-        <div class="v2-cl-row" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" data-v2-cl-name="<?php echo esc_attr( strtolower( $r['name'] ) ); ?>" data-v2-cl-desc="<?php echo esc_attr( strtolower( $r['desc'] ) ); ?>">
-          <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $r['desc'] ); ?></div></div>
-          <span class="<?php echo esc_attr( $chip_class ); ?>"><?php echo esc_html( $chip_label ); ?></span>
-          <label class="v2-tog-label">
-            <input type="checkbox"
-                   class="v2-tog-cb"
-                   name="<?php echo esc_attr( $opt . $field ); ?>"
-                   value="1"
-                   <?php checked( $r['enabled'] ); ?>>
-            <span class="v2-tog<?php echo $r['enabled'] ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
-          </label>
-        </div>
-        <?php endforeach; ?>
-        <?php endforeach;
+        <?php $panel_first = false; endforeach;
         };
 
         /* Search box markup, parameter is the wrapper id of the tab panel. */
@@ -2721,7 +2742,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               'enabled' => ! empty( $enabled_map[ $cls['name'] ] ),
             ];
           }
-          $render_class_group( $starter_by_cat, '[starter_classes][enabled][%s]', 'v2-chip v2-chip--green', __( 'Starter', 'ecf-framework' ) );
+          $render_class_group( $starter_by_cat, '[starter_classes][enabled][%s]', 'v2-chip v2-chip--green', __( 'Starter', 'ecf-framework' ), 'cl-starter-cat' );
         ?>
       </div><!-- /starter tab -->
 
@@ -2738,7 +2759,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               'enabled' => ! empty( $enabled_map[ $cls['name'] ] ),
             ];
           }
-          $render_class_group( $extra_by_cat, '[starter_classes][enabled][%s]', 'v2-chip', __( 'Extra', 'ecf-framework' ) );
+          $render_class_group( $extra_by_cat, '[starter_classes][enabled][%s]', 'v2-chip', __( 'Extra', 'ecf-framework' ), 'cl-extra-cat' );
         ?>
       </div><!-- /extra tab -->
 
@@ -2756,7 +2777,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               ];
             }
           }
-          $render_class_group( $utility_by_cat, '[utility_classes][enabled][%s]', 'v2-chip', __( 'Utility', 'ecf-framework' ) );
+          $render_class_group( $utility_by_cat, '[utility_classes][enabled][%s]', 'v2-chip', __( 'Utility', 'ecf-framework' ), 'cl-utility-cat' );
         ?>
       </div><!-- /utility tab -->
 
