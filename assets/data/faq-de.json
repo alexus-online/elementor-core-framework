@@ -300,6 +300,13 @@
       }
     },
     {
+      "id": "cl-zero-padding",
+      "category": "classes",
+      "q": "Wie setze ich Padding auf 0 für eine Layrix-Klasse (z.B. Layrix Section)?",
+      "a": "<p>Layrix bietet seit 0.6.7 das System-Token <code>ecf-space-none</code> mit Wert <code>0px</code>. Es ist immer verfügbar, taucht nicht in den Spacing-Settings auf (kein editierbarer Step) und kann auf drei Wegen genutzt werden:</p><ol><li><strong>In Elementor die Variable wählen</strong>: Padding-Feld -> Variable-Picker -> <code>--ecf-space-none</code>. Mirror-Mode übernimmt das sofort als Token-Ref in Layrix.</li><li><strong>In Elementor literal 0px eintragen</strong>: einfach <code>0px</code> in das Feld tippen. Auto-Token-Match erkennt dass dieser Wert dem Layrix-Token <code>ecf-space-none</code> entspricht und schreibt die Token-Ref (nicht den literalen Wert) in <code>layrix_class_defaults</code> -- die Klassen-Werte-UI bleibt sauber.</li><li><strong>In Layrix direkt wählen</strong>: Klassen-Werte -> Sektionen (oder Komponenten) -> Layrix Section -> Dropdown <code>ecf-space-none</code> auswählen.</li></ol><p><strong>Pair-Lock-Verhalten</strong>: bei Padding-Pairs (oben/unten, links/rechts) geht der Lock automatisch auf wenn die beiden Werte verschieden sind. Wenn du z.B. nur unten auf 0 setzt und oben auf <code>ecf-space-2xl</code> lässt -> Lock 🔓 entkoppelt sich von selbst. Wenn beide wieder gleich -> Lock 🔗 zurück.</p><p>Funktioniert genauso für andere Token-Werte: <code>0px</code> matched <code>ecf-space-none</code>, <code>28px</code> könnte z.B. <code>ecf-space-m</code> matchen (je nach Skala).</p>",
+      "keywords": "padding null zero 0px ecf-space-none layrix-section button section auto-token-match pair-lock"
+    },
+    {
       "id": "cl-which-class-defaults",
       "category": "classes",
       "q": "Welche Klassen kann ich konfigurieren und welche Properties?",
@@ -462,7 +469,7 @@
       "id": "sy-mirror-vs-strict",
       "category": "sync",
       "q": "Mirror-Modus vs. Strict-Modus -- was soll ich nehmen?",
-      "a": "<p><strong>Mirror</strong> (empfohlen, Default seit 0.6.5): Layrix übernimmt Elementor-Edits automatisch. Du editierst in Elementor, Layrix passt sich an. Klassen-Werte und Variablen-Liste in Layrix sind ein Live-Spiegel von Elementor. Mit ↺ Reset-Icon kannst du jederzeit zum Schema-Default zurück.</p><p><strong>Strict</strong>: Layrix bleibt canonical. Bei Konflikten kommt das Conflict-Modal mit per-Zeile Auswahl. Sinnvoll für Agentur-Setups mit mehreren Editoren wo Layrix das verbindliche Design-System sein soll.</p><p>Umstellbar in Plugin -> Einstellungen -> Allgemein -> Sync-Modus.</p>",
+      "a": "<p><strong>Mirror</strong> (empfohlen, Default seit 0.6.5): Layrix übernimmt Elementor-Edits automatisch. Du editierst in Elementor, Layrix passt sich an. Klassen-Werte und Variablen-Liste in Layrix sind ein Live-Spiegel von Elementor. Mit ↺ Reset-Icon kannst du jederzeit zum Schema-Default zurück.</p><p><strong>Strict</strong>: Layrix bleibt canonical. Bei Konflikten kommt das Conflict-Modal mit per-Zeile Auswahl. Sinnvoll für Agentur-Setups mit mehreren Editoren wo Layrix das verbindliche Design-System sein soll.</p><p><strong>Auto-Token-Match</strong> (seit 0.6.7, Mirror-Modus): Wenn du in Elementor einen literalen Wert eingibst (z.B. <code>0px</code>) der zufällig dem Wert eines Layrix-Tokens entspricht (z.B. <code>ecf-space-none</code> = 0px), promotet Mirror automatisch zur Token-Ref statt zum literalen Wert. So bleibt <code>layrix_class_defaults</code> sauber als Token-Map und du musst die Variable nicht selbst auswählen.</p><p>Umstellbar in Plugin -> Einstellungen -> Allgemein -> Sync-Modus.</p>",
       "keywords": "mirror strict modus default agentur design-system"
     },
     {
