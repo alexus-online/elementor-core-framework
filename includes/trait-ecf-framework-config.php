@@ -513,6 +513,12 @@ trait ECF_Framework_Config_Trait {
                 ['name' => 'ecf-hidden', 'label' => __('Hidden', 'ecf-framework')],
                 ['name' => 'ecf-center-inline', 'label' => __('Center Inline', 'ecf-framework')],
                 ['name' => 'ecf-cluster', 'label' => __('Cluster', 'ecf-framework')],
+                ['name' => 'ecf-row', 'label' => __('Row (Flex horizontal)', 'ecf-framework')],
+                ['name' => 'ecf-flex-center', 'label' => __('Flex Center', 'ecf-framework')],
+                ['name' => 'ecf-flex-between', 'label' => __('Flex Between', 'ecf-framework')],
+                ['name' => 'ecf-items-center', 'label' => __('Items Center', 'ecf-framework')],
+                ['name' => 'ecf-items-start', 'label' => __('Items Start', 'ecf-framework')],
+                ['name' => 'ecf-items-end', 'label' => __('Items End', 'ecf-framework')],
             ],
             'shadows' => [
                 ['name' => 'ecf-shadow-xs', 'label' => __('Shadow XS', 'ecf-framework')],
@@ -618,6 +624,12 @@ trait ECF_Framework_Config_Trait {
             case 'ecf-hidden': return __('Hides the element visually.', 'ecf-framework');
             case 'ecf-center-inline': return __('Centers inline content inside its available width.', 'ecf-framework');
             case 'ecf-cluster': return __('Groups items in a horizontal cluster with wrapping.', 'ecf-framework');
+            case 'ecf-row': return __('Horizontal flex row (no wrap) with gap and centered alignment.', 'ecf-framework');
+            case 'ecf-flex-center': return __('Flex container with content centered on both axes.', 'ecf-framework');
+            case 'ecf-flex-between': return __('Flex row with items spaced to the edges (e.g. for header layouts).', 'ecf-framework');
+            case 'ecf-items-center': return __('Aligns flex/grid items to the center on the cross axis. Combine with .ecf-row or .ecf-stack.', 'ecf-framework');
+            case 'ecf-items-start': return __('Aligns flex/grid items to the start on the cross axis.', 'ecf-framework');
+            case 'ecf-items-end': return __('Aligns flex/grid items to the end on the cross axis.', 'ecf-framework');
             case 'ecf-shadow-xs': return __('Applies the XS shadow token as a reusable box-shadow class.', 'ecf-framework');
             case 'ecf-shadow-s': return __('Applies the S shadow token as a reusable box-shadow class.', 'ecf-framework');
             case 'ecf-shadow-m': return __('Applies the M shadow token as a reusable box-shadow class.', 'ecf-framework');
@@ -822,6 +834,32 @@ trait ECF_Framework_Config_Trait {
                 'flex-wrap' => $this->string_prop('wrap'),
                 'gap' => $this->string_prop('var(--ecf-space-s)'),
                 'align-items' => $this->string_prop('center'),
+            ],
+            'ecf-row' => [
+                'display' => $this->string_prop('flex'),
+                'flex-direction' => $this->string_prop('row'),
+                'gap' => $this->string_prop('var(--ecf-space-s)'),
+                'align-items' => $this->string_prop('center'),
+            ],
+            'ecf-flex-center' => [
+                'display' => $this->string_prop('flex'),
+                'justify-content' => $this->string_prop('center'),
+                'align-items' => $this->string_prop('center'),
+            ],
+            'ecf-flex-between' => [
+                'display' => $this->string_prop('flex'),
+                'justify-content' => $this->string_prop('space-between'),
+                'align-items' => $this->string_prop('center'),
+                'gap' => $this->string_prop('var(--ecf-space-s)'),
+            ],
+            'ecf-items-center' => [
+                'align-items' => $this->string_prop('center'),
+            ],
+            'ecf-items-start' => [
+                'align-items' => $this->string_prop('flex-start'),
+            ],
+            'ecf-items-end' => [
+                'align-items' => $this->string_prop('flex-end'),
             ],
             'ecf-shadow-xs' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-xs)')],
             'ecf-shadow-s' => ['box-shadow' => $this->string_prop('var(--ecf-shadow-s)')],
