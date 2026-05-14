@@ -503,6 +503,13 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
                 if ($elementor_value === null) continue;
 
                 if ((string) $elementor_value !== (string) $backend_value) {
+                    // Semantischer Match: wenn Layrix einen Token-Label hat
+                    // (z.B. 'ecf-space-none') und der Token-Wert dem Elementor-
+                    // Wert entspricht (z.B. '0px'), ist das kein Konflikt —
+                    // die Werte sind nur verschieden serialisiert.
+                    if ($this->layrix_token_equals_literal((string) $backend_value, (string) $elementor_value)) {
+                        continue;
+                    }
                     $conflicts[] = [
                         'class'       => $class_name,
                         'class_label' => (string) ($cls_def['label'] ?? $class_name),
@@ -515,6 +522,25 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             }
         }
         return $conflicts;
+    }
+
+    /**
+     * Hilfsmethode: prüft ob ein Layrix-Token-Label dem effektiven Wert
+     * (in Elementor) entspricht. Z.B. 'ecf-space-none' ↔ '0px' wenn der
+     * Token den Wert 0px trägt. Genutzt vom Class-Conflict-Detector um
+     * semantisch identische Werte nicht als Konflikt zu melden.
+     */
+    private function layrix_token_equals_literal(string $token_label, string $literal_value): bool {
+        if ($token_label === '' || $literal_value === '') return false;
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            foreach ($this->build_native_variable_payloads() as $label => $p) {
+                $v = (string) ($p['value'] ?? '');
+                if ($v !== '') $cache[$label] = $v;
+            }
+        }
+        return isset($cache[$token_label]) && $cache[$token_label] === $literal_value;
     }
 
     /**

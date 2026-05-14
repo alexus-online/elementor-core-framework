@@ -363,6 +363,19 @@ trait ECF_Framework_REST_API_Trait {
             $settings['layrix_class_defaults'] = [];
         }
 
+        // Value→Token-Label Map für Auto-Token-Match: wenn Elementor einen
+        // literalen Wert hat (z.B. '0px') und EIN Layrix-Token hat genau diesen
+        // Wert (z.B. ecf-space-none=0px), promoten wir zur Token-Ref statt zu
+        // skippen. So bleibt der Class-Default sauber als Token-Ref.
+        $value_to_token = [];
+        if (method_exists($this, 'build_native_variable_payloads')) {
+            foreach ($this->build_native_variable_payloads() as $label => $p) {
+                $v = (string) ($p['value'] ?? '');
+                if ($v === '') continue;
+                if (!isset($value_to_token[$v])) $value_to_token[$v] = $label;
+            }
+        }
+
         $token_pattern = '/^[a-z][a-z0-9_-]*$/i';
         $changed = false;
         foreach ($var_conflicts as $vc) {
@@ -379,7 +392,15 @@ trait ECF_Framework_REST_API_Trait {
             $value = (string) ($cc['elementor'] ?? '');
             if ($cls === '' || $prop === '' || $value === '') continue;
             // Class-Defaults speichern nur Token-Refs, keine literalen Werte.
-            if (!preg_match($token_pattern, $value)) continue;
+            if (!preg_match($token_pattern, $value)) {
+                // Auto-Token-Match: wenn ein Layrix-Token denselben Wert hat,
+                // nutz dessen Label statt zu skippen.
+                if (isset($value_to_token[$value])) {
+                    $value = $value_to_token[$value];
+                } else {
+                    continue;
+                }
+            }
             $settings['layrix_class_defaults'][$cls][$prop] = $value;
             $changed = true;
         }
@@ -561,6 +582,15 @@ trait ECF_Framework_REST_API_Trait {
             if (!isset($sanitized['layrix_class_defaults']) || !is_array($sanitized['layrix_class_defaults'])) {
                 $sanitized['layrix_class_defaults'] = [];
             }
+            // Value→Token-Label Map für Auto-Token-Match (z.B. '0px' → 'ecf-space-none')
+            $value_to_token = [];
+            if (method_exists($this, 'build_native_variable_payloads')) {
+                foreach ($this->build_native_variable_payloads() as $tlabel => $tp) {
+                    $tv = (string) ($tp['value'] ?? '');
+                    if ($tv === '') continue;
+                    if (!isset($value_to_token[$tv])) $value_to_token[$tv] = $tlabel;
+                }
+            }
             foreach ($variable_conflicts as $vc) {
                 $label = (string) ($vc['label'] ?? '');
                 $value = (string) ($vc['elementor'] ?? '');
@@ -577,11 +607,16 @@ trait ECF_Framework_REST_API_Trait {
                 $prop  = (string) ($cc['prop']  ?? '');
                 $value = (string) ($cc['elementor'] ?? '');
                 if ($cls === '' || $prop === '' || $value === '') continue;
-                // Class-Resolve nimmt nur Token-Labels — literale CSS-Werte
-                // werden nicht in layrix_class_defaults gespeichert (Sanitizer
-                // würde sie eh ablehnen). Solche Konflikte bleiben sichtbar
-                // im manuellen Sync-Modal.
-                if (!preg_match($token_label_pattern, $value)) continue;
+                // Class-Defaults speichern nur Token-Refs. Literale CSS-Werte
+                // (z.B. '0px') werden via Auto-Token-Match auf passende Layrix-
+                // Tokens gemappt (z.B. ecf-space-none) bevor sie verworfen werden.
+                if (!preg_match($token_label_pattern, $value)) {
+                    if (isset($value_to_token[$value])) {
+                        $value = $value_to_token[$value];
+                    } else {
+                        continue;
+                    }
+                }
                 if (isset($user_touched_class_props[$cls . '.' . $prop])) continue;
                 $sanitized['layrix_class_defaults'][$cls][$prop] = $value;
                 $auto_promoted_classes++;
