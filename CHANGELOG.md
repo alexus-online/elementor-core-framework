@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.6.4 (2026-05-14)
+
+### Neu — Sync-Modi (Mirror vs Strict)
+- **Sync-Modus „Mirror" (neuer Default)**: Layrix übernimmt Elementor-Edits an Variablen und Klassen-Defaults automatisch in `layrix_*_overrides`. Du editierst in Elementor, Layrix passt sich an. Mit Reset-Icon (↺) jederzeit zurück zum Schema-Default. Sinnvoll für Solo-Workflows wo Elementor die führende Edit-Oberfläche ist.
+- **Sync-Modus „Strict" (alternativ)**: Layrix bleibt canonical. Bei Konflikten erscheint vor jedem Sync ein Konflikt-Modal mit per-Zeile-Auswahl („Elementor übernehmen" / „Layrix erzwingen") und Bulk-Buttons pro Sektion. Sinnvoll für Agentur-Setups mit mehreren Editoren wo Layrix das verbindliche Design-System bleiben soll.
+- **Umstellbar** in Plugin → Einstellungen → Allgemein → Sync-Modus.
+- **User-Touched-Filter**: User-Edits im aktuellen Save sind vor Mirror-Mode geschützt — wenn du in Layrix einen Wert änderst, kann Mirror ihn nicht direkt wieder mit einem alten Elementor-Wert überschreiben.
+- **Auto-Promote-Trigger**: Mirror promotet bei Settings-Save, Page-Load (Layrix-Admin), REST-Hook nach Elementor-Save, Tab-Switch-Drift-Check (visibility/focus listener) und beim manuellen Sync.
+
+### Neu — Auto-Token-Match + System-Token `ecf-space-none`
+- **System-Token `ecf-space-none = 0px`**: hardcoded Built-in, immer verfügbar, taucht nicht als editierbarer Step in den Abstands-Settings auf (war konzeptionell verwirrend). Verfügbar im Elementor-Variable-Picker (`--ecf-space-none`) und in Layrix-Klassen-Werte-Dropdowns.
+- **Auto-Token-Match (Mirror-Mode)**: Wenn du in Elementor einen literalen Wert eingibst (z.B. `0px`) der dem Wert eines Layrix-Tokens entspricht, promotet Mirror automatisch zur Token-Ref (`ecf-space-none`) statt zum literalen Wert. `layrix_class_defaults` bleibt sauber als Token-Map.
+- **Semantischer Conflict-Detect**: `layrix_token_equals_literal()` erkennt, dass `ecf-space-none` und `0px` semantisch gleich sind — kein falscher Konflikt mehr im Modal.
+
+### Neu — Helper-Klassen (Layout + Headings)
+- **6 Flex-Layout-Helper**: `ecf-row` (flex/row), `ecf-flex-center` (justify+align center), `ecf-flex-between` (justify between, align center), `ecf-items-center`, `ecf-items-start`, `ecf-items-end`.
+- **`ecf-heading--center`**: zentrierte Hero-Headlines mit `text-align: center` + `margin-inline: auto` + `max-width: 72ch`.
+
+### Neu — UX
+- **Klassen-Werte als top-level V2-Page** (raus aus der tiefen Settings-Navigation): von 5 Klicks → 2 Klicks erreichbar.
+- **Klassen-Werte: Akkordeon → Tabs** (Sektionen / Komponenten / Felder / etc.). Tab-State persistiert in `localStorage`.
+- **Klassen-Auswahl: Kategorien als Sub-Tabs** in Starter / Extra / Utility. Erster Sub-Tab ist immer „Alle" (zeigt alle Kategorien sequenziell mit Header + Bulk-Buttons), danach pro Kategorie ein eigener Tab.
+- **Override-Visualisierung**: gelb-italic Display + `overridden`-Badge + `↺` Reset-Icon. Tooltip + Legend (max-width per `var(--ecf-content-max-width, 72ch)` statt Hardcode) erklärt die gelben Werte.
+- **Pair-Lock mit SVG-Icons**: gekettetes / gebrochenes Ketten-SVG statt 🔗/🔓-Emojis. Lock öffnet sich automatisch wenn Pair-Werte auseinandergehen (z.B. Padding-oben ≠ Padding-unten), schließt wieder wenn beide gleich sind.
+- **Reset-Confirm-Dialog**: vor jedem Override-Reset Bestätigung, damit nicht aus Versehen vorher kuratierte Werte verloren gehen.
+- **Toast mit Action-Button + persistent-Option** (z.B. „Override zurückgesetzt — rückgängig"). Pointer-Events-Fix damit der Action-Button auch wirklich klickbar ist.
+- **Wizard**: Plugin-Erstinstallation führt durch die wichtigsten Settings.
+
+### Fix
+- **Release-Endpoint syncht inline** nach `delete_override` — vorher konnte Mirror einen frischen Reset sofort wieder rückgängig machen.
+- **Auto-promote auch beim Layrix-Admin-Page-Load**, nicht nur bei REST-Saves — fängt Edits ab, die zwischen zwei Layrix-Sessions in Elementor gemacht wurden.
+- **`ecf-space-none` als Auswahl-Option** in Klassen-Werte-Dropdowns (war vorher nicht in `layrix_size_variable_options` weil Built-in nicht in `spacing.steps`).
+- **Klassen-Auswahl ID-Kollision behoben**: outer tab-group selector `[id^="v2-cl-"]` matchte vorher auch innere Panels `v2-cl-starter-cat-*` und entfernte deren Active-State. Inner Groups umbenannt → `cls-starter`/`cls-extra`/`cls-utility`.
+
+### Architektur
+- `trait-ecf-native-elementor-data.php`: `detect_variable_sync_conflicts()`, `detect_class_sync_conflicts()` mit semantischem Match, `build_native_variable_payloads()` hardcoded Built-in `ecf-space-none`, `update_class_pair_lock_states()` Helper.
+- `trait-ecf-rest-api.php`: `rest_update_settings` mit User-Touched-Filter, Auto-Promote, Conflict-Gate. `auto_promote_mirror_on_page_load()` für Page-Load-Trigger. `maybe_auto_promote_after_elementor_save` als REST-Hook-Callback.
+- `trait-ecf-hook-registration.php`: `rest_request_after_callbacks` Filter für Elementor-REST-Hooks.
+
+### FAQ
+- Neue Einträge: `cl-zero-padding`, `sy-mirror-vs-strict`, `sy-when-elementor-to-layrix`, `sy-override-reset` (DE + EN).
+- Aktualisiert: `cl-where-padding`, `cl-defaults-what-happens`, `sy-auto-vs-manual`, `sy-conflict-modal`, `sy-mirror-vs-strict` (Auto-Token-Match-Hinweis).
+
 ## 0.6.3.3 (2026-05-08)
 
 ### Fix (kritisch)
