@@ -2899,7 +2899,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               die sonst kommentarlos im Dropdown auftauchen wenn Mirror-Mode etwas
               promotet hat. Nur sichtbar wenn überhaupt Klassen-Overrides aktiv sind. */ ?>
       <?php if ( ! empty( $class_overrides_map ) ) : ?>
-      <div class="v2-cls-legend" style="display:flex;align-items:center;gap:14px;padding:10px 14px;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2);line-height:1.5">
+      <div class="v2-cls-legend" style="display:flex;align-items:flex-start;gap:14px;padding:10px 14px;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2);line-height:1.5;max-width:720px">
         <span style="font-size:18px" aria-hidden="true">⤴</span>
         <div style="flex:1">
           <strong style="color:#fbbf24"><?php esc_html_e( 'Gelbe Werte mit „aus Elementor"-Tag', 'ecf-framework' ); ?></strong> <?php esc_html_e( 'wurden vom Elementor-Editor übernommen (Mirror-Modus) und überschreiben den Layrix-Default. Klick auf das', 'ecf-framework' ); ?>
