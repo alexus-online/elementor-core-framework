@@ -5165,15 +5165,24 @@
     var steps = [];
     if (stepsWrap) stepsWrap.querySelectorAll('.v2-step-input').forEach(function(inp) { if (inp.value) steps.push(inp.value); });
     if (!steps.length) steps = ['xs','s','m','l','xl','2xl','3xl','4xl'];
-    var baseIdx = Math.floor(steps.length / 2);
+    var baseInput = document.querySelector('input[name$="[scale][base_index]"]');
+    var baseName  = (baseInput && baseInput.value) ? baseInput.value : 'm';
+    var baseIdx   = steps.indexOf(baseName);
+    if (baseIdx < 0) baseIdx = steps.indexOf('m');
+    if (baseIdx < 0) baseIdx = Math.max(0, Math.floor((steps.length - 1) / 3));
+    var base  = Math.max(minBase, maxBase);
+    var ratio = Math.max(minRatio, maxRatio);
     var html = '';
     steps.slice().reverse().forEach(function(step, revIdx) {
       var i = steps.length - 1 - revIdx;
       var exp = i - baseIdx;
-      var px = Math.round(Math.max(minBase, maxBase) * Math.pow(Math.max(minRatio, maxRatio), exp) * 10) / 10;
-      var clampedPx = Math.min(px, 52);
-      html += '<div class="v2-pv-scale-row" style="font-size:' + clampedPx + 'px">'
-        + '<span class="v2-pv-scale-step">' + step + '</span>'
+      var px = Math.round(base * Math.pow(ratio, exp) * 10) / 10;
+      var clampedPx = Math.min(px, 96);
+      var capped = px > 96;
+      html += '<div class="v2-pv-scale-row" style="font-size:' + clampedPx + 'px"'
+        + (capped ? ' title="Vorschau bei ' + clampedPx + 'px gecappt — echter Wert ' + px.toFixed(0) + 'px"' : '')
+        + '>'
+        + '<span class="v2-pv-scale-step">' + step + (capped ? ' ↗' : '') + '</span>'
         + '<span class="v2-pv-scale-sample">The quick brown fox</span>'
         + '<span class="v2-pv-scale-px">' + px.toFixed(0) + 'px</span>'
         + '</div>';
