@@ -227,16 +227,24 @@
     span.textContent = icon + msg;
     el.appendChild(span);
     if (opts.actionLabel && typeof opts.action === 'function') {
+      // Toast-Container hat .v2-toast { pointer-events: none } damit er nicht
+      // accidental Klicks abfängt. Für Toasts MIT Action-Button müssen wir
+      // pointer-events explizit aktivieren — sonst geht der Click ins Leere.
+      el.style.pointerEvents = 'auto';
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'v2-toast__action';
       btn.textContent = opts.actionLabel;
-      btn.style.cssText = 'margin-left:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:inherit;padding:3px 12px;border-radius:4px;cursor:pointer;font-weight:600;font-size:inherit;font-family:inherit';
+      btn.style.cssText = 'margin-left:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:inherit;padding:3px 12px;border-radius:4px;cursor:pointer;font-weight:600;font-size:inherit;font-family:inherit;pointer-events:auto';
       btn.addEventListener('click', function() {
         try { opts.action(); } catch (e) {}
         el.classList.remove('v2-toast--show');
+        el.style.pointerEvents = '';
       });
       el.appendChild(btn);
+    } else {
+      // Reset für nachfolgende Toast-Aufrufe ohne Action
+      el.style.pointerEvents = '';
     }
     el.className = 'v2-toast v2-toast--' + (type || 'info') + ' v2-toast--show';
     clearTimeout(el._ecfT);
