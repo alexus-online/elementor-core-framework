@@ -2895,6 +2895,19 @@ trait ECF_Framework_Admin_V2_View_Trait {
   <div class="v2-page-body">
     <div class="v2-content">
       <div class="v2-ph"><h1><?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Welche Variablen verwenden die Layrix-Standardklassen? Hier feinabstimmen — Padding und Schriftgrößen für Button, Heading, Section, Container.', 'ecf-framework' ); ?></p></div>
+      <?php /* Legende: erklärt das gelbe „aus Elementor"-Styling und das ↺-Reset-Icon
+              die sonst kommentarlos im Dropdown auftauchen wenn Mirror-Mode etwas
+              promotet hat. Nur sichtbar wenn überhaupt Klassen-Overrides aktiv sind. */ ?>
+      <?php if ( ! empty( $class_overrides_map ) ) : ?>
+      <div class="v2-cls-legend" style="display:flex;align-items:center;gap:14px;padding:10px 14px;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2);line-height:1.5">
+        <span style="font-size:18px" aria-hidden="true">⤴</span>
+        <div style="flex:1">
+          <strong style="color:#fbbf24"><?php esc_html_e( 'Gelbe Werte mit „aus Elementor"-Tag', 'ecf-framework' ); ?></strong> <?php esc_html_e( 'wurden vom Elementor-Editor übernommen (Mirror-Modus) und überschreiben den Layrix-Default. Klick auf das', 'ecf-framework' ); ?>
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.10);color:#fbbf24;border-radius:3px;font-size:12px;line-height:1;vertical-align:middle">↺</span>
+          <?php esc_html_e( 'Icon entfernt den Override und stellt den Schema-Default wieder her — der wird dann auch sofort nach Elementor geschrieben.', 'ecf-framework' ); ?>
+        </div>
+      </div>
+      <?php endif; ?>
         <div class="v2-sec">
           <div class="v2-sh"><?php esc_html_e( 'Klassen-Defaults', 'ecf-framework' ); ?></div>
           <div class="v2-sh2" style="margin-bottom:14px"><?php esc_html_e( 'Bestimme welche Variablen Layrix in seinen Standard-Klassen verwendet. Änderungen werden beim Speichern in Elementor\'s Global-Classes-Registry geschrieben.', 'ecf-framework' ); ?></div>
@@ -2920,8 +2933,11 @@ trait ECF_Framework_Admin_V2_View_Trait {
               // layrix_class_defaults und bringt den Schema-Default zurück.
               $is_override = ( $current_value !== '' && $current_value !== $schema_default );
               ?>
-              <span style="display:inline-flex;align-items:center;gap:6px">
-              <select class="v2-si<?php echo $is_override ? ' v2-is-overridden' : ''; ?>" name="<?php echo $name_attr; ?>" style="max-width:240px">
+              <span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <?php if ( $is_override ) : ?>
+                <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen statt vom Layrix-Schema-Default', 'ecf-framework' ); ?>">⤴ <?php esc_html_e( 'aus Elementor', 'ecf-framework' ); ?></span>
+              <?php endif; ?>
+              <select class="v2-si<?php echo $is_override ? ' v2-is-overridden' : ''; ?>" name="<?php echo $name_attr; ?>" style="max-width:240px" title="<?php echo $is_override ? esc_attr__( 'Dieser Wert wurde aus Elementor übernommen. Mit ↺ zurück zum Schema-Default.', 'ecf-framework' ) : ''; ?>">
                   <option value=""><?php
                       printf(
                           /* translators: %s: variable name */
