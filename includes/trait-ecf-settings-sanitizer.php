@@ -77,6 +77,25 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
             }
         }
 
+        // Layrix-Variable-Overrides: sparse map [label] = value.
+        // Wird durch Sync-Conflict-Resolution "Elementor wins" geschrieben und
+        // überschreibt beim Sync den von build_native_variable_payloads()
+        // generierten Wert für genau dieses Label.
+        $output['layrix_variable_overrides'] = [];
+        if (isset($input['layrix_variable_overrides']) && is_array($input['layrix_variable_overrides'])) {
+            foreach ($input['layrix_variable_overrides'] as $label => $value) {
+                if (!is_string($label) || $label === '') continue;
+                if (!preg_match('/^[a-z][a-z0-9_-]*$/i', $label)) continue;
+                $value = sanitize_text_field((string) $value);
+                if ($value === '') continue;
+                $output['layrix_variable_overrides'][$label] = $value;
+            }
+        } elseif (isset($saved_settings['layrix_variable_overrides']) && is_array($saved_settings['layrix_variable_overrides'])) {
+            // Settings-Save ohne overrides-Feld darf bestehende Overrides nicht
+            // löschen (UI sendet die Map nur bei Resolve-Aktionen mit).
+            $output['layrix_variable_overrides'] = $saved_settings['layrix_variable_overrides'];
+        }
+
         $output['auto_classes_enabled']    = !empty($input['auto_classes_enabled'])    ? '1' : '0';
         $output['auto_classes_headings']   = !empty($input['auto_classes_headings'])   ? '1' : '0';
         $output['auto_classes_buttons']    = !empty($input['auto_classes_buttons'])    ? '1' : '0';
@@ -84,6 +103,10 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
         $output['auto_classes_form']       = !empty($input['auto_classes_form'])       ? '1' : '0';
         $output['elementor_auto_sync_variables'] = !empty($input['elementor_auto_sync_variables']) ? '1' : '0';
         $output['elementor_auto_sync_classes'] = !empty($input['elementor_auto_sync_classes']) ? '1' : '0';
+        $sync_mode_input = isset($input['sync_mode']) ? sanitize_key($input['sync_mode']) : '';
+        $output['sync_mode'] = in_array($sync_mode_input, ['mirror', 'strict'], true)
+            ? $sync_mode_input
+            : ($saved_settings['sync_mode'] ?? $defaults['sync_mode'] ?? 'mirror');
         $output['github_update_checks_enabled'] = !empty($input['github_update_checks_enabled']) ? '1' : '0';
         $content_width_value  = trim((string) ($input['content_max_width_value'] ?? $input['content_max_width'] ?? ''));
         $content_width_format = sanitize_key($input['content_max_width_format'] ?? '');
@@ -275,6 +298,11 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
 
         if (!empty($input['spacing']) && is_array($input['spacing'])) {
             $sp = $input['spacing'];
+            // 'none' ist KEIN regulärer Spacing-Step — wird in
+            // build_native_variable_payloads als built-in System-Token
+            // (ecf-space-none = 0px) immer hinzugefügt, unabhängig von der
+            // User-Skala. Falls 'none' versehentlich in der steps-Liste
+            // landet (legacy data), wird es hier rausgefiltert.
             $all_sp_steps = ['6xs','5xs','4xs','3xs','2xs','xs','s','m','l','xl','2xl','3xl','4xl','5xl','6xl'];
             if (!empty($sp['steps']) && is_array($sp['steps'])) {
                 $validated_sp = array_values(array_filter(array_map('sanitize_key', $sp['steps']), function($s) use ($all_sp_steps) {

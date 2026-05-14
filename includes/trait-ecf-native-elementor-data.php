@@ -113,6 +113,12 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         $spacing_labels = array_values(array_map(static function ($step) {
             return 'ecf-space-' . $step;
         }, array_filter($spacing_steps, 'is_string')));
+        // Built-in System-Token: ecf-space-none (immer 0px). Nicht in
+        // settings.spacing.steps weil es kein User-Step ist, aber als
+        // Auswahl-Option in den Klassen-Werte-Dropdowns nutzbar.
+        if (!in_array('ecf-space-none', $spacing_labels, true)) {
+            array_unshift($spacing_labels, 'ecf-space-none');
+        }
 
         // Typography-Stufen aus Settings
         $type_steps = isset($settings['typography']['scale']['steps']) && is_array($settings['typography']['scale']['steps'])
@@ -503,6 +509,13 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
                 if ($elementor_value === null) continue;
 
                 if ((string) $elementor_value !== (string) $backend_value) {
+                    // Semantischer Match: wenn Layrix einen Token-Label hat
+                    // (z.B. 'ecf-space-none') und der Token-Wert dem Elementor-
+                    // Wert entspricht (z.B. '0px'), ist das kein Konflikt —
+                    // die Werte sind nur verschieden serialisiert.
+                    if ($this->layrix_token_equals_literal((string) $backend_value, (string) $elementor_value)) {
+                        continue;
+                    }
                     $conflicts[] = [
                         'class'       => $class_name,
                         'class_label' => (string) ($cls_def['label'] ?? $class_name),
@@ -515,6 +528,25 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             }
         }
         return $conflicts;
+    }
+
+    /**
+     * Hilfsmethode: prüft ob ein Layrix-Token-Label dem effektiven Wert
+     * (in Elementor) entspricht. Z.B. 'ecf-space-none' ↔ '0px' wenn der
+     * Token den Wert 0px trägt. Genutzt vom Class-Conflict-Detector um
+     * semantisch identische Werte nicht als Konflikt zu melden.
+     */
+    private function layrix_token_equals_literal(string $token_label, string $literal_value): bool {
+        if ($token_label === '' || $literal_value === '') return false;
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            foreach ($this->build_native_variable_payloads() as $label => $p) {
+                $v = (string) ($p['value'] ?? '');
+                if ($v !== '') $cache[$label] = $v;
+            }
+        }
+        return isset($cache[$token_label]) && $cache[$token_label] === $literal_value;
     }
 
     /**
@@ -613,6 +645,10 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             ];
         }
 
+        $overrides = isset($settings['layrix_variable_overrides']) && is_array($settings['layrix_variable_overrides'])
+            ? $settings['layrix_variable_overrides']
+            : [];
+
         foreach (($settings['typography']['leading'] ?? []) as $row) {
             $name = sanitize_key($row['name'] ?? '');
             $value = trim((string) ($row['value'] ?? ''));
@@ -642,7 +678,95 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             ];
         }
 
+        // Built-in System-Token: 'ecf-space-none' ist semantisch der Null-Wert
+        // und wird unabhängig von der User-Spacing-Skala bereitgestellt. Damit
+        // hat der User immer einen sauberen 0-Token zur Hand (z.B. für padding-0
+        // an Sections) ohne ihn als Skala-Step manuell einrichten zu müssen.
+        $payloads['ecf-space-none'] = [
+            'type'  => 'global-size-variable',
+            'value' => '0px',
+        ];
+
+        // Variable-Overrides anwenden: promoviert "Elementor wins"-Auflösungen aus
+        // den Sync-Conflicts zur neuen Source-of-Truth. Wenn das Label in den
+        // primary-settings-generated Payloads existiert, wird sein Value ersetzt.
+        // Wenn nicht (z.B. weil der computed value leer/unit-only war und vom
+        // skip-Filter aussortiert wurde — typisch beim 0-Token), wird eine
+        // frische Payload aus dem Label-Prefix erschlossen. So funktioniert auch
+        // ein User-definiertes ecf-space-none = "0".
+        foreach ($overrides as $label => $override_value) {
+            $label = (string) $label;
+            $value = trim((string) $override_value);
+            if ($label === '' || $value === '') continue;
+            if (isset($payloads[$label])) {
+                $payloads[$label]['value'] = $value;
+                continue;
+            }
+            // Type aus Label-Prefix erschließen
+            $type = 'global-string-variable';
+            if (strpos($label, 'ecf-color-') === 0) {
+                $type = 'global-color-variable';
+            } elseif (preg_match('/^ecf-(space|radius|text|container)/', $label)) {
+                $type = 'global-size-variable';
+            }
+            $payloads[$label] = ['type' => $type, 'value' => $value];
+        }
+
         return $payloads;
+    }
+
+    /**
+     * Erkennt Konflikte zwischen Layrix-seitiger Variable-Definition und dem
+     * aktuellen Stand in Elementors Variables-Repository.
+     *
+     * Liefert Array mit Einträgen { label, type, backend, elementor }. Eintrag
+     * existiert nur, wenn das Label in Layrix vorgesehen ist UND in Elementor
+     * existiert UND die Werte sich unterscheiden.
+     */
+    public function detect_variable_sync_conflicts(): array {
+        $conflicts = [];
+        if (!class_exists('\Elementor\Plugin') || !class_exists('\Elementor\Modules\Variables\Storage\Variables_Repository')) {
+            return $conflicts;
+        }
+        try {
+            $kit = \Elementor\Plugin::$instance->kits_manager->get_active_kit();
+            if (!$kit) return $conflicts;
+            $repo = new \Elementor\Modules\Variables\Storage\Variables_Repository($kit);
+            $collection = $repo->load();
+        } catch (\Throwable $e) {
+            return $conflicts;
+        }
+
+        $existing_by_label = [];
+        foreach ($collection->all() as $id => $variable) {
+            if (method_exists($variable, 'is_deleted') && $variable->is_deleted()) continue;
+            $existing_by_label[strtolower((string) $variable->label())] = $variable;
+        }
+
+        $payloads = $this->build_native_variable_payloads();
+        if (empty($payloads)) return $conflicts;
+
+        foreach ($payloads as $label => $payload) {
+            $key = strtolower((string) $label);
+            if (!isset($existing_by_label[$key])) continue; // wird beim nächsten Sync neu angelegt – kein Konflikt
+            $type = (string) ($payload['type'] ?? '');
+            // Color-Variablen werden vom Legacy-JS-Mechanismus (_detectColorConflicts)
+            // bereits angezeigt — Doppelanzeige vermeiden. Sobald der Legacy-Pfad
+            // entfernt ist, kann dieser Filter weg.
+            if ($type === 'global-color-variable') continue;
+            $existing = $existing_by_label[$key];
+            $existing_value = (string) $existing->value();
+            $backend_value  = (string) ($payload['value'] ?? '');
+            if ($existing_value === '' || $backend_value === '') continue;
+            if ($existing_value === $backend_value) continue;
+            $conflicts[] = [
+                'label'     => (string) $label,
+                'type'      => $type,
+                'backend'   => $backend_value,
+                'elementor' => $existing_value,
+            ];
+        }
+        return $conflicts;
     }
 
     private function get_synced_variable_labels() {

@@ -217,13 +217,40 @@
   window.ecfV2CopyText = ecfV2CopyText;
 
   /* ── Toast ───────────────────────────────────────────────────────────── */
-  function ecfV2Toast(msg, type) {
+  function ecfV2Toast(msg, type, opts) {
     var el = document.getElementById('ecf-v2-toast');
     if (!el) return;
-    el.textContent = (type === 'success' ? '✓ ' : 'ℹ ') + msg;
+    opts = opts || {};
+    var icon = type === 'success' ? '✓ ' : (type === 'error' ? '✗ ' : (type === 'warning' ? '⚠ ' : 'ℹ '));
+    el.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = icon + msg;
+    el.appendChild(span);
+    if (opts.actionLabel && typeof opts.action === 'function') {
+      // Toast-Container hat .v2-toast { pointer-events: none } damit er nicht
+      // accidental Klicks abfängt. Für Toasts MIT Action-Button müssen wir
+      // pointer-events explizit aktivieren — sonst geht der Click ins Leere.
+      el.style.pointerEvents = 'auto';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'v2-toast__action';
+      btn.textContent = opts.actionLabel;
+      btn.style.cssText = 'margin-left:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:inherit;padding:3px 12px;border-radius:4px;cursor:pointer;font-weight:600;font-size:inherit;font-family:inherit;pointer-events:auto';
+      btn.addEventListener('click', function() {
+        try { opts.action(); } catch (e) {}
+        el.classList.remove('v2-toast--show');
+        el.style.pointerEvents = '';
+      });
+      el.appendChild(btn);
+    } else {
+      // Reset für nachfolgende Toast-Aufrufe ohne Action
+      el.style.pointerEvents = '';
+    }
     el.className = 'v2-toast v2-toast--' + (type || 'info') + ' v2-toast--show';
     clearTimeout(el._ecfT);
-    el._ecfT = setTimeout(function() { el.classList.remove('v2-toast--show'); }, 3000);
+    if (!opts.persistent) {
+      el._ecfT = setTimeout(function() { el.classList.remove('v2-toast--show'); }, opts.duration || 3000);
+    }
   }
   window.ecfV2Toast = ecfV2Toast;
 
@@ -730,9 +757,35 @@
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data && data.success) {
-        _setPill('saved', _si18n.autosave_saved || '');
-        if (window.ecfAdmin && !ecfAdmin.elementorAutoSync) {
-          ecfV2AutoSyncPrompt();
+        var sync = data.autosync || {};
+        var promoted = (sync.auto_promoted_vars || 0) + (sync.auto_promoted_classes || 0);
+        if (sync.paused) {
+          /* Strict-Mode: Auto-Sync wegen Konflikten ausgesetzt. Pill warnt
+             + Toast verweist auf manuellen Sync mit Conflict-Modal. Pill
+             ist klickbar — direkter Sprung zur Conflict-Auflösung. */
+          var n = (sync.variable_conflicts || 0) + (sync.class_conflicts || 0);
+          var pausedText = (_si18n.autosave_paused || 'Gespeichert. Sync pausiert ({n} Konflikte)').replace('{n}', n);
+          _setPill('warning', pausedText);
+          if (typeof ecfV2Toast === 'function') {
+            ecfV2Toast(_si18n.autosave_paused_toast ||
+              'Auto-Sync angehalten: ' + n + ' Konflikt' + (n === 1 ? '' : 'e') +
+              ' zwischen Layrix und Elementor. Klick auf die Pille oder den Sync-Button um zu entscheiden welcher Wert gewinnt.',
+              'warning');
+          }
+        } else if (promoted > 0) {
+          /* Mirror-Mode: Konflikte wurden automatisch zu Overrides promotet,
+             Sync lief trotzdem durch. Toast informiert, Pill bleibt grün. */
+          _setPill('saved', _si18n.autosave_saved || '');
+          if (typeof ecfV2Toast === 'function') {
+            ecfV2Toast('Auto-Sync: ' + promoted + ' Wert' + (promoted === 1 ? '' : 'e') +
+              ' aus Elementor übernommen. Override-Icons in der Variablen-/Klassen-Liste zeigen die betroffenen Tokens.',
+              'success');
+          }
+        } else {
+          _setPill('saved', _si18n.autosave_saved || '');
+          if (window.ecfAdmin && !ecfAdmin.elementorAutoSync) {
+            ecfV2AutoSyncPrompt();
+          }
         }
       } else {
         _setPill('error', _si18n.autosave_failed || '');
@@ -2789,12 +2842,14 @@
     { mode: 'callout', page: 'spacing',    title: _wi.wiz_title_spacing  || 'Abstände',                   body: _wi.wiz_body_spacing  || 'Spacing-System definieren — Basis-Abstände und Rhythmus. Layrix generiert die komplette Skala.', next: _wi.wiz_next || 'Weiter' },
     { mode: 'callout', page: 'shadows',    title: _wi.wiz_title_shadows  || 'Schatten',                   body: _wi.wiz_body_shadows  || 'Wiederverwendbare Schatten-Tokens — von dezent bis prominent.', next: _wi.wiz_next || 'Weiter' },
     { mode: 'callout', page: 'variables',  title: _wi.wiz_title_vars     || 'Variablen',                  body: _wi.wiz_body_vars     || 'Eigene CSS-Variablen für alles was nicht von Layrix abgedeckt ist (Animation-Dauern, z-Index etc.).', next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'classes',    title: _wi.wiz_title_classes  || 'Klassen-Auswahl',            body: _wi.wiz_body_classes  || 'Globale Elementor-Klassen für wiederkehrende Styles. Aus der Library wählen oder eigene erzeugen.', next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'settings',   title: 'Klassen-Defaults',                                     body: '<strong>Plugin → Klassen-Defaults</strong>: Layrix-Werte für Button, Heading, Section und Container feinabstimmen — bestimmt was die Klassen automatisch tun (Padding, Schriftgröße, Eckenradius).',  next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'settings',   title: 'Auto-Klassen',                                         body: '<strong>Plugin → Allgemein → Auto-Klassen</strong>: Toggle aktivieren — neu eingefügte h1-h5, Buttons und Text-Links bekommen automatisch ihre Layrix-Klasse, sobald sie in Elementor reinkommen.', next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'sync',       title: _wi.wiz_title_sync     || 'Sync mit Elementor',         body: _wi.wiz_body_sync     || 'Alle Tokens und Klassen zu Elementor übertragen. Ab jetzt im Editor als globale Variablen und Klassen verfügbar.',                                                                  next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'cookbook',   title: 'Anwendung',                                            body: 'Karten-Übersicht aller Layrix-Klassen pro Kategorie. Klick auf eine Karte kopiert die Klasse — im Elementor-Editor ins CSS-Klassen-Feld einfügen.',                                                       next: _wi.wiz_next_done || 'Fertig' },
-    { mode: 'toast',   page: null,         title: _wi.wiz_title_ready    || 'Du bist startklar!',        body: _wi.wiz_body_ready    || 'Alle Bereiche durch — Tokens definiert, Klassen gesynct, Auto-Klassen aktiv. Jetzt im Elementor-Editor bauen.' }
+    { mode: 'callout', page: 'classes',       title: _wi.wiz_title_classes  || 'Klassen-Auswahl',            body: _wi.wiz_body_classes  || 'Welche Layrix-Klassen sollen aktiv sein? Aus Library wählen oder eigene erzeugen — Basis für alle Standard-Komponenten.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'class-defaults', title: 'Klassen-Werte',                                       body: '<strong>Sidebar → Klassen-Werte</strong>: Welche Tokens nutzen die Layrix-Klassen? Padding, Schriftgröße und Radius pro Klasse via Dropdowns mit Token-Auswahl. Tabs für Überschriften, Komponenten, Sektionen, Layout. Padding-Pairs haben Lock-Icon zum Verknüpfen.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'settings',      title: 'Sync-Modus',                                          body: '<strong>Plugin → Einstellungen → Sync-Modus</strong>: <em>Mirror</em> (Default) übernimmt Elementor-Edits automatisch in Layrix — du editierst wo du es siehst. <em>Strict</em> blockiert Auto-Sync bei Konflikten und zeigt das Conflict-Modal — sinnvoll für Agentur-Setups mit verbindlichem Design-System.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'settings',      title: 'Auto-Klassen',                                        body: '<strong>Plugin → Allgemein → Auto-Klassen</strong>: Toggle aktivieren — neu eingefügte h1–h5, Buttons und Text-Links bekommen automatisch ihre Layrix-Klasse beim Einfügen in Elementor.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'sync',          title: _wi.wiz_title_sync     || 'Sync mit Elementor',         body: 'Alle Tokens und Klassen zu Elementor übertragen — sind dann im Editor als globale Variablen und Klassen verfügbar. Auto-Sync läuft im Hintergrund nach jedem Save in Layrix; Mirror-Mode übernimmt zusätzlich Elementor-Edits zurück (kein manueller Klick nötig).', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'class-defaults', title: 'Override-Reset (↺)',                                  body: 'Wenn ein Wert von Elementor übernommen wurde, erscheint er gelb-italic mit <code>overridden</code>-Badge und einem <code>↺</code> Reset-Icon. Klick öffnet einen Confirm-Dialog — bei OK wird der Override entfernt und der Layrix-berechnete Default zurück nach Elementor geschrieben. So behältst du jederzeit Kontrolle.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'cookbook',      title: 'Anwendung',                                           body: 'Karten-Übersicht aller Layrix-Klassen pro Kategorie. Klick auf eine Karte kopiert die Klasse — im Elementor-Editor ins CSS-Klassen-Feld einfügen.', next: _wi.wiz_next_done || 'Fertig' },
+    { mode: 'toast',   page: null,            title: _wi.wiz_title_ready    || 'Du bist startklar!',       body: _wi.wiz_body_ready    || 'Alle Bereiche durch — Tokens definiert, Klassen gesynct, Auto-Klassen aktiv, Sync-Modus gewählt. Jetzt im Elementor-Editor bauen — Layrix spiegelt deine Edits automatisch zurück.' }
   ];
 
   function _wizardDots(activeIdx) {
@@ -3734,6 +3789,12 @@
     w.querySelectorAll('[data-v2-preset-filter]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         ecfV2FilterPresets(btn.dataset.v2PresetFilter, btn);
+      });
+    });
+
+    w.querySelectorAll('[data-v2-pair-filter]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        ecfV2FilterPairings(btn.dataset.v2PairFilter, btn);
       });
     });
 
@@ -5104,15 +5165,24 @@
     var steps = [];
     if (stepsWrap) stepsWrap.querySelectorAll('.v2-step-input').forEach(function(inp) { if (inp.value) steps.push(inp.value); });
     if (!steps.length) steps = ['xs','s','m','l','xl','2xl','3xl','4xl'];
-    var baseIdx = Math.floor(steps.length / 2);
+    var baseInput = document.querySelector('input[name$="[scale][base_index]"]');
+    var baseName  = (baseInput && baseInput.value) ? baseInput.value : 'm';
+    var baseIdx   = steps.indexOf(baseName);
+    if (baseIdx < 0) baseIdx = steps.indexOf('m');
+    if (baseIdx < 0) baseIdx = Math.max(0, Math.floor((steps.length - 1) / 3));
+    var base  = Math.max(minBase, maxBase);
+    var ratio = Math.max(minRatio, maxRatio);
     var html = '';
     steps.slice().reverse().forEach(function(step, revIdx) {
       var i = steps.length - 1 - revIdx;
       var exp = i - baseIdx;
-      var px = Math.round(Math.max(minBase, maxBase) * Math.pow(Math.max(minRatio, maxRatio), exp) * 10) / 10;
-      var clampedPx = Math.min(px, 52);
-      html += '<div class="v2-pv-scale-row" style="font-size:' + clampedPx + 'px">'
-        + '<span class="v2-pv-scale-step">' + step + '</span>'
+      var px = Math.round(base * Math.pow(ratio, exp) * 10) / 10;
+      var clampedPx = Math.min(px, 96);
+      var capped = px > 96;
+      html += '<div class="v2-pv-scale-row" style="font-size:' + clampedPx + 'px"'
+        + (capped ? ' title="Vorschau bei ' + clampedPx + 'px gecappt — echter Wert ' + px.toFixed(0) + 'px"' : '')
+        + '>'
+        + '<span class="v2-pv-scale-step">' + step + (capped ? ' ↗' : '') + '</span>'
         + '<span class="v2-pv-scale-sample">The quick brown fox</span>'
         + '<span class="v2-pv-scale-px">' + px.toFixed(0) + 'px</span>'
         + '</div>';
@@ -5199,14 +5269,21 @@
       .catch(function() { return []; });
   }
 
-  function _detectClassConflicts() {
-    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve([]);
+  /* Holt Klassen- UND Variablen-Konflikte in einem Request vom selben Endpoint.
+     Returns: { classes: [...], variables: [...] } */
+  function _fetchSyncConflicts() {
+    var empty = { classes: [], variables: [] };
+    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve(empty);
     return fetch(ecfAdmin.syncConflictsRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        return (data && data.success && Array.isArray(data.conflicts)) ? data.conflicts : [];
+        if (!data || !data.success) return empty;
+        return {
+          classes:   Array.isArray(data.conflicts) ? data.conflicts : [],
+          variables: Array.isArray(data.variable_conflicts) ? data.variable_conflicts : [],
+        };
       })
-      .catch(function() { return []; });
+      .catch(function() { return empty; });
   }
 
   function _renderClassConflicts(conflicts) {
@@ -5242,14 +5319,85 @@
     }).join('');
   }
 
+  /* Variable-Konflikt-Zeile. Rendert Color-Variablen mit Swatch, sonst Text-Code. */
+  function _renderVariableConflicts(conflicts) {
+    var block = document.getElementById('v2-variable-conflict-block');
+    var listEl = document.getElementById('v2-variable-conflict-list');
+    if (!block || !listEl) return;
+    if (!conflicts.length) {
+      block.hidden = true;
+      listEl.innerHTML = '';
+      return;
+    }
+    block.hidden = false;
+
+    listEl.innerHTML = conflicts.map(function(c) {
+      var isColor = c.type === 'global-color-variable';
+      var swatch = function(val) {
+        if (!isColor) return '';
+        return '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--v2-border);vertical-align:middle;margin-right:4px;background:' + escapeHtml(val) + '"></span>';
+      };
+      return '<div class="v2-variable-conflict-row" data-conflict-label="' + escapeHtml(c.label) + '" data-conflict-elementor="' + escapeHtml(c.elementor) + '" data-conflict-type="' + escapeHtml(c.type || '') + '" style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--v2-border)">'
+        + '<div>'
+          + '<div style="font-size:var(--v2-ui-base-fs, 13px);font-weight:600;font-family:var(--v2-mono)">--' + escapeHtml(c.label) + '</div>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Layrix</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2)">' + swatch(c.backend) + escapeHtml(c.backend) + '</code>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Elementor</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-accent2)">' + swatch(c.elementor) + escapeHtml(c.elementor) + '</code>'
+        + '</div>'
+        + '<select class="v2-si v2-si--sm v2-conflict-action" style="max-width:200px">'
+          + '<option value="elementor_wins" selected>Elementor übernehmen</option>'
+          + '<option value="layrix_wins">Layrix erzwingen</option>'
+        + '</select>'
+        + '</div>';
+    }).join('');
+  }
+
   function _runSyncAfterCheck(btn, form) {
-    Promise.all([_detectColorConflicts(), _detectClassConflicts()])
+    Promise.all([_detectColorConflicts(), _fetchSyncConflicts()])
     .then(function(results) {
       var colorConflicts = results[0] || [];
-      var classConflicts = results[1] || [];
-      if (!colorConflicts.length && !classConflicts.length) {
+      var sync = results[1] || { classes: [], variables: [] };
+      var classConflicts = sync.classes;
+      var variableConflicts = sync.variables;
+      if (!colorConflicts.length && !classConflicts.length && !variableConflicts.length) {
         _doSync(btn, form);
         return;
+      }
+      /* Mirror-Modus: User hat sich für „Elementor wins"-Default entschieden.
+         Beim manuellen Sync wird das Modal übersprungen und alle Konflikte
+         werden automatisch via /sync-conflicts/resolve mit elementor_wins
+         promotet — selbe Semantik wie Auto-Sync. Toast informiert. */
+      var mode = (window.ecfAdmin && ecfAdmin.syncMode) || 'mirror';
+      if (mode === 'mirror' && (classConflicts.length || variableConflicts.length)) {
+        var resolutions = [];
+        classConflicts.forEach(function(c) {
+          resolutions.push({ type: 'class', class: c.class, prop: c.prop, elementor: c.elementor, action: 'elementor_wins' });
+        });
+        variableConflicts.forEach(function(v) {
+          resolutions.push({ type: 'variable', label: v.label, elementor: v.elementor, action: 'elementor_wins' });
+        });
+        if (resolutions.length && window.ecfAdmin && ecfAdmin.syncConflictsResolveRestUrl) {
+          fetch(ecfAdmin.syncConflictsResolveRestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+            body: JSON.stringify({ resolutions: resolutions }),
+          })
+          .then(function(r) { return r.json(); })
+          .then(function() {
+            if (typeof ecfV2Toast === 'function') {
+              ecfV2Toast(resolutions.length + ' Wert' + (resolutions.length === 1 ? '' : 'e') +
+                ' aus Elementor übernommen — Sync läuft', 'success');
+            }
+            _doSync(btn, form);
+          })
+          .catch(function() { _doSync(btn, form); });
+          return;
+        }
       }
       _syncConflicts = colorConflicts;
       _classConflicts = classConflicts;
@@ -5277,6 +5425,7 @@
         }
       }
       _renderClassConflicts(classConflicts);
+      _renderVariableConflicts(variableConflicts);
 
       var modal = document.getElementById('v2-conflict-modal');
       if (modal) modal.hidden = false;
@@ -5286,12 +5435,17 @@
     });
   }
 
-  /* Bulk-Action-Buttons im Modal */
+  /* Bulk-Action-Buttons im Modal. Scope ('class' | 'variable') zielt nur auf
+     die jeweilige Sektion — Class-Bulk ändert keine Variable-Dropdowns. */
   document.addEventListener('click', function(e) {
     var bulkBtn = e.target.closest('[data-conflict-bulk]');
     if (!bulkBtn) return;
     var action = bulkBtn.dataset.conflictBulk;
-    document.querySelectorAll('.v2-class-conflict-row .v2-conflict-action').forEach(function(sel) {
+    var scope = bulkBtn.dataset.conflictScope || 'class';
+    var rowSel = scope === 'variable'
+      ? '.v2-variable-conflict-row .v2-conflict-action'
+      : '.v2-class-conflict-row .v2-conflict-action';
+    document.querySelectorAll(rowSel).forEach(function(sel) {
       sel.value = action;
     });
   });
@@ -5306,17 +5460,28 @@
     }
     if (e.target.id === 'v2-conflict-confirm') {
       var modal2 = document.getElementById('v2-conflict-modal');
-      /* Klassen-Konflikt-Resolutionen sammeln. Nur "elementor_wins" wird ans
-         Resolve-Endpoint gesendet — schreibt Elementor-Wert ins Backend.
-         "layrix_wins" braucht keine Aktion: der nachfolgende Sync schreibt
-         Backend-Wert eh nach Elementor (heutiges Verhalten). */
+      /* Konflikt-Resolutionen sammeln (Klassen + Variablen). Nur "elementor_wins"
+         wird ans Resolve-Endpoint gesendet — schreibt Elementor-Wert ins
+         Backend. "layrix_wins" braucht keine Aktion: der nachfolgende Sync
+         schreibt Backend-Wert eh nach Elementor (heutiges Verhalten). */
       var resolutions = [];
       document.querySelectorAll('.v2-class-conflict-row').forEach(function(row) {
         var sel = row.querySelector('.v2-conflict-action');
         if (!sel || sel.value !== 'elementor_wins') return;
         resolutions.push({
+          type: 'class',
           class: row.dataset.conflictClass,
           prop: row.dataset.conflictProp,
+          elementor: row.dataset.conflictElementor,
+          action: 'elementor_wins',
+        });
+      });
+      document.querySelectorAll('.v2-variable-conflict-row').forEach(function(row) {
+        var sel = row.querySelector('.v2-conflict-action');
+        if (!sel || sel.value !== 'elementor_wins') return;
+        resolutions.push({
+          type: 'variable',
+          label: row.dataset.conflictLabel,
           elementor: row.dataset.conflictElementor,
           action: 'elementor_wins',
         });
@@ -5635,7 +5800,11 @@
       if (btn) {
         btn.setAttribute('aria-pressed', linked ? 'true' : 'false');
         var icon = btn.querySelector('.v2-cls-pair__lock-icon');
-        if (icon) icon.textContent = linked ? '🔗' : '🔓';
+        if (icon) {
+          icon.innerHTML = linked
+            ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+            : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07L11.78 5.18"/><path d="M5.17 11.75l-1.71 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="2" y1="8" x2="5" y2="8"/><line x1="16" y1="22" x2="16" y2="19"/><line x1="22" y1="16" x2="19" y2="16"/></svg>';
+        }
       }
       var hidden = pairWrap.querySelector('.v2-cls-pair__linked-state');
       if (hidden) hidden.value = linked ? '1' : '0';
@@ -5868,6 +6037,184 @@
         target.classList.add('is-copied');
         setTimeout(function() { target.classList.remove('is-copied'); }, 1200);
       });
+    });
+  }());
+
+  /* ── Mirror-Mode: Live-Drift-Check bei Tab-Switch ───────────────────
+     Wenn der User vom Elementor-Tab zurück in den Layrix-Tab wechselt,
+     fetched ein throttled Check die aktuellen Konflikte. Falls Mirror-
+     Mode aktiv ist und promotable Konflikte da sind, werden sie still
+     in die Overrides geschrieben (analog zum Page-Load-Promote im PHP).
+     Toast informiert mit Reload-Button — kein Auto-Reload damit der
+     User nichts verliert was er gerade in Layrix tippt. */
+  (function() {
+    if (typeof document === 'undefined') return;
+    var lastCheck = 0;
+    var THROTTLE_MS = 3000;
+    function checkAndPromote() {
+      var now = Date.now();
+      if (now - lastCheck < THROTTLE_MS) return;
+      lastCheck = now;
+      if (!window.ecfAdmin) return;
+      if (ecfAdmin.syncMode !== 'mirror') return;
+      if (!ecfAdmin.elementorAutoSync) return;
+      if (!ecfAdmin.syncConflictsRestUrl || !ecfAdmin.syncConflictsResolveRestUrl) return;
+      fetch(ecfAdmin.syncConflictsRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data || !data.success) return;
+          var classes   = Array.isArray(data.conflicts) ? data.conflicts : [];
+          var variables = Array.isArray(data.variable_conflicts) ? data.variable_conflicts : [];
+          if (!classes.length && !variables.length) return;
+          var resolutions = [];
+          var tokenPattern = /^[a-z][a-z0-9_-]*$/i;
+          classes.forEach(function(c) {
+            if (!tokenPattern.test(String(c.elementor || ''))) return;
+            resolutions.push({ type: 'class', class: c.class, prop: c.prop, elementor: c.elementor, action: 'elementor_wins' });
+          });
+          variables.forEach(function(v) {
+            resolutions.push({ type: 'variable', label: v.label, elementor: v.elementor, action: 'elementor_wins' });
+          });
+          if (!resolutions.length) return;
+          fetch(ecfAdmin.syncConflictsResolveRestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+            body: JSON.stringify({ resolutions: resolutions }),
+          })
+            .then(function(r) { return r.json(); })
+            .then(function(out) {
+              if (!out || !out.success || !out.updated) return;
+              if (typeof ecfV2Toast === 'function') {
+                /* Toast mit Reload-CTA: User sieht dass sich was geändert hat,
+                   entscheidet selbst wann er reloadt damit nichts in-progress
+                   verloren geht. */
+                var n = out.updated;
+                var msg = n + ' Wert' + (n === 1 ? '' : 'e') + ' aus Elementor übernommen — Anzeigen?';
+                ecfV2Toast(msg, 'success', { actionLabel: 'Aktualisieren', action: function() { window.location.reload(); }, persistent: true });
+              }
+            })
+            .catch(function() {});
+        })
+        .catch(function() {});
+    }
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') checkAndPromote();
+    });
+    window.addEventListener('focus', checkAndPromote);
+  }());
+
+  /* ── Klassen-Werte: aktive Kategorie-Tab über Reload persistieren ───
+     Tab-Wechsel (data-v2-tab-group="cls-cat") wird in localStorage gespeichert.
+     Nach Reset (der window.location.reload triggert) bleibt die zuletzt aktive
+     Kategorie-Tab aktiv, statt auf den PHP-Default (erste Kategorie) zurückzufallen. */
+  (function() {
+    var STORAGE_KEY = 'ecf_v2_cls_cat_active';
+    function loadActive() {
+      try { return localStorage.getItem(STORAGE_KEY) || ''; }
+      catch (e) { return ''; }
+    }
+    function saveActive(cat) {
+      try { localStorage.setItem(STORAGE_KEY, cat); }
+      catch (e) {}
+    }
+    function applyActive() {
+      var saved = loadActive();
+      if (!saved) return;
+      var btn = document.querySelector('[data-v2-tab-group="cls-cat"][data-v2-tab="' + saved + '"]');
+      if (btn && typeof window.ecfV2Tab === 'function') {
+        window.ecfV2Tab('cls-cat', saved, btn);
+      }
+    }
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-v2-tab-group="cls-cat"]');
+      if (!btn) return;
+      var cat = btn.getAttribute('data-v2-tab');
+      if (cat) saveActive(cat);
+    });
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      applyActive();
+    } else {
+      document.addEventListener('DOMContentLoaded', applyActive);
+    }
+  }());
+
+  /* ── Override Reset-Button + clickable warning pill ─────────────────
+     Reset-Buttons (.v2-override-reset) entfernen einen einzelnen Override
+     aus layrix_variable_overrides oder layrix_class_defaults via REST.
+     Nach Erfolg: Page reload damit das UI den Schema-Default wieder zeigt
+     und alle Reset-Icons konsistent verschwinden. Warning-Pill öffnet bei
+     Klick das Sync-Conflict-Modal — direkter Pfad zur Auflösung. */
+  (function() {
+    document.addEventListener('click', function(e) {
+      var resetBtn = e.target.closest('.v2-override-reset');
+      if (resetBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!window.ecfAdmin || !ecfAdmin.syncConflictsReleaseRestUrl) {
+          if (typeof ecfV2Toast === 'function') ecfV2Toast('Release-Endpoint nicht verfügbar', 'error');
+          return;
+        }
+        var type = resetBtn.dataset.overrideType || '';
+        var body = { type: type };
+        var confirmLabel = '';
+        if (type === 'variable') {
+          body.label = resetBtn.dataset.overrideLabel || '';
+          confirmLabel = '--' + body.label;
+        } else if (type === 'class') {
+          body.class = resetBtn.dataset.overrideClass || '';
+          body.prop  = resetBtn.dataset.overrideProp || '';
+          confirmLabel = '.' + body.class + ' → ' + body.prop;
+        } else {
+          return;
+        }
+        /* Confirm-Dialog: Reset entfernt den von Mirror-Mode promoteten oder
+           manuell gesetzten Override → Token nutzt wieder Layrix-berechneten
+           Default. Beim nächsten Sync wird Layrix' Wert nach Elementor
+           geschrieben (überschreibt also einen ggf. dort noch abweichenden
+           Wert). Daher Confirm. */
+        var confirmFn = (typeof ecfV2Confirm === 'function')
+          ? ecfV2Confirm
+          : function(msg) { return Promise.resolve(window.confirm(msg)); };
+        confirmFn(
+          'Override für „' + confirmLabel + '" wirklich entfernen? ' +
+          'Der Wert nutzt dann wieder den Layrix-Default. Beim nächsten Sync wird Layrix\' Wert nach Elementor geschrieben.',
+          { danger: true, confirmLabel: 'Override entfernen', cancelLabel: 'Abbrechen' }
+        ).then(function(ok) {
+          if (!ok) return;
+          resetBtn.disabled = true;
+          fetch(ecfAdmin.syncConflictsReleaseRestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ecfAdmin.restNonce },
+            body: JSON.stringify(body),
+          })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data && data.success && data.removed > 0) {
+                if (typeof ecfV2Toast === 'function') ecfV2Toast('Override entfernt — Layrix-Default wiederhergestellt', 'success');
+                window.setTimeout(function() { window.location.reload(); }, 600);
+              } else {
+                resetBtn.disabled = false;
+                if (typeof ecfV2Toast === 'function') ecfV2Toast('Override konnte nicht entfernt werden', 'error');
+              }
+            })
+            .catch(function() {
+              resetBtn.disabled = false;
+              if (typeof ecfV2Toast === 'function') ecfV2Toast('Netzwerkfehler beim Override-Reset', 'error');
+            });
+        });
+        return;
+      }
+
+      /* Pill in --warning state ist klickbar → öffnet Sync-Conflict-Flow.
+         Reuse von _runSyncAfterCheck (existierender Manual-Sync-Code) — bei
+         vorhandenen Konflikten zeigt es das Modal direkt. */
+      var pill = e.target.closest('.v2-autosave-pill--warning');
+      if (pill) {
+        e.preventDefault();
+        if (typeof _runSyncAfterCheck === 'function') {
+          _runSyncAfterCheck(null, null);
+        }
+      }
     });
   }());
 

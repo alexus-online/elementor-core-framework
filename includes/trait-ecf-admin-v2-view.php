@@ -9,6 +9,18 @@ trait ECF_Framework_Admin_V2_View_Trait {
         $ver = get_plugin_data( ECF_FRAMEWORK_FILE )['Version'] ?? '0.4';
         $opt = $this->option_name; // ecf_framework_v50
 
+        /* ── Override-Maps (für Reset-Icons in der UI) ───────────────
+           layrix_variable_overrides: [label => value] für Tokens die
+           durch Mirror-Mode oder Conflict-Resolve übernommen wurden.
+           layrix_class_defaults: [class => [prop => token]] für
+           Klassen-Defaults die vom Schema-Default abweichen. */
+        $var_overrides_map   = isset( $settings['layrix_variable_overrides'] ) && is_array( $settings['layrix_variable_overrides'] )
+            ? $settings['layrix_variable_overrides']
+            : [];
+        $class_overrides_map = isset( $settings['layrix_class_defaults'] ) && is_array( $settings['layrix_class_defaults'] )
+            ? $settings['layrix_class_defaults']
+            : [];
+
         /* ── Color data (indexed array) ─────────────────────────────── */
         $colors_arr = $settings['colors'] ?? [];
         $c = [];   // [name => hex]
@@ -484,6 +496,10 @@ trait ECF_Framework_Admin_V2_View_Trait {
     <button type="button" class="v2-ni" data-v2-page="classes">
       <svg viewBox="0 0 13 13" fill="currentColor"><rect x="1" y="1" width="4.5" height="4.5" rx=".7" opacity=".5"/><rect x="7.5" y="1" width="4.5" height="4.5" rx=".7" opacity=".5"/><rect x="1" y="7.5" width="4.5" height="4.5" rx=".7" opacity=".5"/><rect x="7.5" y="7.5" width="4.5" height="4.5" rx=".7" opacity=".5"/></svg>
       <?php esc_html_e( 'Klassen-Auswahl', 'ecf-framework' ); ?>
+    </button>
+    <button type="button" class="v2-ni" data-v2-page="class-defaults">
+      <svg viewBox="0 0 13 13" fill="none"><path d="M2 3.5h6M2 6.5h9M2 9.5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".55"/><circle cx="9.5" cy="3.5" r="1.4" fill="currentColor" opacity=".75"/><circle cx="3.5" cy="6.5" r="1.4" fill="currentColor" opacity=".75"/><circle cx="9.5" cy="9.5" r="1.4" fill="currentColor" opacity=".75"/></svg>
+      <?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?>
     </button>
     <button type="button" class="v2-ni" data-v2-page="cookbook">
       <svg viewBox="0 0 13 13" fill="none"><path d="M2 2.5C2 2.22 2.22 2 2.5 2h6c.83 0 1.5.67 1.5 1.5v7c0 .28-.22.5-.5.5h-6A1.5 1.5 0 0 1 2 9.5v-7z" stroke="currentColor" stroke-width="1.1" opacity=".7"/><path d="M4.5 4.5h3M4.5 6.5h3M4.5 8.5h2" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity=".55"/></svg>
@@ -2243,7 +2259,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
               $cval  = $row['value'] ?? '';
               if ( ! $cname ) continue;
             ?>
-            <tr data-varname="--ecf-color-<?php echo esc_attr( $cname ); ?>"><td><span class="v2-vn">--ecf-color-<?php echo esc_html( $cname ); ?></span></td><td><span class="v2-tb v2-tb-c"><?php esc_html_e( 'Color', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $cval ); ?></td><td><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="color" data-var-name="<?php echo esc_attr( $cname ); ?>" data-var-value="<?php echo esc_attr( $cval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
+            <?php $cov_label = 'ecf-color-' . $cname; $cov_active = isset( $var_overrides_map[ $cov_label ] ); ?>
+            <tr data-varname="--ecf-color-<?php echo esc_attr( $cname ); ?>"<?php if ( $cov_active ) echo ' class="v2-is-overridden"'; ?>><td><span class="v2-vn">--ecf-color-<?php echo esc_html( $cname ); ?></span><?php if ( $cov_active ) : ?> <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen', 'ecf-framework' ); ?>"><?php esc_html_e( 'overridden', 'ecf-framework' ); ?></span><?php endif; ?></td><td><span class="v2-tb v2-tb-c"><?php esc_html_e( 'Color', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $cval ); ?></td><td><?php if ( $cov_active ) : ?><button type="button" class="v2-reset-btn v2-override-reset" data-override-type="variable" data-override-label="<?php echo esc_attr( $cov_label ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Layrix-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button><?php endif; ?><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="color" data-var-name="<?php echo esc_attr( $cname ); ?>" data-var-value="<?php echo esc_attr( $cval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
             <?php endforeach; ?>
             <tr class="v2-vt-group"><td colspan="4"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></td></tr>
             <?php foreach ( $radius_arr as $rrow ) :
@@ -2251,7 +2268,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
               if ( ! $rname ) continue;
               $rmin = $rrow['min'] ?? '';
             ?>
-            <tr data-varname="--ecf-radius-<?php echo esc_attr( $rname ); ?>"><td><span class="v2-vn">--ecf-radius-<?php echo esc_html( $rname ); ?></span></td><td><span class="v2-tb v2-tb-r"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $rmin . ( $rmin !== ( $rrow['max'] ?? '' ) ? '–' . $rrow['max'] : '' ) ); ?></td><td><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="radius" data-var-name="<?php echo esc_attr( $rname ); ?>" data-var-value="<?php echo esc_attr( $rmin ); ?>" data-var-max="<?php echo esc_attr( $rrow['max'] ?? $rmin ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
+            <?php $rov_label = 'ecf-radius-' . $rname; $rov_active = isset( $var_overrides_map[ $rov_label ] ); ?>
+            <tr data-varname="--ecf-radius-<?php echo esc_attr( $rname ); ?>"<?php if ( $rov_active ) echo ' class="v2-is-overridden"'; ?>><td><span class="v2-vn">--ecf-radius-<?php echo esc_html( $rname ); ?></span><?php if ( $rov_active ) : ?> <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen', 'ecf-framework' ); ?>"><?php esc_html_e( 'overridden', 'ecf-framework' ); ?></span><?php endif; ?></td><td><span class="v2-tb v2-tb-r"><?php esc_html_e( 'Radius', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2)"><?php echo esc_html( $rmin . ( $rmin !== ( $rrow['max'] ?? '' ) ? '–' . $rrow['max'] : '' ) ); ?></td><td><?php if ( $rov_active ) : ?><button type="button" class="v2-reset-btn v2-override-reset" data-override-type="variable" data-override-label="<?php echo esc_attr( $rov_label ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Layrix-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button><?php endif; ?><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="radius" data-var-name="<?php echo esc_attr( $rname ); ?>" data-var-value="<?php echo esc_attr( $rmin ); ?>" data-var-max="<?php echo esc_attr( $rrow['max'] ?? $rmin ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
             <?php endforeach; ?>
             <tr class="v2-vt-group"><td colspan="4"><?php esc_html_e( 'Schatten', 'ecf-framework' ); ?></td></tr>
             <?php foreach ( $shadows_arr as $srow ) :
@@ -2259,7 +2277,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
               $sval  = $srow['value'] ?? '';
               if ( ! $sname ) continue;
             ?>
-            <tr data-varname="--ecf-shadow-<?php echo esc_attr( $sname ); ?>"><td><span class="v2-vn">--ecf-shadow-<?php echo esc_html( $sname ); ?></span></td><td><span class="v2-tb v2-tb-sh"><?php esc_html_e( 'Shadow', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?php echo esc_html( $sval ); ?></td><td><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="shadow" data-var-name="<?php echo esc_attr( $sname ); ?>" data-var-value="<?php echo esc_attr( $sval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
+            <?php $sov_label = 'ecf-shadow-' . $sname; $sov_active = isset( $var_overrides_map[ $sov_label ] ); ?>
+            <tr data-varname="--ecf-shadow-<?php echo esc_attr( $sname ); ?>"<?php if ( $sov_active ) echo ' class="v2-is-overridden"'; ?>><td><span class="v2-vn">--ecf-shadow-<?php echo esc_html( $sname ); ?></span><?php if ( $sov_active ) : ?> <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen', 'ecf-framework' ); ?>"><?php esc_html_e( 'overridden', 'ecf-framework' ); ?></span><?php endif; ?></td><td><span class="v2-tb v2-tb-sh"><?php esc_html_e( 'Shadow', 'ecf-framework' ); ?></span></td><td class="v2-vval" style="font-family:var(--v2-mono);font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?php echo esc_html( $sval ); ?></td><td><?php if ( $sov_active ) : ?><button type="button" class="v2-reset-btn v2-override-reset" data-override-type="variable" data-override-label="<?php echo esc_attr( $sov_label ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Layrix-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button><?php endif; ?><button type="button" class="v2-edit-btn v2-var-edit-btn" data-var-type="shadow" data-var-name="<?php echo esc_attr( $sname ); ?>" data-var-value="<?php echo esc_attr( $sval ); ?>" title="<?php esc_attr_e( 'Bearbeiten', 'ecf-framework' ); ?>">✎</button></td></tr>
             <?php endforeach; ?>
           </tbody>
         </table>
@@ -2645,36 +2664,84 @@ trait ECF_Framework_Admin_V2_View_Trait {
            $name_tpl:    sprintf-style template, %s gets replaced by cls name
            $chip_class:  chip CSS class (e.g. 'v2-chip v2-chip--green')
            $chip_label:  chip text */
-        $render_class_group = function ( $rows_by_cat, $name_tpl, $chip_class, $chip_label ) use ( $opt ) {
+        $render_class_group = function ( $rows_by_cat, $name_tpl, $chip_class, $chip_label, $tab_group = '' ) use ( $opt ) {
           ksort( $rows_by_cat );
-          foreach ( $rows_by_cat as $cat => $rows ) :
-            if ( empty( $rows ) ) continue;
+          $rows_by_cat = array_filter( $rows_by_cat, static function ( $r ) { return ! empty( $r ); } );
+          if ( empty( $rows_by_cat ) ) return;
+          $tab_group = $tab_group !== '' ? $tab_group : 'cl-cat';
+          $total_rows = 0;
+          foreach ( $rows_by_cat as $rows ) $total_rows += count( $rows );
+
+          // Closure: rendert einen Kategorie-Block (Header mit Bulk-Buttons + Rows).
+          // Wird sowohl im "Alle"-Tab (sequenziell pro Kategorie) als auch in den
+          // einzelnen Kategorie-Tabs (genau eine Kategorie) wiederverwendet.
+          $render_cat_block = static function ( $cat_attr, $cat_label_text, $rows ) use ( $name_tpl, $chip_class, $chip_label, $opt ) {
+            ?>
+            <div class="v2-cl-group-label v2-cl-group-head" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span><?php echo esc_html( $cat_label_text ); ?> <span style="opacity:.6">(<?php echo (int) count( $rows ); ?>)</span></span>
+              <span class="v2-cl-bulk" style="display:flex;gap:6px">
+                <button type="button" class="v2-edit-btn" data-v2-cl-bulk="on"  data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle aktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle ein', 'ecf-framework' ); ?></button>
+                <button type="button" class="v2-edit-btn" data-v2-cl-bulk="off" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle deaktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle aus', 'ecf-framework' ); ?></button>
+              </span>
+            </div>
+            <?php foreach ( $rows as $r ) :
+                $cls_name = sanitize_html_class( $r['name'] );
+                $field    = sprintf( $name_tpl, esc_attr( $r['name'] ) );
+            ?>
+            <div class="v2-cl-row" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" data-v2-cl-name="<?php echo esc_attr( strtolower( $r['name'] ) ); ?>" data-v2-cl-desc="<?php echo esc_attr( strtolower( $r['desc'] ) ); ?>">
+              <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $r['desc'] ); ?></div></div>
+              <span class="<?php echo esc_attr( $chip_class ); ?>"><?php echo esc_html( $chip_label ); ?></span>
+              <label class="v2-tog-label">
+                <input type="checkbox"
+                       class="v2-tog-cb"
+                       name="<?php echo esc_attr( $opt . $field ); ?>"
+                       value="1"
+                       <?php checked( $r['enabled'] ); ?>>
+                <span class="v2-tog<?php echo $r['enabled'] ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
+              </label>
+            </div>
+            <?php endforeach;
+          };
+        ?>
+        <div class="v2-tabs" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--v2-border);padding-bottom:0">
+          <!-- "Alle" als erster Tab — zeigt alle Kategorien sequenziell, default active -->
+          <button type="button"
+                  class="v2-tab v2-tab--on"
+                  data-v2-tab-group="<?php echo esc_attr( $tab_group ); ?>"
+                  data-v2-tab="_all"
+                  onclick="ecfV2Tab('<?php echo esc_js( $tab_group ); ?>','_all',this)">
+            <?php esc_html_e( 'Alle', 'ecf-framework' ); ?>
+            <span style="opacity:.55;font-weight:400;margin-left:4px">(<?php echo (int) $total_rows; ?>)</span>
+          </button>
+          <?php foreach ( $rows_by_cat as $cat => $rows ) :
+            $cat_attr = sanitize_key( $cat );
+          ?>
+            <button type="button"
+                    class="v2-tab"
+                    data-v2-tab-group="<?php echo esc_attr( $tab_group ); ?>"
+                    data-v2-tab="<?php echo esc_attr( $cat_attr ); ?>"
+                    onclick="ecfV2Tab('<?php echo esc_js( $tab_group ); ?>','<?php echo esc_js( $cat_attr ); ?>',this)">
+              <?php echo esc_html( ucfirst( $cat ) ); ?>
+              <span style="opacity:.55;font-weight:400;margin-left:4px">(<?php echo (int) count( $rows ); ?>)</span>
+            </button>
+          <?php endforeach; ?>
+        </div>
+
+        <!-- "_all" Panel: alle Kategorien sequenziell — default sichtbar -->
+        <div id="v2-<?php echo esc_attr( $tab_group ); ?>-_all" class="v2-tp v2-tp--on">
+          <?php foreach ( $rows_by_cat as $cat => $rows ) :
+            $cat_attr = sanitize_key( $cat );
+            $render_cat_block( $cat_attr, ucfirst( $cat ), $rows );
+          endforeach; ?>
+        </div>
+
+        <!-- Pro Kategorie ein eigenes Panel (nur diese eine Kategorie) -->
+        <?php foreach ( $rows_by_cat as $cat => $rows ) :
             $cat_attr = sanitize_key( $cat );
         ?>
-        <div class="v2-cl-group-label v2-cl-group-head" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <span><?php echo esc_html( ucfirst( $cat ) ); ?> <span style="opacity:.6">(<?php echo (int) count( $rows ); ?>)</span></span>
-          <span class="v2-cl-bulk" style="display:flex;gap:6px">
-            <button type="button" class="v2-edit-btn" data-v2-cl-bulk="on"  data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle aktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle ein', 'ecf-framework' ); ?></button>
-            <button type="button" class="v2-edit-btn" data-v2-cl-bulk="off" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" title="<?php esc_attr_e( 'Alle deaktivieren', 'ecf-framework' ); ?>"><?php esc_html_e( 'Alle aus', 'ecf-framework' ); ?></button>
-          </span>
+        <div id="v2-<?php echo esc_attr( $tab_group ); ?>-<?php echo esc_attr( $cat_attr ); ?>" class="v2-tp">
+          <?php $render_cat_block( $cat_attr, ucfirst( $cat ), $rows ); ?>
         </div>
-        <?php foreach ( $rows as $r ) :
-            $cls_name = sanitize_html_class( $r['name'] );
-            $field    = sprintf( $name_tpl, esc_attr( $r['name'] ) );
-        ?>
-        <div class="v2-cl-row" data-v2-cl-cat="<?php echo esc_attr( $cat_attr ); ?>" data-v2-cl-name="<?php echo esc_attr( strtolower( $r['name'] ) ); ?>" data-v2-cl-desc="<?php echo esc_attr( strtolower( $r['desc'] ) ); ?>">
-          <div><div class="v2-cl-name">.<?php echo esc_html( $cls_name ); ?></div><div class="v2-cl-desc"><?php echo esc_html( $r['desc'] ); ?></div></div>
-          <span class="<?php echo esc_attr( $chip_class ); ?>"><?php echo esc_html( $chip_label ); ?></span>
-          <label class="v2-tog-label">
-            <input type="checkbox"
-                   class="v2-tog-cb"
-                   name="<?php echo esc_attr( $opt . $field ); ?>"
-                   value="1"
-                   <?php checked( $r['enabled'] ); ?>>
-            <span class="v2-tog<?php echo $r['enabled'] ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
-          </label>
-        </div>
-        <?php endforeach; ?>
         <?php endforeach;
         };
 
@@ -2702,7 +2769,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               'enabled' => ! empty( $enabled_map[ $cls['name'] ] ),
             ];
           }
-          $render_class_group( $starter_by_cat, '[starter_classes][enabled][%s]', 'v2-chip v2-chip--green', __( 'Starter', 'ecf-framework' ) );
+          $render_class_group( $starter_by_cat, '[starter_classes][enabled][%s]', 'v2-chip v2-chip--green', __( 'Starter', 'ecf-framework' ), 'cls-starter' );
         ?>
       </div><!-- /starter tab -->
 
@@ -2719,7 +2786,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               'enabled' => ! empty( $enabled_map[ $cls['name'] ] ),
             ];
           }
-          $render_class_group( $extra_by_cat, '[starter_classes][enabled][%s]', 'v2-chip', __( 'Extra', 'ecf-framework' ) );
+          $render_class_group( $extra_by_cat, '[starter_classes][enabled][%s]', 'v2-chip', __( 'Extra', 'ecf-framework' ), 'cls-extra' );
         ?>
       </div><!-- /extra tab -->
 
@@ -2737,7 +2804,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
               ];
             }
           }
-          $render_class_group( $utility_by_cat, '[utility_classes][enabled][%s]', 'v2-chip', __( 'Utility', 'ecf-framework' ) );
+          $render_class_group( $utility_by_cat, '[utility_classes][enabled][%s]', 'v2-chip', __( 'Utility', 'ecf-framework' ), 'cls-utility' );
         ?>
       </div><!-- /utility tab -->
 
@@ -2865,6 +2932,226 @@ trait ECF_Framework_Admin_V2_View_Trait {
 </div><!-- /classes page -->
 
 <!-- ═══ PAGE: REZEPTE (COOKBOOK) ═══════════════════════════════════ -->
+<!-- ═══ PAGE: Klassen-Werte ════════════════════════════════════════════ -->
+<div id="ecf-v2-page-class-defaults" class="v2-page">
+  <div class="v2-topbar">
+    <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?></span></div>
+    <div class="v2-topbar-r">
+      <button type="button" class="v2-btn v2-btn--outline" data-v2-save><?php esc_html_e( 'Speichern', 'ecf-framework' ); ?></button>
+    </div>
+  </div>
+  <div class="v2-page-body">
+    <div class="v2-content">
+      <div class="v2-ph"><h1><?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?></h1><p><?php esc_html_e( 'Welche Variablen verwenden die Layrix-Standardklassen? Hier feinabstimmen — Padding und Schriftgrößen für Button, Heading, Section, Container.', 'ecf-framework' ); ?></p></div>
+      <?php /* Legende: erklärt das gelbe „aus Elementor"-Styling und das ↺-Reset-Icon
+              die sonst kommentarlos im Dropdown auftauchen wenn Mirror-Mode etwas
+              promotet hat. Nur sichtbar wenn überhaupt Klassen-Overrides aktiv sind. */ ?>
+      <?php if ( ! empty( $class_overrides_map ) ) : ?>
+      <div class="v2-cls-legend" style="display:flex;align-items:flex-start;gap:14px;padding:10px 14px;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2);line-height:1.5;max-width:var(--ecf-content-max-width, 72ch)">
+        <span style="font-size:18px" aria-hidden="true">⤴</span>
+        <div style="flex:1">
+          <strong style="color:#fbbf24"><?php esc_html_e( 'Gelbe Werte mit „aus Elementor"-Tag', 'ecf-framework' ); ?></strong> <?php esc_html_e( 'wurden vom Elementor-Editor übernommen (Mirror-Modus) und überschreiben den Layrix-Default. Klick auf das', 'ecf-framework' ); ?>
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.10);color:#fbbf24;border-radius:3px;font-size:12px;line-height:1;vertical-align:middle">↺</span>
+          <?php esc_html_e( 'Icon entfernt den Override und stellt den Schema-Default wieder her — der wird dann auch sofort nach Elementor geschrieben.', 'ecf-framework' ); ?>
+        </div>
+      </div>
+      <?php endif; ?>
+        <div class="v2-sec">
+          <div class="v2-sh"><?php esc_html_e( 'Klassen-Defaults', 'ecf-framework' ); ?></div>
+          <div class="v2-sh2" style="margin-bottom:14px"><?php esc_html_e( 'Bestimme welche Variablen Layrix in seinen Standard-Klassen verwendet. Änderungen werden beim Speichern in Elementor\'s Global-Classes-Registry geschrieben.', 'ecf-framework' ); ?></div>
+
+          <?php
+          $cls_schema = method_exists( $this, 'layrix_class_defaults_schema' ) ? $this->layrix_class_defaults_schema() : [];
+          $cls_defaults = $settings['layrix_class_defaults'] ?? [];
+          /* $cls_options_for liefert pro Aufruf gefilterte Optionen je nach
+             token_type aus dem Schema. Spacing-Properties zeigen nur Abstände,
+             Typography-Properties zeigen nur Schriftgrößen, etc. */
+          $cls_options_for = function ( $token_type ) {
+              if ( ! method_exists( $this, 'layrix_size_variable_options' ) ) return [];
+              return $this->layrix_size_variable_options( $token_type ?: null );
+          };
+
+          $render_cls_select = function ( $class_name, $prop_key, $current_value, $schema_default, $token_type = '' ) use ( $opt, $cls_options_for ) {
+              $name_attr = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][' . esc_attr( $prop_key ) . ']';
+              $value     = $current_value !== '' ? $current_value : $schema_default;
+              $options   = $cls_options_for( $token_type );
+              // Override-Indikator: User-Wert weicht vom Schema-Default ab UND
+              // ist explizit gesetzt (nicht leer). Reset-Icon erscheint dann
+              // neben dem Select, Klick entfernt den Eintrag aus
+              // layrix_class_defaults und bringt den Schema-Default zurück.
+              $is_override = ( $current_value !== '' && $current_value !== $schema_default );
+              ?>
+              <span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <?php if ( $is_override ) : ?>
+                <span class="v2-override-badge" title="<?php esc_attr_e( 'Wert wurde aus Elementor übernommen statt vom Layrix-Schema-Default', 'ecf-framework' ); ?>">⤴ <?php esc_html_e( 'aus Elementor', 'ecf-framework' ); ?></span>
+              <?php endif; ?>
+              <select class="v2-si<?php echo $is_override ? ' v2-is-overridden' : ''; ?>" name="<?php echo $name_attr; ?>" style="max-width:240px" title="<?php echo $is_override ? esc_attr__( 'Dieser Wert wurde aus Elementor übernommen. Mit ↺ zurück zum Schema-Default.', 'ecf-framework' ) : ''; ?>">
+                  <option value=""><?php
+                      printf(
+                          /* translators: %s: variable name */
+                          esc_html__( 'Default (%s)', 'ecf-framework' ),
+                          esc_html( $schema_default )
+                      );
+                  ?></option>
+                  <?php foreach ( $options as $group_label => $vars ) : ?>
+                      <optgroup label="<?php echo esc_attr( $group_label ); ?>">
+                          <?php foreach ( $vars as $var ) : ?>
+                              <option value="<?php echo esc_attr( $var ); ?>" <?php selected( $value, $var ); ?>><?php echo esc_html( $var ); ?></option>
+                          <?php endforeach; ?>
+                      </optgroup>
+                  <?php endforeach; ?>
+              </select>
+              <?php if ( $is_override ) : ?>
+                <button type="button" class="v2-reset-btn v2-override-reset" data-override-type="class" data-override-class="<?php echo esc_attr( $class_name ); ?>" data-override-prop="<?php echo esc_attr( $prop_key ); ?>" title="<?php esc_attr_e( 'Override entfernen — zurück zum Schema-Default', 'ecf-framework' ); ?>" aria-label="<?php esc_attr_e( 'Override entfernen', 'ecf-framework' ); ?>">↺</button>
+              <?php endif; ?>
+              </span>
+              <?php
+          };
+          ?>
+
+          <?php
+            // Group schema entries by category for accordion rendering.
+            $cls_by_cat = [];
+            foreach ( $cls_schema as $class_name => $cls_def ) {
+              $cat = sanitize_key( $cls_def['category'] ?? 'other' );
+              $cls_by_cat[ $cat ][ $class_name ] = $cls_def;
+            }
+            $cat_labels = [
+              'typography' => __( 'Überschriften',     'ecf-framework' ),
+              'components' => __( 'Komponenten',        'ecf-framework' ),
+              'sections'   => __( 'Sektionen',          'ecf-framework' ),
+              'layout'     => __( 'Layout',             'ecf-framework' ),
+              'other'      => __( 'Weitere Klassen',    'ecf-framework' ),
+            ];
+            // Stable order: typography, components, sections, layout, then any remaining
+            $cat_order = [ 'typography', 'components', 'sections', 'layout' ];
+            foreach ( array_keys( $cls_by_cat ) as $k ) {
+              if ( ! in_array( $k, $cat_order, true ) ) $cat_order[] = $k;
+            }
+          ?>
+
+          <?php /* Tab-Header für Klassen-Kategorien — ersetzt das frühere
+                   <details>-Akkordeon-Pattern. Konsistent mit anderen
+                   V2-Tab-Gruppen (z.B. data-v2-tab-group="pl"). JS persistiert
+                   die zuletzt aktive Tab in localStorage. */ ?>
+          <div class="v2-tabs" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--v2-border);padding-bottom:0">
+            <?php $tab_first = true; foreach ( $cat_order as $cat ) :
+              if ( empty( $cls_by_cat[ $cat ] ) ) continue;
+              $cat_label = $cat_labels[ $cat ] ?? ucfirst( $cat );
+              $cat_count = count( $cls_by_cat[ $cat ] );
+            ?>
+              <button type="button"
+                      class="v2-tab<?php echo $tab_first ? ' v2-tab--on' : ''; ?>"
+                      data-v2-tab-group="cls-cat"
+                      data-v2-tab="<?php echo esc_attr( $cat ); ?>"
+                      onclick="ecfV2Tab('cls-cat','<?php echo esc_js( $cat ); ?>',this)">
+                <?php echo esc_html( $cat_label ); ?>
+                <span style="opacity:.55;font-weight:400;margin-left:4px">(<?php echo (int) $cat_count; ?>)</span>
+              </button>
+            <?php $tab_first = false; endforeach; ?>
+          </div>
+
+          <?php $panel_first = true; foreach ( $cat_order as $cat ) :
+            if ( empty( $cls_by_cat[ $cat ] ) ) continue;
+            $cat_label = $cat_labels[ $cat ] ?? ucfirst( $cat );
+            $cat_count = count( $cls_by_cat[ $cat ] );
+          ?>
+            <div id="v2-cls-cat-<?php echo esc_attr( $cat ); ?>" class="v2-tp<?php echo $panel_first ? ' v2-tp--on' : ''; ?>" data-v2-cls-cat="<?php echo esc_attr( $cat ); ?>">
+              <div style="padding:0">
+                <?php foreach ( $cls_by_cat[ $cat ] as $class_name => $cls_def ) :
+                  /* Pair-Gruppierung: Properties mit gleichem 'pair'-Key (z.B.
+                     padding-block-start + padding-block-end) werden als ein Block
+                     mit Lock-Icon gerendert. */
+                  $pair_groups  = [];
+                  $single_props = [];
+                  foreach ( $cls_def['props'] as $prop_key => $prop_def ) {
+                    $pair_key = $prop_def['pair'] ?? '';
+                    if ( $pair_key !== '' ) {
+                      $role = $prop_def['pair_role'] ?? '';
+                      $pair_groups[ $pair_key ][ $role ] = [ 'key' => $prop_key, 'def' => $prop_def ];
+                    } else {
+                      $single_props[ $prop_key ] = $prop_def;
+                    }
+                  }
+                ?>
+                  <div class="v2-sec" style="margin:10px 0 0;border:1px solid var(--v2-border);border-radius:8px;padding:12px 14px;background:rgba(0,0,0,.18)">
+                    <div class="v2-sh" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                      <span><?php echo esc_html( $cls_def['label'] ); ?></span>
+                      <code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;color:var(--v2-text2);font-weight:400">.<?php echo esc_html( $class_name ); ?></code>
+                    </div>
+                    <div class="v2-sg">
+                      <?php foreach ( $pair_groups as $pair_key => $roles ) :
+                        if ( empty( $roles['start'] ) || empty( $roles['end'] ) ) continue;
+                        $start_prop_key = $roles['start']['key'];
+                        $end_prop_key   = $roles['end']['key'];
+                        $start_current  = $cls_defaults[ $class_name ][ $start_prop_key ] ?? '';
+                        $end_current    = $cls_defaults[ $class_name ][ $end_prop_key ]   ?? '';
+                        $start_sch_def  = $roles['start']['def']['default'] ?? '';
+                        $end_sch_def    = $roles['end']['def']['default']   ?? '';
+                        // Initial Lock-State: linked wenn beide Werte identisch (oder leer = beide nutzen Default)
+                        $effective_start = $start_current !== '' ? $start_current : $start_sch_def;
+                        $effective_end   = $end_current   !== '' ? $end_current   : $end_sch_def;
+                        $is_linked       = ( $effective_start === $effective_end );
+                        $linked_key_name = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][_linked_' . esc_attr( $pair_key ) . ']';
+                        $start_label = preg_replace( '/^Padding\s+/i', '', (string) ( $roles['start']['def']['label'] ?? '' ) );
+                        $end_label   = preg_replace( '/^Padding\s+/i', '', (string) ( $roles['end']['def']['label']   ?? '' ) );
+                        $pair_label  = ucfirst( str_replace( [ 'padding-block', 'padding-inline' ], [ 'Padding (oben/unten)', 'Padding (links/rechts)' ], $pair_key ) );
+                      ?>
+                      <div class="v2-cls-pair" data-cls-pair-class="<?php echo esc_attr( $class_name ); ?>" data-cls-pair-key="<?php echo esc_attr( $pair_key ); ?>" data-cls-pair-linked="<?php echo $is_linked ? '1' : '0'; ?>" style="border-bottom:1px solid var(--v2-border);padding:8px 0">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                          <button type="button" class="v2-cls-pair__lock" title="<?php esc_attr_e( 'Werte verknüpfen / entkoppeln', 'ecf-framework' ); ?>" aria-pressed="<?php echo $is_linked ? 'true' : 'false'; ?>">
+                            <span class="v2-cls-pair__lock-icon" aria-hidden="true"><?php
+                              if ( $is_linked ) {
+                                echo '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+                              } else {
+                                echo '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07L11.78 5.18"/><path d="M5.17 11.75l-1.71 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="2" y1="8" x2="5" y2="8"/><line x1="16" y1="22" x2="16" y2="19"/><line x1="22" y1="16" x2="19" y2="16"/></svg>';
+                              }
+                            ?></span>
+                          </button>
+                          <div class="v2-sl" style="flex:1"><?php echo esc_html( $pair_label ); ?></div>
+                          <input type="hidden" name="<?php echo $linked_key_name; ?>" value="<?php echo $is_linked ? '1' : '0'; ?>" class="v2-cls-pair__linked-state">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+                          <div>
+                            <div class="v2-sh2" style="margin-bottom:4px"><?php echo esc_html( $start_label ); ?></div>
+                            <?php $render_cls_select( $class_name, $start_prop_key, $start_current, $start_sch_def, $roles['start']['def']['token_type'] ?? '' ); ?>
+                          </div>
+                          <div>
+                            <div class="v2-sh2" style="margin-bottom:4px"><?php echo esc_html( $end_label ); ?></div>
+                            <?php $render_cls_select( $class_name, $end_prop_key, $end_current, $end_sch_def, $roles['end']['def']['token_type'] ?? '' ); ?>
+                          </div>
+                        </div>
+                      </div>
+                      <?php endforeach; ?>
+                      <?php foreach ( $single_props as $prop_key => $prop_def ) :
+                        $current = $cls_defaults[ $class_name ][ $prop_key ] ?? '';
+                        $sch_def = $prop_def['default'] ?? '';
+                        $is_editable = ! isset( $prop_def['editable'] ) || $prop_def['editable'] !== false;
+                      ?>
+                      <div class="v2-sr">
+                        <div>
+                          <div class="v2-sl"><?php echo esc_html( $prop_def['label'] ); ?></div>
+                          <div class="v2-sh2"><code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);color:var(--v2-text3)"><?php echo esc_html( $prop_key ); ?></code></div>
+                        </div>
+                        <?php if ( $is_editable ) : ?>
+                          <?php $render_cls_select( $class_name, $prop_key, $current, $sch_def, $prop_def['token_type'] ?? '' ); ?>
+                        <?php else :
+                          $effective = $current !== '' ? $current : $sch_def; ?>
+                          <code title="<?php esc_attr_e( 'Fest verdrahtet — nicht änderbar (Selbstreferenz)', 'ecf-framework' ); ?>" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(99,102,241,.14);color:var(--v2-accent2);padding:6px 10px;border-radius:4px"><?php echo esc_html( $effective ); ?></code>
+                        <?php endif; ?>
+                      </div>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          <?php $panel_first = false; endforeach; ?>
+        </div>
+    </div>
+  </div>
+</div>
+
 <div id="ecf-v2-page-cookbook" class="v2-page">
   <div class="v2-topbar">
     <div class="v2-crumb"><span class="v2-crumb-cur"><?php esc_html_e( 'Anwendung', 'ecf-framework' ); ?></span></div>
@@ -4075,7 +4362,6 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <!-- Plugin sub-tabs -->
       <div class="v2-tabs v2-tabs--sub">
         <button type="button" class="v2-tab v2-tab--on" data-v2-tab-group="pl" data-v2-tab="general"><?php esc_html_e( 'Allgemein', 'ecf-framework' ); ?></button>
-        <button type="button" class="v2-tab" data-v2-tab-group="pl" data-v2-tab="classes"><?php esc_html_e( 'Klassen-Defaults', 'ecf-framework' ); ?></button>
         <button type="button" class="v2-tab" data-v2-tab-group="pl" data-v2-tab="fonts"><?php esc_html_e( 'Schriften', 'ecf-framework' ); ?></button>
       </div>
 
@@ -4100,6 +4386,16 @@ trait ECF_Framework_Admin_V2_View_Trait {
               <span class="v2-tog<?php echo ! empty( $settings['autosave_enabled'] ) ? ' v2-tog--on' : ' v2-tog--off'; ?>"></span>
             </label>
           </div>
+          <div class="v2-sr">
+            <div>
+              <div class="v2-sl"><?php esc_html_e( 'Sync-Modus', 'ecf-framework' ); ?></div>
+              <div class="v2-sh2"><?php esc_html_e( 'Mirror: Elementor-Edits werden automatisch übernommen. Strict: Konflikte erfordern manuelle Auflösung.', 'ecf-framework' ); ?></div>
+            </div>
+            <select class="v2-si" name="<?php echo esc_attr( $opt ); ?>[sync_mode]" style="max-width:200px">
+              <option value="mirror" <?php selected( ($settings['sync_mode'] ?? 'mirror'), 'mirror' ); ?>><?php esc_html_e( 'Mirror (empfohlen)', 'ecf-framework' ); ?></option>
+              <option value="strict" <?php selected( ($settings['sync_mode'] ?? 'mirror'), 'strict' ); ?>><?php esc_html_e( 'Strict (Conflict-Modal)', 'ecf-framework' ); ?></option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -4107,176 +4403,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
 
       <!-- SUB-TAB: Schriften -->
       <!-- SUB-TAB: Klassen-Defaults -->
-      <div id="v2-pl-classes" class="v2-tp">
-        <div class="v2-sec">
-          <div class="v2-sh"><?php esc_html_e( 'Klassen-Defaults', 'ecf-framework' ); ?></div>
-          <div class="v2-sh2" style="margin-bottom:14px"><?php esc_html_e( 'Bestimme welche Variablen Layrix in seinen Standard-Klassen verwendet. Änderungen werden beim Speichern in Elementor\'s Global-Classes-Registry geschrieben.', 'ecf-framework' ); ?></div>
-
-          <?php
-          $cls_schema = method_exists( $this, 'layrix_class_defaults_schema' ) ? $this->layrix_class_defaults_schema() : [];
-          $cls_defaults = $settings['layrix_class_defaults'] ?? [];
-          /* $cls_options_for liefert pro Aufruf gefilterte Optionen je nach
-             token_type aus dem Schema. Spacing-Properties zeigen nur Abstände,
-             Typography-Properties zeigen nur Schriftgrößen, etc. */
-          $cls_options_for = function ( $token_type ) {
-              if ( ! method_exists( $this, 'layrix_size_variable_options' ) ) return [];
-              return $this->layrix_size_variable_options( $token_type ?: null );
-          };
-
-          $render_cls_select = function ( $class_name, $prop_key, $current_value, $schema_default, $token_type = '' ) use ( $opt, $cls_options_for ) {
-              $name_attr = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][' . esc_attr( $prop_key ) . ']';
-              $value     = $current_value !== '' ? $current_value : $schema_default;
-              $options   = $cls_options_for( $token_type );
-              ?>
-              <select class="v2-si" name="<?php echo $name_attr; ?>" style="max-width:240px">
-                  <option value=""><?php
-                      printf(
-                          /* translators: %s: variable name */
-                          esc_html__( 'Default (%s)', 'ecf-framework' ),
-                          esc_html( $schema_default )
-                      );
-                  ?></option>
-                  <?php foreach ( $options as $group_label => $vars ) : ?>
-                      <optgroup label="<?php echo esc_attr( $group_label ); ?>">
-                          <?php foreach ( $vars as $var ) : ?>
-                              <option value="<?php echo esc_attr( $var ); ?>" <?php selected( $value, $var ); ?>><?php echo esc_html( $var ); ?></option>
-                          <?php endforeach; ?>
-                      </optgroup>
-                  <?php endforeach; ?>
-              </select>
-              <?php
-          };
-          ?>
-
-          <?php
-            // Group schema entries by category for accordion rendering.
-            $cls_by_cat = [];
-            foreach ( $cls_schema as $class_name => $cls_def ) {
-              $cat = sanitize_key( $cls_def['category'] ?? 'other' );
-              $cls_by_cat[ $cat ][ $class_name ] = $cls_def;
-            }
-            $cat_labels = [
-              'typography' => __( 'Überschriften',     'ecf-framework' ),
-              'components' => __( 'Komponenten',        'ecf-framework' ),
-              'sections'   => __( 'Sektionen',          'ecf-framework' ),
-              'layout'     => __( 'Layout',             'ecf-framework' ),
-              'other'      => __( 'Weitere Klassen',    'ecf-framework' ),
-            ];
-            // Stable order: typography, components, sections, layout, then any remaining
-            $cat_order = [ 'typography', 'components', 'sections', 'layout' ];
-            foreach ( array_keys( $cls_by_cat ) as $k ) {
-              if ( ! in_array( $k, $cat_order, true ) ) $cat_order[] = $k;
-            }
-          ?>
-
-          <?php $cat_first_rendered = false; foreach ( $cat_order as $cat ) :
-            if ( empty( $cls_by_cat[ $cat ] ) ) continue;
-            $cat_label = $cat_labels[ $cat ] ?? ucfirst( $cat );
-            $cat_count = count( $cls_by_cat[ $cat ] );
-            $cat_open = ! $cat_first_rendered; // first non-empty category open, rest collapsed
-            $cat_first_rendered = true;
-          ?>
-            <details class="v2-cls-cat"<?php echo $cat_open ? ' open' : ''; ?> style="margin-bottom:12px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(255,255,255,.02);overflow:hidden">
-              <summary style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;list-style:none;font-weight:600;font-size:13.5px">
-                <span style="display:flex;align-items:center;gap:10px">
-                  <span class="v2-cls-cat__chevron" style="display:inline-block;font-size:10px;opacity:.6;transition:transform .15s">▼</span>
-                  <span><?php echo esc_html( $cat_label ); ?></span>
-                  <span style="font-weight:400;font-size:11.5px;color:var(--v2-text3)">(<?php echo (int) $cat_count; ?>)</span>
-                </span>
-              </summary>
-              <div style="padding:0 14px 14px">
-                <?php foreach ( $cls_by_cat[ $cat ] as $class_name => $cls_def ) :
-                  /* Pair-Gruppierung: Properties mit gleichem 'pair'-Key (z.B.
-                     padding-block-start + padding-block-end) werden als ein Block
-                     mit Lock-Icon gerendert. */
-                  $pair_groups  = [];
-                  $single_props = [];
-                  foreach ( $cls_def['props'] as $prop_key => $prop_def ) {
-                    $pair_key = $prop_def['pair'] ?? '';
-                    if ( $pair_key !== '' ) {
-                      $role = $prop_def['pair_role'] ?? '';
-                      $pair_groups[ $pair_key ][ $role ] = [ 'key' => $prop_key, 'def' => $prop_def ];
-                    } else {
-                      $single_props[ $prop_key ] = $prop_def;
-                    }
-                  }
-                ?>
-                  <div class="v2-sec" style="margin:10px 0 0;border:1px solid var(--v2-border);border-radius:8px;padding:12px 14px;background:rgba(0,0,0,.18)">
-                    <div class="v2-sh" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                      <span><?php echo esc_html( $cls_def['label'] ); ?></span>
-                      <code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;color:var(--v2-text2);font-weight:400">.<?php echo esc_html( $class_name ); ?></code>
-                    </div>
-                    <div class="v2-sg">
-                      <?php foreach ( $pair_groups as $pair_key => $roles ) :
-                        if ( empty( $roles['start'] ) || empty( $roles['end'] ) ) continue;
-                        $start_prop_key = $roles['start']['key'];
-                        $end_prop_key   = $roles['end']['key'];
-                        $start_current  = $cls_defaults[ $class_name ][ $start_prop_key ] ?? '';
-                        $end_current    = $cls_defaults[ $class_name ][ $end_prop_key ]   ?? '';
-                        $start_sch_def  = $roles['start']['def']['default'] ?? '';
-                        $end_sch_def    = $roles['end']['def']['default']   ?? '';
-                        // Initial Lock-State: linked wenn beide Werte identisch (oder leer = beide nutzen Default)
-                        $effective_start = $start_current !== '' ? $start_current : $start_sch_def;
-                        $effective_end   = $end_current   !== '' ? $end_current   : $end_sch_def;
-                        $is_linked       = ( $effective_start === $effective_end );
-                        $linked_key_name = esc_attr( $opt ) . '[layrix_class_defaults][' . esc_attr( $class_name ) . '][_linked_' . esc_attr( $pair_key ) . ']';
-                        $start_label = preg_replace( '/^Padding\s+/i', '', (string) ( $roles['start']['def']['label'] ?? '' ) );
-                        $end_label   = preg_replace( '/^Padding\s+/i', '', (string) ( $roles['end']['def']['label']   ?? '' ) );
-                        $pair_label  = ucfirst( str_replace( [ 'padding-block', 'padding-inline' ], [ 'Padding (oben/unten)', 'Padding (links/rechts)' ], $pair_key ) );
-                      ?>
-                      <div class="v2-cls-pair" data-cls-pair-class="<?php echo esc_attr( $class_name ); ?>" data-cls-pair-key="<?php echo esc_attr( $pair_key ); ?>" data-cls-pair-linked="<?php echo $is_linked ? '1' : '0'; ?>" style="border-bottom:1px solid var(--v2-border);padding:8px 0">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                          <button type="button" class="v2-cls-pair__lock" title="<?php esc_attr_e( 'Werte verknüpfen / entkoppeln', 'ecf-framework' ); ?>" aria-pressed="<?php echo $is_linked ? 'true' : 'false'; ?>">
-                            <span class="v2-cls-pair__lock-icon" aria-hidden="true"><?php echo $is_linked ? '🔗' : '🔓'; ?></span>
-                          </button>
-                          <div class="v2-sl" style="flex:1"><?php echo esc_html( $pair_label ); ?></div>
-                          <input type="hidden" name="<?php echo $linked_key_name; ?>" value="<?php echo $is_linked ? '1' : '0'; ?>" class="v2-cls-pair__linked-state">
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
-                          <div>
-                            <div class="v2-sh2" style="margin-bottom:4px"><?php echo esc_html( $start_label ); ?></div>
-                            <?php $render_cls_select( $class_name, $start_prop_key, $start_current, $start_sch_def, $roles['start']['def']['token_type'] ?? '' ); ?>
-                          </div>
-                          <div>
-                            <div class="v2-sh2" style="margin-bottom:4px"><?php echo esc_html( $end_label ); ?></div>
-                            <?php $render_cls_select( $class_name, $end_prop_key, $end_current, $end_sch_def, $roles['end']['def']['token_type'] ?? '' ); ?>
-                          </div>
-                        </div>
-                      </div>
-                      <?php endforeach; ?>
-                      <?php foreach ( $single_props as $prop_key => $prop_def ) :
-                        $current = $cls_defaults[ $class_name ][ $prop_key ] ?? '';
-                        $sch_def = $prop_def['default'] ?? '';
-                        $is_editable = ! isset( $prop_def['editable'] ) || $prop_def['editable'] !== false;
-                      ?>
-                      <div class="v2-sr">
-                        <div>
-                          <div class="v2-sl"><?php echo esc_html( $prop_def['label'] ); ?></div>
-                          <div class="v2-sh2"><code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);color:var(--v2-text3)"><?php echo esc_html( $prop_key ); ?></code></div>
-                        </div>
-                        <?php if ( $is_editable ) : ?>
-                          <?php $render_cls_select( $class_name, $prop_key, $current, $sch_def, $prop_def['token_type'] ?? '' ); ?>
-                        <?php else :
-                          $effective = $current !== '' ? $current : $sch_def; ?>
-                          <code title="<?php esc_attr_e( 'Fest verdrahtet — nicht änderbar (Selbstreferenz)', 'ecf-framework' ); ?>" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--v2-btn-fs,12px);background:rgba(99,102,241,.14);color:var(--v2-accent2);padding:6px 10px;border-radius:4px"><?php echo esc_html( $effective ); ?></code>
-                        <?php endif; ?>
-                      </div>
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                <?php endforeach; ?>
-              </div>
-            </details>
-          <?php endforeach; ?>
-
-          <style>
-            .v2-cls-cat > summary::-webkit-details-marker { display: none; }
-            .v2-cls-cat[open] .v2-cls-cat__chevron { transform: rotate(0deg); }
-            .v2-cls-cat:not([open]) .v2-cls-cat__chevron { transform: rotate(-90deg); }
-            .v2-cls-cat > summary:hover { background: rgba(255,255,255,.03); }
-          </style>
-        </div>
-      </div>
+      <!-- Klassen-Defaults wurde zu eigener Top-Level-Page extrahiert -->
+      <div id="v2-pl-classes" class="v2-tp" style="display:none"></div>
 
       <?php
         $v2_base_fs = (int) ( $settings['ui_base_font_size'] ?? 13 );
@@ -4574,8 +4702,12 @@ trait ECF_Framework_Admin_V2_View_Trait {
       <button type="button" class="v2-modal-close" id="v2-conflict-cancel">✕</button>
     </div>
     <div class="v2-modal-body">
-      <p style="font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);margin:0 0 12px">
-        <?php esc_html_e( 'Folgende Werte wurden in Elementor angepasst und weichen vom Layrix-Backend ab. Wähle pro Konflikt was gewinnen soll.', 'ecf-framework' ); ?>
+      <p style="font-size:var(--v2-ui-base-fs, 13px);color:var(--v2-text2);margin:0 0 12px;line-height:1.55">
+        <strong style="color:var(--v2-text1)"><?php esc_html_e( 'Du hast in Elementor Werte angepasst, die vom Layrix-Default abweichen.', 'ecf-framework' ); ?></strong><br>
+        <span style="color:var(--v2-accent2);font-weight:600">„<?php esc_html_e( 'Elementor übernehmen', 'ecf-framework' ); ?>"</span>
+        = <?php esc_html_e( 'dein Elementor-Wert wird Layrix\' neuer Standard.', 'ecf-framework' ); ?><br>
+        <span style="color:var(--v2-text2);font-weight:600">„<?php esc_html_e( 'Layrix erzwingen', 'ecf-framework' ); ?>"</span>
+        = <?php esc_html_e( 'Layrix-Wert überschreibt deinen Elementor-Edit beim nächsten Sync.', 'ecf-framework' ); ?>
       </p>
       <!-- Color-Konflikte (Legacy) -->
       <div id="v2-conflict-list" style="max-height:160px;overflow-y:auto;margin-bottom:12px"></div>
@@ -4584,11 +4716,22 @@ trait ECF_Framework_Admin_V2_View_Trait {
         <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px">
           <strong style="font-size:var(--v2-ui-base-fs, 13px)"><?php esc_html_e( 'Klassen-Werte', 'ecf-framework' ); ?></strong>
           <div style="display:flex;gap:6px">
-            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
-            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" data-conflict-scope="class" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    data-conflict-scope="class" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
           </div>
         </div>
         <div id="v2-class-conflict-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--v2-border);border-radius:6px"></div>
+      </div>
+      <!-- Variablen-Konflikte -->
+      <div id="v2-variable-conflict-block" hidden style="margin-top:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px">
+          <strong style="font-size:var(--v2-ui-base-fs, 13px)"><?php esc_html_e( 'Variablen-Werte', 'ecf-framework' ); ?></strong>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="elementor_wins" data-conflict-scope="variable" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Elementor übernehmen', 'ecf-framework' ); ?></button>
+            <button type="button" class="v2-btn v2-btn--ghost" data-conflict-bulk="layrix_wins"    data-conflict-scope="variable" style="padding:2px 8px;font-size:var(--v2-btn-fs, 12px)"><?php esc_html_e( 'Alle: Layrix erzwingen', 'ecf-framework' ); ?></button>
+          </div>
+        </div>
+        <div id="v2-variable-conflict-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--v2-border);border-radius:6px"></div>
       </div>
     </div>
     <div class="v2-modal-foot">
