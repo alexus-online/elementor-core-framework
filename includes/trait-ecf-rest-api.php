@@ -355,6 +355,54 @@ trait ECF_Framework_REST_API_Trait {
         }
 
         $settings = isset($data['settings']) && is_array($data['settings']) ? $data['settings'] : $data;
+
+        // Pre-Sanitize-Snapshot: vergleicht den jetzt gesendeten Input mit dem
+        // vorher gespeicherten Stand, um zu erkennen welche layrix_class_defaults
+        // bzw. layrix_variable_overrides der User in DIESEM Save explizit geändert
+        // hat. Mirror-Mode darf diese (cls, prop) später NICHT zurück-promoten,
+        // sonst überschreibt Elementor's alter Wert die User-Eingabe.
+        $previous_saved = get_option($this->option_name, []);
+        $prev_cls = is_array($previous_saved['layrix_class_defaults'] ?? null)
+            ? $previous_saved['layrix_class_defaults'] : [];
+        $input_cls = is_array($settings['layrix_class_defaults'] ?? null)
+            ? $settings['layrix_class_defaults'] : [];
+        $user_touched_class_props = [];
+        foreach ($input_cls as $cls_name => $props) {
+            if (!is_array($props)) continue;
+            foreach ($props as $prop_key => $val) {
+                $prev_val = $prev_cls[$cls_name][$prop_key] ?? '';
+                if ((string) $prev_val !== (string) $val) {
+                    $user_touched_class_props[$cls_name . '.' . $prop_key] = true;
+                }
+            }
+        }
+        // Auch entfernte Einträge zählen als user-touched (Reset über Form ohne
+        // Release-Endpoint, oder Wechsel auf "Default ()").
+        foreach ($prev_cls as $cls_name => $props) {
+            if (!is_array($props)) continue;
+            foreach ($props as $prop_key => $val) {
+                if (!isset($input_cls[$cls_name][$prop_key])) {
+                    $user_touched_class_props[$cls_name . '.' . $prop_key] = true;
+                }
+            }
+        }
+        $prev_var_ov = is_array($previous_saved['layrix_variable_overrides'] ?? null)
+            ? $previous_saved['layrix_variable_overrides'] : [];
+        $input_var_ov = is_array($settings['layrix_variable_overrides'] ?? null)
+            ? $settings['layrix_variable_overrides'] : [];
+        $user_touched_var_labels = [];
+        foreach ($input_var_ov as $label => $val) {
+            $prev_val = $prev_var_ov[$label] ?? '';
+            if ((string) $prev_val !== (string) $val) {
+                $user_touched_var_labels[$label] = true;
+            }
+        }
+        foreach ($prev_var_ov as $label => $val) {
+            if (!isset($input_var_ov[$label])) {
+                $user_touched_var_labels[$label] = true;
+            }
+        }
+
         $sanitized = $this->sanitize_settings($settings);
         update_option($this->option_name, $sanitized);
         $this->settings_cache = $sanitized;
@@ -379,6 +427,19 @@ trait ECF_Framework_REST_API_Trait {
             ? $this->detect_class_sync_conflicts()
             : [];
 
+        // User-touched (cls,prop) bzw. variable-labels sind für die Gate-Entscheidung
+        // KEINE echten Konflikte — der User hat in DIESEM Save bewusst entschieden.
+        // Aus der Liste rausfiltern damit Sync für diese Werte durchläuft (Layrix-
+        // Wert nach Elementor schreiben). Mirror-Mode-Promote sieht sie auch nicht
+        // mehr und kann sie nicht versehentlich zurück-promoten.
+        $variable_conflicts = array_values(array_filter($variable_conflicts, function($vc) use ($user_touched_var_labels) {
+            return !isset($user_touched_var_labels[(string) ($vc['label'] ?? '')]);
+        }));
+        $class_conflicts = array_values(array_filter($class_conflicts, function($cc) use ($user_touched_class_props) {
+            $key = ((string) ($cc['class'] ?? '')) . '.' . ((string) ($cc['prop'] ?? ''));
+            return !isset($user_touched_class_props[$key]);
+        }));
+
         // Mirror-Mode: Konflikte werden automatisch zu Overrides promotet, damit
         // Elementor-seitige Edits zu Layrix' Source-of-Truth werden ohne dass
         // der User den Conflict-Dialog durchklicken muss. Idempotent: erneute
@@ -400,6 +461,9 @@ trait ECF_Framework_REST_API_Trait {
                 $value = (string) ($vc['elementor'] ?? '');
                 if ($label === '' || $value === '') continue;
                 if (!preg_match($token_label_pattern, $label)) continue;
+                // User hat in DIESEM Save genau diesen Override gesetzt/geändert/entfernt
+                // → Mirror darf nicht zurück-promoten, sonst wird User-Edit überschrieben.
+                if (isset($user_touched_var_labels[$label])) continue;
                 $sanitized['layrix_variable_overrides'][$label] = $value;
                 $auto_promoted_vars++;
             }
@@ -413,6 +477,7 @@ trait ECF_Framework_REST_API_Trait {
                 // würde sie eh ablehnen). Solche Konflikte bleiben sichtbar
                 // im manuellen Sync-Modal.
                 if (!preg_match($token_label_pattern, $value)) continue;
+                if (isset($user_touched_class_props[$cls . '.' . $prop])) continue;
                 $sanitized['layrix_class_defaults'][$cls][$prop] = $value;
                 $auto_promoted_classes++;
             }

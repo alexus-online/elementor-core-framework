@@ -2973,7 +2973,7 @@ trait ECF_Framework_Admin_V2_View_Trait {
             $cat_open = ! $cat_first_rendered; // first non-empty category open, rest collapsed
             $cat_first_rendered = true;
           ?>
-            <details class="v2-cls-cat"<?php echo $cat_open ? ' open' : ''; ?> style="margin-bottom:12px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(255,255,255,.02);overflow:hidden">
+            <details class="v2-cls-cat" data-v2-cls-cat="<?php echo esc_attr( $cat ); ?>"<?php echo $cat_open ? ' open' : ''; ?> style="margin-bottom:12px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(255,255,255,.02);overflow:hidden">
               <summary style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;list-style:none;font-weight:600;font-size:13.5px">
                 <span style="display:flex;align-items:center;gap:10px">
                   <span class="v2-cls-cat__chevron" style="display:inline-block;font-size:10px;opacity:.6;transition:transform .15s">▼</span>

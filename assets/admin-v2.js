@@ -5992,6 +5992,57 @@
     });
   }());
 
+  /* ── Klassen-Werte: Akkordeon-State über Reload persistieren ────────
+     Kategorie-Akkordeons (.v2-cls-cat) merken sich open/closed in
+     localStorage. Nach einem Reset (der window.location.reload triggert)
+     bleibt die offene Komponenten-/Sektionen-Sektion offen, statt zur
+     PHP-Default zurückzufallen (nur erstes Akkordeon offen). */
+  (function() {
+    var STORAGE_KEY = 'ecf_v2_cls_cat_open';
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+      catch (e) { return {}; }
+    }
+    function saveState(state) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+      catch (e) {}
+    }
+    function applyState() {
+      var state = loadState();
+      // Wenn der User schonmal interagiert hat (state nicht leer), wenden wir
+      // den gespeicherten Zustand auf alle Akkordeons an. Sonst lassen wir die
+      // PHP-Defaults (erstes offen).
+      if (!Object.keys(state).length) return;
+      document.querySelectorAll('details.v2-cls-cat[data-v2-cls-cat]').forEach(function(d) {
+        var cat = d.getAttribute('data-v2-cls-cat');
+        if (Object.prototype.hasOwnProperty.call(state, cat)) {
+          d.open = !!state[cat];
+        }
+      });
+    }
+    function captureState() {
+      var state = {};
+      document.querySelectorAll('details.v2-cls-cat[data-v2-cls-cat]').forEach(function(d) {
+        state[d.getAttribute('data-v2-cls-cat')] = !!d.open;
+      });
+      saveState(state);
+    }
+    document.addEventListener('toggle', function(e) {
+      var d = e.target;
+      if (!d || !d.classList || !d.classList.contains('v2-cls-cat')) return;
+      var cat = d.getAttribute('data-v2-cls-cat');
+      if (!cat) return;
+      var state = loadState();
+      state[cat] = !!d.open;
+      saveState(state);
+    }, true);
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      applyState();
+    } else {
+      document.addEventListener('DOMContentLoaded', applyState);
+    }
+  }());
+
   /* ── Override Reset-Button + clickable warning pill ─────────────────
      Reset-Buttons (.v2-override-reset) entfernen einen einzelnen Override
      aus layrix_variable_overrides oder layrix_class_defaults via REST.
