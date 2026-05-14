@@ -15,7 +15,10 @@
       "q": "What is Layrix exactly?",
       "a": "<p>Layrix is a design system manager for Elementor. You define your <strong>design values</strong> (colors, fonts, spacing, shadows, radii) and <strong>classes</strong> centrally — Layrix syncs everything automatically to Elementor so the values are available there as global variables and classes.</p><p>The benefit: a change in the Layrix backend immediately affects all pages and elements that use the corresponding variable or class.</p><p>For a detailed explanation of the three layers (Layrix Settings, Elementor Variables, Global Classes), see the <strong>How does it work?</strong> page.</p>",
       "keywords": "layrix design system tokens elementor what is three layers architecture",
-      "link": { "page": "how-it-works", "label": "Architecture overview" }
+      "link": {
+        "page": "how-it-works",
+        "label": "Architecture overview"
+      }
     },
     {
       "id": "gs-first-steps",
@@ -23,7 +26,10 @@
       "q": "Where should I start?",
       "a": "<p>Three ways:</p><ol><li><strong>Run the wizard</strong> — guides you through all areas (Getting Started → Start wizard)</li><li><strong>Status page</strong> — all toggles at a glance</li><li><strong>Colors → Hero Grid</strong> — quickly generate a color palette and apply it</li></ol><p>Important: Auto-Sync is enabled <strong>by default</strong> — once you change values and save, they go to Elementor automatically.</p>",
       "keywords": "first steps start beginning wizard getting started onboarding",
-      "link": { "page": "status", "label": "Go to Status" }
+      "link": {
+        "page": "status",
+        "label": "Go to Status"
+      }
     },
     {
       "id": "gs-elementor-version",
@@ -45,7 +51,10 @@
       "q": "How do I back up my Layrix configuration?",
       "a": "<p>Use the <strong>preset export/import</strong> feature (Sync page → Actions → Export preset). You receive a JSON file with all settings (colors, spacing, class defaults, auto-class toggles, etc.).</p><p>On another site, choose „Import preset\" and select the JSON — everything is applied.</p>",
       "keywords": "export import backup save preset migration json configuration",
-      "link": { "page": "sync", "label": "Go to Sync" }
+      "link": {
+        "page": "sync",
+        "label": "Go to Sync"
+      }
     },
     {
       "id": "gs-theme-style-importer",
@@ -74,7 +83,10 @@
       "q": "What is the difference between Website and Plugin tab in Settings?",
       "a": "<p>Inside <strong>Settings</strong> there are two icon tabs:</p><ul><li><strong>⌂ Website</strong> — what affects your live site: root font size, container width, content width, base colors, body font, font sizes, browser margin reset, focus outline.</li><li><strong>⚙ Plugin</strong> — what affects Layrix itself: auto-sync toggles, auto-class toggles, class defaults, GitHub updates, Layrix admin UI (font and font sizes of the interface).</li></ul><p>Rule of thumb: <em>„Does it affect the frontend output?\" → Website. „Only the Layrix admin?\" → Plugin.</em></p>",
       "keywords": "settings website plugin tab difference frontend admin sub-tab",
-      "link": { "page": "settings", "label": "Go to Settings" }
+      "link": {
+        "page": "settings",
+        "label": "Go to Settings"
+      }
     },
     {
       "id": "gs-do-i-need-sync",
@@ -82,16 +94,21 @@
       "q": "Do I need to sync manually?",
       "a": "<p>No, when <strong>Auto-Sync</strong> is on (which is the default). Then sync runs automatically in the background after every save.</p><p>You only need to sync manually when:</p><ul><li>You disabled Auto-Sync</li><li>You modified Layrix classes inside Elementor and want to push Layrix defaults back</li></ul>",
       "keywords": "sync synchronize auto-sync manual automatic",
-      "link": { "page": "sync", "label": "Go to Sync" }
+      "link": {
+        "page": "sync",
+        "label": "Go to Sync"
+      }
     },
-
     {
       "id": "tk-where-spacing",
       "category": "tokens",
       "q": "Where do I configure spacing?",
       "a": "<p>Sidebar → <strong>Design Values → Spacing</strong>. You define the base spacing values (min/max for fluid clamp) and the scale (xs, s, m, l, xl, 2xl, 3xl).</p><p>Layrix generates the <code>--ecf-space-*</code> variables and syncs them to Elementor.</p>",
       "keywords": "spacing padding margin space token",
-      "link": { "page": "spacing", "label": "Go to Spacing" }
+      "link": {
+        "page": "spacing",
+        "label": "Go to Spacing"
+      }
     },
     {
       "id": "tk-where-colors",
@@ -99,7 +116,10 @@
       "q": "Where do I set colors?",
       "a": "<p>Sidebar → <strong>Design Values → Colors</strong>. You have:</p><ul><li><strong>Hero Grid</strong> on top — harmony generator and live picker</li><li><strong>Palette</strong> below — all active color values (primary, secondary, accent, surface, text, plus your own)</li></ul><p>Click any card to open the native color picker. Auto-Save writes the value back immediately.</p>",
       "keywords": "colors color palette primary secondary accent",
-      "link": { "page": "colors", "label": "Go to Colors" }
+      "link": {
+        "page": "colors",
+        "label": "Go to Colors"
+      }
     },
     {
       "id": "tk-change-body-font-size",
@@ -107,7 +127,10 @@
       "q": "How do I change the global font size?",
       "a": "<p>There are two distinct font sizes:</p><ul><li><strong>Body text size</strong> (paragraph text): Settings → Website → Typography → Body Text Size</li><li><strong>Heading sizes</strong> (h1–h5): Settings → Plugin → Class Defaults → Headings → ecf-heading-1..5 → font-size</li></ul><p>Since 0.5.7 the body text size accepts <code>px / rem / em / % / vw</code> with auto-conversion when switching units.</p>",
       "keywords": "font-size body text typography heading",
-      "link": { "page": "settings", "label": "Go to Settings" }
+      "link": {
+        "page": "settings",
+        "label": "Go to Settings"
+      }
     },
     {
       "id": "tk-shadows-invisible",
@@ -115,7 +138,10 @@
       "q": "Why can I not see shadows in the preview?",
       "a": "<p>Since 0.5.7 the shadow preview renders on a light background (white square on light gray) — previously the background was dark, making dark shadows invisible.</p><p>If the preview still looks off: hard reload (Ctrl/Cmd+Shift+R) — likely a cached CSS file.</p>",
       "keywords": "shadow box-shadow preview invisible",
-      "link": { "page": "shadows", "label": "Go to Shadows" }
+      "link": {
+        "page": "shadows",
+        "label": "Go to Shadows"
+      }
     },
     {
       "id": "tk-radius-explained",
@@ -123,7 +149,10 @@
       "q": "What are radius values?",
       "a": "<p>Radius values control how round the corners of elements are. Instead of hardcoding <code>border-radius: 8px</code> everywhere, you define a scale (xs, s, m, l, xl, full) and reference it as <code>--ecf-radius-m</code>.</p><p>Layrix supports fluid clamp: a min and max value per token that interpolates between mobile and desktop.</p>",
       "keywords": "radius border corners round scale xs s m l xl full clamp",
-      "link": { "page": "radius", "label": "Go to Radius" }
+      "link": {
+        "page": "radius",
+        "label": "Go to Radius"
+      }
     },
     {
       "id": "tk-spacing-fluid",
@@ -131,7 +160,10 @@
       "q": "What does min/max mean for spacing?",
       "a": "<p>Layrix uses fluid clamp for spacing: each spacing value has a min (small screens) and a max (large screens). CSS interpolates between via <code>clamp()</code>.</p><p>Benefit: spacing feels tighter on mobile and more generous on desktop without requiring breakpoints.</p>",
       "keywords": "min max spacing fluid clamp responsive viewport breakpoint",
-      "link": { "page": "spacing", "label": "Go to Spacing" }
+      "link": {
+        "page": "spacing",
+        "label": "Go to Spacing"
+      }
     },
     {
       "id": "tk-typography-scale",
@@ -139,7 +171,10 @@
       "q": "What is the type scale?",
       "a": "<p>The type scale is the scale of font sizes for headings and text. Layrix generates it from two values: <strong>base font size</strong> and <strong>ratio</strong> (e.g. 1.25 = Major Third).</p><p>This produces <strong>15 steps</strong> from <code>--ecf-text-5xs</code> to <code>--ecf-text-7xl</code>. Heading classes use the upper half: ecf-heading-1 = text-4xl, ecf-heading-2 = text-3xl, ecf-heading-3 = text-2xl, ecf-heading-4 = text-xl, ecf-heading-5 = text-l. (There is intentionally no ecf-heading-6.)</p>",
       "keywords": "type-scale typography ratio font-sizes heading text",
-      "link": { "page": "typography", "label": "Go to Typography" }
+      "link": {
+        "page": "typography",
+        "label": "Go to Typography"
+      }
     },
     {
       "id": "tk-custom-variables",
@@ -147,7 +182,10 @@
       "q": "How do I create custom variables?",
       "a": "<p>Sidebar → <strong>Design Values → Variables</strong>. Define any custom CSS variable (e.g. <code>--ecf-anim-fast: 200ms</code> or <code>--ecf-z-modal: 1000</code>).</p><p>These are generated alongside the standard Layrix design values and synced together.</p>",
       "keywords": "custom variables css-variable z-index animation duration",
-      "link": { "page": "variables", "label": "Go to Variables" }
+      "link": {
+        "page": "variables",
+        "label": "Go to Variables"
+      }
     },
     {
       "id": "tk-shadow-format",
@@ -155,7 +193,10 @@
       "q": "What format do shadow values use?",
       "a": "<p>Standard CSS box-shadow syntax: <code>x-offset y-offset blur spread color</code>. Examples:</p><ul><li>Outer: <code>0 4px 16px rgba(0,0,0,0.1)</code></li><li>Inner: <code>inset 0 2px 4px rgba(0,0,0,0.06)</code></li></ul><p>Multiple shadows comma-separated: <code>0 1px 2px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04)</code>.</p>",
       "keywords": "shadow format box-shadow syntax inner inset outer rgba",
-      "link": { "page": "shadows", "label": "Go to Shadows" }
+      "link": {
+        "page": "shadows",
+        "label": "Go to Shadows"
+      }
     },
     {
       "id": "tk-hero-grid-what",
@@ -163,7 +204,10 @@
       "q": "What is the Hero Grid on the Colors page?",
       "a": "<p>The Hero Grid is Layrix' <strong>harmony generator</strong>: a sandbox at the top of the Colors page with 5 color slots (primary, secondary, accent, surface, text), where you can experiment with palettes without committing the values immediately.</p><p>Workflow: play around → lock the slots you want to keep → „Shuffle\" regenerates the unlocked ones → when you are happy, click „Apply to palette\". Only then are the values written to your Layrix settings and synced.</p>",
       "keywords": "hero grid harmony generator colors palette",
-      "link": { "page": "colors", "label": "Go to Colors" }
+      "link": {
+        "page": "colors",
+        "label": "Go to Colors"
+      }
     },
     {
       "id": "tk-hero-grid-modes",
@@ -192,7 +236,10 @@
       "q": "What are leading and tracking?",
       "a": "<p>Two typography terms:</p><ul><li><strong>Leading</strong> = line-height. Layrix manages it as <code>--ecf-leading-*</code> tokens (e.g. tight, snug, normal, relaxed, loose). Tab: Typography → Line Heights.</li><li><strong>Tracking</strong> = letter-spacing. Managed as <code>--ecf-tracking-*</code> tokens. Tab: Typography → Letter Spacing. em units recommended (relative to font size).</li></ul>",
       "keywords": "leading tracking line-height letter-spacing typography",
-      "link": { "page": "typography", "label": "Go to Typography" }
+      "link": {
+        "page": "typography",
+        "label": "Go to Typography"
+      }
     },
     {
       "id": "tk-dark-mode-color",
@@ -207,7 +254,10 @@
       "q": "How do I see where a design value (token) is used?",
       "a": "<p>Sidebar → <strong>Usage</strong>. Pick a token (e.g. <code>ecf-space-m</code>) → click „Scan\" → Layrix searches all Elementor data and lists every post/template that references this token. Per result:</p><ul><li>Post title + type (page / template / post)</li><li>Number of occurrences</li><li>Kind of use (variable / class)</li><li>Direct link to open the post in Elementor</li></ul><p>Useful when you want to change a token and know the blast radius — or remove an unused token from the global-class limit.</p>",
       "keywords": "token usage where used scan blast radius elementor referenced",
-      "link": { "page": "token-usage", "label": "Go to Usage" }
+      "link": {
+        "page": "token-usage",
+        "label": "Go to Usage"
+      }
     },
     {
       "id": "tk-units-converter",
@@ -216,14 +266,16 @@
       "a": "<p>Layrix supports several CSS units:</p><ul><li><code>px</code> — fixed pixel size</li><li><code>rem</code> — relative to root font size</li><li><code>em</code> — relative to parent element</li><li><code>%</code> — percent of parent</li><li><code>vw</code> — percent of viewport width</li></ul><p><strong>Note on rem math:</strong> Layrix offers two root modes (Settings → Website → Root Font Size): <strong>62.5%</strong> (10px base, so 1rem = 10px) or <strong>100%</strong> (16px base, so 1rem = 16px). Other values fall back to 100%.</p><p>Switching units, Layrix auto-converts — 18px becomes 1.8rem (at 62.5% root) or 1.125rem (at 100% root).</p>",
       "keywords": "rem em vw px unit conversion font-size"
     },
-
     {
       "id": "cl-what-is-ecf-button",
       "category": "classes",
       "q": "What is the ecf-button class?",
       "a": "<p><code>ecf-button</code> is the Layrix base class for buttons. It contains geometry and typography:</p><ul><li>Padding (block + inline from spacing values)</li><li>Border-radius (from radius value)</li><li>Font size (from type scale)</li></ul><p><strong>Deliberately not included:</strong> background-color, color, hover. Those come from the user or Elementor default. So Layrix never overrides your custom colors.</p>",
       "keywords": "ecf-button button class base components",
-      "link": { "page": "cookbook", "label": "Go to Application" }
+      "link": {
+        "page": "cookbook",
+        "label": "Go to Application"
+      }
     },
     {
       "id": "cl-what-are-class-defaults",
@@ -231,15 +283,21 @@
       "q": "What are class defaults?",
       "a": "<p>Class defaults are the <strong>standard values</strong> a Layrix class carries — e.g. how much padding a button has, what font size a heading uses, what max-width a container uses.</p><p>Layrix manages them centrally so you do not have to touch every single element in Elementor. One change in the backend → every element using that class picks up the new value.</p><p>Defaults reference no fixed pixel values but <strong>design-value variables</strong> (e.g. <code>ecf-space-m</code>) — keeping the system consistent: change the spacing value and every class follows.</p>",
       "keywords": "class-defaults what are defaults design-values settings explanation",
-      "link": { "page": "settings", "label": "Go to Settings" }
+      "link": {
+        "page": "settings",
+        "label": "Go to Settings"
+      }
     },
     {
       "id": "cl-where-padding",
       "category": "classes",
-      "q": "Where do I configure class defaults (padding, radius, font size)?",
-      "a": "<p><strong>Settings → Plugin → Class Defaults</strong>. All Layrix classes are grouped by category as collapsible accordions.</p><p>Per property you pick a design value via dropdown. On the next sync Layrix writes the value into the Elementor global class — every element using that class gets the new value automatically.</p>",
-      "keywords": "class-defaults defaults padding radius font-size token settings where",
-      "link": { "page": "settings", "label": "Go to Settings" }
+      "q": "Where do I configure class values (padding, radius, font-size)?",
+      "a": "<p>Sidebar -> <strong>Klassen-Werte</strong> (Class Values). Top-level page (between Class Selection and Application). All Layrix classes grouped by category as collapsible accordions (Headings, Components, Sections, Layout). Per class, configurable properties as token-select dropdowns. Padding pairs (block/inline) have a lock-icon to link/unlink.</p><p>Before 0.6.4 this lived under <em>Settings -> Plugin -> Class Defaults</em> -- five clicks deep. Now reachable directly from the sidebar.</p>",
+      "keywords": "class values defaults padding radius font-size button heading sidebar",
+      "link": {
+        "page": "settings",
+        "label": "Go to Settings"
+      }
     },
     {
       "id": "cl-which-class-defaults",
@@ -247,14 +305,17 @@
       "q": "Which classes can I configure and which properties?",
       "a": "<p>Currently these classes have configurable defaults:</p><ul><li><strong>Headings</strong> <code>ecf-heading-1</code> … <code>ecf-heading-5</code> → font-size (from type scale)</li><li><strong>Components</strong> <code>ecf-button</code> → padding-block, padding-inline, border-radius, font-size</li><li><strong>Sections</strong> <code>ecf-layrix-section</code> → padding-block, padding-inline</li><li><strong>Layout</strong> <code>ecf-container-boxed</code> → max-width</li></ul><p>Other Layrix classes (e.g. <code>ecf-card</code>, <code>ecf-section</code>) currently have no defaults — they are pure identity classes you style as needed in Elementor's class editor.</p>",
       "keywords": "which classes defaults configure properties heading button section container list overview",
-      "link": { "page": "settings", "label": "Go to Settings" }
+      "link": {
+        "page": "settings",
+        "label": "Go to Settings"
+      }
     },
     {
       "id": "cl-defaults-what-happens",
       "category": "classes",
-      "q": "What happens when I change a class default?",
-      "a": "<p>On save in Layrix:</p><ol><li>The value is written to Layrix settings</li><li>With Auto-Sync on (default), the Elementor global class is updated immediately</li><li>Every element using that class — across 1 or 100 pages — shows the new value</li></ol><p><strong>Important:</strong> Per-element customizations (values you set on a specific button in the editor) remain untouched. They have higher specificity and beat the class default. Only elements that did <em>not</em> set anything custom adopt the new default.</p>",
-      "keywords": "default change what happens effect sync elementor specificity custom-values"
+      "q": "What happens when I change a class value?",
+      "a": "<p>On save in Layrix:</p><ol><li>Value is written to <code>layrix_class_defaults</code></li><li>With auto-sync on (default), sync to Elementor runs in background immediately</li><li>Layrix detects user-edits in THIS save (user-touched filter, since 0.6.5) and protects them from being reverted by Mirror-Mode</li><li>Elementor adopts the new value into its Global-Class-Registry -- visible in frontend after cache refresh</li></ol><p>If a value diverges in Elementor and you do not change it in Layrix -> see Sync-Mode (Mirror vs Strict).</p>",
+      "keywords": "class values change save auto-sync mirror user-edit"
     },
     {
       "id": "cl-button-color-not-here",
@@ -276,7 +337,10 @@
       "q": "Utility classes vs. starter classes — what is the difference?",
       "a": "<p><strong>Starter classes</strong> are component-like: <code>ecf-card</code>, <code>ecf-button</code>, <code>ecf-section</code>. They have an identity character (what is this thing?) and carry Layrix defaults for padding, radius, etc.</p><p><strong>Utility classes</strong> are atomic single-purpose: <code>ecf-shadow-l</code> or <code>ecf-text-2xl</code>. They do exactly one thing and combine.</p>",
       "keywords": "utility starter difference classes components atomic single-purpose",
-      "link": { "page": "classes", "label": "Go to Class Selection" }
+      "link": {
+        "page": "classes",
+        "label": "Go to Class Selection"
+      }
     },
     {
       "id": "cl-custom-class",
@@ -284,7 +348,10 @@
       "q": "How do I create a custom Layrix class?",
       "a": "<p>Class Selection page → bottom „Custom classes\" section → plus button. Specify name, optional description, category.</p><p>Custom classes are synced. You write styles for them in Elementor (class editor) or via custom CSS.</p>",
       "keywords": "custom class create new add",
-      "link": { "page": "classes", "label": "Go to Class Selection" }
+      "link": {
+        "page": "classes",
+        "label": "Go to Class Selection"
+      }
     },
     {
       "id": "cl-anwendung-tab",
@@ -292,7 +359,10 @@
       "q": "What is the Application tab?",
       "a": "<p>Sidebar → <strong>Classes → Application</strong>. Card overview of all Layrix classes per category (Headings, Sections, Components, Layout). Clicking a card copies the class name to clipboard.</p><p>Workflow: click card → in Elementor select element → CSS classes field → paste.</p>",
       "keywords": "application cookbook tab cards copy clipboard overview classes",
-      "link": { "page": "cookbook", "label": "Go to Application" }
+      "link": {
+        "page": "cookbook",
+        "label": "Go to Application"
+      }
     },
     {
       "id": "cl-class-refactor-tool",
@@ -300,7 +370,10 @@
       "q": "How do I rename a class across all pages at once?",
       "a": "<p>Sidebar → <strong>Klassen umbenennen</strong>. Enter the old and new class, click „Vorschau\" — Layrix lists every post/template using the old class with the number of occurrences. After review, click „Jetzt umbenennen\" → Layrix replaces the class in every selected post.</p><p>Works for both V3 classic widgets (CSS-Classes field) and V4 atomic widgets (classes array). For Layrix global classes, the registry class-ID is replaced too — so the link to the global class is preserved when the new class is also a Layrix class.</p><p><strong>Caution:</strong> Writes to the DB. Make a backup beforehand if uncertain.</p>",
       "keywords": "class rename find replace refactor migration",
-      "link": { "page": "class-refactor", "label": "Go to Class Rename" }
+      "link": {
+        "page": "class-refactor",
+        "label": "Go to Class Rename"
+      }
     },
     {
       "id": "cl-shadow-utility-classes",
@@ -308,7 +381,10 @@
       "q": "What are the shadow utility classes (ecf-shadow-xs, ecf-shadow-l, …)?",
       "a": "<p>For every shadow token tier, Layrix generates a matching utility class:</p><ul><li><code>ecf-shadow-xs</code> through <code>ecf-shadow-xl</code> (outer shadows)</li><li><code>ecf-shadow-inner</code> (inner shadow)</li></ul><p>Classes are atomic — one class = one shadow. Activate them under <strong>Class Selection → Utility</strong> and they get synced as global Elementor classes.</p><p>Benefit over inline-style: central control. Change the shadow token value and every element with <code>ecf-shadow-l</code> updates automatically.</p>",
       "keywords": "shadow utility classes ecf-shadow xs s m l xl inner",
-      "link": { "page": "classes", "label": "Go to Class Selection" }
+      "link": {
+        "page": "classes",
+        "label": "Go to Class Selection"
+      }
     },
     {
       "id": "cl-how-use-in-editor",
@@ -316,9 +392,11 @@
       "q": "How do I use Layrix classes inside Elementor?",
       "a": "<p>Three ways:</p><ol><li><strong>Auto-Classes</strong>: when active, newly inserted widgets receive their class automatically (h1–h5 → ecf-heading-N, button → ecf-button, etc.)</li><li><strong>Class field</strong>: select element in Elementor → CSS classes field → paste class name</li><li><strong>Cookbook</strong>: Layrix page „Application\" → click card → class is copied → paste in Elementor</li></ol>",
       "keywords": "classes use elementor editor css-classes application",
-      "link": { "page": "cookbook", "label": "Go to Application" }
+      "link": {
+        "page": "cookbook",
+        "label": "Go to Application"
+      }
     },
-
     {
       "id": "sy-what-happens",
       "category": "sync",
@@ -329,17 +407,20 @@
     {
       "id": "sy-auto-vs-manual",
       "category": "sync",
-      "q": "Auto-Sync vs. manual sync — what is the difference?",
-      "a": "<p><strong>Auto-Sync</strong> (on by default): after every save in Layrix, sync runs automatically in the background. No clicks required.</p><p><strong>Manual sync</strong>: click „Sync with Elementor\" on the Sync tab. Before syncing, Layrix checks whether you modified Layrix classes inside Elementor — if so, a conflict modal opens with per-conflict choice.</p>",
-      "keywords": "auto-sync manual difference automatic",
-      "link": { "page": "sync", "label": "Go to Sync" }
+      "q": "Auto-sync vs manual sync -- what is the difference?",
+      "a": "<p><strong>Auto-sync</strong> (default on): after every save in Layrix, sync runs automatically in the background. No clicks needed.</p><p><strong>Manual sync</strong>: click \"Sync with Elementor\" button (V2 admin or Sync page). Useful if auto-sync is off, or in Strict mode when you need the conflict dialog to decide per value.</p><p><strong>Sync-Mode</strong> (since 0.6.5): determines what happens on conflicts. <em>Mirror</em> (default) auto-promotes Elementor-edits. <em>Strict</em> blocks auto-sync on conflicts and shows the conflict modal. Configurable in Plugin -> Settings -> General.</p>",
+      "keywords": "auto-sync manual sync mirror strict mode conflict",
+      "link": {
+        "page": "sync",
+        "label": "Go to Sync"
+      }
     },
     {
       "id": "sy-conflict-modal",
       "category": "sync",
-      "q": "What is the conflict modal during sync?",
-      "a": "<p>If you adjusted values on a Layrix class itself inside Elementor (e.g. set ecf-button padding-inline to a different value), Layrix shows a conflict modal during manual sync listing all divergences.</p><p>Per conflict you choose:</p><ul><li><strong>Adopt Elementor</strong> (default): Layrix backend is updated to match the Elementor value</li><li><strong>Force Layrix</strong>: backend value overrides Elementor value</li></ul>",
-      "keywords": "conflict modal sync divergence elementor adopt force"
+      "q": "What is the conflict modal at sync? When do I see it?",
+      "a": "<p>If Layrix-default and Elementor-edit for a variable or class property differ, there is a conflict -- who wins, Layrix or Elementor?</p><p><strong>In Mirror mode</strong> (default since 0.6.5): conflicts auto-resolve in favor of Elementor -- no modal. Layrix adopts your Elementor-value into <code>layrix_*_overrides</code>. Use the reset icon (↺) to go back to schema-default at any time.</p><p><strong>In Strict mode</strong>: before sync, Layrix shows a modal with the conflicts. Per row decide \"Use Elementor\" (= your Elementor-value becomes Layrix new default) or \"Force Layrix\" (= Layrix-value overwrites your Elementor-edit).</p><p>Bulk buttons top-right per section for \"All use Elementor / All force Layrix\".</p>",
+      "keywords": "conflict modal sync mirror strict elementor use force layrix"
     },
     {
       "id": "sy-status-warning",
@@ -347,7 +428,10 @@
       "q": "Why does the Status page show „Not yet synced\"?",
       "a": "<p>This happens when neither variables nor classes have arrived in Elementor's registries yet. Common causes:</p><ul><li>Fresh install and no save has happened yet</li><li>Auto-Sync is off and you never synced manually</li><li>Elementor was inactive during sync (e.g. plugin temporarily disabled)</li></ul><p>Just click „Sync now\" — the warning disappears immediately on success.</p>",
       "keywords": "warning not synced status page banner",
-      "link": { "page": "status", "label": "Go to Status" }
+      "link": {
+        "page": "status",
+        "label": "Go to Status"
+      }
     },
     {
       "id": "sy-sync-fails",
@@ -362,7 +446,10 @@
       "q": "What is the CSS drawer on the Sync page?",
       "a": "<p>On the Sync page there is a collapsible <strong>CSS drawer</strong> with the complete frontend CSS that Layrix generates (all <code>--ecf-*</code> variables, class definitions, reset rules).</p><p>You can:</p><ul><li><strong>Inspect</strong> — see what Layrix actually serves to your site</li><li><strong>Copy</strong> to clipboard</li><li><strong>Download</strong> as <code>layrix-generated.css</code></li></ul><p>Useful when you want to disable Layrix later (embed CSS into the theme) or want to use the CSS in a build step.</p>",
       "keywords": "css drawer export download generate standalone offline copy",
-      "link": { "page": "sync", "label": "Go to Sync" }
+      "link": {
+        "page": "sync",
+        "label": "Go to Sync"
+      }
     },
     {
       "id": "sy-classes-disappeared",
@@ -371,14 +458,37 @@
       "a": "<p>Known issue in versions before 0.6.1.2 — Layrix replaced the entire variants array on a class during sync instead of merging only its own properties. Custom values (background, :hover, etc.) were lost.</p><p><strong>Fixed in 0.6.1.2</strong>: variants are now merged per (breakpoint+state). Layrix only overrides its own prop keys (padding, font-size, …); all other props remain.</p><p>If you are on 0.6.1.2: set your custom values once again, they will be preserved on future syncs.</p>",
       "keywords": "class disappeared lost reset default background hover custom"
     },
-
+    {
+      "id": "sy-mirror-vs-strict",
+      "category": "sync",
+      "q": "Mirror mode vs Strict mode -- which should I pick?",
+      "a": "<p><strong>Mirror</strong> (recommended, default since 0.6.5): Layrix auto-adopts Elementor-edits. You edit in Elementor, Layrix follows. Class-Values and Variables-list in Layrix are a live mirror of Elementor. Use ↺ reset-icon to go back to schema-default any time.</p><p><strong>Strict</strong>: Layrix stays canonical. On conflicts, the conflict modal appears with per-row choice. Useful for agency setups with multiple editors where Layrix should remain the binding design system.</p><p>Switch in Plugin -> Settings -> General -> Sync-Mode.</p>",
+      "keywords": "mirror strict mode default agency design-system"
+    },
+    {
+      "id": "sy-when-elementor-to-layrix",
+      "category": "sync",
+      "q": "When do my Elementor changes become visible in Layrix?",
+      "a": "<p>Layrix adopts Elementor-edits at these moments (Mirror-mode on):</p><ol><li><strong>Immediately on Elementor save</strong> (since 0.6.6): Layrix hooks into every Elementor REST save for variables, global-classes, kit-elements. Mirror-promote runs inline with the Elementor request.</li><li><strong>Tab-switch back to Layrix</strong>: visibilitychange listener triggers a drift-check (max 1x/3s). Toast with \"Refresh\" button appears when values were adopted.</li><li><strong>Layrix admin page-load</strong>: <code>auto_promote_mirror_on_page_load()</code> runs in <code>settings_page()</code> before UI renders.</li><li><strong>Layrix settings save</strong>: auto-sync triggers drift-check + mirror-promote.</li><li><strong>Manual sync button</strong>: <code>_runSyncAfterCheck</code> auto-resolves in Mirror-mode.</li></ol><p>Primary path is (1) -- all others are backup triggers in case (1) does not fire for some reason.</p>",
+      "keywords": "reverse-sync elementor layrix when trigger hook tab-switch page-load"
+    },
+    {
+      "id": "sy-override-reset",
+      "category": "sync",
+      "q": "What do the ↺ reset-icons in the class-values and variables list mean?",
+      "a": "<p>When a value in Layrix diverges from the schema-default (e.g. because Mirror-mode adopted it from Elementor or you picked a different token yourself), it is marked as <strong>override</strong>: yellow-italic display + <code>overridden</code> badge + <code>↺</code> reset-button.</p><p>Click ↺ -> confirm dialog -> override is removed -> Layrix-computed default returns + is immediately written to Elementor (since 0.6.5: release endpoint syncs inline after the remove so Mirror does not accidentally undo the reset).</p><p>Overrides live in <code>layrix_variable_overrides</code> resp. <code>layrix_class_defaults</code>.</p>",
+      "keywords": "override reset icon revert badge overridden"
+    },
     {
       "id": "ac-defaults",
       "category": "auto-classes",
       "q": "Which auto-classes are active after installation?",
       "a": "<p>By default (fresh install) ALL auto-classes are active:</p><ul><li>Master toggle: on</li><li>Headings (h1–h5 → ecf-heading-N)</li><li>Buttons (→ ecf-button)</li><li>Text-Links (→ ecf-text-link)</li><li>Forms (→ ecf-form)</li></ul><p>Existing installations keep their toggle states — Layrix does not override unprompted.</p>",
       "keywords": "default standard auto-classes active installation new",
-      "link": { "page": "status", "label": "Go to Status" }
+      "link": {
+        "page": "status",
+        "label": "Go to Status"
+      }
     },
     {
       "id": "ac-warning-banner",
@@ -386,7 +496,10 @@
       "q": "How do I notice when auto-classes are accidentally off?",
       "a": "<p>Layrix automatically shows a <strong>warning banner</strong> at the top of every Layrix page when the master toggle or any sub-toggle (Headings/Buttons/Text-Links/Forms) is disabled:</p><ul><li><strong>Yellow</strong> — master is on but individual sub-toggles are off (with list of which)</li><li><strong>Red</strong> — master is off, no auto-classes work</li></ul><p>The „Activate all\" button in the banner re-enables every auto-class toggle in one click. The banner disappears immediately and auto-sync runs in the background.</p>",
       "keywords": "warning banner auto-classes off disabled notice display error",
-      "link": { "page": "status", "label": "Go to Status" }
+      "link": {
+        "page": "status",
+        "label": "Go to Status"
+      }
     },
     {
       "id": "ac-existing-elements",
@@ -401,7 +514,10 @@
       "q": "How do I turn auto-classes off?",
       "a": "<p>Status page → <strong>Auto-Classes for new widgets → Master</strong> off. That disables all auto-class sub-toggles at once.</p><p>Or individually: just toggle „Headings\" / „Buttons\" / „Text-Links\" / „Forms\".</p>",
       "keywords": "auto-classes off disable toggle",
-      "link": { "page": "status", "label": "Go to Status" }
+      "link": {
+        "page": "status",
+        "label": "Go to Status"
+      }
     },
     {
       "id": "ac-layrix-section",
@@ -417,14 +533,16 @@
       "a": "<p>By design: so you can immediately drop widgets into the right container without having to click one level deeper manually.</p><p>Layrix jumps straight to the inner <code>ecf-container-boxed</code> container because 99% of content (headings, buttons, images, …) belongs inside it — not on the outer section. The outer section is mainly for padding and background.</p>",
       "keywords": "section inner auto-select focus container boxed"
     },
-
     {
       "id": "up-how-update",
       "category": "updates",
       "q": "How do I update Layrix?",
       "a": "<p>When <strong>GitHub update checks</strong> are active (default on), new versions appear automatically in the WordPress plugin list with an „Update available\" button.</p><p>Update checks are triggered by:</p><ul><li>WP-Cron in the background (default 12-hour interval)</li><li>Visiting the WP Plugins page (transient refresh)</li><li>Manually via „Check now\" on the Layrix plugin update page</li></ul><p>Server-side requirement: the GitHub release must have a ZIP asset (all releases since 0.5.4 do).</p>",
       "keywords": "update version github release latest",
-      "link": { "page": "settings", "label": "Go to Settings" }
+      "link": {
+        "page": "settings",
+        "label": "Go to Settings"
+      }
     },
     {
       "id": "up-disable-checks",
@@ -432,7 +550,10 @@
       "q": "How do I disable update checks?",
       "a": "<p>Status page → <strong>Plugin Maintenance → GitHub Update Checks</strong> off. Layrix then no longer checks for new versions.</p><p>You will then have to install updates manually (download ZIP from GitHub → upload as plugin in WP).</p>",
       "keywords": "update check disable github checks",
-      "link": { "page": "status", "label": "Go to Status" }
+      "link": {
+        "page": "status",
+        "label": "Go to Status"
+      }
     },
     {
       "id": "up-changelog",
@@ -448,7 +569,6 @@
       "a": "<p>Common error message: <em>„GitHub release ZIP for version X.Y.Z is missing.\"</em></p><p>Means: the master branch advertises a version for which no published release with a ZIP exists. Solution: wait until the release is published or clear the update cache („Check now\").</p>",
       "keywords": "update error fail zip github"
     },
-
     {
       "id": "ts-classes-not-in-elementor",
       "category": "troubleshooting",
@@ -490,7 +610,10 @@
       "q": "How do I disable Layrix cleanly without breaking the site?",
       "a": "<p>Layrix generates the frontend CSS dynamically. Without the plugin, all Layrix variables and class values disappear.</p><p>Clean exit:</p><ol><li>Sync page → CSS drawer → download CSS</li><li>Embed CSS into your theme (child-theme style.css or Customizer)</li><li>Disable Layrix — classes in HTML remain, CSS is now served from theme</li></ol>",
       "keywords": "disable remove turn off clean break css export",
-      "link": { "page": "sync", "label": "Go to Sync" }
+      "link": {
+        "page": "sync",
+        "label": "Go to Sync"
+      }
     }
   ]
 }

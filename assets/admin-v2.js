@@ -2842,12 +2842,14 @@
     { mode: 'callout', page: 'spacing',    title: _wi.wiz_title_spacing  || 'Abstände',                   body: _wi.wiz_body_spacing  || 'Spacing-System definieren — Basis-Abstände und Rhythmus. Layrix generiert die komplette Skala.', next: _wi.wiz_next || 'Weiter' },
     { mode: 'callout', page: 'shadows',    title: _wi.wiz_title_shadows  || 'Schatten',                   body: _wi.wiz_body_shadows  || 'Wiederverwendbare Schatten-Tokens — von dezent bis prominent.', next: _wi.wiz_next || 'Weiter' },
     { mode: 'callout', page: 'variables',  title: _wi.wiz_title_vars     || 'Variablen',                  body: _wi.wiz_body_vars     || 'Eigene CSS-Variablen für alles was nicht von Layrix abgedeckt ist (Animation-Dauern, z-Index etc.).', next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'classes',    title: _wi.wiz_title_classes  || 'Klassen-Auswahl',            body: _wi.wiz_body_classes  || 'Globale Elementor-Klassen für wiederkehrende Styles. Aus der Library wählen oder eigene erzeugen.', next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'settings',   title: 'Klassen-Defaults',                                     body: '<strong>Plugin → Klassen-Defaults</strong>: Layrix-Werte für Button, Heading, Section und Container feinabstimmen — bestimmt was die Klassen automatisch tun (Padding, Schriftgröße, Eckenradius).',  next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'settings',   title: 'Auto-Klassen',                                         body: '<strong>Plugin → Allgemein → Auto-Klassen</strong>: Toggle aktivieren — neu eingefügte h1-h5, Buttons und Text-Links bekommen automatisch ihre Layrix-Klasse, sobald sie in Elementor reinkommen.', next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'sync',       title: _wi.wiz_title_sync     || 'Sync mit Elementor',         body: _wi.wiz_body_sync     || 'Alle Tokens und Klassen zu Elementor übertragen. Ab jetzt im Editor als globale Variablen und Klassen verfügbar.',                                                                  next: _wi.wiz_next || 'Weiter' },
-    { mode: 'callout', page: 'cookbook',   title: 'Anwendung',                                            body: 'Karten-Übersicht aller Layrix-Klassen pro Kategorie. Klick auf eine Karte kopiert die Klasse — im Elementor-Editor ins CSS-Klassen-Feld einfügen.',                                                       next: _wi.wiz_next_done || 'Fertig' },
-    { mode: 'toast',   page: null,         title: _wi.wiz_title_ready    || 'Du bist startklar!',        body: _wi.wiz_body_ready    || 'Alle Bereiche durch — Tokens definiert, Klassen gesynct, Auto-Klassen aktiv. Jetzt im Elementor-Editor bauen.' }
+    { mode: 'callout', page: 'classes',       title: _wi.wiz_title_classes  || 'Klassen-Auswahl',            body: _wi.wiz_body_classes  || 'Welche Layrix-Klassen sollen aktiv sein? Aus Library wählen oder eigene erzeugen — Basis für alle Standard-Komponenten.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'class-defaults', title: 'Klassen-Werte',                                       body: '<strong>Sidebar → Klassen-Werte</strong>: Welche Tokens nutzen die Layrix-Klassen? Padding, Schriftgröße und Radius pro Klasse via Dropdowns mit Token-Auswahl. Tabs für Überschriften, Komponenten, Sektionen, Layout. Padding-Pairs haben Lock-Icon zum Verknüpfen.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'settings',      title: 'Sync-Modus',                                          body: '<strong>Plugin → Einstellungen → Sync-Modus</strong>: <em>Mirror</em> (Default) übernimmt Elementor-Edits automatisch in Layrix — du editierst wo du es siehst. <em>Strict</em> blockiert Auto-Sync bei Konflikten und zeigt das Conflict-Modal — sinnvoll für Agentur-Setups mit verbindlichem Design-System.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'settings',      title: 'Auto-Klassen',                                        body: '<strong>Plugin → Allgemein → Auto-Klassen</strong>: Toggle aktivieren — neu eingefügte h1–h5, Buttons und Text-Links bekommen automatisch ihre Layrix-Klasse beim Einfügen in Elementor.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'sync',          title: _wi.wiz_title_sync     || 'Sync mit Elementor',         body: 'Alle Tokens und Klassen zu Elementor übertragen — sind dann im Editor als globale Variablen und Klassen verfügbar. Auto-Sync läuft im Hintergrund nach jedem Save in Layrix; Mirror-Mode übernimmt zusätzlich Elementor-Edits zurück (kein manueller Klick nötig).', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'class-defaults', title: 'Override-Reset (↺)',                                  body: 'Wenn ein Wert von Elementor übernommen wurde, erscheint er gelb-italic mit <code>overridden</code>-Badge und einem <code>↺</code> Reset-Icon. Klick öffnet einen Confirm-Dialog — bei OK wird der Override entfernt und der Layrix-berechnete Default zurück nach Elementor geschrieben. So behältst du jederzeit Kontrolle.', next: _wi.wiz_next || 'Weiter' },
+    { mode: 'callout', page: 'cookbook',      title: 'Anwendung',                                           body: 'Karten-Übersicht aller Layrix-Klassen pro Kategorie. Klick auf eine Karte kopiert die Klasse — im Elementor-Editor ins CSS-Klassen-Feld einfügen.', next: _wi.wiz_next_done || 'Fertig' },
+    { mode: 'toast',   page: null,            title: _wi.wiz_title_ready    || 'Du bist startklar!',       body: _wi.wiz_body_ready    || 'Alle Bereiche durch — Tokens definiert, Klassen gesynct, Auto-Klassen aktiv, Sync-Modus gewählt. Jetzt im Elementor-Editor bauen — Layrix spiegelt deine Edits automatisch zurück.' }
   ];
 
   function _wizardDots(activeIdx) {
@@ -6082,54 +6084,38 @@
     window.addEventListener('focus', checkAndPromote);
   }());
 
-  /* ── Klassen-Werte: Akkordeon-State über Reload persistieren ────────
-     Kategorie-Akkordeons (.v2-cls-cat) merken sich open/closed in
-     localStorage. Nach einem Reset (der window.location.reload triggert)
-     bleibt die offene Komponenten-/Sektionen-Sektion offen, statt zur
-     PHP-Default zurückzufallen (nur erstes Akkordeon offen). */
+  /* ── Klassen-Werte: aktive Kategorie-Tab über Reload persistieren ───
+     Tab-Wechsel (data-v2-tab-group="cls-cat") wird in localStorage gespeichert.
+     Nach Reset (der window.location.reload triggert) bleibt die zuletzt aktive
+     Kategorie-Tab aktiv, statt auf den PHP-Default (erste Kategorie) zurückzufallen. */
   (function() {
-    var STORAGE_KEY = 'ecf_v2_cls_cat_open';
-    function loadState() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-      catch (e) { return {}; }
+    var STORAGE_KEY = 'ecf_v2_cls_cat_active';
+    function loadActive() {
+      try { return localStorage.getItem(STORAGE_KEY) || ''; }
+      catch (e) { return ''; }
     }
-    function saveState(state) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function saveActive(cat) {
+      try { localStorage.setItem(STORAGE_KEY, cat); }
       catch (e) {}
     }
-    function applyState() {
-      var state = loadState();
-      // Wenn der User schonmal interagiert hat (state nicht leer), wenden wir
-      // den gespeicherten Zustand auf alle Akkordeons an. Sonst lassen wir die
-      // PHP-Defaults (erstes offen).
-      if (!Object.keys(state).length) return;
-      document.querySelectorAll('details.v2-cls-cat[data-v2-cls-cat]').forEach(function(d) {
-        var cat = d.getAttribute('data-v2-cls-cat');
-        if (Object.prototype.hasOwnProperty.call(state, cat)) {
-          d.open = !!state[cat];
-        }
-      });
+    function applyActive() {
+      var saved = loadActive();
+      if (!saved) return;
+      var btn = document.querySelector('[data-v2-tab-group="cls-cat"][data-v2-tab="' + saved + '"]');
+      if (btn && typeof window.ecfV2Tab === 'function') {
+        window.ecfV2Tab('cls-cat', saved, btn);
+      }
     }
-    function captureState() {
-      var state = {};
-      document.querySelectorAll('details.v2-cls-cat[data-v2-cls-cat]').forEach(function(d) {
-        state[d.getAttribute('data-v2-cls-cat')] = !!d.open;
-      });
-      saveState(state);
-    }
-    document.addEventListener('toggle', function(e) {
-      var d = e.target;
-      if (!d || !d.classList || !d.classList.contains('v2-cls-cat')) return;
-      var cat = d.getAttribute('data-v2-cls-cat');
-      if (!cat) return;
-      var state = loadState();
-      state[cat] = !!d.open;
-      saveState(state);
-    }, true);
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-v2-tab-group="cls-cat"]');
+      if (!btn) return;
+      var cat = btn.getAttribute('data-v2-tab');
+      if (cat) saveActive(cat);
+    });
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      applyState();
+      applyActive();
     } else {
-      document.addEventListener('DOMContentLoaded', applyState);
+      document.addEventListener('DOMContentLoaded', applyActive);
     }
   }());
 

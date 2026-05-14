@@ -2966,22 +2966,34 @@ trait ECF_Framework_Admin_V2_View_Trait {
             }
           ?>
 
-          <?php $cat_first_rendered = false; foreach ( $cat_order as $cat ) :
+          <?php /* Tab-Header für Klassen-Kategorien — ersetzt das frühere
+                   <details>-Akkordeon-Pattern. Konsistent mit anderen
+                   V2-Tab-Gruppen (z.B. data-v2-tab-group="pl"). JS persistiert
+                   die zuletzt aktive Tab in localStorage. */ ?>
+          <div class="v2-tabs" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--v2-border);padding-bottom:0">
+            <?php $tab_first = true; foreach ( $cat_order as $cat ) :
+              if ( empty( $cls_by_cat[ $cat ] ) ) continue;
+              $cat_label = $cat_labels[ $cat ] ?? ucfirst( $cat );
+              $cat_count = count( $cls_by_cat[ $cat ] );
+            ?>
+              <button type="button"
+                      class="v2-tab<?php echo $tab_first ? ' v2-tab--on' : ''; ?>"
+                      data-v2-tab-group="cls-cat"
+                      data-v2-tab="<?php echo esc_attr( $cat ); ?>"
+                      onclick="ecfV2Tab('cls-cat','<?php echo esc_js( $cat ); ?>',this)">
+                <?php echo esc_html( $cat_label ); ?>
+                <span style="opacity:.55;font-weight:400;margin-left:4px">(<?php echo (int) $cat_count; ?>)</span>
+              </button>
+            <?php $tab_first = false; endforeach; ?>
+          </div>
+
+          <?php $panel_first = true; foreach ( $cat_order as $cat ) :
             if ( empty( $cls_by_cat[ $cat ] ) ) continue;
             $cat_label = $cat_labels[ $cat ] ?? ucfirst( $cat );
             $cat_count = count( $cls_by_cat[ $cat ] );
-            $cat_open = ! $cat_first_rendered; // first non-empty category open, rest collapsed
-            $cat_first_rendered = true;
           ?>
-            <details class="v2-cls-cat" data-v2-cls-cat="<?php echo esc_attr( $cat ); ?>"<?php echo $cat_open ? ' open' : ''; ?> style="margin-bottom:12px;border:1px solid var(--v2-border);border-radius:8px;background:rgba(255,255,255,.02);overflow:hidden">
-              <summary style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;list-style:none;font-weight:600;font-size:13.5px">
-                <span style="display:flex;align-items:center;gap:10px">
-                  <span class="v2-cls-cat__chevron" style="display:inline-block;font-size:10px;opacity:.6;transition:transform .15s">▼</span>
-                  <span><?php echo esc_html( $cat_label ); ?></span>
-                  <span style="font-weight:400;font-size:11.5px;color:var(--v2-text3)">(<?php echo (int) $cat_count; ?>)</span>
-                </span>
-              </summary>
-              <div style="padding:0 14px 14px">
+            <div id="v2-cls-cat-<?php echo esc_attr( $cat ); ?>" class="v2-tp<?php echo $panel_first ? ' v2-tp--on' : ''; ?>" data-v2-cls-cat="<?php echo esc_attr( $cat ); ?>">
+              <div style="padding:0">
                 <?php foreach ( $cls_by_cat[ $cat ] as $class_name => $cls_def ) :
                   /* Pair-Gruppierung: Properties mit gleichem 'pair'-Key (z.B.
                      padding-block-start + padding-block-end) werden als ein Block
@@ -3063,15 +3075,8 @@ trait ECF_Framework_Admin_V2_View_Trait {
                   </div>
                 <?php endforeach; ?>
               </div>
-            </details>
-          <?php endforeach; ?>
-
-          <style>
-            .v2-cls-cat > summary::-webkit-details-marker { display: none; }
-            .v2-cls-cat[open] .v2-cls-cat__chevron { transform: rotate(0deg); }
-            .v2-cls-cat:not([open]) .v2-cls-cat__chevron { transform: rotate(-90deg); }
-            .v2-cls-cat > summary:hover { background: rgba(255,255,255,.03); }
-          </style>
+            </div>
+          <?php $panel_first = false; endforeach; ?>
         </div>
     </div>
   </div>
