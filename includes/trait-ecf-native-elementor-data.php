@@ -647,14 +647,28 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         }
 
         // Variable-Overrides anwenden: promoviert "Elementor wins"-Auflösungen aus
-        // den Sync-Conflicts zur neuen Source-of-Truth. Sparse: nur Labels mit
-        // bestehendem Payload werden überschrieben — orphaned Overrides bleiben
-        // im Settings-Array stehen, beeinflussen aber den Sync nicht.
+        // den Sync-Conflicts zur neuen Source-of-Truth. Wenn das Label in den
+        // primary-settings-generated Payloads existiert, wird sein Value ersetzt.
+        // Wenn nicht (z.B. weil der computed value leer/unit-only war und vom
+        // skip-Filter aussortiert wurde — typisch beim 0-Token), wird eine
+        // frische Payload aus dem Label-Prefix erschlossen. So funktioniert auch
+        // ein User-definiertes ecf-space-none = "0".
         foreach ($overrides as $label => $override_value) {
             $label = (string) $label;
             $value = trim((string) $override_value);
-            if ($label === '' || $value === '' || !isset($payloads[$label])) continue;
-            $payloads[$label]['value'] = $value;
+            if ($label === '' || $value === '') continue;
+            if (isset($payloads[$label])) {
+                $payloads[$label]['value'] = $value;
+                continue;
+            }
+            // Type aus Label-Prefix erschließen
+            $type = 'global-string-variable';
+            if (strpos($label, 'ecf-color-') === 0) {
+                $type = 'global-color-variable';
+            } elseif (preg_match('/^ecf-(space|radius|text|container)/', $label)) {
+                $type = 'global-size-variable';
+            }
+            $payloads[$label] = ['type' => $type, 'value' => $value];
         }
 
         return $payloads;

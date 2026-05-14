@@ -298,7 +298,9 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
 
         if (!empty($input['spacing']) && is_array($input['spacing'])) {
             $sp = $input['spacing'];
-            $all_sp_steps = ['6xs','5xs','4xs','3xs','2xs','xs','s','m','l','xl','2xl','3xl','4xl','5xl','6xl'];
+            // 'none' als optionaler Null-Step ganz vorn (User-Need: Padding 0 als Token nutzen).
+            // Wird niemals automatisch generiert -- muss explizit zur steps-Liste hinzugefügt werden.
+            $all_sp_steps = ['none','6xs','5xs','4xs','3xs','2xs','xs','s','m','l','xl','2xl','3xl','4xl','5xl','6xl'];
             if (!empty($sp['steps']) && is_array($sp['steps'])) {
                 $validated_sp = array_values(array_filter(array_map('sanitize_key', $sp['steps']), function($s) use ($all_sp_steps) {
                     return in_array($s, $all_sp_steps, true);
