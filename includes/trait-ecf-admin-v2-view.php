@@ -3052,7 +3052,13 @@ trait ECF_Framework_Admin_V2_View_Trait {
                       <div class="v2-cls-pair" data-cls-pair-class="<?php echo esc_attr( $class_name ); ?>" data-cls-pair-key="<?php echo esc_attr( $pair_key ); ?>" data-cls-pair-linked="<?php echo $is_linked ? '1' : '0'; ?>" style="border-bottom:1px solid var(--v2-border);padding:8px 0">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                           <button type="button" class="v2-cls-pair__lock" title="<?php esc_attr_e( 'Werte verknüpfen / entkoppeln', 'ecf-framework' ); ?>" aria-pressed="<?php echo $is_linked ? 'true' : 'false'; ?>">
-                            <span class="v2-cls-pair__lock-icon" aria-hidden="true"><?php echo $is_linked ? '🔗' : '🔓'; ?></span>
+                            <span class="v2-cls-pair__lock-icon" aria-hidden="true"><?php
+                              if ( $is_linked ) {
+                                echo '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+                              } else {
+                                echo '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07L11.78 5.18"/><path d="M5.17 11.75l-1.71 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="2" y1="8" x2="5" y2="8"/><line x1="16" y1="22" x2="16" y2="19"/><line x1="22" y1="16" x2="19" y2="16"/></svg>';
+                              }
+                            ?></span>
                           </button>
                           <div class="v2-sl" style="flex:1"><?php echo esc_html( $pair_label ); ?></div>
                           <input type="hidden" name="<?php echo $linked_key_name; ?>" value="<?php echo $is_linked ? '1' : '0'; ?>" class="v2-cls-pair__linked-state">
