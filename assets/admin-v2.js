@@ -3792,6 +3792,12 @@
       });
     });
 
+    w.querySelectorAll('[data-v2-pair-filter]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        ecfV2FilterPairings(btn.dataset.v2PairFilter, btn);
+      });
+    });
+
     /* Scale-Aside beim Start: nur anzeigen wenn Skala-Tab aktiv */
     (function() {
       var aside = w.querySelector('#v2-ty-scale-aside');
