@@ -77,6 +77,25 @@ trait ECF_Framework_Settings_Sanitizer_Trait {
             }
         }
 
+        // Layrix-Variable-Overrides: sparse map [label] = value.
+        // Wird durch Sync-Conflict-Resolution "Elementor wins" geschrieben und
+        // überschreibt beim Sync den von build_native_variable_payloads()
+        // generierten Wert für genau dieses Label.
+        $output['layrix_variable_overrides'] = [];
+        if (isset($input['layrix_variable_overrides']) && is_array($input['layrix_variable_overrides'])) {
+            foreach ($input['layrix_variable_overrides'] as $label => $value) {
+                if (!is_string($label) || $label === '') continue;
+                if (!preg_match('/^[a-z][a-z0-9_-]*$/i', $label)) continue;
+                $value = sanitize_text_field((string) $value);
+                if ($value === '') continue;
+                $output['layrix_variable_overrides'][$label] = $value;
+            }
+        } elseif (isset($saved_settings['layrix_variable_overrides']) && is_array($saved_settings['layrix_variable_overrides'])) {
+            // Settings-Save ohne overrides-Feld darf bestehende Overrides nicht
+            // löschen (UI sendet die Map nur bei Resolve-Aktionen mit).
+            $output['layrix_variable_overrides'] = $saved_settings['layrix_variable_overrides'];
+        }
+
         $output['auto_classes_enabled']    = !empty($input['auto_classes_enabled'])    ? '1' : '0';
         $output['auto_classes_headings']   = !empty($input['auto_classes_headings'])   ? '1' : '0';
         $output['auto_classes_buttons']    = !empty($input['auto_classes_buttons'])    ? '1' : '0';

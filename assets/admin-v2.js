@@ -5199,14 +5199,21 @@
       .catch(function() { return []; });
   }
 
-  function _detectClassConflicts() {
-    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve([]);
+  /* Holt Klassen- UND Variablen-Konflikte in einem Request vom selben Endpoint.
+     Returns: { classes: [...], variables: [...] } */
+  function _fetchSyncConflicts() {
+    var empty = { classes: [], variables: [] };
+    if (!window.ecfAdmin || !ecfAdmin.syncConflictsRestUrl) return Promise.resolve(empty);
     return fetch(ecfAdmin.syncConflictsRestUrl, { headers: { 'X-WP-Nonce': ecfAdmin.restNonce } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        return (data && data.success && Array.isArray(data.conflicts)) ? data.conflicts : [];
+        if (!data || !data.success) return empty;
+        return {
+          classes:   Array.isArray(data.conflicts) ? data.conflicts : [],
+          variables: Array.isArray(data.variable_conflicts) ? data.variable_conflicts : [],
+        };
       })
-      .catch(function() { return []; });
+      .catch(function() { return empty; });
   }
 
   function _renderClassConflicts(conflicts) {
@@ -5242,12 +5249,52 @@
     }).join('');
   }
 
+  /* Variable-Konflikt-Zeile. Rendert Color-Variablen mit Swatch, sonst Text-Code. */
+  function _renderVariableConflicts(conflicts) {
+    var block = document.getElementById('v2-variable-conflict-block');
+    var listEl = document.getElementById('v2-variable-conflict-list');
+    if (!block || !listEl) return;
+    if (!conflicts.length) {
+      block.hidden = true;
+      listEl.innerHTML = '';
+      return;
+    }
+    block.hidden = false;
+
+    listEl.innerHTML = conflicts.map(function(c) {
+      var isColor = c.type === 'global-color-variable';
+      var swatch = function(val) {
+        if (!isColor) return '';
+        return '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--v2-border);vertical-align:middle;margin-right:4px;background:' + escapeHtml(val) + '"></span>';
+      };
+      return '<div class="v2-variable-conflict-row" data-conflict-label="' + escapeHtml(c.label) + '" data-conflict-elementor="' + escapeHtml(c.elementor) + '" data-conflict-type="' + escapeHtml(c.type || '') + '" style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--v2-border)">'
+        + '<div>'
+          + '<div style="font-size:var(--v2-ui-base-fs, 13px);font-weight:600;font-family:var(--v2-mono)">--' + escapeHtml(c.label) + '</div>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Layrix</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text2)">' + swatch(c.backend) + escapeHtml(c.backend) + '</code>'
+        + '</div>'
+        + '<div style="text-align:right">'
+          + '<div style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-text3)">Elementor</div>'
+          + '<code style="font-size:var(--v2-btn-fs, 12px);color:var(--v2-accent2)">' + swatch(c.elementor) + escapeHtml(c.elementor) + '</code>'
+        + '</div>'
+        + '<select class="v2-si v2-si--sm v2-conflict-action" style="max-width:200px">'
+          + '<option value="elementor_wins" selected>Elementor übernehmen</option>'
+          + '<option value="layrix_wins">Layrix erzwingen</option>'
+        + '</select>'
+        + '</div>';
+    }).join('');
+  }
+
   function _runSyncAfterCheck(btn, form) {
-    Promise.all([_detectColorConflicts(), _detectClassConflicts()])
+    Promise.all([_detectColorConflicts(), _fetchSyncConflicts()])
     .then(function(results) {
       var colorConflicts = results[0] || [];
-      var classConflicts = results[1] || [];
-      if (!colorConflicts.length && !classConflicts.length) {
+      var sync = results[1] || { classes: [], variables: [] };
+      var classConflicts = sync.classes;
+      var variableConflicts = sync.variables;
+      if (!colorConflicts.length && !classConflicts.length && !variableConflicts.length) {
         _doSync(btn, form);
         return;
       }
@@ -5277,6 +5324,7 @@
         }
       }
       _renderClassConflicts(classConflicts);
+      _renderVariableConflicts(variableConflicts);
 
       var modal = document.getElementById('v2-conflict-modal');
       if (modal) modal.hidden = false;
@@ -5286,12 +5334,17 @@
     });
   }
 
-  /* Bulk-Action-Buttons im Modal */
+  /* Bulk-Action-Buttons im Modal. Scope ('class' | 'variable') zielt nur auf
+     die jeweilige Sektion — Class-Bulk ändert keine Variable-Dropdowns. */
   document.addEventListener('click', function(e) {
     var bulkBtn = e.target.closest('[data-conflict-bulk]');
     if (!bulkBtn) return;
     var action = bulkBtn.dataset.conflictBulk;
-    document.querySelectorAll('.v2-class-conflict-row .v2-conflict-action').forEach(function(sel) {
+    var scope = bulkBtn.dataset.conflictScope || 'class';
+    var rowSel = scope === 'variable'
+      ? '.v2-variable-conflict-row .v2-conflict-action'
+      : '.v2-class-conflict-row .v2-conflict-action';
+    document.querySelectorAll(rowSel).forEach(function(sel) {
       sel.value = action;
     });
   });
@@ -5306,17 +5359,28 @@
     }
     if (e.target.id === 'v2-conflict-confirm') {
       var modal2 = document.getElementById('v2-conflict-modal');
-      /* Klassen-Konflikt-Resolutionen sammeln. Nur "elementor_wins" wird ans
-         Resolve-Endpoint gesendet — schreibt Elementor-Wert ins Backend.
-         "layrix_wins" braucht keine Aktion: der nachfolgende Sync schreibt
-         Backend-Wert eh nach Elementor (heutiges Verhalten). */
+      /* Konflikt-Resolutionen sammeln (Klassen + Variablen). Nur "elementor_wins"
+         wird ans Resolve-Endpoint gesendet — schreibt Elementor-Wert ins
+         Backend. "layrix_wins" braucht keine Aktion: der nachfolgende Sync
+         schreibt Backend-Wert eh nach Elementor (heutiges Verhalten). */
       var resolutions = [];
       document.querySelectorAll('.v2-class-conflict-row').forEach(function(row) {
         var sel = row.querySelector('.v2-conflict-action');
         if (!sel || sel.value !== 'elementor_wins') return;
         resolutions.push({
+          type: 'class',
           class: row.dataset.conflictClass,
           prop: row.dataset.conflictProp,
+          elementor: row.dataset.conflictElementor,
+          action: 'elementor_wins',
+        });
+      });
+      document.querySelectorAll('.v2-variable-conflict-row').forEach(function(row) {
+        var sel = row.querySelector('.v2-conflict-action');
+        if (!sel || sel.value !== 'elementor_wins') return;
+        resolutions.push({
+          type: 'variable',
+          label: row.dataset.conflictLabel,
           elementor: row.dataset.conflictElementor,
           action: 'elementor_wins',
         });
@@ -5869,6 +5933,339 @@
         setTimeout(function() { target.classList.remove('is-copied'); }, 1200);
       });
     });
+  }());
+
+  /* ── Wayfinding: Sticky TOC + Cmd-K Command-Palette ─────────────────
+     Both elements are JS-rendered (no PHP changes), discover sections
+     and tokens by scraping the V2 wrapper's DOM at init. Appends to
+     <body> so they escape the wrapper's overflow constraints. */
+  (function wayfinding() {
+    var wrapper = document.querySelector('.ecf-v2-wrapper');
+    if (!wrapper) return;
+
+    /* Section discovery: walks h1 elements inside the V2 wrapper. Each
+       h1 is treated as a top-level section anchor. We assign the id to
+       the closest sensible block (the .v2-ph wrapper if present, else
+       the h1's parent block) so smooth-scroll lands above the title. */
+    function slugify(s) {
+      return String(s || '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .substring(0, 60) || 'section';
+    }
+    function findSections() {
+      var seen = {};
+      var sections = [];
+      var headings = wrapper.querySelectorAll('h1');
+      for (var i = 0; i < headings.length; i++) {
+        var h = headings[i];
+        if (h.closest('.v2-modal-overlay')) continue; // skip modals
+        if (h.closest('.v2-cmdk-overlay')) continue;
+        var label = (h.textContent || '').trim();
+        if (!label) continue;
+        var anchor = h.closest('.v2-ph') || h.parentElement;
+        if (!anchor) continue;
+        var base = 'v2-sec-' + slugify(label);
+        var id = base;
+        var n = 2;
+        while (seen[id]) { id = base + '-' + (n++); }
+        seen[id] = true;
+        if (!anchor.id) anchor.id = id;
+        sections.push({ id: anchor.id, label: label, el: anchor });
+      }
+      return sections;
+    }
+
+    /* Token discovery: scrapes the rendered token rows. Token sources
+       in V2 — based on the wrapper's data layouts — surface as inputs
+       with name patterns like settings[colors][N][name]. We pull the
+       name and find the row container for jump targets. */
+    function findTokens() {
+      var tokens = [];
+      function pushFromInputs(selector, type, iconBuilder) {
+        var inputs = wrapper.querySelectorAll(selector);
+        for (var i = 0; i < inputs.length; i++) {
+          var inp = inputs[i];
+          var name = (inp.value || '').trim();
+          if (!name) continue;
+          var row = inp.closest('[class*="-row"], li, tr, .v2-card, .v2-cluster') || inp.parentElement;
+          if (!row) continue;
+          if (!row.id) row.id = 'v2-tok-' + type + '-' + slugify(name);
+          tokens.push({
+            id: row.id,
+            label: name,
+            type: type,
+            el: row,
+            icon: iconBuilder ? iconBuilder(inp, row) : null,
+          });
+        }
+      }
+      pushFromInputs('input[name^="ecf_framework"][name*="[colors]"][name$="[name]"]', 'color', function(inp, row) {
+        var hex = row.querySelector('input[type="color"]');
+        return hex ? { kind: 'swatch', value: hex.value } : null;
+      });
+      pushFromInputs('input[name^="ecf_framework"][name*="[shadows]"][name$="[name]"]', 'shadow', null);
+      pushFromInputs('input[name^="ecf_framework"][name*="[radius]"][name$="[name]"]', 'radius', null);
+      pushFromInputs('input[name^="ecf_framework"][name*="[typography][scale]"][name$="[name]"]', 'text', null);
+      pushFromInputs('input[name^="ecf_framework"][name*="[typography][leading]"][name$="[name]"]', 'leading', null);
+      pushFromInputs('input[name^="ecf_framework"][name*="[typography][tracking]"][name$="[name]"]', 'tracking', null);
+      return tokens;
+    }
+
+    /* Token labels carry an ECF prefix when surfaced as Elementor variables.
+       Map per type so Cmd-K shows users the full token name. */
+    var TOKEN_PREFIX = {
+      color: 'ecf-color-', shadow: 'ecf-shadow-', radius: 'ecf-radius-',
+      text: 'ecf-text-', leading: 'ecf-leading-', tracking: 'ecf-tracking-',
+    };
+
+    function jumpTo(el) {
+      if (!el) return;
+      var rect = el.getBoundingClientRect();
+      var top = rect.top + window.pageYOffset - 60;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+      el.classList.remove('v2-jump-flash');
+      void el.offsetWidth; // restart animation
+      el.classList.add('v2-jump-flash');
+      window.setTimeout(function() { el.classList.remove('v2-jump-flash'); }, 1500);
+    }
+
+    /* ── TOC ────────────────────────────────────────────────────── */
+    var toc = null;
+    var tocItems = []; // [{a, sectionId}]
+    function buildTOC(sections) {
+      if (toc) toc.remove();
+      toc = document.createElement('aside');
+      toc.className = 'v2-toc';
+      toc.setAttribute('aria-label', 'Section navigation');
+      var head = document.createElement('div');
+      head.className = 'v2-toc__head';
+      head.innerHTML = 'Sections <kbd>' + (navigator.platform.indexOf('Mac') >= 0 ? '⌘' : 'Ctrl') + 'K</kbd>';
+      toc.appendChild(head);
+      var ul = document.createElement('ul');
+      ul.className = 'v2-toc__list';
+      tocItems = [];
+      sections.forEach(function(sec) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.className = 'v2-toc__item';
+        a.href = '#' + sec.id;
+        a.textContent = sec.label;
+        a.addEventListener('click', function(e) {
+          e.preventDefault();
+          jumpTo(sec.el);
+        });
+        li.appendChild(a);
+        ul.appendChild(li);
+        tocItems.push({ a: a, sectionId: sec.id });
+      });
+      toc.appendChild(ul);
+      document.body.appendChild(toc);
+      window.requestAnimationFrame(function() { toc.classList.add('is-ready'); });
+    }
+
+    /* Scroll-spy: highlight the TOC item whose section is closest to
+       the top of the viewport. Uses IntersectionObserver if available. */
+    function attachScrollSpy(sections) {
+      if (!('IntersectionObserver' in window) || !sections.length) return;
+      var visible = {};
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          visible[e.target.id] = e.isIntersecting ? e.intersectionRatio : 0;
+        });
+        // pick the section with highest ratio that's >0
+        var bestId = null, bestRatio = 0;
+        sections.forEach(function(sec) {
+          var r = visible[sec.id] || 0;
+          if (r > bestRatio) { bestRatio = r; bestId = sec.id; }
+        });
+        tocItems.forEach(function(it) {
+          it.a.classList.toggle('is-active', it.sectionId === bestId);
+        });
+      }, { rootMargin: '-80px 0px -60% 0px', threshold: [0, 0.25, 0.5, 1] });
+      sections.forEach(function(sec) { observer.observe(sec.el); });
+    }
+
+    /* ── Cmd-K Palette ─────────────────────────────────────────── */
+    var cmdk = null, cmdkInput = null, cmdkList = null;
+    var cmdkData = []; // [{kind, label, sub, el, icon, score}]
+    var cmdkSelected = 0;
+
+    function buildCmdK(sections, tokens) {
+      if (cmdk) cmdk.remove();
+      cmdk = document.createElement('div');
+      cmdk.className = 'v2-cmdk-overlay';
+      cmdk.setAttribute('role', 'dialog');
+      cmdk.setAttribute('aria-label', 'Command palette');
+      cmdk.innerHTML =
+        '<div class="v2-cmdk-panel" role="combobox" aria-expanded="true">' +
+          '<input class="v2-cmdk-input" type="text" autocomplete="off" spellcheck="false" placeholder="Section oder Token suchen…" />' +
+          '<ul class="v2-cmdk-list" role="listbox"></ul>' +
+          '<div class="v2-cmdk-foot">' +
+            '<span><kbd>↑↓</kbd> navigate <kbd>↵</kbd> jump <kbd>esc</kbd> close</span>' +
+            '<span>' + (sections.length + tokens.length) + ' items</span>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(cmdk);
+      cmdkInput = cmdk.querySelector('.v2-cmdk-input');
+      cmdkList  = cmdk.querySelector('.v2-cmdk-list');
+
+      cmdkData = [];
+      sections.forEach(function(s) {
+        cmdkData.push({ kind: 'section', label: s.label, sub: '', el: s.el, icon: null });
+      });
+      tokens.forEach(function(t) {
+        var prefix = TOKEN_PREFIX[t.type] || '';
+        cmdkData.push({
+          kind: t.type,
+          label: t.label,
+          sub: '--' + prefix + t.label,
+          el: t.el,
+          icon: t.icon,
+        });
+      });
+
+      cmdk.addEventListener('click', function(e) {
+        if (e.target === cmdk) closeCmdK();
+      });
+      cmdkInput.addEventListener('input', function() { renderCmdK(cmdkInput.value); });
+      cmdkInput.addEventListener('keydown', onCmdKKey);
+    }
+
+    /* Subsequence fuzzy match. Score by tightness of match + label
+       prefix bonus. Returns null when no match. Cheap enough for
+       100s of items typed live. */
+    function fuzzyScore(needle, hay) {
+      if (!needle) return 1;
+      var n = needle.toLowerCase();
+      var h = hay.toLowerCase();
+      if (h.indexOf(n) === 0) return 1000 - hay.length;
+      if (h.indexOf(n) >= 0) return 500 - hay.length;
+      var ni = 0, score = 0, lastMatch = -2;
+      for (var hi = 0; hi < h.length && ni < n.length; hi++) {
+        if (h.charCodeAt(hi) === n.charCodeAt(ni)) {
+          score += hi - lastMatch === 1 ? 5 : 1;
+          lastMatch = hi;
+          ni++;
+        }
+      }
+      return ni === n.length ? score : 0;
+    }
+
+    function renderCmdK(query) {
+      var q = (query || '').trim();
+      var filtered = cmdkData
+        .map(function(it) {
+          var ls = fuzzyScore(q, it.label);
+          var ss = fuzzyScore(q, it.sub);
+          return { it: it, score: Math.max(ls, ss * 0.8) };
+        })
+        .filter(function(r) { return r.score > 0; })
+        .sort(function(a, b) { return b.score - a.score; })
+        .slice(0, 50);
+
+      if (!filtered.length) {
+        cmdkList.innerHTML = '<li class="v2-cmdk-empty">Keine Treffer</li>';
+        cmdkSelected = 0;
+        return;
+      }
+      cmdkSelected = 0;
+      cmdkList.innerHTML = filtered.map(function(r, i) {
+        var it = r.it;
+        var iconHTML = '';
+        if (it.icon && it.icon.kind === 'swatch') {
+          iconHTML = '<span class="v2-cmdk-item__icon v2-cmdk-item__icon--swatch" style="color:' + escapeHtml(it.icon.value) + '"></span>';
+        } else {
+          var glyph = ({ section: '§', color: '◐', shadow: '◌', radius: '◯', text: 'A', leading: '↕', tracking: '⇿' })[it.kind] || '·';
+          iconHTML = '<span class="v2-cmdk-item__icon">' + glyph + '</span>';
+        }
+        return '<li class="v2-cmdk-item' + (i === 0 ? ' is-selected' : '') + '" data-cmdk-idx="' + i + '" role="option">' +
+            iconHTML +
+            '<div class="v2-cmdk-item__label">' +
+              '<span class="v2-cmdk-item__title">' + escapeHtml(it.label) + '</span>' +
+              (it.sub ? '<span class="v2-cmdk-item__sub">' + escapeHtml(it.sub) + '</span>' : '') +
+            '</div>' +
+            '<span class="v2-cmdk-item__hint">' + escapeHtml(it.kind) + '</span>' +
+          '</li>';
+      }).join('');
+      // store filtered for handlers
+      cmdkList._filtered = filtered;
+      [].forEach.call(cmdkList.querySelectorAll('.v2-cmdk-item'), function(el) {
+        el.addEventListener('click', function() {
+          var idx = parseInt(el.getAttribute('data-cmdk-idx'), 10) || 0;
+          activateCmdK(idx);
+        });
+        el.addEventListener('mouseenter', function() {
+          var idx = parseInt(el.getAttribute('data-cmdk-idx'), 10) || 0;
+          updateCmdKSelected(idx);
+        });
+      });
+    }
+
+    function updateCmdKSelected(idx) {
+      var items = cmdkList.querySelectorAll('.v2-cmdk-item');
+      if (!items.length) return;
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      cmdkSelected = idx;
+      [].forEach.call(items, function(el, i) {
+        el.classList.toggle('is-selected', i === idx);
+      });
+      var sel = items[idx];
+      if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: 'nearest' });
+    }
+
+    function activateCmdK(idx) {
+      var filtered = cmdkList._filtered || [];
+      var entry = filtered[idx];
+      if (!entry) return;
+      closeCmdK();
+      jumpTo(entry.it.el);
+    }
+
+    function onCmdKKey(e) {
+      var items = cmdkList.querySelectorAll('.v2-cmdk-item');
+      if (e.key === 'ArrowDown') { e.preventDefault(); updateCmdKSelected(cmdkSelected + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); updateCmdKSelected(cmdkSelected - 1); }
+      else if (e.key === 'Enter') { e.preventDefault(); activateCmdK(cmdkSelected); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeCmdK(); }
+    }
+
+    function openCmdK() {
+      if (!cmdk) return;
+      cmdk.classList.add('is-open');
+      cmdkInput.value = '';
+      renderCmdK('');
+      window.setTimeout(function() { cmdkInput.focus(); }, 0);
+    }
+    function closeCmdK() {
+      if (!cmdk) return;
+      cmdk.classList.remove('is-open');
+    }
+
+    /* Global keyboard listener for Cmd-K / Ctrl-K. */
+    document.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        if (cmdk && cmdk.classList.contains('is-open')) { closeCmdK(); }
+        else { openCmdK(); }
+        e.preventDefault();
+      }
+    });
+
+    /* Init: discover and build. Defer slightly so dynamically-rendered
+       parts of V2 (preview tabs etc.) have settled. */
+    function init() {
+      var sections = findSections();
+      if (!sections.length) return;
+      var tokens = findTokens();
+      buildTOC(sections);
+      attachScrollSpy(sections);
+      buildCmdK(sections, tokens);
+    }
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      window.setTimeout(init, 0);
+    } else {
+      document.addEventListener('DOMContentLoaded', init);
+    }
   }());
 
 }());
