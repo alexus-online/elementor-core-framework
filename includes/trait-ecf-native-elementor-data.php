@@ -646,6 +646,15 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
             ];
         }
 
+        // Built-in System-Token: 'ecf-space-none' ist semantisch der Null-Wert
+        // und wird unabhängig von der User-Spacing-Skala bereitgestellt. Damit
+        // hat der User immer einen sauberen 0-Token zur Hand (z.B. für padding-0
+        // an Sections) ohne ihn als Skala-Step manuell einrichten zu müssen.
+        $payloads['ecf-space-none'] = [
+            'type'  => 'global-size-variable',
+            'value' => '0px',
+        ];
+
         // Variable-Overrides anwenden: promoviert "Elementor wins"-Auflösungen aus
         // den Sync-Conflicts zur neuen Source-of-Truth. Wenn das Label in den
         // primary-settings-generated Payloads existiert, wird sein Value ersetzt.
