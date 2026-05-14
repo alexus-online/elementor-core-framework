@@ -336,6 +336,45 @@ trait ECF_Framework_REST_API_Trait {
     }
 
     /**
+     * Synchronisiert die `_linked_<pair>` Flags in layrix_class_defaults mit
+     * den aktuellen Werten der Pair-Properties. Wenn padding-block-start und
+     * padding-block-end verschiedene Werte haben → _linked auf '0' (unlocked).
+     * Wenn gleich (oder beide leer) → '1' (locked).
+     *
+     * Wird nach jedem Mirror-Promote aufgerufen, damit die UI im Layrix-
+     * Backend den korrekten Lock-State anzeigt und nicht versehentlich
+     * beide Werte synchronisiert obwohl der User sie auseinander haben will.
+     */
+    private function update_class_pair_lock_states(array &$settings): void {
+        if (!method_exists($this, 'layrix_class_defaults_schema')) return;
+        if (!isset($settings['layrix_class_defaults']) || !is_array($settings['layrix_class_defaults'])) return;
+        $schema = $this->layrix_class_defaults_schema();
+        foreach ($settings['layrix_class_defaults'] as $cls => $props) {
+            if (!isset($schema[$cls])) continue;
+            $pair_props = [];
+            foreach ($schema[$cls]['props'] as $pk => $pdef) {
+                $pkey = $pdef['pair'] ?? '';
+                if ($pkey === '') continue;
+                $role = $pdef['pair_role'] ?? '';
+                if ($role === 'start' || $role === 'end') {
+                    $pair_props[$pkey][$role] = $pk;
+                }
+            }
+            foreach ($pair_props as $pkey => $roles) {
+                if (empty($roles['start']) || empty($roles['end'])) continue;
+                $start_val = (string) ($props[$roles['start']] ?? '');
+                $end_val   = (string) ($props[$roles['end']]   ?? '');
+                // Beide leer (Schema-Default) → bleibt linked.
+                // Beide gesetzt und gleich → linked.
+                // Sonst (verschiedene oder nur einer gesetzt) → unlocked.
+                $is_linked = ($start_val === '' && $end_val === '')
+                    || ($start_val !== '' && $end_val !== '' && $start_val === $end_val);
+                $settings['layrix_class_defaults'][$cls]['_linked_' . $pkey] = $is_linked ? '1' : '0';
+            }
+        }
+    }
+
+    /**
      * Beim Page-Load der Layrix-Admin: wenn Mirror-Mode aktiv ist, fange
      * Elementor-Drift ein die seit dem letzten Layrix-Save passiert ist.
      * Damit zeigt die UI (Klassen-Werte, Variablen-Liste) immer die effektiv
@@ -406,6 +445,9 @@ trait ECF_Framework_REST_API_Trait {
         }
 
         if (!$changed) return;
+        // Pair-Lock-States basierend auf den neuen Werten korrigieren —
+        // wenn Mirror nur eine Pair-Hälfte geändert hat, muss der Lock auf '0'.
+        $this->update_class_pair_lock_states($settings);
         $sanitized = $this->sanitize_settings($settings);
         update_option($this->option_name, $sanitized);
         $this->settings_cache = $sanitized;
@@ -530,6 +572,11 @@ trait ECF_Framework_REST_API_Trait {
         }
 
         $sanitized = $this->sanitize_settings($settings);
+        // Pair-Lock-States nach jedem Save normalisieren: wenn ein
+        // padding-block-start ≠ padding-block-end → Lock auf '0', sonst auf '1'.
+        // Greift unabhängig vom Mirror-Promote — auch wenn der User direkt
+        // einen Pair-Wert in Klassen-Werte ändert.
+        $this->update_class_pair_lock_states($sanitized);
         update_option($this->option_name, $sanitized);
         $this->settings_cache = $sanitized;
         $this->clear_css_cache();
@@ -622,6 +669,10 @@ trait ECF_Framework_REST_API_Trait {
                 $auto_promoted_classes++;
             }
             if ($auto_promoted_vars > 0 || $auto_promoted_classes > 0) {
+                // Pair-Lock-States vor sanitize updaten — wenn Mirror einen
+                // Pair-Wert geändert hat (z.B. nur padding-block-end auf 0),
+                // sollte das Lock-Flag entsprechend auf '0' gesetzt werden.
+                $this->update_class_pair_lock_states($sanitized);
                 $sanitized = $this->sanitize_settings($sanitized);
                 update_option($this->option_name, $sanitized);
                 $this->settings_cache = $sanitized;
