@@ -513,6 +513,7 @@ trait ECF_Framework_Config_Trait {
                 ['name' => 'ecf-hidden', 'label' => __('Hidden', 'ecf-framework')],
                 ['name' => 'ecf-center-inline', 'label' => __('Center Inline', 'ecf-framework')],
                 ['name' => 'ecf-cluster', 'label' => __('Cluster', 'ecf-framework')],
+                ['name' => 'ecf-heading--center', 'label' => __('Heading Centered', 'ecf-framework')],
                 ['name' => 'ecf-row', 'label' => __('Row (Flex horizontal)', 'ecf-framework')],
                 ['name' => 'ecf-flex-center', 'label' => __('Flex Center', 'ecf-framework')],
                 ['name' => 'ecf-flex-between', 'label' => __('Flex Between', 'ecf-framework')],
@@ -624,6 +625,7 @@ trait ECF_Framework_Config_Trait {
             case 'ecf-hidden': return __('Hides the element visually.', 'ecf-framework');
             case 'ecf-center-inline': return __('Centers inline content inside its available width.', 'ecf-framework');
             case 'ecf-cluster': return __('Groups items in a horizontal cluster with wrapping.', 'ecf-framework');
+            case 'ecf-heading--center': return __('Centered heading: text-align center, margin-inline auto, max-width on the content reading width — for hero-style headlines that should not run full container width.', 'ecf-framework');
             case 'ecf-row': return __('Horizontal flex row (no wrap) with gap and centered alignment.', 'ecf-framework');
             case 'ecf-flex-center': return __('Flex container with content centered on both axes.', 'ecf-framework');
             case 'ecf-flex-between': return __('Flex row with items spaced to the edges (e.g. for header layouts).', 'ecf-framework');
@@ -834,6 +836,12 @@ trait ECF_Framework_Config_Trait {
                 'flex-wrap' => $this->string_prop('wrap'),
                 'gap' => $this->string_prop('var(--ecf-space-s)'),
                 'align-items' => $this->string_prop('center'),
+            ],
+            'ecf-heading--center' => [
+                'text-align' => $this->string_prop('center'),
+                'margin-left' => $this->string_prop('auto'),
+                'margin-right' => $this->string_prop('auto'),
+                'max-width' => $this->string_prop('var(--ecf-content-max-width)'),
             ],
             'ecf-row' => [
                 'display' => $this->string_prop('flex'),
