@@ -113,6 +113,12 @@ trait ECF_Framework_Native_Elementor_Data_Trait {
         $spacing_labels = array_values(array_map(static function ($step) {
             return 'ecf-space-' . $step;
         }, array_filter($spacing_steps, 'is_string')));
+        // Built-in System-Token: ecf-space-none (immer 0px). Nicht in
+        // settings.spacing.steps weil es kein User-Step ist, aber als
+        // Auswahl-Option in den Klassen-Werte-Dropdowns nutzbar.
+        if (!in_array('ecf-space-none', $spacing_labels, true)) {
+            array_unshift($spacing_labels, 'ecf-space-none');
+        }
 
         // Typography-Stufen aus Settings
         $type_steps = isset($settings['typography']['scale']['steps']) && is_array($settings['typography']['scale']['steps'])
