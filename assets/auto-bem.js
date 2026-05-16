@@ -44,6 +44,10 @@
 						name: 'layrix-generate-bem',
 						title: 'BEM-Klassen aus Struktur',
 						icon: 'eicon-code',
+						// Inline HTML in `shortcut` is rendered raw — same trick
+						// Elementor uses for its purple "New" badge (editor.js:35458).
+						// Custom class .layrix-bem-shortcut-badge styles it (CSS file).
+						shortcut: '<span class="layrix-bem-shortcut-badge">LAYRIX</span>',
 						// V1/V4 callback signature: (openMenuEvent, meta). We read
 						// the right-clicked element via elementor.selection — see
 						// getElementId() — so neither arg is needed here.

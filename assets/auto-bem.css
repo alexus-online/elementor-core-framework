@@ -2,6 +2,26 @@
    Self-contained styles, prefixed with .layrix-bem-* to avoid collisions
    with Elementor's own classes. */
 
+/* Brand badge in the right-click context menu (analog zu Elementor's
+   "New"-Badge). Uses the `shortcut` slot of the action descriptor —
+   Elementor renders `shortcut` as raw HTML inside .elementor-context-
+   menu-list__item__shortcut. */
+.layrix-bem-shortcut-badge {
+	display: inline-block;
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+	color: #ffffff !important;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	line-height: 1.6;
+	vertical-align: middle;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	box-shadow: 0 1px 2px rgba(99, 102, 241, 0.35);
+}
+
 .layrix-bem-overlay {
 	position: fixed;
 	inset: 0;
