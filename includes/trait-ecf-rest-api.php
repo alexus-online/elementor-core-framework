@@ -77,6 +77,20 @@ trait ECF_Framework_REST_API_Trait {
             'permission_callback' => [$this, 'rest_manage_options_permission'],
         ]);
 
+        // Auto-BEM Class Generator — walks element tree, derives BEM names,
+        // creates Global Classes + tags widgets on apply. Triggered from the
+        // Elementor V4 editor's context-menu via elements/context-menu/groups.
+        register_rest_route('ecf-framework/v1', '/bem/preview', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_bem_preview'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+        register_rest_route('ecf-framework/v1', '/bem/apply', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'rest_bem_apply'],
+            'permission_callback' => [$this, 'rest_manage_options_permission'],
+        ]);
+
         // Owner-only "Ideen" notes — Application Password authenticated.
         // Permission self-checks via is_layrix_owner() (email match), so even
         // a valid app-password from another user won't pass.

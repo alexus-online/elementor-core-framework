@@ -39,6 +39,7 @@ require_once __DIR__ . '/includes/trait-ecf-core-admin.php';
 require_once __DIR__ . '/includes/trait-ecf-rest-api.php';
 require_once __DIR__ . '/includes/trait-ecf-admin-v2-view.php';
 require_once __DIR__ . '/includes/trait-ecf-atomic-widgets.php';
+require_once __DIR__ . '/includes/trait-ecf-bem-generator.php';
 require_once __DIR__ . '/includes/trait-ecf-owner-notes.php';
 require_once __DIR__ . '/includes/trait-ecf-theme-style-import.php';
 require_once __DIR__ . '/includes/trait-ecf-faq-data.php';
@@ -57,6 +58,7 @@ class ECF_Framework {
     use ECF_Framework_Schema_Migration_Trait;
     use ECF_Framework_Token_Usage_Trait;
     use ECF_Framework_Class_Refactor_Trait;
+    use ECF_Framework_BEM_Generator_Trait;
     use ECF_Framework_Admin_General_Trait;
     use ECF_Framework_Native_Elementor_Data_Trait;
     use ECF_Framework_Native_Elementor_Handlers_Trait;

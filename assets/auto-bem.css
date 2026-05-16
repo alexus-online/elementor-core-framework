@@ -1,0 +1,266 @@
+/* Auto-BEM Class Generator modal — injected into the Elementor V4 editor.
+   Self-contained styles, prefixed with .layrix-bem-* to avoid collisions
+   with Elementor's own classes. */
+
+/* Brand badge in the right-click context menu (analog zu Elementor's
+   "New"-Badge). Uses the `shortcut` slot of the action descriptor —
+   Elementor renders `shortcut` as raw HTML inside .elementor-context-
+   menu-list__item__shortcut. */
+.layrix-bem-shortcut-badge {
+	display: inline-block;
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+	color: #ffffff !important;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	line-height: 1.6;
+	vertical-align: middle;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	box-shadow: 0 1px 2px rgba(99, 102, 241, 0.35);
+}
+
+.layrix-bem-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	background: rgba(15, 23, 42, 0.55);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	animation: layrix-bem-fade-in 120ms ease-out;
+}
+
+@keyframes layrix-bem-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+.layrix-bem-modal {
+	background: #ffffff;
+	border-radius: 14px;
+	width: 92%;
+	max-width: 640px;
+	max-height: 85vh;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+	overflow: hidden;
+}
+
+.layrix-bem-head {
+	padding: 18px 22px;
+	border-bottom: 1px solid #e5e7eb;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.layrix-bem-title {
+	font-size: 17px;
+	font-weight: 600;
+	color: #0f172a;
+}
+
+.layrix-bem-close {
+	border: none;
+	background: transparent;
+	font-size: 26px;
+	line-height: 1;
+	cursor: pointer;
+	color: #6b7280;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 120ms;
+}
+.layrix-bem-close:hover { background: #f3f4f6; color: #111827; }
+
+.layrix-bem-body {
+	padding: 18px 22px;
+	overflow-y: auto;
+	flex: 1;
+	min-height: 120px;
+}
+
+.layrix-bem-foot {
+	padding: 14px 22px;
+	border-top: 1px solid #e5e7eb;
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	background: #f9fafb;
+}
+
+.layrix-bem-btn {
+	padding: 8px 16px;
+	border-radius: 8px;
+	border: none;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: background 120ms, opacity 120ms;
+}
+.layrix-bem-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.layrix-bem-cancel {
+	background: #fee2e2;
+	color: #b91c1c;
+}
+.layrix-bem-cancel:hover:not(:disabled) { background: #fecaca; }
+
+.layrix-bem-apply {
+	background: #4f46e5;
+	color: #ffffff;
+}
+.layrix-bem-apply:hover:not(:disabled) { background: #4338ca; }
+
+/* Nested-card layout: each element wraps its children in a `.layrix-bem-children`
+   container. The container provides the visible left-padding for indentation,
+   plus a dotted vertical connector line via ::before that visually links the
+   parent box to its child boxes. */
+
+.layrix-bem-card {
+	background: #f3f4f6;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	padding: 12px 14px;
+	margin-bottom: 10px;
+}
+.layrix-bem-card:last-child { margin-bottom: 0; }
+
+.layrix-bem-card--block {
+	background: #eef2ff;
+	border: 2px solid #c7d2fe;
+}
+
+.layrix-bem-row {
+	display: block;
+}
+.layrix-bem-row + .layrix-bem-row { margin-top: 10px; }
+
+/* Modifier rows — render under their target's row as small chip-rows.
+   Visually distinct via amber accent so the user sees they're variants
+   on the target, not separate classes. */
+.layrix-bem-modifiers {
+	margin-top: 8px;
+	padding: 8px 10px 6px;
+	background: rgba(251, 191, 36, 0.08);
+	border: 1px dashed rgba(251, 191, 36, 0.4);
+	border-radius: 8px;
+}
+.layrix-bem-mod-row {
+	display: block;
+}
+.layrix-bem-mod-row + .layrix-bem-mod-row { margin-top: 6px; }
+
+.layrix-bem-chip--mod {
+	background: #fef3c7;
+	color: #92400e;
+}
+.layrix-bem-meta--mod {
+	color: #92400e;
+	font-size: 12px;
+}
+
+.layrix-bem-children {
+	position: relative;
+	margin: 12px 0 0 16px;
+	padding-left: 16px;
+}
+
+/* Vertical dotted connector running along the left edge of the children
+   container, from just below the first child's top down to the last child. */
+.layrix-bem-children::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 8px;
+	bottom: 24px;
+	border-left: 1px dashed #9ca3af;
+}
+
+/* Per-child horizontal stub: a short dotted line from the vertical connector
+   to the left edge of each child card. */
+.layrix-bem-children > .layrix-bem-card {
+	position: relative;
+}
+.layrix-bem-children > .layrix-bem-card::before {
+	content: '';
+	position: absolute;
+	left: -16px;
+	top: 22px;
+	width: 14px;
+	border-top: 1px dashed #9ca3af;
+}
+
+.layrix-bem-chip {
+	display: inline-block;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: #e0e7ff;
+	color: #4338ca;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	margin-bottom: 8px;
+	text-transform: uppercase;
+}
+.layrix-bem-chip--block {
+	background: #4f46e5;
+	color: #ffffff;
+}
+
+.layrix-bem-meta {
+	font-size: 13px;
+	color: #374151;
+	margin-bottom: 8px;
+}
+
+.layrix-bem-hint {
+	font-style: italic;
+	color: #b45309;
+	font-size: 12px;
+	margin-left: 4px;
+}
+
+.layrix-bem-input {
+	width: 100%;
+	padding: 7px 11px;
+	border: 1px solid #d1d5db;
+	border-radius: 7px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 13px;
+	color: #111827;
+	background: #ffffff;
+	box-sizing: border-box;
+	transition: border-color 120ms, box-shadow 120ms;
+}
+.layrix-bem-input:focus {
+	outline: none;
+	border-color: #4f46e5;
+	box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.layrix-bem-loading,
+.layrix-bem-empty {
+	padding: 32px;
+	text-align: center;
+	color: #6b7280;
+	font-size: 14px;
+}
+
+.layrix-bem-error {
+	padding: 14px 16px;
+	background: #fef2f2;
+	color: #991b1b;
+	border-radius: 8px;
+	font-size: 13px;
+	border: 1px solid #fecaca;
+}
