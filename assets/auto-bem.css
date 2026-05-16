@@ -145,6 +145,30 @@
 }
 .layrix-bem-row + .layrix-bem-row { margin-top: 10px; }
 
+/* Modifier rows — render under their target's row as small chip-rows.
+   Visually distinct via amber accent so the user sees they're variants
+   on the target, not separate classes. */
+.layrix-bem-modifiers {
+	margin-top: 8px;
+	padding: 8px 10px 6px;
+	background: rgba(251, 191, 36, 0.08);
+	border: 1px dashed rgba(251, 191, 36, 0.4);
+	border-radius: 8px;
+}
+.layrix-bem-mod-row {
+	display: block;
+}
+.layrix-bem-mod-row + .layrix-bem-mod-row { margin-top: 6px; }
+
+.layrix-bem-chip--mod {
+	background: #fef3c7;
+	color: #92400e;
+}
+.layrix-bem-meta--mod {
+	color: #92400e;
+	font-size: 12px;
+}
+
 .layrix-bem-children {
 	position: relative;
 	margin: 12px 0 0 16px;

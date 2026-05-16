@@ -95,6 +95,74 @@
 		return null;
 	}
 
+	/**
+	 * Build a {element_id: visible_navigator_label} map by walking the live
+	 * editor's container tree. Server-side fallback chain
+	 * (editor_settings.title → _title → elType) misses the widget's
+	 * get_title() display name that the Navigator actually shows for
+	 * unrenamed elements. By passing this map alongside the preview
+	 * request, PHP can use it as a fourth fallback before resorting to
+	 * elType, so an unrenamed "Layrix Section" yields `layrix-section`
+	 * (nicer) instead of a generic stripped elType.
+	 */
+	function buildNavigatorLabels() {
+		var map = {};
+		try {
+			if (!window.elementor || !elementor.documents) return map;
+			var doc = elementor.documents.getCurrent && elementor.documents.getCurrent();
+			if (!doc || !doc.container) return map;
+			walkContainerForLabels(doc.container, map);
+		} catch (e) {}
+		return map;
+	}
+
+	function walkContainerForLabels(container, map) {
+		if (!container) return;
+		var id = container.id || (container.model && (container.model.id || (container.model.get && container.model.get('id'))));
+		if (id) {
+			var label = readContainerLabel(container);
+			if (label) map[id] = label;
+		}
+		var children = container.children;
+		if (!children) return;
+		// Marionette Collection: .each / Backbone-style
+		if (typeof children.each === 'function') {
+			children.each(function (c) { walkContainerForLabels(c, map); });
+		} else if (children.length) {
+			for (var i = 0; i < children.length; i++) walkContainerForLabels(children[i], map);
+		}
+	}
+
+	function readContainerLabel(c) {
+		try {
+			// Property may be string or function depending on container variant
+			if (typeof c.label === 'string' && c.label) return c.label;
+			if (typeof c.label === 'function') {
+				var l = c.label();
+				if (l) return l;
+			}
+			// Widget-type's display title — what Navigator shows when not renamed
+			if (c.getElementType) {
+				var t = c.getElementType();
+				if (t && t.title) return t.title;
+			}
+			// Settings-level _title (V1 fallback)
+			if (c.model && c.model.get) {
+				var settings = c.model.get('settings');
+				if (settings) {
+					var v1 = settings.get ? settings.get('_title') : settings._title;
+					if (v1) return v1;
+				}
+				var editorSettings = c.model.get('editor_settings');
+				if (editorSettings) {
+					var t4 = editorSettings.title || (editorSettings.get && editorSettings.get('title'));
+					if (t4) return t4;
+				}
+			}
+		} catch (e) {}
+		return '';
+	}
+
 	function escapeHtml(s) {
 		return String(s == null ? '' : s)
 			.replace(/&/g, '&amp;')
@@ -157,6 +225,38 @@
 		overlay.querySelector('.layrix-bem-apply').disabled = true;
 	}
 
+	/**
+	 * Ensure the current editor state is persisted to _elementor_data before
+	 * we read it via REST. Without this, freshly added widgets / renames
+	 * aren't visible to PHP. Tries V4's $e command first, falls back to V1's
+	 * saver, then resolves anyway as last resort.
+	 */
+	function saveDocument() {
+		return new Promise(function (resolve) {
+			try {
+				if (window.$e && typeof $e.run === 'function') {
+					var p = $e.run('document/save/default');
+					if (p && typeof p.then === 'function') {
+						p.then(function () { resolve(); }, function () { resolve(); });
+						return;
+					}
+				}
+				if (window.elementor && elementor.saver) {
+					if (typeof elementor.saver.savePromise === 'function') {
+						elementor.saver.savePromise({ status: 'draft' }).then(resolve, resolve);
+						return;
+					}
+					if (typeof elementor.saver.update === 'function') {
+						elementor.saver.update({ status: 'draft' });
+						setTimeout(resolve, 600);
+						return;
+					}
+				}
+			} catch (e) {}
+			resolve();
+		});
+	}
+
 	function openBemModal() {
 		var elementId = getElementId();
 		var postId = getPostId();
@@ -173,6 +273,15 @@
 		}
 
 		showLoading();
+		var body = buildModalShell().querySelector('.layrix-bem-body');
+		body.innerHTML = '<div class="layrix-bem-loading">Speichere Editor-Stand…</div>';
+
+		saveDocument().then(function () { fetchPreview(postId, elementId, cfg); });
+	}
+
+	function fetchPreview(postId, elementId, cfg) {
+		var body = buildModalShell().querySelector('.layrix-bem-body');
+		body.innerHTML = '<div class="layrix-bem-loading">Lade Struktur…</div>';
 
 		fetch(cfg.restUrl + '/bem/preview', {
 			method: 'POST',
@@ -181,7 +290,11 @@
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': cfg.nonce,
 			},
-			body: JSON.stringify({ post_id: postId, element_id: elementId }),
+			body: JSON.stringify({
+				post_id: postId,
+				element_id: elementId,
+				navigator_labels: buildNavigatorLabels(),
+			}),
 		})
 			.then(function (r) {
 				return r.json().then(function (j) {
@@ -220,6 +333,25 @@
 		return root._children;
 	}
 
+	/**
+	 * Render modifier chips under an element/block. Each modifier has its own
+	 * input whose data-el-id points at the TARGET (not the modifier layer);
+	 * apply accumulates per target so the modifier class joins the target's
+	 * widget alongside its base class.
+	 */
+	function renderModifiersHtml(modifiers, target_el_id) {
+		if (!modifiers || !modifiers.length) return '';
+		return '<div class="layrix-bem-modifiers">' +
+			modifiers.map(function (m) {
+				return '<div class="layrix-bem-mod-row">' +
+					'  <div class="layrix-bem-chip layrix-bem-chip--mod">Mod</div>' +
+					'  <div class="layrix-bem-meta layrix-bem-meta--mod">' + escapeHtml(m.original_label) + '</div>' +
+					'  <input type="text" class="layrix-bem-input" data-el-id="' + escapeHtml(target_el_id) + '" value="' + escapeHtml(m.suggested_class) + '">' +
+					'</div>';
+			}).join('') +
+			'</div>';
+	}
+
 	function renderElementCard(d) {
 		var childrenHtml = '';
 		if (d._children && d._children.length) {
@@ -235,6 +367,7 @@
 			'    </div>' +
 			'    <input type="text" class="layrix-bem-input" data-el-id="' + escapeHtml(d.element_id) + '" value="' + escapeHtml(d.suggested_class) + '">' +
 			'  </div>' +
+			renderModifiersHtml(d.modifiers, d.element_id) +
 			childrenHtml +
 			'</div>';
 	}
@@ -250,7 +383,8 @@
 			(data.block_is_default ? ' <span class="layrix-bem-hint">(Default — Element im Navigator umbenennen für besseren Block-Namen)</span>' : '') +
 			'    </div>' +
 			'    <input type="text" class="layrix-bem-input" data-el-id="' + escapeHtml(data.block_element_id) + '" value="' + escapeHtml(data.block_suggested) + '">' +
-			'  </div>';
+			'  </div>' +
+			renderModifiersHtml(data.block_modifiers, data.block_element_id);
 
 		if (data.descendants && data.descendants.length) {
 			var nested = buildNested(data.descendants);
@@ -273,22 +407,17 @@
 
 	function doApply(overlay, postId) {
 		var inputs = overlay.querySelectorAll('.layrix-bem-input');
+		// classes: { element_id => [class1, class2, ...] } — multiple inputs
+		// can target the same element_id (base + modifiers from --layers).
 		var classes = {};
-		var seen = {};
-		var duplicate = '';
 		inputs.forEach(function (inp) {
 			var id = inp.getAttribute('data-el-id');
 			var val = inp.value.trim();
 			if (!id || !val) return;
-			if (seen[val]) { duplicate = val; return; }
-			seen[val] = true;
-			classes[id] = val;
+			if (!classes[id]) classes[id] = [];
+			if (classes[id].indexOf(val) === -1) classes[id].push(val);
 		});
 
-		if (duplicate) {
-			showError('Doppelter Klassenname: "' + duplicate + '" — bitte unique machen.');
-			return;
-		}
 		if (!Object.keys(classes).length) {
 			showError('Keine Klassen zum Anwenden.');
 			return;
