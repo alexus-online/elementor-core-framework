@@ -565,6 +565,38 @@ trait ECF_Framework_Asset_Loading_Trait {
             true
         );
 
+        // Auto-BEM Class Generator — Elementor V4 context-menu integration.
+        // Adds a "BEM-Klassen aus Struktur" item to container/section/flexbox
+        // right-click in Navigator + Canvas; opens a modal that walks the
+        // tree and on apply creates global classes + tags widget classes.value.
+        $bem_js_ver  = $this->asset_version('assets/auto-bem.js', '0.1.0');
+        $bem_css_ver = $this->asset_version('assets/auto-bem.css', '0.1.0');
+        wp_enqueue_style(
+            'ecf-auto-bem',
+            plugins_url('assets/auto-bem.css', ECF_FRAMEWORK_FILE),
+            [],
+            $bem_css_ver
+        );
+        wp_enqueue_script(
+            'ecf-auto-bem',
+            plugins_url('assets/auto-bem.js', ECF_FRAMEWORK_FILE),
+            ['elementor-editor'],
+            $bem_js_ver,
+            true
+        );
+        $bem_doc_id = 0;
+        if (class_exists('\Elementor\Plugin')) {
+            try {
+                $doc = \Elementor\Plugin::instance()->documents->get_current();
+                if ($doc) $bem_doc_id = (int) $doc->get_main_id();
+            } catch (\Throwable $e) {}
+        }
+        wp_localize_script('ecf-auto-bem', 'layrixBem', [
+            'restUrl' => esc_url_raw(rest_url('ecf-framework/v1')),
+            'nonce'   => wp_create_nonce('wp_rest'),
+            'postId'  => $bem_doc_id,
+        ]);
+
         // Class IDs for auto-classes feature. Layrix syncs starter classes to
         // Elementor's Global Classes registry with deterministic IDs of the
         // form 'g-ecf-' . substr(md5(label), 0, 10). The editor's Klassen chip
